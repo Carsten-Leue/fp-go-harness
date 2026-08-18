@@ -1,0 +1,14 @@
+{
+	"servers": {
+		"fp-go": {
+			"type": "stdio",
+			"command": "go",
+			"args": [
+				"tool",
+				"gen",
+				"mcp"
+			]
+		}
+	},
+	"inputs": []
+}
