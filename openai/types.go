@@ -4,7 +4,9 @@ import (
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/ioresult"
 	"github.com/IBM/fp-go/v2/option"
+	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
+	"github.com/IBM/fp-go/v2/result"
 )
 
 type (
@@ -13,4 +15,6 @@ type (
 	IOResult[A any]        = ioresult.IOResult[A]
 	Option[A any]          = option.Option[A]
 	ReaderOption[R, A any] = readeroption.ReaderOption[R, A]
+	Result[A any]          = result.Result[A]
+	Reader[R, A any]       = reader.Reader[R, A]
 )

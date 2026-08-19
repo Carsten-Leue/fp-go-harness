@@ -5,10 +5,12 @@ import (
 
 	A "github.com/IBM/fp-go/v2/array"
 	CR "github.com/IBM/fp-go/v2/context/reader"
+	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/reader"
+	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 	opt "github.com/openai/openai-go/v3/option"
 )
@@ -16,6 +18,7 @@ import (
 type (
 	ChatCompletionDeps interface {
 		GetChatCompletionService() *openai.ChatCompletionService
+		GetRequestOptions() Thunk[[]opt.RequestOption]
 	}
 	chatCompletionDeps struct {
 		client *openai.Client
@@ -41,26 +44,46 @@ func (c *chatCompletionDeps) GetChatCompletionService() *openai.ChatCompletionSe
 	return &c.client.Chat.Completions
 }
 
+func (c *chatCompletionDeps) GetRequestOptions() Thunk[[]opt.RequestOption] {
+	return thunk.FromLazy(A.Empty[opt.RequestOption])
+}
+
 func MakeChatCompletionDeps(client *openai.Client) ChatCompletionDeps {
 	return &chatCompletionDeps{client}
 }
 
-func getNew(svc *openai.ChatCompletionService) func(context.Context, openai.ChatCompletionNewParams) (res *openai.ChatCompletion, err error) {
-	getApiKey := F.Flow2(
-		GetRequestOptions(),
-		option.GetOrElse(A.Empty[opt.RequestOption]),
-	)
-
-	return func(ctx context.Context, ccnp openai.ChatCompletionNewParams) (res *openai.ChatCompletion, err error) {
-		return svc.New(ctx, ccnp, getApiKey(ctx)...)
+func getNew() func(openai.ChatCompletionNewParams) func(*openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
+	return func(req openai.ChatCompletionNewParams) func(*openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
+		return func(svc *openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
+			return func(opts []opt.RequestOption) Thunk[*openai.ChatCompletion] {
+				return func(ctx context.Context) IOResult[*openai.ChatCompletion] {
+					return func() Result[*openai.ChatCompletion] {
+						return result.TryCatchError(svc.New(
+							ctx,
+							req,
+							opts...,
+						))
+					}
+				}
+			}
+		}
 	}
 }
 
 func ChatCompletion() effect.Kleisli[ChatCompletionDeps, openai.ChatCompletionNewParams, *openai.ChatCompletion] {
-	return F.Pipe3(
-		getNew,
-		effect.FromIdiomatic,
-		reader.Local[Effect[openai.ChatCompletionNewParams, *openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
-		reader.Sequence,
+
+	return F.Flow3(
+		getNew(),
+		reader.Local[func([]opt.RequestOption) Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
+		reader.Chain(func(f func([]opt.RequestOption) Thunk[*openai.ChatCompletion]) Reader[ChatCompletionDeps, Thunk[*openai.ChatCompletion]] {
+			return func(deps ChatCompletionDeps) Thunk[*openai.ChatCompletion] {
+				return F.Pipe2(
+					deps,
+					ChatCompletionDeps.GetRequestOptions,
+					thunk.Chain(f),
+				)
+			}
+		}),
 	)
+
 }
