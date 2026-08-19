@@ -15,6 +15,14 @@ const (
 	deepSeekAPIKeyEnvVar = "DEEPSEEK_API_KEY"
 )
 
+// DeepSeek chat model identifiers usable as ChatCompletionNewParams.Model
+// against DeepSeek's OpenAI-compatible API.
+// See: https://api-docs.deepseek.com/quick_start/pricing
+const (
+	DeepSeekModelFlash = "deepseek-v4-flash" // replaces deepseek-chat / deepseek-reasoner
+	DeepSeekModelPro   = "deepseek-v4-pro"
+)
+
 type deepSeekChatCompletionDeps struct {
 	client *openai.Client
 	apiKey string
