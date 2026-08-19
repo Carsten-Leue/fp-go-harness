@@ -9,7 +9,6 @@ import (
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/option"
-	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 	opt "github.com/openai/openai-go/v3/option"
@@ -52,7 +51,7 @@ func MakeChatCompletionDeps(client *openai.Client) ChatCompletionDeps {
 	return &chatCompletionDeps{client}
 }
 
-func getNew() func(openai.ChatCompletionNewParams) func(*openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
+func newChatCompletionThunk() func(openai.ChatCompletionNewParams) func(*openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
 	return func(req openai.ChatCompletionNewParams) func(*openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
 		return func(svc *openai.ChatCompletionService) func([]opt.RequestOption) Thunk[*openai.ChatCompletion] {
 			return func(opts []opt.RequestOption) Thunk[*openai.ChatCompletion] {
@@ -71,13 +70,21 @@ func getNew() func(openai.ChatCompletionNewParams) func(*openai.ChatCompletionSe
 }
 
 func ChatCompletion() effect.Kleisli[ChatCompletionDeps, openai.ChatCompletionNewParams, *openai.ChatCompletion] {
-	return F.Flow3(
-		getNew(),
-		reader.Local[Effect[[]opt.RequestOption, *openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
-		reader.Chain(F.Flow3(
-			thunk.Chain,
-			reader.Of[ChatCompletionDeps],
-			reader.Ap[Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetRequestOptions),
-		)),
+	return F.Flow5(
+		// req -> Reader[*ChatCompletionService, Effect[[]RequestOption, *ChatCompletion]]:
+		// curry the SDK call, deferring both the service instance and the request options.
+		newChatCompletionThunk(),
+		// lift that Reader into an Effect keyed on *ChatCompletionService, so the next
+		// step can reindex its environment.
+		effect.Asks[*openai.ChatCompletionService, Effect[[]opt.RequestOption, *openai.ChatCompletion]],
+		// swap the environment from *ChatCompletionService to ChatCompletionDeps by
+		// reading the service off deps; the []RequestOption -> *ChatCompletion effect
+		// is carried through as the (still curried) payload.
+		effect.Local[Effect[[]opt.RequestOption, *openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
+		// applicatively supply the request options, also read off deps, collapsing the
+		// curried payload into Effect[ChatCompletionDeps, Thunk[*ChatCompletion]].
+		effect.Ap[Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetRequestOptions),
+		// flatten the resulting Thunk into the final Effect[ChatCompletionDeps, *ChatCompletion].
+		effect.Chain(effect.FromThunk[ChatCompletionDeps, *openai.ChatCompletion]),
 	)
 }
