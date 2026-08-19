@@ -1,5 +1,5 @@
 {
-	"servers": {
+	"mcpServers": {
 		"fp-go": {
 			"type": "stdio",
 			"command": "go",

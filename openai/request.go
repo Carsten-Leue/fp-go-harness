@@ -71,19 +71,13 @@ func getNew() func(openai.ChatCompletionNewParams) func(*openai.ChatCompletionSe
 }
 
 func ChatCompletion() effect.Kleisli[ChatCompletionDeps, openai.ChatCompletionNewParams, *openai.ChatCompletion] {
-
 	return F.Flow3(
 		getNew(),
-		reader.Local[func([]opt.RequestOption) Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
-		reader.Chain(func(f func([]opt.RequestOption) Thunk[*openai.ChatCompletion]) Reader[ChatCompletionDeps, Thunk[*openai.ChatCompletion]] {
-			return func(deps ChatCompletionDeps) Thunk[*openai.ChatCompletion] {
-				return F.Pipe2(
-					deps,
-					ChatCompletionDeps.GetRequestOptions,
-					thunk.Chain(f),
-				)
-			}
-		}),
+		reader.Local[Effect[[]opt.RequestOption, *openai.ChatCompletion]](ChatCompletionDeps.GetChatCompletionService),
+		reader.Chain(F.Flow3(
+			thunk.Chain,
+			reader.Of[ChatCompletionDeps],
+			reader.Ap[Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetRequestOptions),
+		)),
 	)
-
 }
