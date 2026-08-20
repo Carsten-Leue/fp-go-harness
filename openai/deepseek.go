@@ -45,12 +45,10 @@ func (d *deepSeekChatCompletionDeps) GetRequestOptions() Thunk[[]opt.RequestOpti
 	return thunk.Of(A.Of(opt.WithAPIKey(d.apiKey)))
 }
 
-func newDeepSeekChatCompletionDeps(client *openai.Client) func(string) ChatCompletionDeps {
-	return func(apiKey string) ChatCompletionDeps {
-		return &deepSeekChatCompletionDeps{
-			client: client,
-			apiKey: apiKey,
-		}
+func newDeepSeekChatCompletionDeps(apiKey string, client *openai.Client) ChatCompletionDeps {
+	return &deepSeekChatCompletionDeps{
+		client: client,
+		apiKey: apiKey,
 	}
 }
 
@@ -66,17 +64,18 @@ func MakeDeepSeekChatCompletionDeps() Effect[DeepSeekDeps, ChatCompletionDeps] {
 
 	newClient := F.Unvariadic0(openai.NewClient)
 
-	apiKey := F.Pipe1(
-		env.LookupEnvThunk(deepSeekAPIKeyEnvVar),
+	apiKey := F.Pipe2(
+		deepSeekAPIKeyEnvVar,
+		env.LookupEnvThunk,
 		effect.Local[string, DeepSeekDeps](env.AsEnvironmentDeps),
 	)
 
-	baseUrlOpts := F.Pipe1(
+	baseUrlOpt := F.Pipe1(
 		deepSeekBaseURL,
 		opt.WithBaseURL,
 	)
 
-	httpOpts := F.Pipe1(
+	httpOpt := F.Pipe1(
 		DeepSeekDeps.GetHttpClient,
 		reader.Map[DeepSeekDeps](F.Flow2(
 			asHTTPClient,
@@ -85,10 +84,10 @@ func MakeDeepSeekChatCompletionDeps() Effect[DeepSeekDeps, ChatCompletionDeps] {
 	)
 
 	openaiClient := F.Pipe4(
-		baseUrlOpts,
+		baseUrlOpt,
 		A.Of,
 		reader.Of[DeepSeekDeps],
-		reader.ApS(A.Push, httpOpts),
+		reader.ApS(A.Push, httpOpt),
 		reader.Map[DeepSeekDeps](F.Flow2(
 			newClient,
 			F.Ref,
@@ -97,7 +96,7 @@ func MakeDeepSeekChatCompletionDeps() Effect[DeepSeekDeps, ChatCompletionDeps] {
 
 	return F.Pipe3(
 		openaiClient,
-		reader.Map[DeepSeekDeps](newDeepSeekChatCompletionDeps),
+		reader.Map[DeepSeekDeps](reader.Curry(newDeepSeekChatCompletionDeps)),
 		effect.Asks,
 		effect.Ap[ChatCompletionDeps](apiKey),
 	)
