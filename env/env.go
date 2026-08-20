@@ -19,6 +19,10 @@ type environmentDeps struct {
 	lookup ReaderIOResult[string, string]
 }
 
+func AsEnvironmentDeps[R EnvironmentDeps](r R) EnvironmentDeps {
+	return r
+}
+
 func (d *environmentDeps) GetLookupEnv() ReaderIOResult[string, string] {
 	return d.lookup
 }
