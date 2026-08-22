@@ -38,7 +38,7 @@ func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai
 			B.ToString,
 			F.Curry2(openai.ToolMessage[string]),
 			reader.Local[openai.ChatCompletionMessageParamUnion](idLens.Get),
-			readerresult.Asks[openai.ChatCompletionMessageToolCallUnion],
+			readerresult.Asks,
 		)),
 		result.GetOrElse(readerresult.Left[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion]),
 	)
@@ -61,6 +61,13 @@ func effectFromReaderResult[C, A any](rdr ReaderResult[C, A]) Effect[C, A] {
 	)
 }
 
+// MakeToolCall builds a Kleisli arrow that resolves and executes a single tool
+// call requested by the model. Given a ToolCaller registry, it looks up the
+// tool by name, invokes it with the call's arguments, and turns the outcome —
+// success, an unknown tool name, or a failed invocation — into a tool
+// ChatCompletionMessageParamUnion carrying the call's ID. The returned Effect
+// never fails: every error is captured in the resulting message rather than
+// propagated as a Result error.
 func MakeToolCall() effect.Kleisli[ToolCaller, openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion] {
 	functionLens := MakeChatCompletionMessageToolCallUnionFunctionLens()
 	nameLens := MakeChatCompletionMessageFunctionToolCallFunctionNameLens()
@@ -84,13 +91,13 @@ func MakeToolCall() effect.Kleisli[ToolCaller, openai.ChatCompletionMessageToolC
 		reader.Map[openai.ChatCompletionMessageToolCallUnion](S.Format[string]("Unable to find tool '%s'.")),
 		readerresult.Asks,
 		readerresult.Chain(makeError),
-		effectFromReaderResult[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion],
+		effectFromReaderResult,
 	)
 
 	generalError := F.Flow3(
 		error.Error,
 		makeError,
-		effectFromReaderResult[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion],
+		effectFromReaderResult,
 	)
 
 	return F.Pipe1(

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
+	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
@@ -88,9 +89,7 @@ func TestMakeToolCall_ToolNotFound(t *testing.T) {
 }
 
 func TestMakeToolCall_ToolCallError(t *testing.T) {
-	var brokenTool ToolCall = func(_ string) Thunk[string] {
-		return thunk.Left[string](errors.New("boom"))
-	}
+	var brokenTool ToolCall = effect.Fail[string, string](errors.New("boom"))
 
 	caller := makeToolCaller(map[string]ToolCall{"broken_tool": brokenTool})
 	call := makeToolCallUnion("call_3", "broken_tool", `{}`)
