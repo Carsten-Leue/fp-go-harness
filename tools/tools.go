@@ -6,9 +6,7 @@ import (
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	J "github.com/IBM/fp-go/v2/json"
-	"github.com/IBM/fp-go/v2/lazy"
 	L "github.com/IBM/fp-go/v2/optics/lens"
-	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
 	"github.com/IBM/fp-go/v2/readerresult"
@@ -81,13 +79,12 @@ func MakeToolCall() effect.Kleisli[ToolCaller, openai.ChatCompletionMessageToolC
 		L.Compose[openai.ChatCompletionMessageToolCallUnion](argsLens),
 	)
 
-	toolNotFoundError := F.Pipe5(
+	toolNotFoundError := F.Pipe4(
 		functionNameLens.Get,
 		reader.Map[openai.ChatCompletionMessageToolCallUnion](S.Format[string]("Unable to find tool '%s'.")),
 		readerresult.Asks,
 		readerresult.Chain(makeError),
 		effectFromReaderResult[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion],
-		lazy.Of,
 	)
 
 	generalError := F.Flow3(
@@ -98,15 +95,16 @@ func MakeToolCall() effect.Kleisli[ToolCaller, openai.ChatCompletionMessageToolC
 
 	return F.Pipe1(
 		functionNameLens.Get,
-		reader.Chain(F.Flow3(
+		reader.Chain(F.Flow4(
 			readeroption.Read[ToolCall, string],
-			reader.Map[ToolCaller](F.Flow2(
-				option.Map(F.Flow3(
-					effect.Local[string](functionArgsLens.Get),
-					effect.ChainReaderK(makeSuccess),
-					effect.ChainLeft(generalError),
-				)),
-				option.GetOrElse(toolNotFoundError),
+			readeroption.Map[ToolCaller](F.Flow3(
+				effect.Local[string](functionArgsLens.Get),
+				effect.ChainReaderK(makeSuccess),
+				effect.ChainLeft(generalError),
+			)),
+			readeroption.GetOrElse(F.Pipe1(
+				toolNotFoundError,
+				reader.Of[ToolCaller],
 			)),
 			reader.Sequence,
 		)),
