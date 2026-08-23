@@ -1,12 +1,17 @@
 package tools
 
 import (
+	oai "github.com/Carsten-Leue/fp-go-harness/openai"
+	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	F "github.com/IBM/fp-go/v2/function"
 	J "github.com/IBM/fp-go/v2/json"
 	L "github.com/IBM/fp-go/v2/optics/lens"
+	LP "github.com/IBM/fp-go/v2/optics/lens/prism"
+	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
 	"github.com/IBM/fp-go/v2/readerresult"
@@ -115,5 +120,83 @@ func MakeToolCall() effect.Kleisli[ToolCaller, openai.ChatCompletionMessageToolC
 			)),
 			reader.Sequence,
 		)),
+	)
+}
+
+func MakeToolCalls() effect.Kleisli[ToolCaller, []openai.ChatCompletionMessageToolCallUnion, []openai.ChatCompletionMessageParamUnion] {
+	return F.Pipe1(
+		MakeToolCall(),
+		effect.TraverseArray,
+	)
+}
+
+func handleToolCallsForChoice() effect.Kleisli[ToolCaller, openai.ChatCompletionChoice, Endomorphism[openai.ChatCompletionNewParams]] {
+	messageLens := oai.MakeChatCompletionChoiceMessageLens()
+	toolCallsLens := oai.MakeChatCompletionMessageToolCallsLens()
+
+	toolCallsFromChoiceOptional := F.Pipe2(
+		messageLens,
+		L.Compose[openai.ChatCompletionChoice](toolCallsLens),
+		LP.Compose[openai.ChatCompletionChoice](P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion])),
+	)
+
+	makeToolCalls := MakeToolCalls()
+
+	messageToParam := F.Flow2(
+		messageLens.Get,
+		openai.ChatCompletionMessage.ToParam,
+	)
+
+	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
+
+	appendMessages := F.Flow3(
+		A.Concat[openai.ChatCompletionMessageParamUnion],
+		L.Modify[openai.ChatCompletionNewParams],
+		reader.Read[Endomorphism[openai.ChatCompletionNewParams]](messagesLens),
+	)
+
+	return F.Pipe4(
+		toolCallsFromChoiceOptional.GetOption,
+		readeroption.Map[openai.ChatCompletionChoice](makeToolCalls),
+		readeroption.ApS(
+			F.Flow2(
+				A.Prepend[openai.ChatCompletionMessageParamUnion],
+				effect.Map[ToolCaller],
+			), F.Pipe1(
+				messageToParam,
+				readeroption.Asks,
+			),
+		),
+		readeroption.Map[openai.ChatCompletionChoice](
+			F.Pipe1(
+				appendMessages,
+				effect.Map[ToolCaller],
+			),
+		),
+		readeroption.GetOrElse(
+			F.Pipe2(
+				reader.Ask[openai.ChatCompletionNewParams](),
+				effect.Of[ToolCaller],
+				reader.Of[openai.ChatCompletionChoice],
+			),
+		),
+	)
+}
+
+func HandleToolCalls() effect.Kleisli[ToolCaller, *openai.ChatCompletion, Endomorphism[openai.ChatCompletionNewParams]] {
+	choicesLens := oai.MakeChatCompletionChoicesRefLens()
+	flattenEndo := endomorphism.Monoid[openai.ChatCompletionNewParams]()
+
+	return F.Pipe2(
+		handleToolCallsForChoice(),
+		effect.TraverseArray,
+		reader.ProMap(
+			choicesLens.Get,
+			F.Pipe2(
+				flattenEndo,
+				A.Fold[Endomorphism[openai.ChatCompletionNewParams]],
+				effect.Map[ToolCaller],
+			),
+		),
 	)
 }

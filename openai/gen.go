@@ -12,7 +12,1770 @@ import (
 	github_com_openai_openai_go_v3 "github.com/openai/openai-go/v3"
 	github_com_openai_openai_go_v3_packages_param "github.com/openai/openai-go/v3/packages/param"
 	github_com_openai_openai_go_v3_shared "github.com/openai/openai-go/v3/shared"
+	github_com_openai_openai_go_v3_shared_constant "github.com/openai/openai-go/v3/shared/constant"
 )
+
+// ChatCompletionLenses provides [lenses] for accessing fields of [ChatCompletion]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionLenses struct {
+	// ID is a [__lens.Lens] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion]
+	ID __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Choices is a [__lens.Lens] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Choices __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice]
+	// Created is a [__lens.Lens] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Created __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// Model is a [__lens.Lens] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Model __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Object is a [__lens.Lens] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Object __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// Metadata is a [__lens.Lens] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Metadata __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata]
+	// Moderation is a [__lens.Lens] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Moderation __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration]
+	// ServiceTier is a [__lens.Lens] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion]
+	ServiceTier __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprint is a [__lens.Lens] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion]
+	// Deprecated: This field is deprecated
+	SystemFingerprint __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Usage is a [__lens.Lens] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Usage __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage]
+	// IDO is a [__lens_option.LensO] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	IDO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// CreatedO is a [__lens_option.LensO] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	CreatedO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// ModelO is a [__lens_option.LensO] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	ModelO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// ObjectO is a [__lens_option.LensO] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	ObjectO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// ServiceTierO is a [__lens_option.LensO] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	ServiceTierO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprintO is a [__lens_option.LensO] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion], treating the zero value as absent
+	// Deprecated: This field is deprecated
+	SystemFingerprintO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string]
+}
+
+// ChatCompletionRefLenses provides [lenses] for accessing fields of [ChatCompletion] via a pointer to [ChatCompletion]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionRefLenses struct {
+	// ID is a [__lens.Lens] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	ID __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Choices is a [__lens.Lens] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Choices __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice]
+	// Created is a [__lens.Lens] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Created __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// Model is a [__lens.Lens] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Model __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Object is a [__lens.Lens] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Object __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// Metadata is a [__lens.Lens] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Metadata __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata]
+	// Moderation is a [__lens.Lens] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Moderation __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration]
+	// ServiceTier is a [__lens.Lens] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	ServiceTier __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprint is a [__lens.Lens] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	// Deprecated: This field is deprecated
+	SystemFingerprint __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Usage is a [__lens.Lens] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Usage __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage]
+	// IDO is a [__lens_option.LensO] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	IDO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// CreatedO is a [__lens_option.LensO] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	CreatedO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// ModelO is a [__lens_option.LensO] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	ModelO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// ObjectO is a [__lens_option.LensO] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	ObjectO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// ServiceTierO is a [__lens_option.LensO] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	ServiceTierO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprintO is a [__lens_option.LensO] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver, treating the zero value as absent
+	// Deprecated: This field is deprecated
+	SystemFingerprintO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string]
+}
+
+// ChatCompletionPrisms provides [prisms] for accessing fields of [ChatCompletion]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionPrisms struct {
+	// ID is a [__prism.Prism] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion]
+	ID __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Choices is a [__prism.Prism] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Choices __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice]
+	// Created is a [__prism.Prism] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Created __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// Model is a [__prism.Prism] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Model __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Object is a [__prism.Prism] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Object __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// Metadata is a [__prism.Prism] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Metadata __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata]
+	// Moderation is a [__prism.Prism] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Moderation __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration]
+	// ServiceTier is a [__prism.Prism] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion]
+	ServiceTier __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprint is a [__prism.Prism] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion]
+	// Deprecated: This field is deprecated
+	SystemFingerprint __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Usage is a [__prism.Prism] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion]
+	Usage __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage]
+}
+
+// ChatCompletionRefPrisms provides [prisms] for accessing fields of [ChatCompletion] via a pointer to [ChatCompletion]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionRefPrisms struct {
+	// ID is a [__prism.Prism] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	ID __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Choices is a [__prism.Prism] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Choices __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice]
+	// Created is a [__prism.Prism] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Created __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, int64]
+	// Model is a [__prism.Prism] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Model __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Object is a [__prism.Prism] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Object __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion]
+	// Metadata is a [__prism.Prism] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Metadata __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata]
+	// Moderation is a [__prism.Prism] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Moderation __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration]
+	// ServiceTier is a [__prism.Prism] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	ServiceTier __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier]
+	// SystemFingerprint is a [__prism.Prism] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	// Deprecated: This field is deprecated
+	SystemFingerprint __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string]
+	// Usage is a [__prism.Prism] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+	Usage __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage]
+}
+
+// MakeChatCompletionIDLens returns a [__lens.Lens] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionIDLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) string { return s.ID },
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v string) github_com_openai_openai_go_v3.ChatCompletion {
+			s.ID = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ID",
+	)
+}
+
+// MakeChatCompletionIDLensO returns a [__lens_option.LensO] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionIDLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionIDLens())
+}
+
+// MakeChatCompletionIDRefLens returns a [__lens.Lens] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionIDRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) string { return s.ID },
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.ID = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).ID",
+	)
+}
+
+// MakeChatCompletionIDRefLensO returns a [__lens_option.LensO] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionIDRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionIDRefLens())
+}
+
+// MakeChatCompletionIDPrism returns a [__prism.Prism] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionIDPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.ID)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{ID: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ID",
+	)
+}
+
+// MakeChatCompletionIDRefPrism returns a [__prism.Prism] for the ID field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionIDRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.ID)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{ID: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ID",
+	)
+}
+
+// MakeChatCompletionChoicesLens returns a [__lens.Lens] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionChoicesLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) []github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return s.Choices
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v []github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Choices = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Choices",
+	)
+}
+
+// MakeChatCompletionChoicesRefLens returns a [__lens.Lens] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionChoicesRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) []github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return s.Choices
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v []github_com_openai_openai_go_v3.ChatCompletionChoice) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Choices = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Choices",
+	)
+}
+
+// MakeChatCompletionChoicesPrism returns a [__prism.Prism] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionChoicesPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionChoice] {
+			return __option.Some(s.Choices)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Choices: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Choices",
+	)
+}
+
+// MakeChatCompletionChoicesRefPrism returns a [__prism.Prism] for the Choices field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionChoicesRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, []github_com_openai_openai_go_v3.ChatCompletionChoice] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionChoice] {
+			return __option.Some(s.Choices)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionChoice) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Choices: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Choices",
+	)
+}
+
+// MakeChatCompletionCreatedLens returns a [__lens.Lens] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionCreatedLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) int64 { return s.Created },
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v int64) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Created = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Created",
+	)
+}
+
+// MakeChatCompletionCreatedLensO returns a [__lens_option.LensO] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionCreatedLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[int64]())(MakeChatCompletionCreatedLens())
+}
+
+// MakeChatCompletionCreatedRefLens returns a [__lens.Lens] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionCreatedRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) int64 { return s.Created },
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v int64) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Created = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Created",
+	)
+}
+
+// MakeChatCompletionCreatedRefLensO returns a [__lens_option.LensO] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionCreatedRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[int64]())(MakeChatCompletionCreatedRefLens())
+}
+
+// MakeChatCompletionCreatedPrism returns a [__prism.Prism] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionCreatedPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[int64] {
+			return _fromNonZero(s.Created)
+		},
+		func(v int64) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Created: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Created",
+	)
+}
+
+// MakeChatCompletionCreatedRefPrism returns a [__prism.Prism] for the Created field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionCreatedRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[int64] {
+			return _fromNonZero(s.Created)
+		},
+		func(v int64) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Created: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Created",
+	)
+}
+
+// MakeChatCompletionModelLens returns a [__lens.Lens] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionModelLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) string { return s.Model },
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v string) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Model = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Model",
+	)
+}
+
+// MakeChatCompletionModelLensO returns a [__lens_option.LensO] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionModelLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionModelLens())
+}
+
+// MakeChatCompletionModelRefLens returns a [__lens.Lens] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionModelRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) string { return s.Model },
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Model = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Model",
+	)
+}
+
+// MakeChatCompletionModelRefLensO returns a [__lens_option.LensO] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionModelRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionModelRefLens())
+}
+
+// MakeChatCompletionModelPrism returns a [__prism.Prism] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionModelPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.Model)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Model: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Model",
+	)
+}
+
+// MakeChatCompletionModelRefPrism returns a [__prism.Prism] for the Model field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionModelRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.Model)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Model: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Model",
+	)
+}
+
+// MakeChatCompletionObjectLens returns a [__lens.Lens] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionObjectLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3_shared_constant.ChatCompletion {
+			return s.Object
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3_shared_constant.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Object = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Object",
+	)
+}
+
+// MakeChatCompletionObjectLensO returns a [__lens_option.LensO] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionObjectLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[github_com_openai_openai_go_v3_shared_constant.ChatCompletion]())(MakeChatCompletionObjectLens())
+}
+
+// MakeChatCompletionObjectRefLens returns a [__lens.Lens] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionObjectRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3_shared_constant.ChatCompletion {
+			return s.Object
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3_shared_constant.ChatCompletion) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Object = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Object",
+	)
+}
+
+// MakeChatCompletionObjectRefLensO returns a [__lens_option.LensO] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionObjectRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[github_com_openai_openai_go_v3_shared_constant.ChatCompletion]())(MakeChatCompletionObjectRefLens())
+}
+
+// MakeChatCompletionObjectPrism returns a [__prism.Prism] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionObjectPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3_shared_constant.ChatCompletion]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+			return _fromNonZero(s.Object)
+		},
+		func(v github_com_openai_openai_go_v3_shared_constant.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Object: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Object",
+	)
+}
+
+// MakeChatCompletionObjectRefPrism returns a [__prism.Prism] for the Object field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionObjectRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3_shared_constant.ChatCompletion]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3_shared_constant.ChatCompletion] {
+			return _fromNonZero(s.Object)
+		},
+		func(v github_com_openai_openai_go_v3_shared_constant.ChatCompletion) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Object: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Object",
+	)
+}
+
+// MakeChatCompletionMetadataLens returns a [__lens.Lens] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionMetadataLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3_shared.Metadata {
+			return s.Metadata
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3_shared.Metadata) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Metadata = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Metadata",
+	)
+}
+
+// MakeChatCompletionMetadataRefLens returns a [__lens.Lens] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionMetadataRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3_shared.Metadata {
+			return s.Metadata
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3_shared.Metadata) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Metadata = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Metadata",
+	)
+}
+
+// MakeChatCompletionMetadataPrism returns a [__prism.Prism] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionMetadataPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3_shared.Metadata] {
+			return __option.Some(s.Metadata)
+		},
+		func(v github_com_openai_openai_go_v3_shared.Metadata) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Metadata: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Metadata",
+	)
+}
+
+// MakeChatCompletionMetadataRefPrism returns a [__prism.Prism] for the Metadata field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionMetadataRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3_shared.Metadata] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3_shared.Metadata] {
+			return __option.Some(s.Metadata)
+		},
+		func(v github_com_openai_openai_go_v3_shared.Metadata) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Metadata: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Metadata",
+	)
+}
+
+// MakeChatCompletionModerationLens returns a [__lens.Lens] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionModerationLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletionModeration {
+			return s.Moderation
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.ChatCompletionModeration) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Moderation = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Moderation",
+	)
+}
+
+// MakeChatCompletionModerationRefLens returns a [__lens.Lens] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionModerationRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletionModeration {
+			return s.Moderation
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.ChatCompletionModeration) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Moderation = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Moderation",
+	)
+}
+
+// MakeChatCompletionModerationPrism returns a [__prism.Prism] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionModerationPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.ChatCompletionModeration] {
+			return __option.Some(s.Moderation)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionModeration) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Moderation: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Moderation",
+	)
+}
+
+// MakeChatCompletionModerationRefPrism returns a [__prism.Prism] for the Moderation field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionModerationRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionModeration] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.ChatCompletionModeration] {
+			return __option.Some(s.Moderation)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionModeration) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Moderation: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Moderation",
+	)
+}
+
+// MakeChatCompletionServiceTierLens returns a [__lens.Lens] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionServiceTierLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletionServiceTier {
+			return s.ServiceTier
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.ChatCompletionServiceTier) github_com_openai_openai_go_v3.ChatCompletion {
+			s.ServiceTier = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ServiceTier",
+	)
+}
+
+// MakeChatCompletionServiceTierLensO returns a [__lens_option.LensO] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionServiceTierLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[github_com_openai_openai_go_v3.ChatCompletionServiceTier]())(MakeChatCompletionServiceTierLens())
+}
+
+// MakeChatCompletionServiceTierRefLens returns a [__lens.Lens] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionServiceTierRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.ChatCompletionServiceTier {
+			return s.ServiceTier
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.ChatCompletionServiceTier) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.ServiceTier = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).ServiceTier",
+	)
+}
+
+// MakeChatCompletionServiceTierRefLensO returns a [__lens_option.LensO] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionServiceTierRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[github_com_openai_openai_go_v3.ChatCompletionServiceTier]())(MakeChatCompletionServiceTierRefLens())
+}
+
+// MakeChatCompletionServiceTierPrism returns a [__prism.Prism] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionServiceTierPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3.ChatCompletionServiceTier]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+			return _fromNonZero(s.ServiceTier)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionServiceTier) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{ServiceTier: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ServiceTier",
+	)
+}
+
+// MakeChatCompletionServiceTierRefPrism returns a [__prism.Prism] for the ServiceTier field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionServiceTierRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3.ChatCompletionServiceTier]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.ChatCompletionServiceTier] {
+			return _fromNonZero(s.ServiceTier)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionServiceTier) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{ServiceTier: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.ServiceTier",
+	)
+}
+
+// MakeChatCompletionSystemFingerprintLens returns a [__lens.Lens] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion]
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) string { return s.SystemFingerprint },
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v string) github_com_openai_openai_go_v3.ChatCompletion {
+			s.SystemFingerprint = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.SystemFingerprint",
+	)
+}
+
+// MakeChatCompletionSystemFingerprintLensO returns a [__lens_option.LensO] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion]
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionSystemFingerprintLens())
+}
+
+// MakeChatCompletionSystemFingerprintRefLens returns a [__lens.Lens] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) string { return s.SystemFingerprint },
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.SystemFingerprint = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).SystemFingerprint",
+	)
+}
+
+// MakeChatCompletionSystemFingerprintRefLensO returns a [__lens_option.LensO] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletion](__iso_option.FromZero[string]())(MakeChatCompletionSystemFingerprintRefLens())
+}
+
+// MakeChatCompletionSystemFingerprintPrism returns a [__prism.Prism] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion]
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.SystemFingerprint)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{SystemFingerprint: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.SystemFingerprint",
+	)
+}
+
+// MakeChatCompletionSystemFingerprintRefPrism returns a [__prism.Prism] for the SystemFingerprint field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionSystemFingerprintRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[string] {
+			return _fromNonZero(s.SystemFingerprint)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{SystemFingerprint: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.SystemFingerprint",
+	)
+}
+
+// MakeChatCompletionUsageLens returns a [__lens.Lens] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionUsageLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.CompletionUsage {
+			return s.Usage
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.CompletionUsage) github_com_openai_openai_go_v3.ChatCompletion {
+			s.Usage = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Usage",
+	)
+}
+
+// MakeChatCompletionUsageRefLens returns a [__lens.Lens] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionUsageRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) github_com_openai_openai_go_v3.CompletionUsage {
+			return s.Usage
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletion, v github_com_openai_openai_go_v3.CompletionUsage) *github_com_openai_openai_go_v3.ChatCompletion {
+			s.Usage = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletion).Usage",
+	)
+}
+
+// MakeChatCompletionUsagePrism returns a [__prism.Prism] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion]
+func MakeChatCompletionUsagePrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.Usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) github_com_openai_openai_go_v3.ChatCompletion {
+			return github_com_openai_openai_go_v3.ChatCompletion{Usage: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Usage",
+	)
+}
+
+// MakeChatCompletionUsageRefPrism returns a [__prism.Prism] for the Usage field of [github_com_openai_openai_go_v3.ChatCompletion] via a pointer receiver
+func MakeChatCompletionUsageRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletion, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletion) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.Usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) *github_com_openai_openai_go_v3.ChatCompletion {
+			return &github_com_openai_openai_go_v3.ChatCompletion{Usage: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletion.Usage",
+	)
+}
+
+// MakeChatCompletionLenses creates a new [ChatCompletionLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionLenses() ChatCompletionLenses {
+	return ChatCompletionLenses{
+		// mandatory lenses
+		ID:                MakeChatCompletionIDLens(),
+		Choices:           MakeChatCompletionChoicesLens(),
+		Created:           MakeChatCompletionCreatedLens(),
+		Model:             MakeChatCompletionModelLens(),
+		Object:            MakeChatCompletionObjectLens(),
+		Metadata:          MakeChatCompletionMetadataLens(),
+		Moderation:        MakeChatCompletionModerationLens(),
+		ServiceTier:       MakeChatCompletionServiceTierLens(),
+		SystemFingerprint: MakeChatCompletionSystemFingerprintLens(),
+		Usage:             MakeChatCompletionUsageLens(),
+		// optional lenses
+		IDO:                MakeChatCompletionIDLensO(),
+		CreatedO:           MakeChatCompletionCreatedLensO(),
+		ModelO:             MakeChatCompletionModelLensO(),
+		ObjectO:            MakeChatCompletionObjectLensO(),
+		ServiceTierO:       MakeChatCompletionServiceTierLensO(),
+		SystemFingerprintO: MakeChatCompletionSystemFingerprintLensO(),
+	}
+}
+
+// MakeChatCompletionRefLenses creates a new [ChatCompletionRefLenses] with [lenses] for all fields via a pointer to [ChatCompletion]
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionRefLenses() ChatCompletionRefLenses {
+	return ChatCompletionRefLenses{
+		// mandatory lenses
+		ID:                MakeChatCompletionIDRefLens(),
+		Choices:           MakeChatCompletionChoicesRefLens(),
+		Created:           MakeChatCompletionCreatedRefLens(),
+		Model:             MakeChatCompletionModelRefLens(),
+		Object:            MakeChatCompletionObjectRefLens(),
+		Metadata:          MakeChatCompletionMetadataRefLens(),
+		Moderation:        MakeChatCompletionModerationRefLens(),
+		ServiceTier:       MakeChatCompletionServiceTierRefLens(),
+		SystemFingerprint: MakeChatCompletionSystemFingerprintRefLens(),
+		Usage:             MakeChatCompletionUsageRefLens(),
+		// optional lenses
+		IDO:                MakeChatCompletionIDRefLensO(),
+		CreatedO:           MakeChatCompletionCreatedRefLensO(),
+		ModelO:             MakeChatCompletionModelRefLensO(),
+		ObjectO:            MakeChatCompletionObjectRefLensO(),
+		ServiceTierO:       MakeChatCompletionServiceTierRefLensO(),
+		SystemFingerprintO: MakeChatCompletionSystemFingerprintRefLensO(),
+	}
+}
+
+// MakeChatCompletionPrisms creates a new [ChatCompletionPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionPrisms() ChatCompletionPrisms {
+	return ChatCompletionPrisms{
+		ID:                MakeChatCompletionIDPrism(),
+		Choices:           MakeChatCompletionChoicesPrism(),
+		Created:           MakeChatCompletionCreatedPrism(),
+		Model:             MakeChatCompletionModelPrism(),
+		Object:            MakeChatCompletionObjectPrism(),
+		Metadata:          MakeChatCompletionMetadataPrism(),
+		Moderation:        MakeChatCompletionModerationPrism(),
+		ServiceTier:       MakeChatCompletionServiceTierPrism(),
+		SystemFingerprint: MakeChatCompletionSystemFingerprintPrism(),
+		Usage:             MakeChatCompletionUsagePrism(),
+	}
+}
+
+// MakeChatCompletionRefPrisms creates a new [ChatCompletionRefPrisms] with [prisms] for all fields via a pointer to [ChatCompletion]
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionRefPrisms() ChatCompletionRefPrisms {
+	return ChatCompletionRefPrisms{
+		ID:                MakeChatCompletionIDRefPrism(),
+		Choices:           MakeChatCompletionChoicesRefPrism(),
+		Created:           MakeChatCompletionCreatedRefPrism(),
+		Model:             MakeChatCompletionModelRefPrism(),
+		Object:            MakeChatCompletionObjectRefPrism(),
+		Metadata:          MakeChatCompletionMetadataRefPrism(),
+		Moderation:        MakeChatCompletionModerationRefPrism(),
+		ServiceTier:       MakeChatCompletionServiceTierRefPrism(),
+		SystemFingerprint: MakeChatCompletionSystemFingerprintRefPrism(),
+		Usage:             MakeChatCompletionUsageRefPrism(),
+	}
+}
+
+// ChatCompletionChoiceLenses provides [lenses] for accessing fields of [ChatCompletionChoice]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionChoiceLenses struct {
+	// FinishReason is a [__lens.Lens] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	FinishReason __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// Index is a [__lens.Lens] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Index __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+	// Logprobs is a [__lens.Lens] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Logprobs __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs]
+	// Message is a [__lens.Lens] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Message __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage]
+	// FinishReasonO is a [__lens_option.LensO] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice], treating the zero value as absent
+	FinishReasonO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// IndexO is a [__lens_option.LensO] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice], treating the zero value as absent
+	IndexO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+}
+
+// ChatCompletionChoiceRefLenses provides [lenses] for accessing fields of [ChatCompletionChoice] via a pointer to [ChatCompletionChoice]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionChoiceRefLenses struct {
+	// FinishReason is a [__lens.Lens] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	FinishReason __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// Index is a [__lens.Lens] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Index __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+	// Logprobs is a [__lens.Lens] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Logprobs __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs]
+	// Message is a [__lens.Lens] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Message __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage]
+	// FinishReasonO is a [__lens_option.LensO] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver, treating the zero value as absent
+	FinishReasonO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// IndexO is a [__lens_option.LensO] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver, treating the zero value as absent
+	IndexO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+}
+
+// ChatCompletionChoicePrisms provides [prisms] for accessing fields of [ChatCompletionChoice]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionChoicePrisms struct {
+	// FinishReason is a [__prism.Prism] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	FinishReason __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// Index is a [__prism.Prism] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Index __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+	// Logprobs is a [__prism.Prism] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Logprobs __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs]
+	// Message is a [__prism.Prism] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+	Message __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage]
+}
+
+// ChatCompletionChoiceRefPrisms provides [prisms] for accessing fields of [ChatCompletionChoice] via a pointer to [ChatCompletionChoice]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionChoiceRefPrisms struct {
+	// FinishReason is a [__prism.Prism] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	FinishReason __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, string]
+	// Index is a [__prism.Prism] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Index __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64]
+	// Logprobs is a [__prism.Prism] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Logprobs __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs]
+	// Message is a [__prism.Prism] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+	Message __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage]
+}
+
+// MakeChatCompletionChoiceFinishReasonLens returns a [__lens.Lens] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceFinishReasonLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) string { return s.FinishReason },
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice, v string) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.FinishReason = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.FinishReason",
+	)
+}
+
+// MakeChatCompletionChoiceFinishReasonLensO returns a [__lens_option.LensO] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceFinishReasonLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletionChoice](__iso_option.FromZero[string]())(MakeChatCompletionChoiceFinishReasonLens())
+}
+
+// MakeChatCompletionChoiceFinishReasonRefLens returns a [__lens.Lens] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceFinishReasonRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) string { return s.FinishReason },
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice, v string) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.FinishReason = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionChoice).FinishReason",
+	)
+}
+
+// MakeChatCompletionChoiceFinishReasonRefLensO returns a [__lens_option.LensO] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceFinishReasonRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletionChoice](__iso_option.FromZero[string]())(MakeChatCompletionChoiceFinishReasonRefLens())
+}
+
+// MakeChatCompletionChoiceFinishReasonPrism returns a [__prism.Prism] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceFinishReasonPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[string] {
+			return _fromNonZero(s.FinishReason)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return github_com_openai_openai_go_v3.ChatCompletionChoice{FinishReason: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.FinishReason",
+	)
+}
+
+// MakeChatCompletionChoiceFinishReasonRefPrism returns a [__prism.Prism] for the FinishReason field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceFinishReasonRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[string] {
+			return _fromNonZero(s.FinishReason)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return &github_com_openai_openai_go_v3.ChatCompletionChoice{FinishReason: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.FinishReason",
+	)
+}
+
+// MakeChatCompletionChoiceIndexLens returns a [__lens.Lens] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceIndexLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) int64 { return s.Index },
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice, v int64) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Index = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Index",
+	)
+}
+
+// MakeChatCompletionChoiceIndexLensO returns a [__lens_option.LensO] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceIndexLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletionChoice](__iso_option.FromZero[int64]())(MakeChatCompletionChoiceIndexLens())
+}
+
+// MakeChatCompletionChoiceIndexRefLens returns a [__lens.Lens] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceIndexRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) int64 { return s.Index },
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice, v int64) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Index = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionChoice).Index",
+	)
+}
+
+// MakeChatCompletionChoiceIndexRefLensO returns a [__lens_option.LensO] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceIndexRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletionChoice](__iso_option.FromZero[int64]())(MakeChatCompletionChoiceIndexRefLens())
+}
+
+// MakeChatCompletionChoiceIndexPrism returns a [__prism.Prism] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceIndexPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[int64] {
+			return _fromNonZero(s.Index)
+		},
+		func(v int64) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return github_com_openai_openai_go_v3.ChatCompletionChoice{Index: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Index",
+	)
+}
+
+// MakeChatCompletionChoiceIndexRefPrism returns a [__prism.Prism] for the Index field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceIndexRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[int64] {
+			return _fromNonZero(s.Index)
+		},
+		func(v int64) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return &github_com_openai_openai_go_v3.ChatCompletionChoice{Index: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Index",
+	)
+}
+
+// MakeChatCompletionChoiceLogprobsLens returns a [__lens.Lens] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceLogprobsLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs {
+			return s.Logprobs
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice, v github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Logprobs = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Logprobs",
+	)
+}
+
+// MakeChatCompletionChoiceLogprobsRefLens returns a [__lens.Lens] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceLogprobsRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs {
+			return s.Logprobs
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice, v github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Logprobs = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionChoice).Logprobs",
+	)
+}
+
+// MakeChatCompletionChoiceLogprobsPrism returns a [__prism.Prism] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceLogprobsPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+			return __option.Some(s.Logprobs)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return github_com_openai_openai_go_v3.ChatCompletionChoice{Logprobs: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Logprobs",
+	)
+}
+
+// MakeChatCompletionChoiceLogprobsRefPrism returns a [__prism.Prism] for the Logprobs field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceLogprobsRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs] {
+			return __option.Some(s.Logprobs)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionChoiceLogprobs) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return &github_com_openai_openai_go_v3.ChatCompletionChoice{Logprobs: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Logprobs",
+	)
+}
+
+// MakeChatCompletionChoiceMessageLens returns a [__lens.Lens] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceMessageLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return s.Message
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice, v github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Message = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Message",
+	)
+}
+
+// MakeChatCompletionChoiceMessageRefLens returns a [__lens.Lens] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceMessageRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return s.Message
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice, v github_com_openai_openai_go_v3.ChatCompletionMessage) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			s.Message = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionChoice).Message",
+	)
+}
+
+// MakeChatCompletionChoiceMessagePrism returns a [__prism.Prism] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice]
+func MakeChatCompletionChoiceMessagePrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[github_com_openai_openai_go_v3.ChatCompletionMessage] {
+			return __option.Some(s.Message)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return github_com_openai_openai_go_v3.ChatCompletionChoice{Message: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Message",
+	)
+}
+
+// MakeChatCompletionChoiceMessageRefPrism returns a [__prism.Prism] for the Message field of [github_com_openai_openai_go_v3.ChatCompletionChoice] via a pointer receiver
+func MakeChatCompletionChoiceMessageRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionChoice, github_com_openai_openai_go_v3.ChatCompletionMessage] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionChoice) __option.Option[github_com_openai_openai_go_v3.ChatCompletionMessage] {
+			return __option.Some(s.Message)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionMessage) *github_com_openai_openai_go_v3.ChatCompletionChoice {
+			return &github_com_openai_openai_go_v3.ChatCompletionChoice{Message: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionChoice.Message",
+	)
+}
+
+// MakeChatCompletionChoiceLenses creates a new [ChatCompletionChoiceLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionChoiceLenses() ChatCompletionChoiceLenses {
+	return ChatCompletionChoiceLenses{
+		// mandatory lenses
+		FinishReason: MakeChatCompletionChoiceFinishReasonLens(),
+		Index:        MakeChatCompletionChoiceIndexLens(),
+		Logprobs:     MakeChatCompletionChoiceLogprobsLens(),
+		Message:      MakeChatCompletionChoiceMessageLens(),
+		// optional lenses
+		FinishReasonO: MakeChatCompletionChoiceFinishReasonLensO(),
+		IndexO:        MakeChatCompletionChoiceIndexLensO(),
+	}
+}
+
+// MakeChatCompletionChoiceRefLenses creates a new [ChatCompletionChoiceRefLenses] with [lenses] for all fields via a pointer to [ChatCompletionChoice]
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionChoiceRefLenses() ChatCompletionChoiceRefLenses {
+	return ChatCompletionChoiceRefLenses{
+		// mandatory lenses
+		FinishReason: MakeChatCompletionChoiceFinishReasonRefLens(),
+		Index:        MakeChatCompletionChoiceIndexRefLens(),
+		Logprobs:     MakeChatCompletionChoiceLogprobsRefLens(),
+		Message:      MakeChatCompletionChoiceMessageRefLens(),
+		// optional lenses
+		FinishReasonO: MakeChatCompletionChoiceFinishReasonRefLensO(),
+		IndexO:        MakeChatCompletionChoiceIndexRefLensO(),
+	}
+}
+
+// MakeChatCompletionChoicePrisms creates a new [ChatCompletionChoicePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionChoicePrisms() ChatCompletionChoicePrisms {
+	return ChatCompletionChoicePrisms{
+		FinishReason: MakeChatCompletionChoiceFinishReasonPrism(),
+		Index:        MakeChatCompletionChoiceIndexPrism(),
+		Logprobs:     MakeChatCompletionChoiceLogprobsPrism(),
+		Message:      MakeChatCompletionChoiceMessagePrism(),
+	}
+}
+
+// MakeChatCompletionChoiceRefPrisms creates a new [ChatCompletionChoiceRefPrisms] with [prisms] for all fields via a pointer to [ChatCompletionChoice]
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionChoiceRefPrisms() ChatCompletionChoiceRefPrisms {
+	return ChatCompletionChoiceRefPrisms{
+		FinishReason: MakeChatCompletionChoiceFinishReasonRefPrism(),
+		Index:        MakeChatCompletionChoiceIndexRefPrism(),
+		Logprobs:     MakeChatCompletionChoiceLogprobsRefPrism(),
+		Message:      MakeChatCompletionChoiceMessageRefPrism(),
+	}
+}
+
+// ChatCompletionMessageLenses provides [lenses] for accessing fields of [ChatCompletionMessage]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionMessageLenses struct {
+	// Content is a [__lens.Lens] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Content __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Refusal is a [__lens.Lens] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Refusal __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Role is a [__lens.Lens] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Role __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+	// Annotations is a [__lens.Lens] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Annotations __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation]
+	// Audio is a [__lens.Lens] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Audio __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio]
+	// FunctionCall is a [__lens.Lens] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	// Deprecated: This field is deprecated
+	FunctionCall __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall]
+	// ToolCalls is a [__lens.Lens] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	ToolCalls __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion]
+	// ContentO is a [__lens_option.LensO] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage], treating the zero value as absent
+	ContentO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// RefusalO is a [__lens_option.LensO] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage], treating the zero value as absent
+	RefusalO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// RoleO is a [__lens_option.LensO] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage], treating the zero value as absent
+	RoleO __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+}
+
+// ChatCompletionMessageRefLenses provides [lenses] for accessing fields of [ChatCompletionMessage] via a pointer to [ChatCompletionMessage]
+//
+// [lenses]: __lens.Lens
+type ChatCompletionMessageRefLenses struct {
+	// Content is a [__lens.Lens] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Content __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Refusal is a [__lens.Lens] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Refusal __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Role is a [__lens.Lens] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Role __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+	// Annotations is a [__lens.Lens] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Annotations __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation]
+	// Audio is a [__lens.Lens] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Audio __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio]
+	// FunctionCall is a [__lens.Lens] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	// Deprecated: This field is deprecated
+	FunctionCall __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall]
+	// ToolCalls is a [__lens.Lens] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	ToolCalls __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion]
+	// ContentO is a [__lens_option.LensO] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver, treating the zero value as absent
+	ContentO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// RefusalO is a [__lens_option.LensO] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver, treating the zero value as absent
+	RefusalO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// RoleO is a [__lens_option.LensO] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver, treating the zero value as absent
+	RoleO __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+}
+
+// ChatCompletionMessagePrisms provides [prisms] for accessing fields of [ChatCompletionMessage]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionMessagePrisms struct {
+	// Content is a [__prism.Prism] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Content __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Refusal is a [__prism.Prism] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Refusal __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Role is a [__prism.Prism] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Role __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+	// Annotations is a [__prism.Prism] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Annotations __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation]
+	// Audio is a [__prism.Prism] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	Audio __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio]
+	// FunctionCall is a [__prism.Prism] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	// Deprecated: This field is deprecated
+	FunctionCall __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall]
+	// ToolCalls is a [__prism.Prism] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+	ToolCalls __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion]
+}
+
+// ChatCompletionMessageRefPrisms provides [prisms] for accessing fields of [ChatCompletionMessage] via a pointer to [ChatCompletionMessage]
+//
+// [prisms]: __prism.Prism
+type ChatCompletionMessageRefPrisms struct {
+	// Content is a [__prism.Prism] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Content __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Refusal is a [__prism.Prism] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Refusal __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, string]
+	// Role is a [__prism.Prism] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Role __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant]
+	// Annotations is a [__prism.Prism] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Annotations __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation]
+	// Audio is a [__prism.Prism] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	Audio __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio]
+	// FunctionCall is a [__prism.Prism] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	// Deprecated: This field is deprecated
+	FunctionCall __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall]
+	// ToolCalls is a [__prism.Prism] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+	ToolCalls __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion]
+}
+
+// MakeChatCompletionMessageContentLens returns a [__lens.Lens] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageContentLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) string { return s.Content },
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v string) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Content = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Content",
+	)
+}
+
+// MakeChatCompletionMessageContentLensO returns a [__lens_option.LensO] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageContentLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[string]())(MakeChatCompletionMessageContentLens())
+}
+
+// MakeChatCompletionMessageContentRefLens returns a [__lens.Lens] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageContentRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) string { return s.Content },
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v string) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Content = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).Content",
+	)
+}
+
+// MakeChatCompletionMessageContentRefLensO returns a [__lens_option.LensO] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageContentRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[string]())(MakeChatCompletionMessageContentRefLens())
+}
+
+// MakeChatCompletionMessageContentPrism returns a [__prism.Prism] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageContentPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[string] {
+			return _fromNonZero(s.Content)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{Content: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Content",
+	)
+}
+
+// MakeChatCompletionMessageContentRefPrism returns a [__prism.Prism] for the Content field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageContentRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[string] {
+			return _fromNonZero(s.Content)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{Content: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Content",
+	)
+}
+
+// MakeChatCompletionMessageRefusalLens returns a [__lens.Lens] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRefusalLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) string { return s.Refusal },
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v string) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Refusal = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Refusal",
+	)
+}
+
+// MakeChatCompletionMessageRefusalLensO returns a [__lens_option.LensO] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRefusalLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[string]())(MakeChatCompletionMessageRefusalLens())
+}
+
+// MakeChatCompletionMessageRefusalRefLens returns a [__lens.Lens] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRefusalRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) string { return s.Refusal },
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v string) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Refusal = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).Refusal",
+	)
+}
+
+// MakeChatCompletionMessageRefusalRefLensO returns a [__lens_option.LensO] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRefusalRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[string]())(MakeChatCompletionMessageRefusalRefLens())
+}
+
+// MakeChatCompletionMessageRefusalPrism returns a [__prism.Prism] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRefusalPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[string] {
+			return _fromNonZero(s.Refusal)
+		},
+		func(v string) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{Refusal: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Refusal",
+	)
+}
+
+// MakeChatCompletionMessageRefusalRefPrism returns a [__prism.Prism] for the Refusal field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRefusalRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[string] {
+			return _fromNonZero(s.Refusal)
+		},
+		func(v string) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{Refusal: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Refusal",
+	)
+}
+
+// MakeChatCompletionMessageRoleLens returns a [__lens.Lens] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRoleLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3_shared_constant.Assistant {
+			return s.Role
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3_shared_constant.Assistant) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Role = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Role",
+	)
+}
+
+// MakeChatCompletionMessageRoleLensO returns a [__lens_option.LensO] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRoleLensO() __lens_option.LensO[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	return __lens_option.FromIso[github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[github_com_openai_openai_go_v3_shared_constant.Assistant]())(MakeChatCompletionMessageRoleLens())
+}
+
+// MakeChatCompletionMessageRoleRefLens returns a [__lens.Lens] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRoleRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	return __lens.MakeLensStrictWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3_shared_constant.Assistant {
+			return s.Role
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3_shared_constant.Assistant) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Role = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).Role",
+	)
+}
+
+// MakeChatCompletionMessageRoleRefLensO returns a [__lens_option.LensO] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRoleRefLensO() __lens_option.LensO[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	return __lens_option.FromIso[*github_com_openai_openai_go_v3.ChatCompletionMessage](__iso_option.FromZero[github_com_openai_openai_go_v3_shared_constant.Assistant]())(MakeChatCompletionMessageRoleRefLens())
+}
+
+// MakeChatCompletionMessageRolePrism returns a [__prism.Prism] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageRolePrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3_shared_constant.Assistant]()
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3_shared_constant.Assistant] {
+			return _fromNonZero(s.Role)
+		},
+		func(v github_com_openai_openai_go_v3_shared_constant.Assistant) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{Role: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Role",
+	)
+}
+
+// MakeChatCompletionMessageRoleRefPrism returns a [__prism.Prism] for the Role field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageRoleRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3_shared_constant.Assistant] {
+	_fromNonZero := __option.FromNonZero[github_com_openai_openai_go_v3_shared_constant.Assistant]()
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3_shared_constant.Assistant] {
+			return _fromNonZero(s.Role)
+		},
+		func(v github_com_openai_openai_go_v3_shared_constant.Assistant) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{Role: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Role",
+	)
+}
+
+// MakeChatCompletionMessageAnnotationsLens returns a [__lens.Lens] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageAnnotationsLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation {
+			return s.Annotations
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Annotations = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Annotations",
+	)
+}
+
+// MakeChatCompletionMessageAnnotationsRefLens returns a [__lens.Lens] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageAnnotationsRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation {
+			return s.Annotations
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Annotations = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).Annotations",
+	)
+}
+
+// MakeChatCompletionMessageAnnotationsPrism returns a [__prism.Prism] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageAnnotationsPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+			return __option.Some(s.Annotations)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{Annotations: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Annotations",
+	)
+}
+
+// MakeChatCompletionMessageAnnotationsRefPrism returns a [__prism.Prism] for the Annotations field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageAnnotationsRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation] {
+			return __option.Some(s.Annotations)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionMessageAnnotation) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{Annotations: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Annotations",
+	)
+}
+
+// MakeChatCompletionMessageAudioLens returns a [__lens.Lens] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageAudioLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionAudio {
+			return s.Audio
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3.ChatCompletionAudio) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Audio = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Audio",
+	)
+}
+
+// MakeChatCompletionMessageAudioRefLens returns a [__lens.Lens] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageAudioRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionAudio {
+			return s.Audio
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3.ChatCompletionAudio) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.Audio = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).Audio",
+	)
+}
+
+// MakeChatCompletionMessageAudioPrism returns a [__prism.Prism] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageAudioPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3.ChatCompletionAudio] {
+			return __option.Some(s.Audio)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionAudio) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{Audio: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Audio",
+	)
+}
+
+// MakeChatCompletionMessageAudioRefPrism returns a [__prism.Prism] for the Audio field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageAudioRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionAudio] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3.ChatCompletionAudio] {
+			return __option.Some(s.Audio)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionAudio) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{Audio: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.Audio",
+	)
+}
+
+// MakeChatCompletionMessageFunctionCallLens returns a [__lens.Lens] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionMessageFunctionCallLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall {
+			return s.FunctionCall
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.FunctionCall = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.FunctionCall",
+	)
+}
+
+// MakeChatCompletionMessageFunctionCallRefLens returns a [__lens.Lens] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionMessageFunctionCallRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall {
+			return s.FunctionCall
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.FunctionCall = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).FunctionCall",
+	)
+}
+
+// MakeChatCompletionMessageFunctionCallPrism returns a [__prism.Prism] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionMessageFunctionCallPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+			return __option.Some(s.FunctionCall)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{FunctionCall: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.FunctionCall",
+	)
+}
+
+// MakeChatCompletionMessageFunctionCallRefPrism returns a [__prism.Prism] for the FunctionCall field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+//
+// Deprecated: This field is deprecated
+func MakeChatCompletionMessageFunctionCallRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall] {
+			return __option.Some(s.FunctionCall)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionMessageFunctionCall) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{FunctionCall: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.FunctionCall",
+	)
+}
+
+// MakeChatCompletionMessageToolCallsLens returns a [__lens.Lens] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageToolCallsLens() __lens.Lens[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+	return __lens.MakeLensWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion {
+			return s.ToolCalls
+		},
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage, v []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.ToolCalls = v
+			return s
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.ToolCalls",
+	)
+}
+
+// MakeChatCompletionMessageToolCallsRefLens returns a [__lens.Lens] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageToolCallsRefLens() __lens.Lens[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+	return __lens.MakeLensRefWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion {
+			return s.ToolCalls
+		},
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage, v []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			s.ToolCalls = v
+			return s
+		},
+		"(*github_com_openai_openai_go_v3.ChatCompletionMessage).ToolCalls",
+	)
+}
+
+// MakeChatCompletionMessageToolCallsPrism returns a [__prism.Prism] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage]
+func MakeChatCompletionMessageToolCallsPrism() __prism.Prism[github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+	return __prism.MakePrismWithName(
+		func(s github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+			return __option.Some(s.ToolCalls)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion) github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return github_com_openai_openai_go_v3.ChatCompletionMessage{ToolCalls: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.ToolCalls",
+	)
+}
+
+// MakeChatCompletionMessageToolCallsRefPrism returns a [__prism.Prism] for the ToolCalls field of [github_com_openai_openai_go_v3.ChatCompletionMessage] via a pointer receiver
+func MakeChatCompletionMessageToolCallsRefPrism() __prism.Prism[*github_com_openai_openai_go_v3.ChatCompletionMessage, []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+	return __prism.MakePrismWithName(
+		func(s *github_com_openai_openai_go_v3.ChatCompletionMessage) __option.Option[[]github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion] {
+			return __option.Some(s.ToolCalls)
+		},
+		func(v []github_com_openai_openai_go_v3.ChatCompletionMessageToolCallUnion) *github_com_openai_openai_go_v3.ChatCompletionMessage {
+			return &github_com_openai_openai_go_v3.ChatCompletionMessage{ToolCalls: v}
+		},
+		"github_com_openai_openai_go_v3.ChatCompletionMessage.ToolCalls",
+	)
+}
+
+// MakeChatCompletionMessageLenses creates a new [ChatCompletionMessageLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionMessageLenses() ChatCompletionMessageLenses {
+	return ChatCompletionMessageLenses{
+		// mandatory lenses
+		Content:      MakeChatCompletionMessageContentLens(),
+		Refusal:      MakeChatCompletionMessageRefusalLens(),
+		Role:         MakeChatCompletionMessageRoleLens(),
+		Annotations:  MakeChatCompletionMessageAnnotationsLens(),
+		Audio:        MakeChatCompletionMessageAudioLens(),
+		FunctionCall: MakeChatCompletionMessageFunctionCallLens(),
+		ToolCalls:    MakeChatCompletionMessageToolCallsLens(),
+		// optional lenses
+		ContentO: MakeChatCompletionMessageContentLensO(),
+		RefusalO: MakeChatCompletionMessageRefusalLensO(),
+		RoleO:    MakeChatCompletionMessageRoleLensO(),
+	}
+}
+
+// MakeChatCompletionMessageRefLenses creates a new [ChatCompletionMessageRefLenses] with [lenses] for all fields via a pointer to [ChatCompletionMessage]
+//
+// [lenses]: __lens.Lens
+func MakeChatCompletionMessageRefLenses() ChatCompletionMessageRefLenses {
+	return ChatCompletionMessageRefLenses{
+		// mandatory lenses
+		Content:      MakeChatCompletionMessageContentRefLens(),
+		Refusal:      MakeChatCompletionMessageRefusalRefLens(),
+		Role:         MakeChatCompletionMessageRoleRefLens(),
+		Annotations:  MakeChatCompletionMessageAnnotationsRefLens(),
+		Audio:        MakeChatCompletionMessageAudioRefLens(),
+		FunctionCall: MakeChatCompletionMessageFunctionCallRefLens(),
+		ToolCalls:    MakeChatCompletionMessageToolCallsRefLens(),
+		// optional lenses
+		ContentO: MakeChatCompletionMessageContentRefLensO(),
+		RefusalO: MakeChatCompletionMessageRefusalRefLensO(),
+		RoleO:    MakeChatCompletionMessageRoleRefLensO(),
+	}
+}
+
+// MakeChatCompletionMessagePrisms creates a new [ChatCompletionMessagePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionMessagePrisms() ChatCompletionMessagePrisms {
+	return ChatCompletionMessagePrisms{
+		Content:      MakeChatCompletionMessageContentPrism(),
+		Refusal:      MakeChatCompletionMessageRefusalPrism(),
+		Role:         MakeChatCompletionMessageRolePrism(),
+		Annotations:  MakeChatCompletionMessageAnnotationsPrism(),
+		Audio:        MakeChatCompletionMessageAudioPrism(),
+		FunctionCall: MakeChatCompletionMessageFunctionCallPrism(),
+		ToolCalls:    MakeChatCompletionMessageToolCallsPrism(),
+	}
+}
+
+// MakeChatCompletionMessageRefPrisms creates a new [ChatCompletionMessageRefPrisms] with [prisms] for all fields via a pointer to [ChatCompletionMessage]
+//
+// [prisms]: __prism.Prism
+func MakeChatCompletionMessageRefPrisms() ChatCompletionMessageRefPrisms {
+	return ChatCompletionMessageRefPrisms{
+		Content:      MakeChatCompletionMessageContentRefPrism(),
+		Refusal:      MakeChatCompletionMessageRefusalRefPrism(),
+		Role:         MakeChatCompletionMessageRoleRefPrism(),
+		Annotations:  MakeChatCompletionMessageAnnotationsRefPrism(),
+		Audio:        MakeChatCompletionMessageAudioRefPrism(),
+		FunctionCall: MakeChatCompletionMessageFunctionCallRefPrism(),
+		ToolCalls:    MakeChatCompletionMessageToolCallsRefPrism(),
+	}
+}
 
 // ChatCompletionNewParamsLenses provides [lenses] for accessing fields of [ChatCompletionNewParams]
 //
