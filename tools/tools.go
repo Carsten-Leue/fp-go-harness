@@ -15,7 +15,6 @@ import (
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
 	"github.com/IBM/fp-go/v2/readerresult"
-	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/openai/openai-go/v3"
 )
@@ -33,28 +32,26 @@ func makeErrorResult(message string) errorResult {
 	return errorResult{Error: true, Message: message}
 }
 
-func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion] {
-	idLens := MakeChatCompletionMessageToolCallUnionIDLens()
-
-	return F.Flow4(
-		makeErrorResult,
-		J.Marshal,
-		result.Map(F.Flow4(
-			B.ToString,
-			F.Curry2(openai.ToolMessage[string]),
-			reader.Local[openai.ChatCompletionMessageParamUnion](idLens.Get),
-			readerresult.Asks,
-		)),
-		result.GetOrElse(readerresult.Left[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion]),
-	)
-}
-
 func makeSuccessChatCompletionMessageParamUnion() func(string) Reader[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion] {
 	idLens := MakeChatCompletionMessageToolCallUnionIDLens()
 
 	return F.Flow2(
 		F.Curry2(openai.ToolMessage[string]),
 		reader.Local[openai.ChatCompletionMessageParamUnion](idLens.Get),
+	)
+}
+
+func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion] {
+	toMessage := F.Flow2(
+		B.ToString,
+		makeSuccessChatCompletionMessageParamUnion(),
+	)
+
+	return F.Flow4(
+		makeErrorResult,
+		J.Marshal,
+		readerresult.FromResult[openai.ChatCompletionMessageToolCallUnion, []byte],
+		readerresult.ChainReaderK(toMessage),
 	)
 }
 
@@ -175,7 +172,7 @@ func handleToolCallsForChoice() effect.Kleisli[ToolCaller, openai.ChatCompletion
 		),
 		readeroption.GetOrElse(
 			F.Pipe2(
-				reader.Ask[openai.ChatCompletionNewParams](),
+				F.Identity[openai.ChatCompletionNewParams],
 				effect.Of[ToolCaller],
 				reader.Of[openai.ChatCompletionChoice],
 			),
