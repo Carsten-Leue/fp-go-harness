@@ -28,6 +28,10 @@ type (
 
 var keyRequestOptions = requestOptions{}
 
+func AsChatCompletionDeps[R ChatCompletionDeps](r R) ChatCompletionDeps {
+	return r
+}
+
 func WithRequestOptions() CR.Kleisli[[]opt.RequestOption, context.Context] {
 	return CR.WithValue[[]opt.RequestOption](keyRequestOptions)
 }

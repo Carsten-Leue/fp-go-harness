@@ -180,6 +180,12 @@ func handleToolCallsForChoice() effect.Kleisli[ToolCaller, openai.ChatCompletion
 	)
 }
 
+// HandleToolCalls resolves and executes every tool call across all choices of
+// a ChatCompletion, folding the per-choice results (see
+// handleToolCallsForChoice) into a single Endomorphism that appends the
+// resulting assistant/tool messages to a ChatCompletionNewParams. A
+// completion whose choices carry no tool calls yields the identity
+// endomorphism.
 func HandleToolCalls() effect.Kleisli[ToolCaller, *openai.ChatCompletion, Endomorphism[openai.ChatCompletionNewParams]] {
 	choicesLens := oai.MakeChatCompletionChoicesRefLens()
 	flattenEndo := endomorphism.Monoid[openai.ChatCompletionNewParams]()
