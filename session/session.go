@@ -98,28 +98,33 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		)),
 	)
 
-	addToHistory := func(r FinalResult) FinalResult {
+	addHstoryEntry := F.Pipe1(
+		A.Push[HistoryEntry],
+		reader.Map[HistoryEntry](F.Flow2(
+			L.Modify[Session, Endomorphism[History]],
+			reader.Read[Endomorphism[Session]](historyLens),
+		)),
+	)
 
-		x := F.Pipe1(
-			pair.Tail[Session, *openai.ChatCompletion],
-			reader.ApS(
-				pair.FromHead[*openai.ChatCompletion, openai.ChatCompletionNewParams],
-				F.Flow3(
-					reader.Ask[FinalResult](),
-					pair.Head[Session, *openai.ChatCompletion],
-					currentLens.Get,
-				),
+	addToHistory := F.Pipe2(
+		pair.Tail[Session, *openai.ChatCompletion],
+		reader.ApS(
+			pair.FromHead[*openai.ChatCompletion, openai.ChatCompletionNewParams],
+			F.Flow3(
+				reader.Ask[FinalResult](),
+				pair.Head[Session, *openai.ChatCompletion],
+				currentLens.Get,
 			),
-			// reader.ApS(
-			// 	func(History) func(),
-			// 	F.Flow3(
-			// 		reader.Ask[FinalResult](),
-			// 		pair.Head[Session, *openai.ChatCompletion],
-			// 		historyLens.Get,
-			// 	),
-			// ),
-		)
-	}
+		),
+		reader.ApS(
+			F.Pipe2(
+				addHstoryEntry,
+				reader.Map[HistoryEntry](pair.MapHead[*openai.ChatCompletion, Session, Session]),
+				reader.Sequence,
+			),
+			reader.Ask[FinalResult](),
+		),
+	)
 
 	toFinalResult := F.Flow2(
 		reader.Of[Session, Effect[SessionDeps, *openai.ChatCompletion]],
