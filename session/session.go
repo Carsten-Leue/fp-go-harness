@@ -150,11 +150,8 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 	toFinalResult := F.Flow2(
 		reader.Of[Session, Effect[SessionDeps, *openai.ChatCompletion]],
 		reader.ApS(
-			F.Flow2(
-				pair.FromHead[*openai.ChatCompletion, Session],
-				effect.Map[SessionDeps],
-			),
-			reader.Ask[Session](),
+			effect.Map[SessionDeps],
+			pair.FromHead[*openai.ChatCompletion, Session],
 		),
 	)
 
