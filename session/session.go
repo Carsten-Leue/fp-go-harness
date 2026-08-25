@@ -5,18 +5,16 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
-	"github.com/IBM/fp-go/v2/endomorphism"
 	F "github.com/IBM/fp-go/v2/function"
 	I "github.com/IBM/fp-go/v2/identity"
 	N "github.com/IBM/fp-go/v2/number"
-	L "github.com/IBM/fp-go/v2/optics/lens"
 	LP "github.com/IBM/fp-go/v2/optics/lens/prism"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
 	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
+	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
-	"github.com/IBM/fp-go/v2/readeroption"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/IBM/fp-go/v2/tailrec"
 	"github.com/openai/openai-go/v3"
@@ -103,78 +101,46 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		effect.Local[*openai.ChatCompletion](oai.AsChatCompletionDeps[SessionDeps]),
 	)
 
-	incIterations := F.Pipe2(
+	incIterations := F.Pipe1(
 		N.Add(1),
-		L.Modify,
-		reader.Read[Endomorphism[Session]](iterLens),
+		iterLens.Modify,
 	)
 
 	usageMonoid := MakeUsageMonoid()
-	addUsage := F.Pipe1(
+	addUsage := F.Flow2(
 		F.Curry2(usageMonoid.Concat),
-		reader.Map[openai.CompletionUsage](F.Flow2(
-			L.Modify[Session, Endomorphism[openai.CompletionUsage]],
-			reader.Read[Endomorphism[Session]](usageLens),
-		)),
+		usageLens.Modify,
 	)
 
-	addHstoryEntry := F.Pipe1(
+	addHistoryEntry := F.Flow2(
 		A.Push[HistoryEntry],
-		reader.Map[HistoryEntry](F.Flow2(
-			L.Modify[Session, Endomorphism[History]],
-			reader.Read[Endomorphism[Session]](historyLens),
-		)),
+		historyLens.Modify,
 	)
 
-	getRequest := F.Flow2(
-		pair.Head[Session, *openai.ChatCompletion],
-		currentLens.Get,
-	)
-
-	addToHistory := F.Pipe2(
-		pair.Tail[Session, *openai.ChatCompletion],
-		reader.ApS(
-			pair.FromHead[*openai.ChatCompletion, openai.ChatCompletionNewParams],
-			getRequest,
-		),
-		reader.ApS(
-			F.Pipe2(
-				addHstoryEntry,
-				reader.Map[HistoryEntry](pair.MapHead[*openai.ChatCompletion, Session, Session]),
-				reader.Sequence,
-			),
-			reader.Ask[FinalResult](),
+	addToHistory := I.Bind(
+		pair.MapHead[*openai.ChatCompletion, Session, Session],
+		F.Flow2(
+			pair.MapHead[*openai.ChatCompletion](currentLens.Get),
+			addHistoryEntry,
 		),
 	)
 
-	toFinalResult := F.Flow2(
-		reader.Of[Session, Effect[SessionDeps, *openai.ChatCompletion]],
-		reader.ApS(
-			effect.Map[SessionDeps],
-			pair.FromHead[*openai.ChatCompletion, Session],
-		),
-	)
+	toFinalResult := reader.Sequence(F.Flow2(
+		pair.FromHead[*openai.ChatCompletion, Session],
+		effect.Map[SessionDeps],
+	))
 
-	bounceToolCall := F.Pipe5(
+	bounceToolCall := F.Pipe4(
 		pair.Tail[Session, *openai.ChatCompletion],
 		reader.Map[FinalResult](handleToolCalls),
 		reader.ApS(
-			F.Flow2(
-				endomorphism.Read[openai.ChatCompletionNewParams],
+			F.Flow3(
+				reader.Read[Session],
+				reader.Local[Session](currentLens.Modify),
 				effect.Map[SessionDeps],
 			),
-			getRequest,
+			pair.Head[Session, *openai.ChatCompletion],
 		),
-		reader.Chain(F.Flow2(
-			reader.Of[FinalResult],
-			reader.ApS(
-				F.Flow2(
-					reader.Sequence(currentLens.Set),
-					effect.Map[SessionDeps],
-				),
-				pair.Head[Session, *openai.ChatCompletion],
-			),
-		)),
 		reader.Map[FinalResult](F.Pipe1(
 			tailrec.Bounce[FinalResult, Session],
 			effect.Map[SessionDeps],
@@ -187,12 +153,16 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		effect.Of[SessionDeps],
 	)
 
-	dispatch := F.Pipe4(
-		pair.Tail[Session, *openai.ChatCompletion],
-		reader.Map[FinalResult](firstFinishReason.GetOption),
-		readeroption.ChainOptionK[FinalResult](option.FromPredicate(isToolCallFinishReason())),
-		readeroption.ChainReaderK(reader.Of[string](bounceToolCall)),
-		readeroption.GetOrElse(landFinalResult),
+	dispatch := F.Pipe1(
+		F.Flow3(
+			pair.Tail[Session, *openai.ChatCompletion],
+			firstFinishReason.GetOption,
+			option.Exists(isToolCallFinishReason()),
+		),
+		predicate.Fold(
+			landFinalResult,
+			bounceToolCall,
+		),
 	)
 
 	return F.Pipe3(
