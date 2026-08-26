@@ -36,7 +36,7 @@ type Session struct {
 
 type SessionDeps interface {
 	oai.ChatCompletionDeps
-	GetToolCaller() ToolCaller
+	tools.ToolDeps
 }
 
 type FinalResult = Pair[Session, *openai.ChatCompletion]
@@ -94,7 +94,7 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 
 	handleToolCalls := F.Flow2(
 		tools.HandleToolCalls(),
-		effect.Local[Endomorphism[openai.ChatCompletionNewParams]](SessionDeps.GetToolCaller),
+		effect.Local[Endomorphism[openai.ChatCompletionNewParams]](tools.AsToolDeps[SessionDeps]),
 	)
 	chatCompletion := F.Flow2(
 		oai.ChatCompletion(),

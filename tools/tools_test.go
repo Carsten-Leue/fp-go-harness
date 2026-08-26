@@ -37,10 +37,10 @@ func makeToolCaller(registry map[string]ToolCall) ToolCaller {
 // runToolCall executes [MakeToolCall] for the given call/registry pair and
 // unwraps the outer [Result], failing the test if the effect itself errors
 // (it shouldn't, since MakeToolCall recovers every failure into a message).
-func runToolCall(t *testing.T, call openai.ChatCompletionMessageToolCallUnion, caller ToolCaller) openai.ChatCompletionMessageParamUnion {
+func runToolCall(t *testing.T, call openai.ChatCompletionMessageToolCallUnion, deps ToolDeps) openai.ChatCompletionMessageParamUnion {
 	t.Helper()
 
-	msg, err := result.Unwrap(MakeToolCall()(call)(caller)(t.Context())())
+	msg, err := result.Unwrap(MakeToolCall()(call)(deps)(t.Context())())
 	require.NoError(t, err)
 
 	return msg
@@ -66,8 +66,9 @@ func TestMakeToolCall_Success(t *testing.T) {
 
 	caller := makeToolCaller(map[string]ToolCall{"get_weather": weatherTool})
 	call := makeToolCallUnion("call_1", "get_weather", `{"city":"Berlin"}`)
+	deps := MakeToolDeps(caller)
 
-	msg := runToolCall(t, call, caller)
+	msg := runToolCall(t, call, deps)
 
 	require.NotNil(t, msg.OfTool)
 	assert.Equal(t, call.ID, msg.OfTool.ToolCallID)
@@ -77,8 +78,9 @@ func TestMakeToolCall_Success(t *testing.T) {
 func TestMakeToolCall_ToolNotFound(t *testing.T) {
 	caller := makeToolCaller(map[string]ToolCall{})
 	call := makeToolCallUnion("call_2", "unknown_tool", `{}`)
+	deps := MakeToolDeps(caller)
 
-	msg := runToolCall(t, call, caller)
+	msg := runToolCall(t, call, deps)
 
 	require.NotNil(t, msg.OfTool)
 	assert.Equal(t, call.ID, msg.OfTool.ToolCallID)
@@ -93,8 +95,9 @@ func TestMakeToolCall_ToolCallError(t *testing.T) {
 
 	caller := makeToolCaller(map[string]ToolCall{"broken_tool": brokenTool})
 	call := makeToolCallUnion("call_3", "broken_tool", `{}`)
+	deps := MakeToolDeps(caller)
 
-	msg := runToolCall(t, call, caller)
+	msg := runToolCall(t, call, deps)
 
 	require.NotNil(t, msg.OfTool)
 	assert.Equal(t, call.ID, msg.OfTool.ToolCallID)
@@ -107,10 +110,10 @@ func TestMakeToolCall_ToolCallError(t *testing.T) {
 // runHandleToolCalls executes [HandleToolCalls] for the given completion/registry
 // pair and unwraps the outer [Result], failing the test if the effect itself
 // errors.
-func runHandleToolCalls(t *testing.T, completion *openai.ChatCompletion, caller ToolCaller) Endomorphism[openai.ChatCompletionNewParams] {
+func runHandleToolCalls(t *testing.T, completion *openai.ChatCompletion, deps ToolDeps) Endomorphism[openai.ChatCompletionNewParams] {
 	t.Helper()
 
-	endo, err := result.Unwrap(HandleToolCalls()(completion)(caller)(t.Context())())
+	endo, err := result.Unwrap(HandleToolCalls()(completion)(deps)(t.Context())())
 	require.NoError(t, err)
 
 	return endo
@@ -121,6 +124,7 @@ func runHandleToolCalls(t *testing.T, completion *openai.ChatCompletion, caller 
 // unchanged.
 func TestHandleToolCalls_NoToolCalls(t *testing.T) {
 	caller := makeToolCaller(map[string]ToolCall{})
+	deps := MakeToolDeps(caller)
 
 	completion := &openai.ChatCompletion{
 		Choices: []openai.ChatCompletionChoice{
@@ -132,7 +136,7 @@ func TestHandleToolCalls_NoToolCalls(t *testing.T) {
 		},
 	}
 
-	endo := runHandleToolCalls(t, completion, caller)
+	endo := runHandleToolCalls(t, completion, deps)
 
 	original := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
@@ -174,8 +178,9 @@ func TestHandleToolCalls_WithToolCalls(t *testing.T) {
 		"get_weather": weatherTool,
 		"get_time":    timeTool,
 	})
+	deps := MakeToolDeps(caller)
 
-	endo := runHandleToolCalls(t, completion, caller)
+	endo := runHandleToolCalls(t, completion, deps)
 
 	original := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
