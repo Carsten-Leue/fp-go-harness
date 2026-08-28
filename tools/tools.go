@@ -70,7 +70,7 @@ func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai
 	return F.Flow4(
 		makeErrorResult,
 		J.Marshal,
-		readerresult.FromResult[openai.ChatCompletionMessageToolCallUnion, []byte],
+		readerresult.FromResult,
 		readerresult.ChainReaderK(toMessage),
 	)
 }

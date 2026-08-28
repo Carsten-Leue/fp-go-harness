@@ -80,7 +80,7 @@ func ChatCompletion() effect.Kleisli[ChatCompletionDeps, openai.ChatCompletionNe
 		newChatCompletionThunk(),
 		// lift that Reader into an Effect keyed on *ChatCompletionService, so the next
 		// step can reindex its environment.
-		effect.Asks[*openai.ChatCompletionService, Effect[[]opt.RequestOption, *openai.ChatCompletion]],
+		effect.Asks,
 		// swap the environment from *ChatCompletionService to ChatCompletionDeps by
 		// reading the service off deps; the []RequestOption -> *ChatCompletion effect
 		// is carried through as the (still curried) payload.
