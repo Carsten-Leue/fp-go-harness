@@ -1,7 +1,9 @@
 package openai
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -41,7 +43,11 @@ func makeSampleResponse() Effect[ChatCompletionDeps, *openai.ChatCompletion] {
 }
 
 func TestMakeDeepSeekChatCompletionDeps(t *testing.T) {
-	require.NoError(t, godotenv.Load("../.env"))
+	if err := godotenv.Load("../.env"); errors.Is(err, os.ErrNotExist) {
+		t.Skip(".env file not found")
+	} else {
+		require.NoError(t, err)
+	}
 
 	resp := makeSampleResponse()
 
