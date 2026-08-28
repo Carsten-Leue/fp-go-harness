@@ -98,15 +98,9 @@ func MakeToolCall() effect.Kleisli[ToolDeps, openai.ChatCompletionMessageToolCal
 	makeSuccess := makeSuccessChatCompletionMessageParamUnion()
 	makeError := makeErrorChatCompletionMessageParamUnion()
 
-	functionNameLens := F.Pipe1(
-		functionLens,
-		L.Compose[openai.ChatCompletionMessageToolCallUnion](nameLens),
-	)
+	functionNameLens := functionLens.Compose(nameLens)
 
-	functionArgsLens := F.Pipe1(
-		functionLens,
-		L.Compose[openai.ChatCompletionMessageToolCallUnion](argsLens),
-	)
+	functionArgsLens := functionLens.Compose(argsLens)
 
 	toolNotFoundError := F.Pipe4(
 		functionNameLens.Get,
@@ -152,9 +146,8 @@ func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionCh
 	messageLens := oai.MakeChatCompletionChoiceMessageLens()
 	toolCallsLens := oai.MakeChatCompletionMessageToolCallsLens()
 
-	toolCallsFromChoiceOptional := F.Pipe2(
-		messageLens,
-		L.Compose[openai.ChatCompletionChoice](toolCallsLens),
+	toolCallsFromChoiceOptional := F.Pipe1(
+		messageLens.Compose(toolCallsLens),
 		LP.Compose[openai.ChatCompletionChoice](P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion])),
 	)
 
