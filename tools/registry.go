@@ -25,6 +25,8 @@ func MakeTool(definition openai.FunctionDefinitionParam, call ToolCall) Tool {
 	return Tool{Definition: definition, Call: call}
 }
 
+// toolDefinition and toolCall are leaf accessors: the lens generator cannot
+// derive lenses for Tool because its Call field has a function type.
 func toolDefinition(t Tool) openai.FunctionDefinitionParam {
 	return t.Definition
 }
@@ -33,15 +35,13 @@ func toolCall(t Tool) ToolCall {
 	return t.Call
 }
 
-func definitionName(d openai.FunctionDefinitionParam) string {
-	return d.Name
-}
-
 // toolEntry keys a tool by the name of its definition.
 func toolEntry() func(Tool) pair.Pair[string, Tool] {
+	nameLens := MakeFunctionDefinitionParamNameLens()
+
 	return F.Flow2(
 		pair.Of[Tool],
-		pair.MapHead[Tool](F.Flow2(toolDefinition, definitionName)),
+		pair.MapHead[Tool](F.Flow2(toolDefinition, nameLens.Get)),
 	)
 }
 

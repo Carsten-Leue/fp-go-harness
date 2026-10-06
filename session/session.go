@@ -17,7 +17,7 @@ import (
 	"github.com/IBM/fp-go/v2/reader"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/IBM/fp-go/v2/tailrec"
-	"github.com/openai/openai-go/v3"
+	openai "github.com/openai/openai-go/v3"
 )
 
 const finishReasonToolCalls = "tool_calls"

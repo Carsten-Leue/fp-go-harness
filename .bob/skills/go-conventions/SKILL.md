@@ -172,10 +172,10 @@ func(u User, t []string) User { u.Tags = t; return u }
 
 ## Lens code generation
 
-Packages with `// fp-go:Lens`-annotated structs have a `gen_lens.go` produced by
+Packages with `// fp-go:Lens`-annotated structs have a `gen.go` (plus `gen_*.go` for further directives) produced by
 `go tool gen lens`. It holds lens, prism and accessor functions for every field.
 
-**Never hand-write lenses into `gen_lens.go`.** When you add, rename or remove a field of
+**Never hand-write lenses into the generated files.** When you add, rename or remove a field of
 such a struct, or annotate a new struct:
 
 1. Change only the source Go file.
@@ -186,11 +186,54 @@ such a struct, or annotate a new struct:
    go generate ./...
    ```
 
-3. Commit the regenerated `gen_lens.go` with the struct change.
+3. Commit the regenerated `gen*.go` files with the struct change.
 
 Hand-written lenses miss the `Ref` / `Prism` / `LensO` variants, drift from the naming
 convention, and are overwritten by the next `go generate`. If the generator fails, fix the
-struct or type error first; don't patch `gen_lens.go`.
+struct or type error first; don't patch the generated file.
+
+### Generated lenses instead of hand-written field accessors
+
+A function such as `func definitionName(d openai.FunctionDefinitionParam) string { return d.Name }`
+is a hand-written lens getter. Generate the lens and use its `.Get` instead, also for
+third-party types:
+
+```go
+// doc.go of the package that needs the lens
+//go:generate go tool gen lens --type ChatCompletionMessageToolCallUnion github.com/openai/openai-go/v3
+//go:generate go tool gen lens --type FunctionDefinitionParam --filename gen_shared.go github.com/openai/openai-go/v3/shared
+```
+
+```go
+// AVOID
+func definitionName(d openai.FunctionDefinitionParam) string { return d.Name }
+pair.MapHead[Tool](F.Flow2(toolDefinition, definitionName))
+
+// PREFER
+nameLens := MakeFunctionDefinitionParamNameLens()
+pair.MapHead[Tool](F.Flow2(toolDefinition, nameLens.Get))
+```
+
+### Generator rules and pitfalls (`go tool gen lens`, fp-go v2.4.0)
+
+- **Every package with a `gen*.go` has its `//go:generate` directives in `doc.go`.** Without
+  one, `go generate ./pkg/...` silently does nothing and the lenses can't be regenerated.
+- **`--type` replaces annotation scanning.** One directive either scans for `// fp-go:Lens`
+  structs or loads the listed `--type`s from one import path. Several directives in one
+  package need distinct `--filename`s (`gen.go`, `gen_shared.go`, …), else they overwrite
+  each other.
+- **Type aliases:** `--type` must name the package that *defines* the struct.
+  `openai.FunctionDefinitionParam` is an alias of `shared.FunctionDefinitionParam`, so it
+  is generated from `github.com/openai/openai-go/v3/shared`.
+- **Import the package explicitly under its name when the name differs from the last path
+  element.** In the file with the annotated struct, write
+  `openai "github.com/openai/openai-go/v3"`, not the bare import. Otherwise the generated
+  file references `openai.X` without importing it (`undefined: openai`).
+- **Function-typed fields can't be lensed.** For a field such as `Call ToolCall` (a
+  `Kleisli` alias) the generator emits `LensO`s that need `comparable`, or lenses over
+  `any`. Don't annotate such a struct; write minimal leaf accessors and say why in a
+  comment (see `tools.Tool`).
+- After regenerating, check `git diff` of the generated files and run `go build ./...`.
 
 ## HTTP header names and MIME types
 

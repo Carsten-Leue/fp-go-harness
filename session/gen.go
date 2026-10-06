@@ -9,7 +9,7 @@ import (
 	__lens_option "github.com/IBM/fp-go/v2/optics/lens/option"
 	__prism "github.com/IBM/fp-go/v2/optics/prism"
 	__option "github.com/IBM/fp-go/v2/option"
-	"github.com/openai/openai-go/v3"
+	github_com_openai_openai_go_v3 "github.com/openai/openai-go/v3"
 )
 
 // SessionLenses provides [lenses] for accessing fields of [Session]
@@ -19,9 +19,9 @@ type SessionLenses struct {
 	// history is a [__lens.Lens] for the history field of [Session]
 	history __lens.Lens[Session, History]
 	// current is a [__lens.Lens] for the current field of [Session]
-	current __lens.Lens[Session, openai.ChatCompletionNewParams]
+	current __lens.Lens[Session, github_com_openai_openai_go_v3.ChatCompletionNewParams]
 	// usage is a [__lens.Lens] for the usage field of [Session]
-	usage __lens.Lens[Session, openai.CompletionUsage]
+	usage __lens.Lens[Session, github_com_openai_openai_go_v3.CompletionUsage]
 	// iterations is a [__lens.Lens] for the iterations field of [Session]
 	iterations __lens.Lens[Session, int]
 	// iterationsO is a [__lens_option.LensO] for the iterations field of [Session], treating the zero value as absent
@@ -35,9 +35,9 @@ type SessionRefLenses struct {
 	// history is a [__lens.Lens] for the history field of [Session] via a pointer receiver
 	history __lens.Lens[*Session, History]
 	// current is a [__lens.Lens] for the current field of [Session] via a pointer receiver
-	current __lens.Lens[*Session, openai.ChatCompletionNewParams]
+	current __lens.Lens[*Session, github_com_openai_openai_go_v3.ChatCompletionNewParams]
 	// usage is a [__lens.Lens] for the usage field of [Session] via a pointer receiver
-	usage __lens.Lens[*Session, openai.CompletionUsage]
+	usage __lens.Lens[*Session, github_com_openai_openai_go_v3.CompletionUsage]
 	// iterations is a [__lens.Lens] for the iterations field of [Session] via a pointer receiver
 	iterations __lens.Lens[*Session, int]
 	// iterationsO is a [__lens_option.LensO] for the iterations field of [Session] via a pointer receiver, treating the zero value as absent
@@ -51,9 +51,9 @@ type SessionPrisms struct {
 	// history is a [__prism.Prism] for the history field of [Session]
 	history __prism.Prism[Session, History]
 	// current is a [__prism.Prism] for the current field of [Session]
-	current __prism.Prism[Session, openai.ChatCompletionNewParams]
+	current __prism.Prism[Session, github_com_openai_openai_go_v3.ChatCompletionNewParams]
 	// usage is a [__prism.Prism] for the usage field of [Session]
-	usage __prism.Prism[Session, openai.CompletionUsage]
+	usage __prism.Prism[Session, github_com_openai_openai_go_v3.CompletionUsage]
 	// iterations is a [__prism.Prism] for the iterations field of [Session]
 	iterations __prism.Prism[Session, int]
 }
@@ -65,9 +65,9 @@ type SessionRefPrisms struct {
 	// history is a [__prism.Prism] for the history field of [Session] via a pointer receiver
 	history __prism.Prism[*Session, History]
 	// current is a [__prism.Prism] for the current field of [Session] via a pointer receiver
-	current __prism.Prism[*Session, openai.ChatCompletionNewParams]
+	current __prism.Prism[*Session, github_com_openai_openai_go_v3.ChatCompletionNewParams]
 	// usage is a [__prism.Prism] for the usage field of [Session] via a pointer receiver
-	usage __prism.Prism[*Session, openai.CompletionUsage]
+	usage __prism.Prism[*Session, github_com_openai_openai_go_v3.CompletionUsage]
 	// iterations is a [__prism.Prism] for the iterations field of [Session] via a pointer receiver
 	iterations __prism.Prism[*Session, int]
 }
@@ -81,29 +81,68 @@ func MakeSessionhistoryLens() __lens.Lens[Session, History] {
 	)
 }
 
+// MakeSessionhistoryRefLens returns a [__lens.Lens] for the history field of [Session] via a pointer receiver
+func MakeSessionhistoryRefLens() __lens.Lens[*Session, History] {
+	return __lens.MakeLensRefWithName(
+		func(s *Session) History { return s.history },
+		func(s *Session, v History) *Session { s.history = v; return s },
+		"(*Session).history",
+	)
+}
+
+// MakeSessionhistoryPrism returns a [__prism.Prism] for the history field of [Session]
+func MakeSessionhistoryPrism() __prism.Prism[Session, History] {
+	return __prism.MakePrismWithName(
+		func(s Session) __option.Option[History] { return __option.Some(s.history) },
+		func(v History) Session {
+			return Session{history: v}
+		},
+		"Session.history",
+	)
+}
+
+// MakeSessionhistoryRefPrism returns a [__prism.Prism] for the history field of [Session] via a pointer receiver
+func MakeSessionhistoryRefPrism() __prism.Prism[*Session, History] {
+	return __prism.MakePrismWithName(
+		func(s *Session) __option.Option[History] { return __option.Some(s.history) },
+		func(v History) *Session {
+			return &Session{history: v}
+		},
+		"Session.history",
+	)
+}
+
 // MakeSessioncurrentLens returns a [__lens.Lens] for the current field of [Session]
-func MakeSessioncurrentLens() __lens.Lens[Session, openai.ChatCompletionNewParams] {
+func MakeSessioncurrentLens() __lens.Lens[Session, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
 	return __lens.MakeLensWithName(
-		func(s Session) openai.ChatCompletionNewParams { return s.current },
-		func(s Session, v openai.ChatCompletionNewParams) Session { s.current = v; return s },
+		func(s Session) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.current },
+		func(s Session, v github_com_openai_openai_go_v3.ChatCompletionNewParams) Session {
+			s.current = v
+			return s
+		},
 		"Session.current",
 	)
 }
 
 // MakeSessioncurrentRefLens returns a [__lens.Lens] for the current field of [Session] via a pointer receiver
-func MakeSessioncurrentRefLens() __lens.Lens[*Session, openai.ChatCompletionNewParams] {
+func MakeSessioncurrentRefLens() __lens.Lens[*Session, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
 	return __lens.MakeLensRefWithName(
-		func(s *Session) openai.ChatCompletionNewParams { return s.current },
-		func(s *Session, v openai.ChatCompletionNewParams) *Session { s.current = v; return s },
+		func(s *Session) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.current },
+		func(s *Session, v github_com_openai_openai_go_v3.ChatCompletionNewParams) *Session {
+			s.current = v
+			return s
+		},
 		"(*Session).current",
 	)
 }
 
 // MakeSessioncurrentPrism returns a [__prism.Prism] for the current field of [Session]
-func MakeSessioncurrentPrism() __prism.Prism[Session, openai.ChatCompletionNewParams] {
+func MakeSessioncurrentPrism() __prism.Prism[Session, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
 	return __prism.MakePrismWithName(
-		func(s Session) __option.Option[openai.ChatCompletionNewParams] { return __option.Some(s.current) },
-		func(v openai.ChatCompletionNewParams) Session {
+		func(s Session) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.current)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) Session {
 			return Session{current: v}
 		},
 		"Session.current",
@@ -111,10 +150,12 @@ func MakeSessioncurrentPrism() __prism.Prism[Session, openai.ChatCompletionNewPa
 }
 
 // MakeSessioncurrentRefPrism returns a [__prism.Prism] for the current field of [Session] via a pointer receiver
-func MakeSessioncurrentRefPrism() __prism.Prism[*Session, openai.ChatCompletionNewParams] {
+func MakeSessioncurrentRefPrism() __prism.Prism[*Session, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
 	return __prism.MakePrismWithName(
-		func(s *Session) __option.Option[openai.ChatCompletionNewParams] { return __option.Some(s.current) },
-		func(v openai.ChatCompletionNewParams) *Session {
+		func(s *Session) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.current)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) *Session {
 			return &Session{current: v}
 		},
 		"Session.current",
@@ -122,28 +163,30 @@ func MakeSessioncurrentRefPrism() __prism.Prism[*Session, openai.ChatCompletionN
 }
 
 // MakeSessionusageLens returns a [__lens.Lens] for the usage field of [Session]
-func MakeSessionusageLens() __lens.Lens[Session, openai.CompletionUsage] {
+func MakeSessionusageLens() __lens.Lens[Session, github_com_openai_openai_go_v3.CompletionUsage] {
 	return __lens.MakeLensWithName(
-		func(s Session) openai.CompletionUsage { return s.usage },
-		func(s Session, v openai.CompletionUsage) Session { s.usage = v; return s },
+		func(s Session) github_com_openai_openai_go_v3.CompletionUsage { return s.usage },
+		func(s Session, v github_com_openai_openai_go_v3.CompletionUsage) Session { s.usage = v; return s },
 		"Session.usage",
 	)
 }
 
 // MakeSessionusageRefLens returns a [__lens.Lens] for the usage field of [Session] via a pointer receiver
-func MakeSessionusageRefLens() __lens.Lens[*Session, openai.CompletionUsage] {
+func MakeSessionusageRefLens() __lens.Lens[*Session, github_com_openai_openai_go_v3.CompletionUsage] {
 	return __lens.MakeLensRefWithName(
-		func(s *Session) openai.CompletionUsage { return s.usage },
-		func(s *Session, v openai.CompletionUsage) *Session { s.usage = v; return s },
+		func(s *Session) github_com_openai_openai_go_v3.CompletionUsage { return s.usage },
+		func(s *Session, v github_com_openai_openai_go_v3.CompletionUsage) *Session { s.usage = v; return s },
 		"(*Session).usage",
 	)
 }
 
 // MakeSessionusagePrism returns a [__prism.Prism] for the usage field of [Session]
-func MakeSessionusagePrism() __prism.Prism[Session, openai.CompletionUsage] {
+func MakeSessionusagePrism() __prism.Prism[Session, github_com_openai_openai_go_v3.CompletionUsage] {
 	return __prism.MakePrismWithName(
-		func(s Session) __option.Option[openai.CompletionUsage] { return __option.Some(s.usage) },
-		func(v openai.CompletionUsage) Session {
+		func(s Session) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) Session {
 			return Session{usage: v}
 		},
 		"Session.usage",
@@ -151,10 +194,12 @@ func MakeSessionusagePrism() __prism.Prism[Session, openai.CompletionUsage] {
 }
 
 // MakeSessionusageRefPrism returns a [__prism.Prism] for the usage field of [Session] via a pointer receiver
-func MakeSessionusageRefPrism() __prism.Prism[*Session, openai.CompletionUsage] {
+func MakeSessionusageRefPrism() __prism.Prism[*Session, github_com_openai_openai_go_v3.CompletionUsage] {
 	return __prism.MakePrismWithName(
-		func(s *Session) __option.Option[openai.CompletionUsage] { return __option.Some(s.usage) },
-		func(v openai.CompletionUsage) *Session {
+		func(s *Session) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) *Session {
 			return &Session{usage: v}
 		},
 		"Session.usage",
@@ -234,6 +279,7 @@ func MakeSessionLenses() SessionLenses {
 func MakeSessionRefLenses() SessionRefLenses {
 	return SessionRefLenses{
 		// mandatory lenses
+		history:    MakeSessionhistoryRefLens(),
 		current:    MakeSessioncurrentRefLens(),
 		usage:      MakeSessionusageRefLens(),
 		iterations: MakeSessioniterationsRefLens(),
@@ -247,6 +293,7 @@ func MakeSessionRefLenses() SessionRefLenses {
 // [prisms]: __prism.Prism
 func MakeSessionPrisms() SessionPrisms {
 	return SessionPrisms{
+		history:    MakeSessionhistoryPrism(),
 		current:    MakeSessioncurrentPrism(),
 		usage:      MakeSessionusagePrism(),
 		iterations: MakeSessioniterationsPrism(),
@@ -258,6 +305,7 @@ func MakeSessionPrisms() SessionPrisms {
 // [prisms]: __prism.Prism
 func MakeSessionRefPrisms() SessionRefPrisms {
 	return SessionRefPrisms{
+		history:    MakeSessionhistoryRefPrism(),
 		current:    MakeSessioncurrentRefPrism(),
 		usage:      MakeSessionusageRefPrism(),
 		iterations: MakeSessioniterationsRefPrism(),

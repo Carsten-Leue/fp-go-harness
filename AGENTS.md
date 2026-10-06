@@ -10,6 +10,10 @@ primitives for Go: Reader, IOResult, ReaderIOResult, Effect, Kleisli composition
   Prefer it over guessing combinator signatures or behavior from memory.
 - Load the repository skills [`fp-go`](.bob/skills/fp-go/SKILL.md) and
   [`go-conventions`](.bob/skills/go-conventions/SKILL.md) for every Go change.
+- Field access goes through generated lenses (`go generate`, directives in each package's
+  `doc.go`), also for third-party types; no hand-written getters where the generator works.
+  The generator's pitfalls are in
+  [`go-conventions`](.bob/skills/go-conventions/SKILL.md#generator-rules-and-pitfalls-go-tool-gen-lens-fp-go-v240).
 
 ### Composing `Effect[C, A]`
 

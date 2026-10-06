@@ -219,7 +219,10 @@ works on. Aim for it at every level above the leaves.
 
 - **Lambdas only at the leaves:** a field accessor (better: a generated lens `.Get` or
   prism `.ReverseGet`), a lens setter for `L.MakeLens`, a multi-field formatter, a raw
-  I/O sink. Every `Map`, `Chain`, `Bind`, `Filter`, `Fold` argument above them is a named
+  I/O sink. A hand-written accessor is a review finding whenever the lens generator can
+  produce the lens, third-party types included (`--type`); keep one only where the
+  generator can't (function-typed fields), with a comment. See
+  [`go-conventions`, *Generated lenses*](../go-conventions/SKILL.md#generated-lenses-instead-of-hand-written-field-accessors). Every `Map`, `Chain`, `Bind`, `Filter`, `Fold` argument above them is a named
   function, a combinator or an `F.FlowN` of those.
 - **Combinators instead of small lambdas:** `N.MoreThan(18)`, `N.Mul(2)`, `S.IsEmpty`,
   `S.IsNonEmpty`, `P.Not`, `P.And`, `F.Constant1[E](v)`, `F.Bind2nd`, `LZ.Of(v)`.
