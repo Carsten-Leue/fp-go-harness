@@ -356,7 +356,18 @@ final, err := effect.RunSync(F.Pipe1(
 
 `Provide` needs the result type given explicitly (`Provide[A]`). Inside the code,
 dependencies that are themselves built by an effect (an `Effect[D1, D2]`) are threaded
-through with `effect.ChainThunkK` and `reader.Read`, not run early.
+through with `effect.LocalEffectK[A](F.Constant1[D1](buildDeps))`, not run early:
+
+```go
+// main.answer: reuse session.Run under DeepSeekDeps
+F.Flow5(
+	makeRequest(registry),
+	session.MakeSession,
+	session.Run(),
+	effect.Local[session.FinalResult](toSessionDeps),
+	effect.LocalEffectK[session.FinalResult](F.Constant1[oai.DeepSeekDeps](oai.MakeDeepSeekChatCompletionDeps())),
+)
+```
 
 ## Aliases in this repository
 

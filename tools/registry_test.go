@@ -30,7 +30,7 @@ func makeEchoTool(name, prefix string) Tool {
 
 func TestToToolCaller_ResolvesRegisteredTools(t *testing.T) {
 	registry := MakeToolRegistry(makeEchoTool("echo", "echo: "))
-	caller := ToToolCaller(registry)
+	caller := ToToolCaller()(registry)
 
 	call, ok := option.Unwrap(caller("echo"))
 	require.True(t, ok)
@@ -46,7 +46,7 @@ func TestMakeToolRegistry_LastToolWins(t *testing.T) {
 	registry := MakeToolRegistry(makeEchoTool("echo", "first: "), makeEchoTool("echo", "second: "))
 	require.Len(t, registry, 1)
 
-	call, ok := option.Unwrap(ToToolCaller(registry)("echo"))
+	call, ok := option.Unwrap(ToToolCaller()(registry)("echo"))
 	require.True(t, ok)
 
 	out, err := result.Unwrap(call("x")(t.Context())())
@@ -59,7 +59,7 @@ func TestMakeToolRegistry_LastToolWins(t *testing.T) {
 func TestWithTools_SetsSortedDefinitions(t *testing.T) {
 	registry := MakeToolRegistry(makeEchoTool("zeta", ""), makeEchoTool("alpha", ""))
 
-	params := WithTools(registry)(openai.ChatCompletionNewParams{Model: "gpt-test"})
+	params := WithTools()(registry)(openai.ChatCompletionNewParams{Model: "gpt-test"})
 	require.Len(t, params.Tools, 2)
 
 	raw, err := json.Marshal(params.Tools)

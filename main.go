@@ -45,64 +45,79 @@ func makeRequest(registry tools.ToolRegistry) func(string) openai.ChatCompletion
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
 
-	base := F.Pipe1(
+	base := F.Pipe2(
 		oai.ForAskMode(),
 		modelLens.Set(oai.DeepSeekModelFlash),
+		tools.WithTools()(registry),
 	)
 
-	return F.Flow5(
+	return F.Flow4(
 		openai.UserMessage[string],
 		A.Push[openai.ChatCompletionMessageParamUnion],
 		messagesLens.Modify,
 		reader.Read[openai.ChatCompletionNewParams](base),
-		tools.WithTools(registry),
 	)
 }
 
 // answer runs the agent loop for a prompt against DeepSeek.
+//
+// session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
+// the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
+// from DeepSeekDeps with the effectful [oai.MakeDeepSeekChatCompletionDeps].
 func answer(registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
 	toSessionDeps := F.Bind23of3(session.MakeSessionDeps)(
-		tools.MakeRegistryToolDeps(registry),
+		tools.MakeRegistryToolDeps()(registry),
 		session.MakeLoopDeps(maxIterations),
 	)
 
-	// reuse session.Run unchanged under the provider's ChatCompletionDeps
-	runWith := F.Flow3(
+	return F.Flow5(
+		makeRequest(registry),
 		session.MakeSession,
 		session.Run(),
 		effect.Local[session.FinalResult](toSessionDeps),
-	)
-
-	// build the provider deps first, then run the loop against them
-	return F.Flow4(
-		makeRequest(registry),
-		runWith,
-		effect.ChainThunkK[oai.DeepSeekDeps, oai.ChatCompletionDeps, session.FinalResult],
-		reader.Read[effect.Effect[oai.DeepSeekDeps, session.FinalResult]](oai.MakeDeepSeekChatCompletionDeps()),
+		effect.LocalEffectK[session.FinalResult](F.Constant1[oai.DeepSeekDeps](oai.MakeDeepSeekChatCompletionDeps())),
 	)
 }
 
-// formatResult renders the final assistant message followed by the
-// accumulated token usage.
-func formatResult(final session.FinalResult) string {
-	usageLens := session.MakeSessionusageLens()
-	iterLens := session.MakeSessioniterationsLens()
-
+// finalContent extracts the content of the first choice of a completion, or
+// the empty string.
+func finalContent() func(*openai.ChatCompletion) string {
 	content := F.Pipe2(
 		oai.MakeChatCompletionChoicesRefLens(),
 		L.ComposePrism[*openai.ChatCompletion](P.Head[openai.ChatCompletionChoice]()),
 		OL.Compose[*openai.ChatCompletion](oai.MakeChatCompletionChoiceMessageLens().Compose(oai.MakeChatCompletionMessageContentLens())),
 	)
 
-	usage := usageLens.Get(pair.Head(final))
+	return F.Flow2(
+		content.GetOption,
+		option.GetOrElse(F.Constant("")),
+	)
+}
+
+// sessionStats renders the iteration count and accumulated token usage of a
+// session. It is a leaf: one formatter over several fields.
+func sessionStats(s session.Session) string {
+	usage := session.MakeSessionusageLens().Get(s)
 
 	return fmt.Sprintf(
-		"%s\n\n[iterations: %d, prompt tokens: %d, completion tokens: %d, total tokens: %d]",
-		F.Pipe2(pair.Tail(final), content.GetOption, option.GetOrElse(F.Constant(""))),
-		iterLens.Get(pair.Head(final)),
+		"[iterations: %d, prompt tokens: %d, completion tokens: %d, total tokens: %d]",
+		session.MakeSessioniterationsLens().Get(s),
 		usage.PromptTokens,
 		usage.CompletionTokens,
 		usage.TotalTokens,
+	)
+}
+
+func joinParagraphs(stats, content string) string {
+	return content + "\n\n" + stats
+}
+
+// formatResult renders the final assistant message followed by the session
+// statistics.
+func formatResult() func(session.FinalResult) string {
+	return F.Flow2(
+		pair.BiMap(sessionStats, finalContent()),
+		pair.Paired(joinParagraphs),
 	)
 }
 
@@ -130,5 +145,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(formatResult(final))
+	fmt.Println(formatResult()(final))
 }
