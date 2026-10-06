@@ -81,3 +81,31 @@ func ReadLogFile() SeqKleisli[string, Record] {
 		decodeRecords(),
 	)
 }
+
+// LoadRecords reads every record of a JSON-lines log from an [io.Reader] into
+// a slice.
+//
+// Read and Load are the two ends of the package: the Read functions stream,
+// so that an operator such as [Requests] never materializes the log, while the
+// Load functions materialize it for the operations that need every record
+// before they can produce anything, such as [GroupTasks]. The first record
+// that does not decode fails the result.
+func LoadRecords() ioresult.Kleisli[io.Reader, []Record] {
+	return F.Flow2(
+		ReadRecords(),
+		iterresult.Collect[Record],
+	)
+}
+
+// LoadLogFile reads every record of the JSON-lines log file at a path into a
+// slice. See [LoadRecords] for how it differs from [ReadLogFile].
+//
+// Example:
+//
+//	tasks := F.Pipe2(path, LoadLogFile(), ioresult.ChainResultK(GroupTasks()))
+func LoadLogFile() ioresult.Kleisli[string, []Record] {
+	return F.Flow2(
+		ReadLogFile(),
+		iterresult.Collect[Record],
+	)
+}

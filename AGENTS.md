@@ -23,3 +23,72 @@ Build `Effect`s with the `effect` package's own combinators (`Asks`, `Map`, `Ap`
 and `Local` to reuse an existing `Effect` / `Kleisli` under a different environment. The full rules
 and examples are in the [`fp-go` skill, section *Composing `Effect[C, A]`*](.bob/skills/fp-go/SKILL.md#composing-effectc-a);
 [openai/request.go](openai/request.go) `ChatCompletion` is the worked example.
+
+### Closures over a pipeline's input
+
+A pipeline that reads its input in more than one place is a `reader.Reader[R, A]`, not a
+closure: `reader.Ap` for two independent reads, `reader.Chain` for a later one, and
+`reader.TraverseArray` to hand the environment to each element's reader (`reader.Read`
+belongs at the edge only). `reader.Reader[R, A]` is an alias for `func(R) A`, so the
+return type can be widened to it without touching a single call site. The rules and the
+worked example are in the [`fp-go` skill, section *Readers instead of closures over the
+input*](.bob/skills/fp-go/SKILL.md#readers-instead-of-closures-over-the-input);
+[replay/task.go](replay/task.go) `chunkAt` is that example.
+
+### Several readers over one environment
+
+A value whose fields are each read from the same input does not need an accumulator struct
+with generated lenses and do-notation. Curry the constructor (`F.Curry3`) and apply one
+reader per field with `readerresult.Ap`, naming the partial applications as type *aliases*
+(`=`) because `Ap` cannot infer them. Independent fields are applicative; a field computed
+from an earlier one is monadic and *does* want `Bind` and a lens. The rules are in the
+[`fp-go` skill, section *Several readers over one environment*](.bob/skills/fp-go/SKILL.md#several-readers-over-one-environment);
+[replay/task.go](replay/task.go) `turnOf` is the worked example.
+
+### Pure core, effect in the reader
+
+An operation that needs all of its input before it can produce anything is a pure function
+over a slice, not a `SeqResult` consumer returning an `IOResult`. Keep the effect in the
+reader that produces the slice. [replay/record.go](replay/record.go) is the pattern: the
+`Read*` functions stream (`SeqResult[Record]`, so an operator such as `Requests` never
+materializes the log) and the `Load*` functions materialize (`IOResult[[]Record]`), while
+[replay/task.go](replay/task.go) `GroupTasks` is a `result.Kleisli[[]Record, []Task]` that
+composes with either through `ioresult.ChainResultK`.
+
+### Combinators that don't exist, and what to use instead
+
+Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
+
+| Wanted | Doesn't exist | Use instead |
+|---|---|---|
+| split a slice into runs at a predicate | `array.Chunk`, `Split`, `GroupBy`, anything in `iter` (`A.Partition` exists but yields two groups, not consecutive runs) | build it as a reader (see *Closures over a pipeline's input*) |
+| `TakeWhile` / `DropWhile` | in `array` | `A.Slice(low, high)`, `A.SliceRight(n)` over indices |
+| distinct, first occurrence wins | `A.Distinct` | `A.Uniq(F.Identity[K])` |
+| drop the `None`s of a `[]Option[A]` | `A.Compact` | `option.CompactArray` |
+| pair each element with its successor | `A.Pairwise` | `A.Zip` over the slice and `A.SliceRight(1)` of it |
+| add context to a `Result`'s error | | `result.MapLeft[A](ER.OnError("task %q", id))`, which wraps with `%w` |
+| `Option[A]` to `Result[A]` | | `result.FromOption[A](ER.OnNone("..."))` |
+
+Before concluding that a combinator is missing, `go doc` the **whole** package: the ones
+that return an `Operator` sit in an indented block that `grep "^func"` skips.
+
+### Two build breaks worth avoiding
+
+- **A type parameter named `A`, `F`, `P`, `S`, `J` or `ER` shadows the package alias** for
+  the whole function body, so `func chunkAt[A any](…)` turns every `A.Map` inside it into
+  a compile error. Name type parameters `T`.
+- **A named slice type doesn't compose generically.** `json.RawMessage` is assignable to
+  `[]byte` in a direct call, but not through `F.Flow2` / `option.Chain`, where inference
+  sees two different types. Convert in a named leaf (`rawBytes` in
+  [replay/task.go](replay/task.go)).
+
+### Tooling
+
+- `mcp__fp-go__search_examples` fails with an FTS5 syntax error on any query containing a
+  comma, and has no entry for most combinators. For a signature,
+  `go doc github.com/IBM/fp-go/v2/<pkg>` on the pinned module is faster and authoritative.
+- `gofmt -l` lists nearly every file in the repository, including untouched ones: the
+  working tree is CRLF and the repository stores LF. Never run `gofmt -w` — it rewrites
+  every line of every file. Judge formatting from `gofmt -d` on the file you changed.
+- `runCodeActions.bat <dir>` (the cleanup in [PLAN.md](PLAN.md) rule 10) runs from
+  PowerShell, not from the Bash tool.

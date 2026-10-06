@@ -1,6 +1,6 @@
 ---
 name: fp-go
-description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the four rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
+description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the four rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, readers instead of closures over a pipeline's input (reader.Ap/Chain/TraverseArray), the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
 ---
 # fp-go — the rules for every code change, and the MCP server behind them
 
@@ -257,6 +257,125 @@ func validateLookup() thunk.Operator[LookupResponse, LookupResponse] {
 Point-free is not a goal in itself: if the composed version needs more helper types or a
 longer lambda than the plain one, keep the plain one and say why. That case is rare;
 check the MCP server for a combinator first.
+
+## Readers instead of closures over the input
+
+A pipeline that needs its input in more than one place is usually written as a closure
+over the argument. That closure is not a leaf: `reader.Reader[R, A]` **is** `func(R) A`
+(an alias, `reader/types.go`), so the value the closure captures is already the
+environment of a reader. Build the pipeline with the reader combinators instead and it
+stays point-free, with the same signature.
+
+| Shape inside the closure | Reader combinator |
+|---|---|
+| two steps read the same input, independently | `reader.Ap[B](fa)` applied to a `Reader[R, func(A) B]` |
+| a later step reads the input again | `reader.Chain(k)` with `k: A -> Reader[R, B]` |
+| every element of a slice becomes a value that reads the input | `reader.TraverseArray(k)` with `k: Kleisli[R, A, B]` |
+| the environment is already named | `reader.Read[A](r)` — a sign the pipeline should have been a reader |
+
+Worked example: [replay/task.go](../../../replay/task.go) `chunkAt` splits a slice into
+one chunk per element that matches a predicate. The boundaries (the matching indices,
+terminated by the size) and the slicing both read the same slice.
+
+```go
+// AVOID: a closure, because `as` is read three times
+func chunkAt[T any](pred Predicate[T]) func([]T) [][]T {
+	starts := A.FilterMapWithIndex(indexWhen(pred))
+	ranges := consecutiveRanges()
+
+	return func(as []T) [][]T {
+		return F.Pipe4(
+			as,
+			starts,
+			F.Bind2nd(A.Append[int], A.Size(as)),
+			ranges,
+			A.Map(F.Flow2(pair.Paired(A.Slice[T]), reader.Read[[]T](as))),
+		)
+	}
+}
+
+// PREFER: the slice is the environment of a reader
+func chunkBounds[T any](pred Predicate[T]) reader.Reader[[]T, []int] {
+	return F.Pipe1(
+		F.Flow2(A.Size[T], A.Push[int]),                         // Reader[[]T, Operator[int, int]]
+		reader.Ap[[]int](A.FilterMapWithIndex(indexWhen(pred))),
+	)
+}
+
+func chunkAt[T any](pred Predicate[T]) reader.Reader[[]T, [][]T] {
+	return F.Pipe1(
+		chunkBounds(pred),
+		reader.Chain(F.Flow2(
+			consecutiveRanges(),
+			reader.TraverseArray(pair.Paired(A.Slice[T])),        // Kleisli[[]T, Pair[int, int], []T]
+		)),
+	)
+}
+```
+
+What makes it work:
+
+- **An `Operator[A, B]` is a `Reader[[]A, []B]`.** `pair.Paired(A.Slice[T])` is therefore
+  already a `Kleisli[[]T, Pair[int, int], []T]`, and `reader.TraverseArray` hands it the
+  environment, so the `A.Map(F.Flow2(..., reader.Read(as)))` step disappears.
+- **`A.Push(a)` is the curried `A.Append(as, a)`.** Prefer it over
+  `F.Bind2nd(A.Append[A], a)`; look for the curried sibling before reaching for
+  `F.Bind1st` / `F.Bind2nd`.
+- **`reader.Reader[R, A]` is an alias**, so widening a return type from `func([]T) [][]T`
+  to `reader.Reader[[]T, [][]T]` changes no call site: `F.FlowN` and the `*.TraverseArray`
+  combinators keep inferring.
+- `consecutiveRanges` in the same file is the degenerate case of the applicative shape
+  (`reader.Ap` with `F.Identity` as the second reader); `chunkBounds` is the same shape
+  with a real one.
+
+Watch the empty case: `reader.TraverseArray` over an empty slice yields `nil` where
+`A.Map` yielded an empty slice, so tests comparing with `assert.Equal` expect `nil`.
+
+## Several readers over one environment
+
+When one value has several fields and each is read from the *same* environment, the
+reflex is an accumulator struct — `// fp-go:Lens`, `go generate`, `Do` / `ApS`. For
+independent fields that is more machinery than the job needs. Curry the constructor and
+apply one reader per field with the applicative; no struct, no lenses, no intermediate
+state.
+
+Worked example: [replay/task.go](../../../replay/task.go) `turnOf` builds a `Turn` out of
+three readers over the same chunk of records — the request, the last response and the tool
+invocations.
+
+```go
+// The partial applications of the curried constructor, in reverse order of
+// application. They must be ALIASES (`=`): a defined type is not assignable
+// from the function `F.Curry3` returns.
+type (
+	turnFromTools    = func([]ToolInvocation) Option[Turn]
+	turnFromResponse = func(Option[ChatResponse]) turnFromTools
+)
+
+func turnOf() ReaderResult[[]Record, Option[Turn]] {
+	return F.Pipe3(
+		readerresult.Of[[]Record](F.Curry3(completeTurn)),
+		readerresult.Ap[turnFromResponse](requestOf()),   // peels the 1st argument
+		readerresult.Ap[turnFromTools](responseOf()),     // peels the 2nd
+		readerresult.Ap[Option[Turn]](toolsOf()),         // peels the 3rd
+	)
+}
+```
+
+What makes it work:
+
+- **Each `Ap` peels one argument**, and its explicit type argument is what is *left* of the
+  curried function. `Ap[B, R, A]` cannot infer `B`, so name those leftovers as aliases;
+  spelled out they are unreadable and they change whenever an argument is added.
+- **A field that cannot fail still goes through `Ap`**, lifted into the monad at its own
+  leaf (`toolsOf` ends in `result.Of`). Don't special-case it.
+- **The constructor is the only leaf.** `completeTurn` takes the three decoded parts and
+  returns `Option[Turn]`, so "a chunk with no response is not a turn" is expressed once,
+  in a total function, instead of as a branch in the pipeline.
+
+Use `Bind` with do-notation and generated lenses **instead** when a later field is computed
+*from* an earlier one — that is what the accumulator struct is for. Independent fields are
+applicative; dependent fields are monadic.
 
 ## Composing `Effect[C, A]`
 
