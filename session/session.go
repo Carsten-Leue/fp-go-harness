@@ -8,7 +8,7 @@ import (
 	F "github.com/IBM/fp-go/v2/function"
 	I "github.com/IBM/fp-go/v2/identity"
 	N "github.com/IBM/fp-go/v2/number"
-	LP "github.com/IBM/fp-go/v2/optics/lens/prism"
+	L "github.com/IBM/fp-go/v2/optics/lens"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
 	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
@@ -37,6 +37,17 @@ type Session struct {
 type SessionDeps interface {
 	oai.ChatCompletionDeps
 	tools.ToolDeps
+	LoopDeps
+}
+
+type sessionDeps struct {
+	oai.ChatCompletionDeps
+	tools.ToolDeps
+	LoopDeps
+}
+
+func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps) SessionDeps {
+	return &sessionDeps{c, t, l}
 }
 
 type FinalResult = Pair[Session, *openai.ChatCompletion]
@@ -45,11 +56,6 @@ type NextStep = Trampoline[Session, FinalResult]
 
 func MakeSession(req openai.ChatCompletionNewParams) Session {
 	return Session{current: req}
-}
-
-// TODO move to library
-func headPrism[T any]() Prism[[]T, T] {
-	return P.MakePrism(A.Head[T], A.Of)
 }
 
 func isToolCallFinishReason() Predicate[string] {
@@ -88,7 +94,7 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 
 	firstFinishReason := F.Pipe2(
 		choicesLens,
-		LP.Compose[*openai.ChatCompletion](headPrism[openai.ChatCompletionChoice]()),
+		L.ComposePrism[*openai.ChatCompletion](P.Head[openai.ChatCompletionChoice]()),
 		OL.Compose[*openai.ChatCompletion](finishReasonLens),
 	)
 

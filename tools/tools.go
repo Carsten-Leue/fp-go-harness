@@ -10,7 +10,6 @@ import (
 	F "github.com/IBM/fp-go/v2/function"
 	J "github.com/IBM/fp-go/v2/json"
 	L "github.com/IBM/fp-go/v2/optics/lens"
-	LP "github.com/IBM/fp-go/v2/optics/lens/prism"
 	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
@@ -75,14 +74,6 @@ func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai
 	)
 }
 
-// TODO the missing helper
-func effectFromReaderResult[C, A any](rdr ReaderResult[C, A]) Effect[C, A] {
-	return F.Pipe1(
-		rdr,
-		reader.Map[C](thunk.FromResult[A]),
-	)
-}
-
 // MakeToolCall builds a Kleisli arrow that resolves and executes a single tool
 // call requested by the model. Given a ToolCaller registry, it looks up the
 // tool by name, invokes it with the call's arguments, and turns the outcome —
@@ -107,13 +98,13 @@ func MakeToolCall() effect.Kleisli[ToolDeps, openai.ChatCompletionMessageToolCal
 		reader.Map[openai.ChatCompletionMessageToolCallUnion](S.Format[string]("Unable to find tool '%s'.")),
 		readerresult.Asks,
 		readerresult.Chain(makeError),
-		effectFromReaderResult,
+		effect.FromReaderResult,
 	)
 
 	generalError := F.Flow3(
 		error.Error,
 		makeError,
-		effectFromReaderResult,
+		effect.FromReaderResult,
 	)
 
 	return F.Pipe1(
@@ -148,7 +139,7 @@ func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionCh
 
 	toolCallsFromChoiceOptional := F.Pipe1(
 		messageLens.Compose(toolCallsLens),
-		LP.Compose[openai.ChatCompletionChoice](P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion])),
+		L.ComposePrism[openai.ChatCompletionChoice](P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion])),
 	)
 
 	makeToolCalls := MakeToolCalls()

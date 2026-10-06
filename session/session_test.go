@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
@@ -23,8 +24,13 @@ import (
 // [*openai.ChatCompletionService] pointed at a local test server, and a
 // static tool registry.
 type stubSessionDeps struct {
-	svc      *openai.ChatCompletionService
-	toolCall ToolCaller
+	svc           *openai.ChatCompletionService
+	toolCall      ToolCaller
+	maxIterations int
+}
+
+func (d *stubSessionDeps) GetMaxIterations() int {
+	return d.maxIterations
 }
 
 func (d *stubSessionDeps) GetChatCompletionService() *openai.ChatCompletionService {
@@ -46,9 +52,21 @@ func (d *stubSessionDeps) GetToolCaller() ToolCaller {
 func makeStubSessionDeps(t *testing.T, response openai.ChatCompletion, registry map[string]tools.ToolCall) SessionDeps {
 	t.Helper()
 
+	return makeSequencedSessionDeps(t, []openai.ChatCompletion{response}, registry, 10)
+}
+
+// makeSequencedSessionDeps starts a test server that answers the n-th chat
+// completion request with responses[n], repeating the last response once the
+// sequence is exhausted.
+func makeSequencedSessionDeps(t *testing.T, responses []openai.ChatCompletion, registry map[string]tools.ToolCall, maxIterations int) SessionDeps {
+	t.Helper()
+
+	var calls atomic.Int64
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		idx := min(int(calls.Add(1))-1, len(responses)-1)
 		w.Header().Set("Content-Type", "application/json")
-		require.NoError(t, json.NewEncoder(w).Encode(response))
+		require.NoError(t, json.NewEncoder(w).Encode(responses[idx]))
 	}))
 	t.Cleanup(server.Close)
 
@@ -60,8 +78,9 @@ func makeStubSessionDeps(t *testing.T, response openai.ChatCompletion, registry 
 	caller := F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry)
 
 	return &stubSessionDeps{
-		svc:      &client.Chat.Completions,
-		toolCall: caller,
+		svc:           &client.Chat.Completions,
+		toolCall:      caller,
+		maxIterations: maxIterations,
 	}
 }
 
