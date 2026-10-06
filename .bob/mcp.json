@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "fp-go": {
+      "type": "stdio",
+      "command": "go",
+      "args": ["tool", "gen", "mcp", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "alwaysAllow": ["get_example", "search_examples", "use_skill", "list_skills"],
+      "disabled": false
+    }
+  }
+}
