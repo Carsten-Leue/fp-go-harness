@@ -13,6 +13,1920 @@ import (
 	time "time"
 )
 
+// ContentPartLenses provides [lenses] for accessing fields of [ContentPart]
+//
+// [lenses]: __lens.Lens
+type ContentPartLenses struct {
+	// Type is a [__lens.Lens] for the Type field of [ContentPart]
+	Type __lens.Lens[ContentPart, string]
+	// Text is a [__lens.Lens] for the Text field of [ContentPart]
+	Text __lens.Lens[ContentPart, string]
+	// ToolCallID is a [__lens.Lens] for the ToolCallID field of [ContentPart]
+	ToolCallID __lens.Lens[ContentPart, string]
+	// ToolName is a [__lens.Lens] for the ToolName field of [ContentPart]
+	ToolName __lens.Lens[ContentPart, string]
+	// Input is a [__lens.Lens] for the Input field of [ContentPart]
+	Input __lens.Lens[ContentPart, encoding_json.RawMessage]
+	// TypeO is a [__lens_option.LensO] for the Type field of [ContentPart], treating the zero value as absent
+	TypeO __lens_option.LensO[ContentPart, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [ContentPart], treating the zero value as absent
+	TextO __lens_option.LensO[ContentPart, string]
+	// ToolCallIDO is a [__lens_option.LensO] for the ToolCallID field of [ContentPart], treating the zero value as absent
+	ToolCallIDO __lens_option.LensO[ContentPart, string]
+	// ToolNameO is a [__lens_option.LensO] for the ToolName field of [ContentPart], treating the zero value as absent
+	ToolNameO __lens_option.LensO[ContentPart, string]
+}
+
+// ContentPartRefLenses provides [lenses] for accessing fields of [ContentPart] via a pointer to [ContentPart]
+//
+// [lenses]: __lens.Lens
+type ContentPartRefLenses struct {
+	// Type is a [__lens.Lens] for the Type field of [ContentPart] via a pointer receiver
+	Type __lens.Lens[*ContentPart, string]
+	// Text is a [__lens.Lens] for the Text field of [ContentPart] via a pointer receiver
+	Text __lens.Lens[*ContentPart, string]
+	// ToolCallID is a [__lens.Lens] for the ToolCallID field of [ContentPart] via a pointer receiver
+	ToolCallID __lens.Lens[*ContentPart, string]
+	// ToolName is a [__lens.Lens] for the ToolName field of [ContentPart] via a pointer receiver
+	ToolName __lens.Lens[*ContentPart, string]
+	// Input is a [__lens.Lens] for the Input field of [ContentPart] via a pointer receiver
+	Input __lens.Lens[*ContentPart, encoding_json.RawMessage]
+	// TypeO is a [__lens_option.LensO] for the Type field of [ContentPart] via a pointer receiver, treating the zero value as absent
+	TypeO __lens_option.LensO[*ContentPart, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [ContentPart] via a pointer receiver, treating the zero value as absent
+	TextO __lens_option.LensO[*ContentPart, string]
+	// ToolCallIDO is a [__lens_option.LensO] for the ToolCallID field of [ContentPart] via a pointer receiver, treating the zero value as absent
+	ToolCallIDO __lens_option.LensO[*ContentPart, string]
+	// ToolNameO is a [__lens_option.LensO] for the ToolName field of [ContentPart] via a pointer receiver, treating the zero value as absent
+	ToolNameO __lens_option.LensO[*ContentPart, string]
+}
+
+// ContentPartPrisms provides [prisms] for accessing fields of [ContentPart]
+//
+// [prisms]: __prism.Prism
+type ContentPartPrisms struct {
+	// Type is a [__prism.Prism] for the Type field of [ContentPart]
+	Type __prism.Prism[ContentPart, string]
+	// Text is a [__prism.Prism] for the Text field of [ContentPart]
+	Text __prism.Prism[ContentPart, string]
+	// ToolCallID is a [__prism.Prism] for the ToolCallID field of [ContentPart]
+	ToolCallID __prism.Prism[ContentPart, string]
+	// ToolName is a [__prism.Prism] for the ToolName field of [ContentPart]
+	ToolName __prism.Prism[ContentPart, string]
+	// Input is a [__prism.Prism] for the Input field of [ContentPart]
+	Input __prism.Prism[ContentPart, encoding_json.RawMessage]
+}
+
+// ContentPartRefPrisms provides [prisms] for accessing fields of [ContentPart] via a pointer to [ContentPart]
+//
+// [prisms]: __prism.Prism
+type ContentPartRefPrisms struct {
+	// Type is a [__prism.Prism] for the Type field of [ContentPart] via a pointer receiver
+	Type __prism.Prism[*ContentPart, string]
+	// Text is a [__prism.Prism] for the Text field of [ContentPart] via a pointer receiver
+	Text __prism.Prism[*ContentPart, string]
+	// ToolCallID is a [__prism.Prism] for the ToolCallID field of [ContentPart] via a pointer receiver
+	ToolCallID __prism.Prism[*ContentPart, string]
+	// ToolName is a [__prism.Prism] for the ToolName field of [ContentPart] via a pointer receiver
+	ToolName __prism.Prism[*ContentPart, string]
+	// Input is a [__prism.Prism] for the Input field of [ContentPart] via a pointer receiver
+	Input __prism.Prism[*ContentPart, encoding_json.RawMessage]
+}
+
+// MakeContentPartTypeLens returns a [__lens.Lens] for the Type field of [ContentPart]
+func MakeContentPartTypeLens() __lens.Lens[ContentPart, string] {
+	return __lens.MakeLensWithName(
+		func(s ContentPart) string { return s.Type },
+		func(s ContentPart, v string) ContentPart { s.Type = v; return s },
+		"ContentPart.Type",
+	)
+}
+
+// MakeContentPartTypeLensO returns a [__lens_option.LensO] for the Type field of [ContentPart]
+func MakeContentPartTypeLensO() __lens_option.LensO[ContentPart, string] {
+	return __lens_option.FromIso[ContentPart](__iso_option.FromZero[string]())(MakeContentPartTypeLens())
+}
+
+// MakeContentPartTypeRefLens returns a [__lens.Lens] for the Type field of [ContentPart] via a pointer receiver
+func MakeContentPartTypeRefLens() __lens.Lens[*ContentPart, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ContentPart) string { return s.Type },
+		func(s *ContentPart, v string) *ContentPart { s.Type = v; return s },
+		"(*ContentPart).Type",
+	)
+}
+
+// MakeContentPartTypeRefLensO returns a [__lens_option.LensO] for the Type field of [ContentPart] via a pointer receiver
+func MakeContentPartTypeRefLensO() __lens_option.LensO[*ContentPart, string] {
+	return __lens_option.FromIso[*ContentPart](__iso_option.FromZero[string]())(MakeContentPartTypeRefLens())
+}
+
+// MakeContentPartTypePrism returns a [__prism.Prism] for the Type field of [ContentPart]
+func MakeContentPartTypePrism() __prism.Prism[ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ContentPart) __option.Option[string] { return _fromNonZero(s.Type) },
+		func(v string) ContentPart {
+			return ContentPart{Type: v}
+		},
+		"ContentPart.Type",
+	)
+}
+
+// MakeContentPartTypeRefPrism returns a [__prism.Prism] for the Type field of [ContentPart] via a pointer receiver
+func MakeContentPartTypeRefPrism() __prism.Prism[*ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ContentPart) __option.Option[string] { return _fromNonZero(s.Type) },
+		func(v string) *ContentPart {
+			return &ContentPart{Type: v}
+		},
+		"ContentPart.Type",
+	)
+}
+
+// MakeContentPartTextLens returns a [__lens.Lens] for the Text field of [ContentPart]
+func MakeContentPartTextLens() __lens.Lens[ContentPart, string] {
+	return __lens.MakeLensWithName(
+		func(s ContentPart) string { return s.Text },
+		func(s ContentPart, v string) ContentPart { s.Text = v; return s },
+		"ContentPart.Text",
+	)
+}
+
+// MakeContentPartTextLensO returns a [__lens_option.LensO] for the Text field of [ContentPart]
+func MakeContentPartTextLensO() __lens_option.LensO[ContentPart, string] {
+	return __lens_option.FromIso[ContentPart](__iso_option.FromZero[string]())(MakeContentPartTextLens())
+}
+
+// MakeContentPartTextRefLens returns a [__lens.Lens] for the Text field of [ContentPart] via a pointer receiver
+func MakeContentPartTextRefLens() __lens.Lens[*ContentPart, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ContentPart) string { return s.Text },
+		func(s *ContentPart, v string) *ContentPart { s.Text = v; return s },
+		"(*ContentPart).Text",
+	)
+}
+
+// MakeContentPartTextRefLensO returns a [__lens_option.LensO] for the Text field of [ContentPart] via a pointer receiver
+func MakeContentPartTextRefLensO() __lens_option.LensO[*ContentPart, string] {
+	return __lens_option.FromIso[*ContentPart](__iso_option.FromZero[string]())(MakeContentPartTextRefLens())
+}
+
+// MakeContentPartTextPrism returns a [__prism.Prism] for the Text field of [ContentPart]
+func MakeContentPartTextPrism() __prism.Prism[ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ContentPart) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) ContentPart {
+			return ContentPart{Text: v}
+		},
+		"ContentPart.Text",
+	)
+}
+
+// MakeContentPartTextRefPrism returns a [__prism.Prism] for the Text field of [ContentPart] via a pointer receiver
+func MakeContentPartTextRefPrism() __prism.Prism[*ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ContentPart) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) *ContentPart {
+			return &ContentPart{Text: v}
+		},
+		"ContentPart.Text",
+	)
+}
+
+// MakeContentPartToolCallIDLens returns a [__lens.Lens] for the ToolCallID field of [ContentPart]
+func MakeContentPartToolCallIDLens() __lens.Lens[ContentPart, string] {
+	return __lens.MakeLensWithName(
+		func(s ContentPart) string { return s.ToolCallID },
+		func(s ContentPart, v string) ContentPart { s.ToolCallID = v; return s },
+		"ContentPart.ToolCallID",
+	)
+}
+
+// MakeContentPartToolCallIDLensO returns a [__lens_option.LensO] for the ToolCallID field of [ContentPart]
+func MakeContentPartToolCallIDLensO() __lens_option.LensO[ContentPart, string] {
+	return __lens_option.FromIso[ContentPart](__iso_option.FromZero[string]())(MakeContentPartToolCallIDLens())
+}
+
+// MakeContentPartToolCallIDRefLens returns a [__lens.Lens] for the ToolCallID field of [ContentPart] via a pointer receiver
+func MakeContentPartToolCallIDRefLens() __lens.Lens[*ContentPart, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ContentPart) string { return s.ToolCallID },
+		func(s *ContentPart, v string) *ContentPart { s.ToolCallID = v; return s },
+		"(*ContentPart).ToolCallID",
+	)
+}
+
+// MakeContentPartToolCallIDRefLensO returns a [__lens_option.LensO] for the ToolCallID field of [ContentPart] via a pointer receiver
+func MakeContentPartToolCallIDRefLensO() __lens_option.LensO[*ContentPart, string] {
+	return __lens_option.FromIso[*ContentPart](__iso_option.FromZero[string]())(MakeContentPartToolCallIDRefLens())
+}
+
+// MakeContentPartToolCallIDPrism returns a [__prism.Prism] for the ToolCallID field of [ContentPart]
+func MakeContentPartToolCallIDPrism() __prism.Prism[ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ContentPart) __option.Option[string] { return _fromNonZero(s.ToolCallID) },
+		func(v string) ContentPart {
+			return ContentPart{ToolCallID: v}
+		},
+		"ContentPart.ToolCallID",
+	)
+}
+
+// MakeContentPartToolCallIDRefPrism returns a [__prism.Prism] for the ToolCallID field of [ContentPart] via a pointer receiver
+func MakeContentPartToolCallIDRefPrism() __prism.Prism[*ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ContentPart) __option.Option[string] { return _fromNonZero(s.ToolCallID) },
+		func(v string) *ContentPart {
+			return &ContentPart{ToolCallID: v}
+		},
+		"ContentPart.ToolCallID",
+	)
+}
+
+// MakeContentPartToolNameLens returns a [__lens.Lens] for the ToolName field of [ContentPart]
+func MakeContentPartToolNameLens() __lens.Lens[ContentPart, string] {
+	return __lens.MakeLensWithName(
+		func(s ContentPart) string { return s.ToolName },
+		func(s ContentPart, v string) ContentPart { s.ToolName = v; return s },
+		"ContentPart.ToolName",
+	)
+}
+
+// MakeContentPartToolNameLensO returns a [__lens_option.LensO] for the ToolName field of [ContentPart]
+func MakeContentPartToolNameLensO() __lens_option.LensO[ContentPart, string] {
+	return __lens_option.FromIso[ContentPart](__iso_option.FromZero[string]())(MakeContentPartToolNameLens())
+}
+
+// MakeContentPartToolNameRefLens returns a [__lens.Lens] for the ToolName field of [ContentPart] via a pointer receiver
+func MakeContentPartToolNameRefLens() __lens.Lens[*ContentPart, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ContentPart) string { return s.ToolName },
+		func(s *ContentPart, v string) *ContentPart { s.ToolName = v; return s },
+		"(*ContentPart).ToolName",
+	)
+}
+
+// MakeContentPartToolNameRefLensO returns a [__lens_option.LensO] for the ToolName field of [ContentPart] via a pointer receiver
+func MakeContentPartToolNameRefLensO() __lens_option.LensO[*ContentPart, string] {
+	return __lens_option.FromIso[*ContentPart](__iso_option.FromZero[string]())(MakeContentPartToolNameRefLens())
+}
+
+// MakeContentPartToolNamePrism returns a [__prism.Prism] for the ToolName field of [ContentPart]
+func MakeContentPartToolNamePrism() __prism.Prism[ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ContentPart) __option.Option[string] { return _fromNonZero(s.ToolName) },
+		func(v string) ContentPart {
+			return ContentPart{ToolName: v}
+		},
+		"ContentPart.ToolName",
+	)
+}
+
+// MakeContentPartToolNameRefPrism returns a [__prism.Prism] for the ToolName field of [ContentPart] via a pointer receiver
+func MakeContentPartToolNameRefPrism() __prism.Prism[*ContentPart, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ContentPart) __option.Option[string] { return _fromNonZero(s.ToolName) },
+		func(v string) *ContentPart {
+			return &ContentPart{ToolName: v}
+		},
+		"ContentPart.ToolName",
+	)
+}
+
+// MakeContentPartInputLens returns a [__lens.Lens] for the Input field of [ContentPart]
+func MakeContentPartInputLens() __lens.Lens[ContentPart, encoding_json.RawMessage] {
+	return __lens.MakeLensWithName(
+		func(s ContentPart) encoding_json.RawMessage { return s.Input },
+		func(s ContentPart, v encoding_json.RawMessage) ContentPart { s.Input = v; return s },
+		"ContentPart.Input",
+	)
+}
+
+// MakeContentPartInputRefLens returns a [__lens.Lens] for the Input field of [ContentPart] via a pointer receiver
+func MakeContentPartInputRefLens() __lens.Lens[*ContentPart, encoding_json.RawMessage] {
+	return __lens.MakeLensRefWithName(
+		func(s *ContentPart) encoding_json.RawMessage { return s.Input },
+		func(s *ContentPart, v encoding_json.RawMessage) *ContentPart { s.Input = v; return s },
+		"(*ContentPart).Input",
+	)
+}
+
+// MakeContentPartInputPrism returns a [__prism.Prism] for the Input field of [ContentPart]
+func MakeContentPartInputPrism() __prism.Prism[ContentPart, encoding_json.RawMessage] {
+	return __prism.MakePrismWithName(
+		func(s ContentPart) __option.Option[encoding_json.RawMessage] { return __option.Some(s.Input) },
+		func(v encoding_json.RawMessage) ContentPart {
+			return ContentPart{Input: v}
+		},
+		"ContentPart.Input",
+	)
+}
+
+// MakeContentPartInputRefPrism returns a [__prism.Prism] for the Input field of [ContentPart] via a pointer receiver
+func MakeContentPartInputRefPrism() __prism.Prism[*ContentPart, encoding_json.RawMessage] {
+	return __prism.MakePrismWithName(
+		func(s *ContentPart) __option.Option[encoding_json.RawMessage] { return __option.Some(s.Input) },
+		func(v encoding_json.RawMessage) *ContentPart {
+			return &ContentPart{Input: v}
+		},
+		"ContentPart.Input",
+	)
+}
+
+// MakeContentPartLenses creates a new [ContentPartLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeContentPartLenses() ContentPartLenses {
+	return ContentPartLenses{
+		// mandatory lenses
+		Type:       MakeContentPartTypeLens(),
+		Text:       MakeContentPartTextLens(),
+		ToolCallID: MakeContentPartToolCallIDLens(),
+		ToolName:   MakeContentPartToolNameLens(),
+		Input:      MakeContentPartInputLens(),
+		// optional lenses
+		TypeO:       MakeContentPartTypeLensO(),
+		TextO:       MakeContentPartTextLensO(),
+		ToolCallIDO: MakeContentPartToolCallIDLensO(),
+		ToolNameO:   MakeContentPartToolNameLensO(),
+	}
+}
+
+// MakeContentPartRefLenses creates a new [ContentPartRefLenses] with [lenses] for all fields via a pointer to [ContentPart]
+//
+// [lenses]: __lens.Lens
+func MakeContentPartRefLenses() ContentPartRefLenses {
+	return ContentPartRefLenses{
+		// mandatory lenses
+		Type:       MakeContentPartTypeRefLens(),
+		Text:       MakeContentPartTextRefLens(),
+		ToolCallID: MakeContentPartToolCallIDRefLens(),
+		ToolName:   MakeContentPartToolNameRefLens(),
+		Input:      MakeContentPartInputRefLens(),
+		// optional lenses
+		TypeO:       MakeContentPartTypeRefLensO(),
+		TextO:       MakeContentPartTextRefLensO(),
+		ToolCallIDO: MakeContentPartToolCallIDRefLensO(),
+		ToolNameO:   MakeContentPartToolNameRefLensO(),
+	}
+}
+
+// MakeContentPartPrisms creates a new [ContentPartPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeContentPartPrisms() ContentPartPrisms {
+	return ContentPartPrisms{
+		Type:       MakeContentPartTypePrism(),
+		Text:       MakeContentPartTextPrism(),
+		ToolCallID: MakeContentPartToolCallIDPrism(),
+		ToolName:   MakeContentPartToolNamePrism(),
+		Input:      MakeContentPartInputPrism(),
+	}
+}
+
+// MakeContentPartRefPrisms creates a new [ContentPartRefPrisms] with [prisms] for all fields via a pointer to [ContentPart]
+//
+// [prisms]: __prism.Prism
+func MakeContentPartRefPrisms() ContentPartRefPrisms {
+	return ContentPartRefPrisms{
+		Type:       MakeContentPartTypeRefPrism(),
+		Text:       MakeContentPartTextRefPrism(),
+		ToolCallID: MakeContentPartToolCallIDRefPrism(),
+		ToolName:   MakeContentPartToolNameRefPrism(),
+		Input:      MakeContentPartInputRefPrism(),
+	}
+}
+
+// ResponseMessageLenses provides [lenses] for accessing fields of [ResponseMessage]
+//
+// [lenses]: __lens.Lens
+type ResponseMessageLenses struct {
+	// Role is a [__lens.Lens] for the Role field of [ResponseMessage]
+	Role __lens.Lens[ResponseMessage, string]
+	// Content is a [__lens.Lens] for the Content field of [ResponseMessage]
+	Content __lens.Lens[ResponseMessage, []ContentPart]
+	// RoleO is a [__lens_option.LensO] for the Role field of [ResponseMessage], treating the zero value as absent
+	RoleO __lens_option.LensO[ResponseMessage, string]
+}
+
+// ResponseMessageRefLenses provides [lenses] for accessing fields of [ResponseMessage] via a pointer to [ResponseMessage]
+//
+// [lenses]: __lens.Lens
+type ResponseMessageRefLenses struct {
+	// Role is a [__lens.Lens] for the Role field of [ResponseMessage] via a pointer receiver
+	Role __lens.Lens[*ResponseMessage, string]
+	// Content is a [__lens.Lens] for the Content field of [ResponseMessage] via a pointer receiver
+	Content __lens.Lens[*ResponseMessage, []ContentPart]
+	// RoleO is a [__lens_option.LensO] for the Role field of [ResponseMessage] via a pointer receiver, treating the zero value as absent
+	RoleO __lens_option.LensO[*ResponseMessage, string]
+}
+
+// ResponseMessagePrisms provides [prisms] for accessing fields of [ResponseMessage]
+//
+// [prisms]: __prism.Prism
+type ResponseMessagePrisms struct {
+	// Role is a [__prism.Prism] for the Role field of [ResponseMessage]
+	Role __prism.Prism[ResponseMessage, string]
+	// Content is a [__prism.Prism] for the Content field of [ResponseMessage]
+	Content __prism.Prism[ResponseMessage, []ContentPart]
+}
+
+// ResponseMessageRefPrisms provides [prisms] for accessing fields of [ResponseMessage] via a pointer to [ResponseMessage]
+//
+// [prisms]: __prism.Prism
+type ResponseMessageRefPrisms struct {
+	// Role is a [__prism.Prism] for the Role field of [ResponseMessage] via a pointer receiver
+	Role __prism.Prism[*ResponseMessage, string]
+	// Content is a [__prism.Prism] for the Content field of [ResponseMessage] via a pointer receiver
+	Content __prism.Prism[*ResponseMessage, []ContentPart]
+}
+
+// MakeResponseMessageRoleLens returns a [__lens.Lens] for the Role field of [ResponseMessage]
+func MakeResponseMessageRoleLens() __lens.Lens[ResponseMessage, string] {
+	return __lens.MakeLensWithName(
+		func(s ResponseMessage) string { return s.Role },
+		func(s ResponseMessage, v string) ResponseMessage { s.Role = v; return s },
+		"ResponseMessage.Role",
+	)
+}
+
+// MakeResponseMessageRoleLensO returns a [__lens_option.LensO] for the Role field of [ResponseMessage]
+func MakeResponseMessageRoleLensO() __lens_option.LensO[ResponseMessage, string] {
+	return __lens_option.FromIso[ResponseMessage](__iso_option.FromZero[string]())(MakeResponseMessageRoleLens())
+}
+
+// MakeResponseMessageRoleRefLens returns a [__lens.Lens] for the Role field of [ResponseMessage] via a pointer receiver
+func MakeResponseMessageRoleRefLens() __lens.Lens[*ResponseMessage, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ResponseMessage) string { return s.Role },
+		func(s *ResponseMessage, v string) *ResponseMessage { s.Role = v; return s },
+		"(*ResponseMessage).Role",
+	)
+}
+
+// MakeResponseMessageRoleRefLensO returns a [__lens_option.LensO] for the Role field of [ResponseMessage] via a pointer receiver
+func MakeResponseMessageRoleRefLensO() __lens_option.LensO[*ResponseMessage, string] {
+	return __lens_option.FromIso[*ResponseMessage](__iso_option.FromZero[string]())(MakeResponseMessageRoleRefLens())
+}
+
+// MakeResponseMessageRolePrism returns a [__prism.Prism] for the Role field of [ResponseMessage]
+func MakeResponseMessageRolePrism() __prism.Prism[ResponseMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ResponseMessage) __option.Option[string] { return _fromNonZero(s.Role) },
+		func(v string) ResponseMessage {
+			return ResponseMessage{Role: v}
+		},
+		"ResponseMessage.Role",
+	)
+}
+
+// MakeResponseMessageRoleRefPrism returns a [__prism.Prism] for the Role field of [ResponseMessage] via a pointer receiver
+func MakeResponseMessageRoleRefPrism() __prism.Prism[*ResponseMessage, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ResponseMessage) __option.Option[string] { return _fromNonZero(s.Role) },
+		func(v string) *ResponseMessage {
+			return &ResponseMessage{Role: v}
+		},
+		"ResponseMessage.Role",
+	)
+}
+
+// MakeResponseMessageContentLens returns a [__lens.Lens] for the Content field of [ResponseMessage]
+func MakeResponseMessageContentLens() __lens.Lens[ResponseMessage, []ContentPart] {
+	return __lens.MakeLensWithName(
+		func(s ResponseMessage) []ContentPart { return s.Content },
+		func(s ResponseMessage, v []ContentPart) ResponseMessage { s.Content = v; return s },
+		"ResponseMessage.Content",
+	)
+}
+
+// MakeResponseMessageContentRefLens returns a [__lens.Lens] for the Content field of [ResponseMessage] via a pointer receiver
+func MakeResponseMessageContentRefLens() __lens.Lens[*ResponseMessage, []ContentPart] {
+	return __lens.MakeLensRefWithName(
+		func(s *ResponseMessage) []ContentPart { return s.Content },
+		func(s *ResponseMessage, v []ContentPart) *ResponseMessage { s.Content = v; return s },
+		"(*ResponseMessage).Content",
+	)
+}
+
+// MakeResponseMessageContentPrism returns a [__prism.Prism] for the Content field of [ResponseMessage]
+func MakeResponseMessageContentPrism() __prism.Prism[ResponseMessage, []ContentPart] {
+	return __prism.MakePrismWithName(
+		func(s ResponseMessage) __option.Option[[]ContentPart] { return __option.Some(s.Content) },
+		func(v []ContentPart) ResponseMessage {
+			return ResponseMessage{Content: v}
+		},
+		"ResponseMessage.Content",
+	)
+}
+
+// MakeResponseMessageContentRefPrism returns a [__prism.Prism] for the Content field of [ResponseMessage] via a pointer receiver
+func MakeResponseMessageContentRefPrism() __prism.Prism[*ResponseMessage, []ContentPart] {
+	return __prism.MakePrismWithName(
+		func(s *ResponseMessage) __option.Option[[]ContentPart] { return __option.Some(s.Content) },
+		func(v []ContentPart) *ResponseMessage {
+			return &ResponseMessage{Content: v}
+		},
+		"ResponseMessage.Content",
+	)
+}
+
+// MakeResponseMessageLenses creates a new [ResponseMessageLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeResponseMessageLenses() ResponseMessageLenses {
+	return ResponseMessageLenses{
+		// mandatory lenses
+		Role:    MakeResponseMessageRoleLens(),
+		Content: MakeResponseMessageContentLens(),
+		// optional lenses
+		RoleO: MakeResponseMessageRoleLensO(),
+	}
+}
+
+// MakeResponseMessageRefLenses creates a new [ResponseMessageRefLenses] with [lenses] for all fields via a pointer to [ResponseMessage]
+//
+// [lenses]: __lens.Lens
+func MakeResponseMessageRefLenses() ResponseMessageRefLenses {
+	return ResponseMessageRefLenses{
+		// mandatory lenses
+		Role:    MakeResponseMessageRoleRefLens(),
+		Content: MakeResponseMessageContentRefLens(),
+		// optional lenses
+		RoleO: MakeResponseMessageRoleRefLensO(),
+	}
+}
+
+// MakeResponseMessagePrisms creates a new [ResponseMessagePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeResponseMessagePrisms() ResponseMessagePrisms {
+	return ResponseMessagePrisms{
+		Role:    MakeResponseMessageRolePrism(),
+		Content: MakeResponseMessageContentPrism(),
+	}
+}
+
+// MakeResponseMessageRefPrisms creates a new [ResponseMessageRefPrisms] with [prisms] for all fields via a pointer to [ResponseMessage]
+//
+// [prisms]: __prism.Prism
+func MakeResponseMessageRefPrisms() ResponseMessageRefPrisms {
+	return ResponseMessageRefPrisms{
+		Role:    MakeResponseMessageRoleRefPrism(),
+		Content: MakeResponseMessageContentRefPrism(),
+	}
+}
+
+// InputTokenDetailsLenses provides [lenses] for accessing fields of [InputTokenDetails]
+//
+// [lenses]: __lens.Lens
+type InputTokenDetailsLenses struct {
+	// NoCacheTokens is a [__lens.Lens] for the NoCacheTokens field of [InputTokenDetails]
+	NoCacheTokens __lens.Lens[InputTokenDetails, int64]
+	// CacheReadTokens is a [__lens.Lens] for the CacheReadTokens field of [InputTokenDetails]
+	CacheReadTokens __lens.Lens[InputTokenDetails, int64]
+	// NoCacheTokensO is a [__lens_option.LensO] for the NoCacheTokens field of [InputTokenDetails], treating the zero value as absent
+	NoCacheTokensO __lens_option.LensO[InputTokenDetails, int64]
+	// CacheReadTokensO is a [__lens_option.LensO] for the CacheReadTokens field of [InputTokenDetails], treating the zero value as absent
+	CacheReadTokensO __lens_option.LensO[InputTokenDetails, int64]
+}
+
+// InputTokenDetailsRefLenses provides [lenses] for accessing fields of [InputTokenDetails] via a pointer to [InputTokenDetails]
+//
+// [lenses]: __lens.Lens
+type InputTokenDetailsRefLenses struct {
+	// NoCacheTokens is a [__lens.Lens] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver
+	NoCacheTokens __lens.Lens[*InputTokenDetails, int64]
+	// CacheReadTokens is a [__lens.Lens] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver
+	CacheReadTokens __lens.Lens[*InputTokenDetails, int64]
+	// NoCacheTokensO is a [__lens_option.LensO] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver, treating the zero value as absent
+	NoCacheTokensO __lens_option.LensO[*InputTokenDetails, int64]
+	// CacheReadTokensO is a [__lens_option.LensO] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver, treating the zero value as absent
+	CacheReadTokensO __lens_option.LensO[*InputTokenDetails, int64]
+}
+
+// InputTokenDetailsPrisms provides [prisms] for accessing fields of [InputTokenDetails]
+//
+// [prisms]: __prism.Prism
+type InputTokenDetailsPrisms struct {
+	// NoCacheTokens is a [__prism.Prism] for the NoCacheTokens field of [InputTokenDetails]
+	NoCacheTokens __prism.Prism[InputTokenDetails, int64]
+	// CacheReadTokens is a [__prism.Prism] for the CacheReadTokens field of [InputTokenDetails]
+	CacheReadTokens __prism.Prism[InputTokenDetails, int64]
+}
+
+// InputTokenDetailsRefPrisms provides [prisms] for accessing fields of [InputTokenDetails] via a pointer to [InputTokenDetails]
+//
+// [prisms]: __prism.Prism
+type InputTokenDetailsRefPrisms struct {
+	// NoCacheTokens is a [__prism.Prism] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver
+	NoCacheTokens __prism.Prism[*InputTokenDetails, int64]
+	// CacheReadTokens is a [__prism.Prism] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver
+	CacheReadTokens __prism.Prism[*InputTokenDetails, int64]
+}
+
+// MakeInputTokenDetailsNoCacheTokensLens returns a [__lens.Lens] for the NoCacheTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsNoCacheTokensLens() __lens.Lens[InputTokenDetails, int64] {
+	return __lens.MakeLensWithName(
+		func(s InputTokenDetails) int64 { return s.NoCacheTokens },
+		func(s InputTokenDetails, v int64) InputTokenDetails { s.NoCacheTokens = v; return s },
+		"InputTokenDetails.NoCacheTokens",
+	)
+}
+
+// MakeInputTokenDetailsNoCacheTokensLensO returns a [__lens_option.LensO] for the NoCacheTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsNoCacheTokensLensO() __lens_option.LensO[InputTokenDetails, int64] {
+	return __lens_option.FromIso[InputTokenDetails](__iso_option.FromZero[int64]())(MakeInputTokenDetailsNoCacheTokensLens())
+}
+
+// MakeInputTokenDetailsNoCacheTokensRefLens returns a [__lens.Lens] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsNoCacheTokensRefLens() __lens.Lens[*InputTokenDetails, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InputTokenDetails) int64 { return s.NoCacheTokens },
+		func(s *InputTokenDetails, v int64) *InputTokenDetails { s.NoCacheTokens = v; return s },
+		"(*InputTokenDetails).NoCacheTokens",
+	)
+}
+
+// MakeInputTokenDetailsNoCacheTokensRefLensO returns a [__lens_option.LensO] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsNoCacheTokensRefLensO() __lens_option.LensO[*InputTokenDetails, int64] {
+	return __lens_option.FromIso[*InputTokenDetails](__iso_option.FromZero[int64]())(MakeInputTokenDetailsNoCacheTokensRefLens())
+}
+
+// MakeInputTokenDetailsNoCacheTokensPrism returns a [__prism.Prism] for the NoCacheTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsNoCacheTokensPrism() __prism.Prism[InputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s InputTokenDetails) __option.Option[int64] { return _fromNonZero(s.NoCacheTokens) },
+		func(v int64) InputTokenDetails {
+			return InputTokenDetails{NoCacheTokens: v}
+		},
+		"InputTokenDetails.NoCacheTokens",
+	)
+}
+
+// MakeInputTokenDetailsNoCacheTokensRefPrism returns a [__prism.Prism] for the NoCacheTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsNoCacheTokensRefPrism() __prism.Prism[*InputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *InputTokenDetails) __option.Option[int64] { return _fromNonZero(s.NoCacheTokens) },
+		func(v int64) *InputTokenDetails {
+			return &InputTokenDetails{NoCacheTokens: v}
+		},
+		"InputTokenDetails.NoCacheTokens",
+	)
+}
+
+// MakeInputTokenDetailsCacheReadTokensLens returns a [__lens.Lens] for the CacheReadTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsCacheReadTokensLens() __lens.Lens[InputTokenDetails, int64] {
+	return __lens.MakeLensWithName(
+		func(s InputTokenDetails) int64 { return s.CacheReadTokens },
+		func(s InputTokenDetails, v int64) InputTokenDetails { s.CacheReadTokens = v; return s },
+		"InputTokenDetails.CacheReadTokens",
+	)
+}
+
+// MakeInputTokenDetailsCacheReadTokensLensO returns a [__lens_option.LensO] for the CacheReadTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsCacheReadTokensLensO() __lens_option.LensO[InputTokenDetails, int64] {
+	return __lens_option.FromIso[InputTokenDetails](__iso_option.FromZero[int64]())(MakeInputTokenDetailsCacheReadTokensLens())
+}
+
+// MakeInputTokenDetailsCacheReadTokensRefLens returns a [__lens.Lens] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsCacheReadTokensRefLens() __lens.Lens[*InputTokenDetails, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InputTokenDetails) int64 { return s.CacheReadTokens },
+		func(s *InputTokenDetails, v int64) *InputTokenDetails { s.CacheReadTokens = v; return s },
+		"(*InputTokenDetails).CacheReadTokens",
+	)
+}
+
+// MakeInputTokenDetailsCacheReadTokensRefLensO returns a [__lens_option.LensO] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsCacheReadTokensRefLensO() __lens_option.LensO[*InputTokenDetails, int64] {
+	return __lens_option.FromIso[*InputTokenDetails](__iso_option.FromZero[int64]())(MakeInputTokenDetailsCacheReadTokensRefLens())
+}
+
+// MakeInputTokenDetailsCacheReadTokensPrism returns a [__prism.Prism] for the CacheReadTokens field of [InputTokenDetails]
+func MakeInputTokenDetailsCacheReadTokensPrism() __prism.Prism[InputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s InputTokenDetails) __option.Option[int64] { return _fromNonZero(s.CacheReadTokens) },
+		func(v int64) InputTokenDetails {
+			return InputTokenDetails{CacheReadTokens: v}
+		},
+		"InputTokenDetails.CacheReadTokens",
+	)
+}
+
+// MakeInputTokenDetailsCacheReadTokensRefPrism returns a [__prism.Prism] for the CacheReadTokens field of [InputTokenDetails] via a pointer receiver
+func MakeInputTokenDetailsCacheReadTokensRefPrism() __prism.Prism[*InputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *InputTokenDetails) __option.Option[int64] { return _fromNonZero(s.CacheReadTokens) },
+		func(v int64) *InputTokenDetails {
+			return &InputTokenDetails{CacheReadTokens: v}
+		},
+		"InputTokenDetails.CacheReadTokens",
+	)
+}
+
+// MakeInputTokenDetailsLenses creates a new [InputTokenDetailsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeInputTokenDetailsLenses() InputTokenDetailsLenses {
+	return InputTokenDetailsLenses{
+		// mandatory lenses
+		NoCacheTokens:   MakeInputTokenDetailsNoCacheTokensLens(),
+		CacheReadTokens: MakeInputTokenDetailsCacheReadTokensLens(),
+		// optional lenses
+		NoCacheTokensO:   MakeInputTokenDetailsNoCacheTokensLensO(),
+		CacheReadTokensO: MakeInputTokenDetailsCacheReadTokensLensO(),
+	}
+}
+
+// MakeInputTokenDetailsRefLenses creates a new [InputTokenDetailsRefLenses] with [lenses] for all fields via a pointer to [InputTokenDetails]
+//
+// [lenses]: __lens.Lens
+func MakeInputTokenDetailsRefLenses() InputTokenDetailsRefLenses {
+	return InputTokenDetailsRefLenses{
+		// mandatory lenses
+		NoCacheTokens:   MakeInputTokenDetailsNoCacheTokensRefLens(),
+		CacheReadTokens: MakeInputTokenDetailsCacheReadTokensRefLens(),
+		// optional lenses
+		NoCacheTokensO:   MakeInputTokenDetailsNoCacheTokensRefLensO(),
+		CacheReadTokensO: MakeInputTokenDetailsCacheReadTokensRefLensO(),
+	}
+}
+
+// MakeInputTokenDetailsPrisms creates a new [InputTokenDetailsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeInputTokenDetailsPrisms() InputTokenDetailsPrisms {
+	return InputTokenDetailsPrisms{
+		NoCacheTokens:   MakeInputTokenDetailsNoCacheTokensPrism(),
+		CacheReadTokens: MakeInputTokenDetailsCacheReadTokensPrism(),
+	}
+}
+
+// MakeInputTokenDetailsRefPrisms creates a new [InputTokenDetailsRefPrisms] with [prisms] for all fields via a pointer to [InputTokenDetails]
+//
+// [prisms]: __prism.Prism
+func MakeInputTokenDetailsRefPrisms() InputTokenDetailsRefPrisms {
+	return InputTokenDetailsRefPrisms{
+		NoCacheTokens:   MakeInputTokenDetailsNoCacheTokensRefPrism(),
+		CacheReadTokens: MakeInputTokenDetailsCacheReadTokensRefPrism(),
+	}
+}
+
+// OutputTokenDetailsLenses provides [lenses] for accessing fields of [OutputTokenDetails]
+//
+// [lenses]: __lens.Lens
+type OutputTokenDetailsLenses struct {
+	// TextTokens is a [__lens.Lens] for the TextTokens field of [OutputTokenDetails]
+	TextTokens __lens.Lens[OutputTokenDetails, int64]
+	// ReasoningTokens is a [__lens.Lens] for the ReasoningTokens field of [OutputTokenDetails]
+	ReasoningTokens __lens.Lens[OutputTokenDetails, int64]
+	// TextTokensO is a [__lens_option.LensO] for the TextTokens field of [OutputTokenDetails], treating the zero value as absent
+	TextTokensO __lens_option.LensO[OutputTokenDetails, int64]
+	// ReasoningTokensO is a [__lens_option.LensO] for the ReasoningTokens field of [OutputTokenDetails], treating the zero value as absent
+	ReasoningTokensO __lens_option.LensO[OutputTokenDetails, int64]
+}
+
+// OutputTokenDetailsRefLenses provides [lenses] for accessing fields of [OutputTokenDetails] via a pointer to [OutputTokenDetails]
+//
+// [lenses]: __lens.Lens
+type OutputTokenDetailsRefLenses struct {
+	// TextTokens is a [__lens.Lens] for the TextTokens field of [OutputTokenDetails] via a pointer receiver
+	TextTokens __lens.Lens[*OutputTokenDetails, int64]
+	// ReasoningTokens is a [__lens.Lens] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver
+	ReasoningTokens __lens.Lens[*OutputTokenDetails, int64]
+	// TextTokensO is a [__lens_option.LensO] for the TextTokens field of [OutputTokenDetails] via a pointer receiver, treating the zero value as absent
+	TextTokensO __lens_option.LensO[*OutputTokenDetails, int64]
+	// ReasoningTokensO is a [__lens_option.LensO] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver, treating the zero value as absent
+	ReasoningTokensO __lens_option.LensO[*OutputTokenDetails, int64]
+}
+
+// OutputTokenDetailsPrisms provides [prisms] for accessing fields of [OutputTokenDetails]
+//
+// [prisms]: __prism.Prism
+type OutputTokenDetailsPrisms struct {
+	// TextTokens is a [__prism.Prism] for the TextTokens field of [OutputTokenDetails]
+	TextTokens __prism.Prism[OutputTokenDetails, int64]
+	// ReasoningTokens is a [__prism.Prism] for the ReasoningTokens field of [OutputTokenDetails]
+	ReasoningTokens __prism.Prism[OutputTokenDetails, int64]
+}
+
+// OutputTokenDetailsRefPrisms provides [prisms] for accessing fields of [OutputTokenDetails] via a pointer to [OutputTokenDetails]
+//
+// [prisms]: __prism.Prism
+type OutputTokenDetailsRefPrisms struct {
+	// TextTokens is a [__prism.Prism] for the TextTokens field of [OutputTokenDetails] via a pointer receiver
+	TextTokens __prism.Prism[*OutputTokenDetails, int64]
+	// ReasoningTokens is a [__prism.Prism] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver
+	ReasoningTokens __prism.Prism[*OutputTokenDetails, int64]
+}
+
+// MakeOutputTokenDetailsTextTokensLens returns a [__lens.Lens] for the TextTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsTextTokensLens() __lens.Lens[OutputTokenDetails, int64] {
+	return __lens.MakeLensWithName(
+		func(s OutputTokenDetails) int64 { return s.TextTokens },
+		func(s OutputTokenDetails, v int64) OutputTokenDetails { s.TextTokens = v; return s },
+		"OutputTokenDetails.TextTokens",
+	)
+}
+
+// MakeOutputTokenDetailsTextTokensLensO returns a [__lens_option.LensO] for the TextTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsTextTokensLensO() __lens_option.LensO[OutputTokenDetails, int64] {
+	return __lens_option.FromIso[OutputTokenDetails](__iso_option.FromZero[int64]())(MakeOutputTokenDetailsTextTokensLens())
+}
+
+// MakeOutputTokenDetailsTextTokensRefLens returns a [__lens.Lens] for the TextTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsTextTokensRefLens() __lens.Lens[*OutputTokenDetails, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *OutputTokenDetails) int64 { return s.TextTokens },
+		func(s *OutputTokenDetails, v int64) *OutputTokenDetails { s.TextTokens = v; return s },
+		"(*OutputTokenDetails).TextTokens",
+	)
+}
+
+// MakeOutputTokenDetailsTextTokensRefLensO returns a [__lens_option.LensO] for the TextTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsTextTokensRefLensO() __lens_option.LensO[*OutputTokenDetails, int64] {
+	return __lens_option.FromIso[*OutputTokenDetails](__iso_option.FromZero[int64]())(MakeOutputTokenDetailsTextTokensRefLens())
+}
+
+// MakeOutputTokenDetailsTextTokensPrism returns a [__prism.Prism] for the TextTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsTextTokensPrism() __prism.Prism[OutputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s OutputTokenDetails) __option.Option[int64] { return _fromNonZero(s.TextTokens) },
+		func(v int64) OutputTokenDetails {
+			return OutputTokenDetails{TextTokens: v}
+		},
+		"OutputTokenDetails.TextTokens",
+	)
+}
+
+// MakeOutputTokenDetailsTextTokensRefPrism returns a [__prism.Prism] for the TextTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsTextTokensRefPrism() __prism.Prism[*OutputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *OutputTokenDetails) __option.Option[int64] { return _fromNonZero(s.TextTokens) },
+		func(v int64) *OutputTokenDetails {
+			return &OutputTokenDetails{TextTokens: v}
+		},
+		"OutputTokenDetails.TextTokens",
+	)
+}
+
+// MakeOutputTokenDetailsReasoningTokensLens returns a [__lens.Lens] for the ReasoningTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsReasoningTokensLens() __lens.Lens[OutputTokenDetails, int64] {
+	return __lens.MakeLensWithName(
+		func(s OutputTokenDetails) int64 { return s.ReasoningTokens },
+		func(s OutputTokenDetails, v int64) OutputTokenDetails { s.ReasoningTokens = v; return s },
+		"OutputTokenDetails.ReasoningTokens",
+	)
+}
+
+// MakeOutputTokenDetailsReasoningTokensLensO returns a [__lens_option.LensO] for the ReasoningTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsReasoningTokensLensO() __lens_option.LensO[OutputTokenDetails, int64] {
+	return __lens_option.FromIso[OutputTokenDetails](__iso_option.FromZero[int64]())(MakeOutputTokenDetailsReasoningTokensLens())
+}
+
+// MakeOutputTokenDetailsReasoningTokensRefLens returns a [__lens.Lens] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsReasoningTokensRefLens() __lens.Lens[*OutputTokenDetails, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *OutputTokenDetails) int64 { return s.ReasoningTokens },
+		func(s *OutputTokenDetails, v int64) *OutputTokenDetails { s.ReasoningTokens = v; return s },
+		"(*OutputTokenDetails).ReasoningTokens",
+	)
+}
+
+// MakeOutputTokenDetailsReasoningTokensRefLensO returns a [__lens_option.LensO] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsReasoningTokensRefLensO() __lens_option.LensO[*OutputTokenDetails, int64] {
+	return __lens_option.FromIso[*OutputTokenDetails](__iso_option.FromZero[int64]())(MakeOutputTokenDetailsReasoningTokensRefLens())
+}
+
+// MakeOutputTokenDetailsReasoningTokensPrism returns a [__prism.Prism] for the ReasoningTokens field of [OutputTokenDetails]
+func MakeOutputTokenDetailsReasoningTokensPrism() __prism.Prism[OutputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s OutputTokenDetails) __option.Option[int64] { return _fromNonZero(s.ReasoningTokens) },
+		func(v int64) OutputTokenDetails {
+			return OutputTokenDetails{ReasoningTokens: v}
+		},
+		"OutputTokenDetails.ReasoningTokens",
+	)
+}
+
+// MakeOutputTokenDetailsReasoningTokensRefPrism returns a [__prism.Prism] for the ReasoningTokens field of [OutputTokenDetails] via a pointer receiver
+func MakeOutputTokenDetailsReasoningTokensRefPrism() __prism.Prism[*OutputTokenDetails, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *OutputTokenDetails) __option.Option[int64] { return _fromNonZero(s.ReasoningTokens) },
+		func(v int64) *OutputTokenDetails {
+			return &OutputTokenDetails{ReasoningTokens: v}
+		},
+		"OutputTokenDetails.ReasoningTokens",
+	)
+}
+
+// MakeOutputTokenDetailsLenses creates a new [OutputTokenDetailsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeOutputTokenDetailsLenses() OutputTokenDetailsLenses {
+	return OutputTokenDetailsLenses{
+		// mandatory lenses
+		TextTokens:      MakeOutputTokenDetailsTextTokensLens(),
+		ReasoningTokens: MakeOutputTokenDetailsReasoningTokensLens(),
+		// optional lenses
+		TextTokensO:      MakeOutputTokenDetailsTextTokensLensO(),
+		ReasoningTokensO: MakeOutputTokenDetailsReasoningTokensLensO(),
+	}
+}
+
+// MakeOutputTokenDetailsRefLenses creates a new [OutputTokenDetailsRefLenses] with [lenses] for all fields via a pointer to [OutputTokenDetails]
+//
+// [lenses]: __lens.Lens
+func MakeOutputTokenDetailsRefLenses() OutputTokenDetailsRefLenses {
+	return OutputTokenDetailsRefLenses{
+		// mandatory lenses
+		TextTokens:      MakeOutputTokenDetailsTextTokensRefLens(),
+		ReasoningTokens: MakeOutputTokenDetailsReasoningTokensRefLens(),
+		// optional lenses
+		TextTokensO:      MakeOutputTokenDetailsTextTokensRefLensO(),
+		ReasoningTokensO: MakeOutputTokenDetailsReasoningTokensRefLensO(),
+	}
+}
+
+// MakeOutputTokenDetailsPrisms creates a new [OutputTokenDetailsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeOutputTokenDetailsPrisms() OutputTokenDetailsPrisms {
+	return OutputTokenDetailsPrisms{
+		TextTokens:      MakeOutputTokenDetailsTextTokensPrism(),
+		ReasoningTokens: MakeOutputTokenDetailsReasoningTokensPrism(),
+	}
+}
+
+// MakeOutputTokenDetailsRefPrisms creates a new [OutputTokenDetailsRefPrisms] with [prisms] for all fields via a pointer to [OutputTokenDetails]
+//
+// [prisms]: __prism.Prism
+func MakeOutputTokenDetailsRefPrisms() OutputTokenDetailsRefPrisms {
+	return OutputTokenDetailsRefPrisms{
+		TextTokens:      MakeOutputTokenDetailsTextTokensRefPrism(),
+		ReasoningTokens: MakeOutputTokenDetailsReasoningTokensRefPrism(),
+	}
+}
+
+// ResponseUsageLenses provides [lenses] for accessing fields of [ResponseUsage]
+//
+// [lenses]: __lens.Lens
+type ResponseUsageLenses struct {
+	// InputTokens is a [__lens.Lens] for the InputTokens field of [ResponseUsage]
+	InputTokens __lens.Lens[ResponseUsage, int64]
+	// InputTokenDetails is a [__lens.Lens] for the InputTokenDetails field of [ResponseUsage]
+	InputTokenDetails __lens.Lens[ResponseUsage, InputTokenDetails]
+	// OutputTokens is a [__lens.Lens] for the OutputTokens field of [ResponseUsage]
+	OutputTokens __lens.Lens[ResponseUsage, int64]
+	// OutputTokenDetails is a [__lens.Lens] for the OutputTokenDetails field of [ResponseUsage]
+	OutputTokenDetails __lens.Lens[ResponseUsage, OutputTokenDetails]
+	// TotalTokens is a [__lens.Lens] for the TotalTokens field of [ResponseUsage]
+	TotalTokens __lens.Lens[ResponseUsage, int64]
+	// InputTokensO is a [__lens_option.LensO] for the InputTokens field of [ResponseUsage], treating the zero value as absent
+	InputTokensO __lens_option.LensO[ResponseUsage, int64]
+	// OutputTokensO is a [__lens_option.LensO] for the OutputTokens field of [ResponseUsage], treating the zero value as absent
+	OutputTokensO __lens_option.LensO[ResponseUsage, int64]
+	// TotalTokensO is a [__lens_option.LensO] for the TotalTokens field of [ResponseUsage], treating the zero value as absent
+	TotalTokensO __lens_option.LensO[ResponseUsage, int64]
+}
+
+// ResponseUsageRefLenses provides [lenses] for accessing fields of [ResponseUsage] via a pointer to [ResponseUsage]
+//
+// [lenses]: __lens.Lens
+type ResponseUsageRefLenses struct {
+	// InputTokens is a [__lens.Lens] for the InputTokens field of [ResponseUsage] via a pointer receiver
+	InputTokens __lens.Lens[*ResponseUsage, int64]
+	// InputTokenDetails is a [__lens.Lens] for the InputTokenDetails field of [ResponseUsage] via a pointer receiver
+	InputTokenDetails __lens.Lens[*ResponseUsage, InputTokenDetails]
+	// OutputTokens is a [__lens.Lens] for the OutputTokens field of [ResponseUsage] via a pointer receiver
+	OutputTokens __lens.Lens[*ResponseUsage, int64]
+	// OutputTokenDetails is a [__lens.Lens] for the OutputTokenDetails field of [ResponseUsage] via a pointer receiver
+	OutputTokenDetails __lens.Lens[*ResponseUsage, OutputTokenDetails]
+	// TotalTokens is a [__lens.Lens] for the TotalTokens field of [ResponseUsage] via a pointer receiver
+	TotalTokens __lens.Lens[*ResponseUsage, int64]
+	// InputTokensO is a [__lens_option.LensO] for the InputTokens field of [ResponseUsage] via a pointer receiver, treating the zero value as absent
+	InputTokensO __lens_option.LensO[*ResponseUsage, int64]
+	// OutputTokensO is a [__lens_option.LensO] for the OutputTokens field of [ResponseUsage] via a pointer receiver, treating the zero value as absent
+	OutputTokensO __lens_option.LensO[*ResponseUsage, int64]
+	// TotalTokensO is a [__lens_option.LensO] for the TotalTokens field of [ResponseUsage] via a pointer receiver, treating the zero value as absent
+	TotalTokensO __lens_option.LensO[*ResponseUsage, int64]
+}
+
+// ResponseUsagePrisms provides [prisms] for accessing fields of [ResponseUsage]
+//
+// [prisms]: __prism.Prism
+type ResponseUsagePrisms struct {
+	// InputTokens is a [__prism.Prism] for the InputTokens field of [ResponseUsage]
+	InputTokens __prism.Prism[ResponseUsage, int64]
+	// InputTokenDetails is a [__prism.Prism] for the InputTokenDetails field of [ResponseUsage]
+	InputTokenDetails __prism.Prism[ResponseUsage, InputTokenDetails]
+	// OutputTokens is a [__prism.Prism] for the OutputTokens field of [ResponseUsage]
+	OutputTokens __prism.Prism[ResponseUsage, int64]
+	// OutputTokenDetails is a [__prism.Prism] for the OutputTokenDetails field of [ResponseUsage]
+	OutputTokenDetails __prism.Prism[ResponseUsage, OutputTokenDetails]
+	// TotalTokens is a [__prism.Prism] for the TotalTokens field of [ResponseUsage]
+	TotalTokens __prism.Prism[ResponseUsage, int64]
+}
+
+// ResponseUsageRefPrisms provides [prisms] for accessing fields of [ResponseUsage] via a pointer to [ResponseUsage]
+//
+// [prisms]: __prism.Prism
+type ResponseUsageRefPrisms struct {
+	// InputTokens is a [__prism.Prism] for the InputTokens field of [ResponseUsage] via a pointer receiver
+	InputTokens __prism.Prism[*ResponseUsage, int64]
+	// InputTokenDetails is a [__prism.Prism] for the InputTokenDetails field of [ResponseUsage] via a pointer receiver
+	InputTokenDetails __prism.Prism[*ResponseUsage, InputTokenDetails]
+	// OutputTokens is a [__prism.Prism] for the OutputTokens field of [ResponseUsage] via a pointer receiver
+	OutputTokens __prism.Prism[*ResponseUsage, int64]
+	// OutputTokenDetails is a [__prism.Prism] for the OutputTokenDetails field of [ResponseUsage] via a pointer receiver
+	OutputTokenDetails __prism.Prism[*ResponseUsage, OutputTokenDetails]
+	// TotalTokens is a [__prism.Prism] for the TotalTokens field of [ResponseUsage] via a pointer receiver
+	TotalTokens __prism.Prism[*ResponseUsage, int64]
+}
+
+// MakeResponseUsageInputTokensLens returns a [__lens.Lens] for the InputTokens field of [ResponseUsage]
+func MakeResponseUsageInputTokensLens() __lens.Lens[ResponseUsage, int64] {
+	return __lens.MakeLensWithName(
+		func(s ResponseUsage) int64 { return s.InputTokens },
+		func(s ResponseUsage, v int64) ResponseUsage { s.InputTokens = v; return s },
+		"ResponseUsage.InputTokens",
+	)
+}
+
+// MakeResponseUsageInputTokensLensO returns a [__lens_option.LensO] for the InputTokens field of [ResponseUsage]
+func MakeResponseUsageInputTokensLensO() __lens_option.LensO[ResponseUsage, int64] {
+	return __lens_option.FromIso[ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageInputTokensLens())
+}
+
+// MakeResponseUsageInputTokensRefLens returns a [__lens.Lens] for the InputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageInputTokensRefLens() __lens.Lens[*ResponseUsage, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ResponseUsage) int64 { return s.InputTokens },
+		func(s *ResponseUsage, v int64) *ResponseUsage { s.InputTokens = v; return s },
+		"(*ResponseUsage).InputTokens",
+	)
+}
+
+// MakeResponseUsageInputTokensRefLensO returns a [__lens_option.LensO] for the InputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageInputTokensRefLensO() __lens_option.LensO[*ResponseUsage, int64] {
+	return __lens_option.FromIso[*ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageInputTokensRefLens())
+}
+
+// MakeResponseUsageInputTokensPrism returns a [__prism.Prism] for the InputTokens field of [ResponseUsage]
+func MakeResponseUsageInputTokensPrism() __prism.Prism[ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s ResponseUsage) __option.Option[int64] { return _fromNonZero(s.InputTokens) },
+		func(v int64) ResponseUsage {
+			return ResponseUsage{InputTokens: v}
+		},
+		"ResponseUsage.InputTokens",
+	)
+}
+
+// MakeResponseUsageInputTokensRefPrism returns a [__prism.Prism] for the InputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageInputTokensRefPrism() __prism.Prism[*ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *ResponseUsage) __option.Option[int64] { return _fromNonZero(s.InputTokens) },
+		func(v int64) *ResponseUsage {
+			return &ResponseUsage{InputTokens: v}
+		},
+		"ResponseUsage.InputTokens",
+	)
+}
+
+// MakeResponseUsageInputTokenDetailsLens returns a [__lens.Lens] for the InputTokenDetails field of [ResponseUsage]
+func MakeResponseUsageInputTokenDetailsLens() __lens.Lens[ResponseUsage, InputTokenDetails] {
+	return __lens.MakeLensWithName(
+		func(s ResponseUsage) InputTokenDetails { return s.InputTokenDetails },
+		func(s ResponseUsage, v InputTokenDetails) ResponseUsage { s.InputTokenDetails = v; return s },
+		"ResponseUsage.InputTokenDetails",
+	)
+}
+
+// MakeResponseUsageInputTokenDetailsRefLens returns a [__lens.Lens] for the InputTokenDetails field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageInputTokenDetailsRefLens() __lens.Lens[*ResponseUsage, InputTokenDetails] {
+	return __lens.MakeLensRefWithName(
+		func(s *ResponseUsage) InputTokenDetails { return s.InputTokenDetails },
+		func(s *ResponseUsage, v InputTokenDetails) *ResponseUsage { s.InputTokenDetails = v; return s },
+		"(*ResponseUsage).InputTokenDetails",
+	)
+}
+
+// MakeResponseUsageInputTokenDetailsPrism returns a [__prism.Prism] for the InputTokenDetails field of [ResponseUsage]
+func MakeResponseUsageInputTokenDetailsPrism() __prism.Prism[ResponseUsage, InputTokenDetails] {
+	return __prism.MakePrismWithName(
+		func(s ResponseUsage) __option.Option[InputTokenDetails] { return __option.Some(s.InputTokenDetails) },
+		func(v InputTokenDetails) ResponseUsage {
+			return ResponseUsage{InputTokenDetails: v}
+		},
+		"ResponseUsage.InputTokenDetails",
+	)
+}
+
+// MakeResponseUsageInputTokenDetailsRefPrism returns a [__prism.Prism] for the InputTokenDetails field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageInputTokenDetailsRefPrism() __prism.Prism[*ResponseUsage, InputTokenDetails] {
+	return __prism.MakePrismWithName(
+		func(s *ResponseUsage) __option.Option[InputTokenDetails] { return __option.Some(s.InputTokenDetails) },
+		func(v InputTokenDetails) *ResponseUsage {
+			return &ResponseUsage{InputTokenDetails: v}
+		},
+		"ResponseUsage.InputTokenDetails",
+	)
+}
+
+// MakeResponseUsageOutputTokensLens returns a [__lens.Lens] for the OutputTokens field of [ResponseUsage]
+func MakeResponseUsageOutputTokensLens() __lens.Lens[ResponseUsage, int64] {
+	return __lens.MakeLensWithName(
+		func(s ResponseUsage) int64 { return s.OutputTokens },
+		func(s ResponseUsage, v int64) ResponseUsage { s.OutputTokens = v; return s },
+		"ResponseUsage.OutputTokens",
+	)
+}
+
+// MakeResponseUsageOutputTokensLensO returns a [__lens_option.LensO] for the OutputTokens field of [ResponseUsage]
+func MakeResponseUsageOutputTokensLensO() __lens_option.LensO[ResponseUsage, int64] {
+	return __lens_option.FromIso[ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageOutputTokensLens())
+}
+
+// MakeResponseUsageOutputTokensRefLens returns a [__lens.Lens] for the OutputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageOutputTokensRefLens() __lens.Lens[*ResponseUsage, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ResponseUsage) int64 { return s.OutputTokens },
+		func(s *ResponseUsage, v int64) *ResponseUsage { s.OutputTokens = v; return s },
+		"(*ResponseUsage).OutputTokens",
+	)
+}
+
+// MakeResponseUsageOutputTokensRefLensO returns a [__lens_option.LensO] for the OutputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageOutputTokensRefLensO() __lens_option.LensO[*ResponseUsage, int64] {
+	return __lens_option.FromIso[*ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageOutputTokensRefLens())
+}
+
+// MakeResponseUsageOutputTokensPrism returns a [__prism.Prism] for the OutputTokens field of [ResponseUsage]
+func MakeResponseUsageOutputTokensPrism() __prism.Prism[ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s ResponseUsage) __option.Option[int64] { return _fromNonZero(s.OutputTokens) },
+		func(v int64) ResponseUsage {
+			return ResponseUsage{OutputTokens: v}
+		},
+		"ResponseUsage.OutputTokens",
+	)
+}
+
+// MakeResponseUsageOutputTokensRefPrism returns a [__prism.Prism] for the OutputTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageOutputTokensRefPrism() __prism.Prism[*ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *ResponseUsage) __option.Option[int64] { return _fromNonZero(s.OutputTokens) },
+		func(v int64) *ResponseUsage {
+			return &ResponseUsage{OutputTokens: v}
+		},
+		"ResponseUsage.OutputTokens",
+	)
+}
+
+// MakeResponseUsageOutputTokenDetailsLens returns a [__lens.Lens] for the OutputTokenDetails field of [ResponseUsage]
+func MakeResponseUsageOutputTokenDetailsLens() __lens.Lens[ResponseUsage, OutputTokenDetails] {
+	return __lens.MakeLensWithName(
+		func(s ResponseUsage) OutputTokenDetails { return s.OutputTokenDetails },
+		func(s ResponseUsage, v OutputTokenDetails) ResponseUsage { s.OutputTokenDetails = v; return s },
+		"ResponseUsage.OutputTokenDetails",
+	)
+}
+
+// MakeResponseUsageOutputTokenDetailsRefLens returns a [__lens.Lens] for the OutputTokenDetails field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageOutputTokenDetailsRefLens() __lens.Lens[*ResponseUsage, OutputTokenDetails] {
+	return __lens.MakeLensRefWithName(
+		func(s *ResponseUsage) OutputTokenDetails { return s.OutputTokenDetails },
+		func(s *ResponseUsage, v OutputTokenDetails) *ResponseUsage { s.OutputTokenDetails = v; return s },
+		"(*ResponseUsage).OutputTokenDetails",
+	)
+}
+
+// MakeResponseUsageOutputTokenDetailsPrism returns a [__prism.Prism] for the OutputTokenDetails field of [ResponseUsage]
+func MakeResponseUsageOutputTokenDetailsPrism() __prism.Prism[ResponseUsage, OutputTokenDetails] {
+	return __prism.MakePrismWithName(
+		func(s ResponseUsage) __option.Option[OutputTokenDetails] { return __option.Some(s.OutputTokenDetails) },
+		func(v OutputTokenDetails) ResponseUsage {
+			return ResponseUsage{OutputTokenDetails: v}
+		},
+		"ResponseUsage.OutputTokenDetails",
+	)
+}
+
+// MakeResponseUsageOutputTokenDetailsRefPrism returns a [__prism.Prism] for the OutputTokenDetails field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageOutputTokenDetailsRefPrism() __prism.Prism[*ResponseUsage, OutputTokenDetails] {
+	return __prism.MakePrismWithName(
+		func(s *ResponseUsage) __option.Option[OutputTokenDetails] { return __option.Some(s.OutputTokenDetails) },
+		func(v OutputTokenDetails) *ResponseUsage {
+			return &ResponseUsage{OutputTokenDetails: v}
+		},
+		"ResponseUsage.OutputTokenDetails",
+	)
+}
+
+// MakeResponseUsageTotalTokensLens returns a [__lens.Lens] for the TotalTokens field of [ResponseUsage]
+func MakeResponseUsageTotalTokensLens() __lens.Lens[ResponseUsage, int64] {
+	return __lens.MakeLensWithName(
+		func(s ResponseUsage) int64 { return s.TotalTokens },
+		func(s ResponseUsage, v int64) ResponseUsage { s.TotalTokens = v; return s },
+		"ResponseUsage.TotalTokens",
+	)
+}
+
+// MakeResponseUsageTotalTokensLensO returns a [__lens_option.LensO] for the TotalTokens field of [ResponseUsage]
+func MakeResponseUsageTotalTokensLensO() __lens_option.LensO[ResponseUsage, int64] {
+	return __lens_option.FromIso[ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageTotalTokensLens())
+}
+
+// MakeResponseUsageTotalTokensRefLens returns a [__lens.Lens] for the TotalTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageTotalTokensRefLens() __lens.Lens[*ResponseUsage, int64] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ResponseUsage) int64 { return s.TotalTokens },
+		func(s *ResponseUsage, v int64) *ResponseUsage { s.TotalTokens = v; return s },
+		"(*ResponseUsage).TotalTokens",
+	)
+}
+
+// MakeResponseUsageTotalTokensRefLensO returns a [__lens_option.LensO] for the TotalTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageTotalTokensRefLensO() __lens_option.LensO[*ResponseUsage, int64] {
+	return __lens_option.FromIso[*ResponseUsage](__iso_option.FromZero[int64]())(MakeResponseUsageTotalTokensRefLens())
+}
+
+// MakeResponseUsageTotalTokensPrism returns a [__prism.Prism] for the TotalTokens field of [ResponseUsage]
+func MakeResponseUsageTotalTokensPrism() __prism.Prism[ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s ResponseUsage) __option.Option[int64] { return _fromNonZero(s.TotalTokens) },
+		func(v int64) ResponseUsage {
+			return ResponseUsage{TotalTokens: v}
+		},
+		"ResponseUsage.TotalTokens",
+	)
+}
+
+// MakeResponseUsageTotalTokensRefPrism returns a [__prism.Prism] for the TotalTokens field of [ResponseUsage] via a pointer receiver
+func MakeResponseUsageTotalTokensRefPrism() __prism.Prism[*ResponseUsage, int64] {
+	_fromNonZero := __option.FromNonZero[int64]()
+	return __prism.MakePrismWithName(
+		func(s *ResponseUsage) __option.Option[int64] { return _fromNonZero(s.TotalTokens) },
+		func(v int64) *ResponseUsage {
+			return &ResponseUsage{TotalTokens: v}
+		},
+		"ResponseUsage.TotalTokens",
+	)
+}
+
+// MakeResponseUsageLenses creates a new [ResponseUsageLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeResponseUsageLenses() ResponseUsageLenses {
+	return ResponseUsageLenses{
+		// mandatory lenses
+		InputTokens:        MakeResponseUsageInputTokensLens(),
+		InputTokenDetails:  MakeResponseUsageInputTokenDetailsLens(),
+		OutputTokens:       MakeResponseUsageOutputTokensLens(),
+		OutputTokenDetails: MakeResponseUsageOutputTokenDetailsLens(),
+		TotalTokens:        MakeResponseUsageTotalTokensLens(),
+		// optional lenses
+		InputTokensO:  MakeResponseUsageInputTokensLensO(),
+		OutputTokensO: MakeResponseUsageOutputTokensLensO(),
+		TotalTokensO:  MakeResponseUsageTotalTokensLensO(),
+	}
+}
+
+// MakeResponseUsageRefLenses creates a new [ResponseUsageRefLenses] with [lenses] for all fields via a pointer to [ResponseUsage]
+//
+// [lenses]: __lens.Lens
+func MakeResponseUsageRefLenses() ResponseUsageRefLenses {
+	return ResponseUsageRefLenses{
+		// mandatory lenses
+		InputTokens:        MakeResponseUsageInputTokensRefLens(),
+		InputTokenDetails:  MakeResponseUsageInputTokenDetailsRefLens(),
+		OutputTokens:       MakeResponseUsageOutputTokensRefLens(),
+		OutputTokenDetails: MakeResponseUsageOutputTokenDetailsRefLens(),
+		TotalTokens:        MakeResponseUsageTotalTokensRefLens(),
+		// optional lenses
+		InputTokensO:  MakeResponseUsageInputTokensRefLensO(),
+		OutputTokensO: MakeResponseUsageOutputTokensRefLensO(),
+		TotalTokensO:  MakeResponseUsageTotalTokensRefLensO(),
+	}
+}
+
+// MakeResponseUsagePrisms creates a new [ResponseUsagePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeResponseUsagePrisms() ResponseUsagePrisms {
+	return ResponseUsagePrisms{
+		InputTokens:        MakeResponseUsageInputTokensPrism(),
+		InputTokenDetails:  MakeResponseUsageInputTokenDetailsPrism(),
+		OutputTokens:       MakeResponseUsageOutputTokensPrism(),
+		OutputTokenDetails: MakeResponseUsageOutputTokenDetailsPrism(),
+		TotalTokens:        MakeResponseUsageTotalTokensPrism(),
+	}
+}
+
+// MakeResponseUsageRefPrisms creates a new [ResponseUsageRefPrisms] with [prisms] for all fields via a pointer to [ResponseUsage]
+//
+// [prisms]: __prism.Prism
+func MakeResponseUsageRefPrisms() ResponseUsageRefPrisms {
+	return ResponseUsageRefPrisms{
+		InputTokens:        MakeResponseUsageInputTokensRefPrism(),
+		InputTokenDetails:  MakeResponseUsageInputTokenDetailsRefPrism(),
+		OutputTokens:       MakeResponseUsageOutputTokensRefPrism(),
+		OutputTokenDetails: MakeResponseUsageOutputTokenDetailsRefPrism(),
+		TotalTokens:        MakeResponseUsageTotalTokensRefPrism(),
+	}
+}
+
+// ChatResponseLenses provides [lenses] for accessing fields of [ChatResponse]
+//
+// [lenses]: __lens.Lens
+type ChatResponseLenses struct {
+	// TaskID is a [__lens.Lens] for the TaskID field of [ChatResponse]
+	TaskID __lens.Lens[ChatResponse, string]
+	// ID is a [__lens.Lens] for the ID field of [ChatResponse]
+	ID __lens.Lens[ChatResponse, string]
+	// ModelID is a [__lens.Lens] for the ModelID field of [ChatResponse]
+	ModelID __lens.Lens[ChatResponse, string]
+	// FinishReason is a [__lens.Lens] for the FinishReason field of [ChatResponse]
+	FinishReason __lens.Lens[ChatResponse, string]
+	// Usage is a [__lens.Lens] for the Usage field of [ChatResponse]
+	Usage __lens.Lens[ChatResponse, ResponseUsage]
+	// Text is a [__lens.Lens] for the Text field of [ChatResponse]
+	Text __lens.Lens[ChatResponse, string]
+	// ToolCalls is a [__lens.Lens] for the ToolCalls field of [ChatResponse]
+	ToolCalls __lens.Lens[ChatResponse, []ContentPart]
+	// ResponseMessages is a [__lens.Lens] for the ResponseMessages field of [ChatResponse]
+	ResponseMessages __lens.Lens[ChatResponse, []ResponseMessage]
+	// TaskIDO is a [__lens_option.LensO] for the TaskID field of [ChatResponse], treating the zero value as absent
+	TaskIDO __lens_option.LensO[ChatResponse, string]
+	// IDO is a [__lens_option.LensO] for the ID field of [ChatResponse], treating the zero value as absent
+	IDO __lens_option.LensO[ChatResponse, string]
+	// ModelIDO is a [__lens_option.LensO] for the ModelID field of [ChatResponse], treating the zero value as absent
+	ModelIDO __lens_option.LensO[ChatResponse, string]
+	// FinishReasonO is a [__lens_option.LensO] for the FinishReason field of [ChatResponse], treating the zero value as absent
+	FinishReasonO __lens_option.LensO[ChatResponse, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [ChatResponse], treating the zero value as absent
+	TextO __lens_option.LensO[ChatResponse, string]
+}
+
+// ChatResponseRefLenses provides [lenses] for accessing fields of [ChatResponse] via a pointer to [ChatResponse]
+//
+// [lenses]: __lens.Lens
+type ChatResponseRefLenses struct {
+	// TaskID is a [__lens.Lens] for the TaskID field of [ChatResponse] via a pointer receiver
+	TaskID __lens.Lens[*ChatResponse, string]
+	// ID is a [__lens.Lens] for the ID field of [ChatResponse] via a pointer receiver
+	ID __lens.Lens[*ChatResponse, string]
+	// ModelID is a [__lens.Lens] for the ModelID field of [ChatResponse] via a pointer receiver
+	ModelID __lens.Lens[*ChatResponse, string]
+	// FinishReason is a [__lens.Lens] for the FinishReason field of [ChatResponse] via a pointer receiver
+	FinishReason __lens.Lens[*ChatResponse, string]
+	// Usage is a [__lens.Lens] for the Usage field of [ChatResponse] via a pointer receiver
+	Usage __lens.Lens[*ChatResponse, ResponseUsage]
+	// Text is a [__lens.Lens] for the Text field of [ChatResponse] via a pointer receiver
+	Text __lens.Lens[*ChatResponse, string]
+	// ToolCalls is a [__lens.Lens] for the ToolCalls field of [ChatResponse] via a pointer receiver
+	ToolCalls __lens.Lens[*ChatResponse, []ContentPart]
+	// ResponseMessages is a [__lens.Lens] for the ResponseMessages field of [ChatResponse] via a pointer receiver
+	ResponseMessages __lens.Lens[*ChatResponse, []ResponseMessage]
+	// TaskIDO is a [__lens_option.LensO] for the TaskID field of [ChatResponse] via a pointer receiver, treating the zero value as absent
+	TaskIDO __lens_option.LensO[*ChatResponse, string]
+	// IDO is a [__lens_option.LensO] for the ID field of [ChatResponse] via a pointer receiver, treating the zero value as absent
+	IDO __lens_option.LensO[*ChatResponse, string]
+	// ModelIDO is a [__lens_option.LensO] for the ModelID field of [ChatResponse] via a pointer receiver, treating the zero value as absent
+	ModelIDO __lens_option.LensO[*ChatResponse, string]
+	// FinishReasonO is a [__lens_option.LensO] for the FinishReason field of [ChatResponse] via a pointer receiver, treating the zero value as absent
+	FinishReasonO __lens_option.LensO[*ChatResponse, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [ChatResponse] via a pointer receiver, treating the zero value as absent
+	TextO __lens_option.LensO[*ChatResponse, string]
+}
+
+// ChatResponsePrisms provides [prisms] for accessing fields of [ChatResponse]
+//
+// [prisms]: __prism.Prism
+type ChatResponsePrisms struct {
+	// TaskID is a [__prism.Prism] for the TaskID field of [ChatResponse]
+	TaskID __prism.Prism[ChatResponse, string]
+	// ID is a [__prism.Prism] for the ID field of [ChatResponse]
+	ID __prism.Prism[ChatResponse, string]
+	// ModelID is a [__prism.Prism] for the ModelID field of [ChatResponse]
+	ModelID __prism.Prism[ChatResponse, string]
+	// FinishReason is a [__prism.Prism] for the FinishReason field of [ChatResponse]
+	FinishReason __prism.Prism[ChatResponse, string]
+	// Usage is a [__prism.Prism] for the Usage field of [ChatResponse]
+	Usage __prism.Prism[ChatResponse, ResponseUsage]
+	// Text is a [__prism.Prism] for the Text field of [ChatResponse]
+	Text __prism.Prism[ChatResponse, string]
+	// ToolCalls is a [__prism.Prism] for the ToolCalls field of [ChatResponse]
+	ToolCalls __prism.Prism[ChatResponse, []ContentPart]
+	// ResponseMessages is a [__prism.Prism] for the ResponseMessages field of [ChatResponse]
+	ResponseMessages __prism.Prism[ChatResponse, []ResponseMessage]
+}
+
+// ChatResponseRefPrisms provides [prisms] for accessing fields of [ChatResponse] via a pointer to [ChatResponse]
+//
+// [prisms]: __prism.Prism
+type ChatResponseRefPrisms struct {
+	// TaskID is a [__prism.Prism] for the TaskID field of [ChatResponse] via a pointer receiver
+	TaskID __prism.Prism[*ChatResponse, string]
+	// ID is a [__prism.Prism] for the ID field of [ChatResponse] via a pointer receiver
+	ID __prism.Prism[*ChatResponse, string]
+	// ModelID is a [__prism.Prism] for the ModelID field of [ChatResponse] via a pointer receiver
+	ModelID __prism.Prism[*ChatResponse, string]
+	// FinishReason is a [__prism.Prism] for the FinishReason field of [ChatResponse] via a pointer receiver
+	FinishReason __prism.Prism[*ChatResponse, string]
+	// Usage is a [__prism.Prism] for the Usage field of [ChatResponse] via a pointer receiver
+	Usage __prism.Prism[*ChatResponse, ResponseUsage]
+	// Text is a [__prism.Prism] for the Text field of [ChatResponse] via a pointer receiver
+	Text __prism.Prism[*ChatResponse, string]
+	// ToolCalls is a [__prism.Prism] for the ToolCalls field of [ChatResponse] via a pointer receiver
+	ToolCalls __prism.Prism[*ChatResponse, []ContentPart]
+	// ResponseMessages is a [__prism.Prism] for the ResponseMessages field of [ChatResponse] via a pointer receiver
+	ResponseMessages __prism.Prism[*ChatResponse, []ResponseMessage]
+}
+
+// MakeChatResponseTaskIDLens returns a [__lens.Lens] for the TaskID field of [ChatResponse]
+func MakeChatResponseTaskIDLens() __lens.Lens[ChatResponse, string] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) string { return s.TaskID },
+		func(s ChatResponse, v string) ChatResponse { s.TaskID = v; return s },
+		"ChatResponse.TaskID",
+	)
+}
+
+// MakeChatResponseTaskIDLensO returns a [__lens_option.LensO] for the TaskID field of [ChatResponse]
+func MakeChatResponseTaskIDLensO() __lens_option.LensO[ChatResponse, string] {
+	return __lens_option.FromIso[ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseTaskIDLens())
+}
+
+// MakeChatResponseTaskIDRefLens returns a [__lens.Lens] for the TaskID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTaskIDRefLens() __lens.Lens[*ChatResponse, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ChatResponse) string { return s.TaskID },
+		func(s *ChatResponse, v string) *ChatResponse { s.TaskID = v; return s },
+		"(*ChatResponse).TaskID",
+	)
+}
+
+// MakeChatResponseTaskIDRefLensO returns a [__lens_option.LensO] for the TaskID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTaskIDRefLensO() __lens_option.LensO[*ChatResponse, string] {
+	return __lens_option.FromIso[*ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseTaskIDRefLens())
+}
+
+// MakeChatResponseTaskIDPrism returns a [__prism.Prism] for the TaskID field of [ChatResponse]
+func MakeChatResponseTaskIDPrism() __prism.Prism[ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[string] { return _fromNonZero(s.TaskID) },
+		func(v string) ChatResponse {
+			return ChatResponse{TaskID: v}
+		},
+		"ChatResponse.TaskID",
+	)
+}
+
+// MakeChatResponseTaskIDRefPrism returns a [__prism.Prism] for the TaskID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTaskIDRefPrism() __prism.Prism[*ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[string] { return _fromNonZero(s.TaskID) },
+		func(v string) *ChatResponse {
+			return &ChatResponse{TaskID: v}
+		},
+		"ChatResponse.TaskID",
+	)
+}
+
+// MakeChatResponseIDLens returns a [__lens.Lens] for the ID field of [ChatResponse]
+func MakeChatResponseIDLens() __lens.Lens[ChatResponse, string] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) string { return s.ID },
+		func(s ChatResponse, v string) ChatResponse { s.ID = v; return s },
+		"ChatResponse.ID",
+	)
+}
+
+// MakeChatResponseIDLensO returns a [__lens_option.LensO] for the ID field of [ChatResponse]
+func MakeChatResponseIDLensO() __lens_option.LensO[ChatResponse, string] {
+	return __lens_option.FromIso[ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseIDLens())
+}
+
+// MakeChatResponseIDRefLens returns a [__lens.Lens] for the ID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseIDRefLens() __lens.Lens[*ChatResponse, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ChatResponse) string { return s.ID },
+		func(s *ChatResponse, v string) *ChatResponse { s.ID = v; return s },
+		"(*ChatResponse).ID",
+	)
+}
+
+// MakeChatResponseIDRefLensO returns a [__lens_option.LensO] for the ID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseIDRefLensO() __lens_option.LensO[*ChatResponse, string] {
+	return __lens_option.FromIso[*ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseIDRefLens())
+}
+
+// MakeChatResponseIDPrism returns a [__prism.Prism] for the ID field of [ChatResponse]
+func MakeChatResponseIDPrism() __prism.Prism[ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[string] { return _fromNonZero(s.ID) },
+		func(v string) ChatResponse {
+			return ChatResponse{ID: v}
+		},
+		"ChatResponse.ID",
+	)
+}
+
+// MakeChatResponseIDRefPrism returns a [__prism.Prism] for the ID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseIDRefPrism() __prism.Prism[*ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[string] { return _fromNonZero(s.ID) },
+		func(v string) *ChatResponse {
+			return &ChatResponse{ID: v}
+		},
+		"ChatResponse.ID",
+	)
+}
+
+// MakeChatResponseModelIDLens returns a [__lens.Lens] for the ModelID field of [ChatResponse]
+func MakeChatResponseModelIDLens() __lens.Lens[ChatResponse, string] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) string { return s.ModelID },
+		func(s ChatResponse, v string) ChatResponse { s.ModelID = v; return s },
+		"ChatResponse.ModelID",
+	)
+}
+
+// MakeChatResponseModelIDLensO returns a [__lens_option.LensO] for the ModelID field of [ChatResponse]
+func MakeChatResponseModelIDLensO() __lens_option.LensO[ChatResponse, string] {
+	return __lens_option.FromIso[ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseModelIDLens())
+}
+
+// MakeChatResponseModelIDRefLens returns a [__lens.Lens] for the ModelID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseModelIDRefLens() __lens.Lens[*ChatResponse, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ChatResponse) string { return s.ModelID },
+		func(s *ChatResponse, v string) *ChatResponse { s.ModelID = v; return s },
+		"(*ChatResponse).ModelID",
+	)
+}
+
+// MakeChatResponseModelIDRefLensO returns a [__lens_option.LensO] for the ModelID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseModelIDRefLensO() __lens_option.LensO[*ChatResponse, string] {
+	return __lens_option.FromIso[*ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseModelIDRefLens())
+}
+
+// MakeChatResponseModelIDPrism returns a [__prism.Prism] for the ModelID field of [ChatResponse]
+func MakeChatResponseModelIDPrism() __prism.Prism[ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[string] { return _fromNonZero(s.ModelID) },
+		func(v string) ChatResponse {
+			return ChatResponse{ModelID: v}
+		},
+		"ChatResponse.ModelID",
+	)
+}
+
+// MakeChatResponseModelIDRefPrism returns a [__prism.Prism] for the ModelID field of [ChatResponse] via a pointer receiver
+func MakeChatResponseModelIDRefPrism() __prism.Prism[*ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[string] { return _fromNonZero(s.ModelID) },
+		func(v string) *ChatResponse {
+			return &ChatResponse{ModelID: v}
+		},
+		"ChatResponse.ModelID",
+	)
+}
+
+// MakeChatResponseFinishReasonLens returns a [__lens.Lens] for the FinishReason field of [ChatResponse]
+func MakeChatResponseFinishReasonLens() __lens.Lens[ChatResponse, string] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) string { return s.FinishReason },
+		func(s ChatResponse, v string) ChatResponse { s.FinishReason = v; return s },
+		"ChatResponse.FinishReason",
+	)
+}
+
+// MakeChatResponseFinishReasonLensO returns a [__lens_option.LensO] for the FinishReason field of [ChatResponse]
+func MakeChatResponseFinishReasonLensO() __lens_option.LensO[ChatResponse, string] {
+	return __lens_option.FromIso[ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseFinishReasonLens())
+}
+
+// MakeChatResponseFinishReasonRefLens returns a [__lens.Lens] for the FinishReason field of [ChatResponse] via a pointer receiver
+func MakeChatResponseFinishReasonRefLens() __lens.Lens[*ChatResponse, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ChatResponse) string { return s.FinishReason },
+		func(s *ChatResponse, v string) *ChatResponse { s.FinishReason = v; return s },
+		"(*ChatResponse).FinishReason",
+	)
+}
+
+// MakeChatResponseFinishReasonRefLensO returns a [__lens_option.LensO] for the FinishReason field of [ChatResponse] via a pointer receiver
+func MakeChatResponseFinishReasonRefLensO() __lens_option.LensO[*ChatResponse, string] {
+	return __lens_option.FromIso[*ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseFinishReasonRefLens())
+}
+
+// MakeChatResponseFinishReasonPrism returns a [__prism.Prism] for the FinishReason field of [ChatResponse]
+func MakeChatResponseFinishReasonPrism() __prism.Prism[ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[string] { return _fromNonZero(s.FinishReason) },
+		func(v string) ChatResponse {
+			return ChatResponse{FinishReason: v}
+		},
+		"ChatResponse.FinishReason",
+	)
+}
+
+// MakeChatResponseFinishReasonRefPrism returns a [__prism.Prism] for the FinishReason field of [ChatResponse] via a pointer receiver
+func MakeChatResponseFinishReasonRefPrism() __prism.Prism[*ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[string] { return _fromNonZero(s.FinishReason) },
+		func(v string) *ChatResponse {
+			return &ChatResponse{FinishReason: v}
+		},
+		"ChatResponse.FinishReason",
+	)
+}
+
+// MakeChatResponseUsageLens returns a [__lens.Lens] for the Usage field of [ChatResponse]
+func MakeChatResponseUsageLens() __lens.Lens[ChatResponse, ResponseUsage] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) ResponseUsage { return s.Usage },
+		func(s ChatResponse, v ResponseUsage) ChatResponse { s.Usage = v; return s },
+		"ChatResponse.Usage",
+	)
+}
+
+// MakeChatResponseUsageRefLens returns a [__lens.Lens] for the Usage field of [ChatResponse] via a pointer receiver
+func MakeChatResponseUsageRefLens() __lens.Lens[*ChatResponse, ResponseUsage] {
+	return __lens.MakeLensRefWithName(
+		func(s *ChatResponse) ResponseUsage { return s.Usage },
+		func(s *ChatResponse, v ResponseUsage) *ChatResponse { s.Usage = v; return s },
+		"(*ChatResponse).Usage",
+	)
+}
+
+// MakeChatResponseUsagePrism returns a [__prism.Prism] for the Usage field of [ChatResponse]
+func MakeChatResponseUsagePrism() __prism.Prism[ChatResponse, ResponseUsage] {
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[ResponseUsage] { return __option.Some(s.Usage) },
+		func(v ResponseUsage) ChatResponse {
+			return ChatResponse{Usage: v}
+		},
+		"ChatResponse.Usage",
+	)
+}
+
+// MakeChatResponseUsageRefPrism returns a [__prism.Prism] for the Usage field of [ChatResponse] via a pointer receiver
+func MakeChatResponseUsageRefPrism() __prism.Prism[*ChatResponse, ResponseUsage] {
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[ResponseUsage] { return __option.Some(s.Usage) },
+		func(v ResponseUsage) *ChatResponse {
+			return &ChatResponse{Usage: v}
+		},
+		"ChatResponse.Usage",
+	)
+}
+
+// MakeChatResponseTextLens returns a [__lens.Lens] for the Text field of [ChatResponse]
+func MakeChatResponseTextLens() __lens.Lens[ChatResponse, string] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) string { return s.Text },
+		func(s ChatResponse, v string) ChatResponse { s.Text = v; return s },
+		"ChatResponse.Text",
+	)
+}
+
+// MakeChatResponseTextLensO returns a [__lens_option.LensO] for the Text field of [ChatResponse]
+func MakeChatResponseTextLensO() __lens_option.LensO[ChatResponse, string] {
+	return __lens_option.FromIso[ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseTextLens())
+}
+
+// MakeChatResponseTextRefLens returns a [__lens.Lens] for the Text field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTextRefLens() __lens.Lens[*ChatResponse, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ChatResponse) string { return s.Text },
+		func(s *ChatResponse, v string) *ChatResponse { s.Text = v; return s },
+		"(*ChatResponse).Text",
+	)
+}
+
+// MakeChatResponseTextRefLensO returns a [__lens_option.LensO] for the Text field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTextRefLensO() __lens_option.LensO[*ChatResponse, string] {
+	return __lens_option.FromIso[*ChatResponse](__iso_option.FromZero[string]())(MakeChatResponseTextRefLens())
+}
+
+// MakeChatResponseTextPrism returns a [__prism.Prism] for the Text field of [ChatResponse]
+func MakeChatResponseTextPrism() __prism.Prism[ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) ChatResponse {
+			return ChatResponse{Text: v}
+		},
+		"ChatResponse.Text",
+	)
+}
+
+// MakeChatResponseTextRefPrism returns a [__prism.Prism] for the Text field of [ChatResponse] via a pointer receiver
+func MakeChatResponseTextRefPrism() __prism.Prism[*ChatResponse, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) *ChatResponse {
+			return &ChatResponse{Text: v}
+		},
+		"ChatResponse.Text",
+	)
+}
+
+// MakeChatResponseToolCallsLens returns a [__lens.Lens] for the ToolCalls field of [ChatResponse]
+func MakeChatResponseToolCallsLens() __lens.Lens[ChatResponse, []ContentPart] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) []ContentPart { return s.ToolCalls },
+		func(s ChatResponse, v []ContentPart) ChatResponse { s.ToolCalls = v; return s },
+		"ChatResponse.ToolCalls",
+	)
+}
+
+// MakeChatResponseToolCallsRefLens returns a [__lens.Lens] for the ToolCalls field of [ChatResponse] via a pointer receiver
+func MakeChatResponseToolCallsRefLens() __lens.Lens[*ChatResponse, []ContentPart] {
+	return __lens.MakeLensRefWithName(
+		func(s *ChatResponse) []ContentPart { return s.ToolCalls },
+		func(s *ChatResponse, v []ContentPart) *ChatResponse { s.ToolCalls = v; return s },
+		"(*ChatResponse).ToolCalls",
+	)
+}
+
+// MakeChatResponseToolCallsPrism returns a [__prism.Prism] for the ToolCalls field of [ChatResponse]
+func MakeChatResponseToolCallsPrism() __prism.Prism[ChatResponse, []ContentPart] {
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[[]ContentPart] { return __option.Some(s.ToolCalls) },
+		func(v []ContentPart) ChatResponse {
+			return ChatResponse{ToolCalls: v}
+		},
+		"ChatResponse.ToolCalls",
+	)
+}
+
+// MakeChatResponseToolCallsRefPrism returns a [__prism.Prism] for the ToolCalls field of [ChatResponse] via a pointer receiver
+func MakeChatResponseToolCallsRefPrism() __prism.Prism[*ChatResponse, []ContentPart] {
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[[]ContentPart] { return __option.Some(s.ToolCalls) },
+		func(v []ContentPart) *ChatResponse {
+			return &ChatResponse{ToolCalls: v}
+		},
+		"ChatResponse.ToolCalls",
+	)
+}
+
+// MakeChatResponseResponseMessagesLens returns a [__lens.Lens] for the ResponseMessages field of [ChatResponse]
+func MakeChatResponseResponseMessagesLens() __lens.Lens[ChatResponse, []ResponseMessage] {
+	return __lens.MakeLensWithName(
+		func(s ChatResponse) []ResponseMessage { return s.ResponseMessages },
+		func(s ChatResponse, v []ResponseMessage) ChatResponse { s.ResponseMessages = v; return s },
+		"ChatResponse.ResponseMessages",
+	)
+}
+
+// MakeChatResponseResponseMessagesRefLens returns a [__lens.Lens] for the ResponseMessages field of [ChatResponse] via a pointer receiver
+func MakeChatResponseResponseMessagesRefLens() __lens.Lens[*ChatResponse, []ResponseMessage] {
+	return __lens.MakeLensRefWithName(
+		func(s *ChatResponse) []ResponseMessage { return s.ResponseMessages },
+		func(s *ChatResponse, v []ResponseMessage) *ChatResponse { s.ResponseMessages = v; return s },
+		"(*ChatResponse).ResponseMessages",
+	)
+}
+
+// MakeChatResponseResponseMessagesPrism returns a [__prism.Prism] for the ResponseMessages field of [ChatResponse]
+func MakeChatResponseResponseMessagesPrism() __prism.Prism[ChatResponse, []ResponseMessage] {
+	return __prism.MakePrismWithName(
+		func(s ChatResponse) __option.Option[[]ResponseMessage] { return __option.Some(s.ResponseMessages) },
+		func(v []ResponseMessage) ChatResponse {
+			return ChatResponse{ResponseMessages: v}
+		},
+		"ChatResponse.ResponseMessages",
+	)
+}
+
+// MakeChatResponseResponseMessagesRefPrism returns a [__prism.Prism] for the ResponseMessages field of [ChatResponse] via a pointer receiver
+func MakeChatResponseResponseMessagesRefPrism() __prism.Prism[*ChatResponse, []ResponseMessage] {
+	return __prism.MakePrismWithName(
+		func(s *ChatResponse) __option.Option[[]ResponseMessage] { return __option.Some(s.ResponseMessages) },
+		func(v []ResponseMessage) *ChatResponse {
+			return &ChatResponse{ResponseMessages: v}
+		},
+		"ChatResponse.ResponseMessages",
+	)
+}
+
+// MakeChatResponseLenses creates a new [ChatResponseLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeChatResponseLenses() ChatResponseLenses {
+	return ChatResponseLenses{
+		// mandatory lenses
+		TaskID:           MakeChatResponseTaskIDLens(),
+		ID:               MakeChatResponseIDLens(),
+		ModelID:          MakeChatResponseModelIDLens(),
+		FinishReason:     MakeChatResponseFinishReasonLens(),
+		Usage:            MakeChatResponseUsageLens(),
+		Text:             MakeChatResponseTextLens(),
+		ToolCalls:        MakeChatResponseToolCallsLens(),
+		ResponseMessages: MakeChatResponseResponseMessagesLens(),
+		// optional lenses
+		TaskIDO:       MakeChatResponseTaskIDLensO(),
+		IDO:           MakeChatResponseIDLensO(),
+		ModelIDO:      MakeChatResponseModelIDLensO(),
+		FinishReasonO: MakeChatResponseFinishReasonLensO(),
+		TextO:         MakeChatResponseTextLensO(),
+	}
+}
+
+// MakeChatResponseRefLenses creates a new [ChatResponseRefLenses] with [lenses] for all fields via a pointer to [ChatResponse]
+//
+// [lenses]: __lens.Lens
+func MakeChatResponseRefLenses() ChatResponseRefLenses {
+	return ChatResponseRefLenses{
+		// mandatory lenses
+		TaskID:           MakeChatResponseTaskIDRefLens(),
+		ID:               MakeChatResponseIDRefLens(),
+		ModelID:          MakeChatResponseModelIDRefLens(),
+		FinishReason:     MakeChatResponseFinishReasonRefLens(),
+		Usage:            MakeChatResponseUsageRefLens(),
+		Text:             MakeChatResponseTextRefLens(),
+		ToolCalls:        MakeChatResponseToolCallsRefLens(),
+		ResponseMessages: MakeChatResponseResponseMessagesRefLens(),
+		// optional lenses
+		TaskIDO:       MakeChatResponseTaskIDRefLensO(),
+		IDO:           MakeChatResponseIDRefLensO(),
+		ModelIDO:      MakeChatResponseModelIDRefLensO(),
+		FinishReasonO: MakeChatResponseFinishReasonRefLensO(),
+		TextO:         MakeChatResponseTextRefLensO(),
+	}
+}
+
+// MakeChatResponsePrisms creates a new [ChatResponsePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeChatResponsePrisms() ChatResponsePrisms {
+	return ChatResponsePrisms{
+		TaskID:           MakeChatResponseTaskIDPrism(),
+		ID:               MakeChatResponseIDPrism(),
+		ModelID:          MakeChatResponseModelIDPrism(),
+		FinishReason:     MakeChatResponseFinishReasonPrism(),
+		Usage:            MakeChatResponseUsagePrism(),
+		Text:             MakeChatResponseTextPrism(),
+		ToolCalls:        MakeChatResponseToolCallsPrism(),
+		ResponseMessages: MakeChatResponseResponseMessagesPrism(),
+	}
+}
+
+// MakeChatResponseRefPrisms creates a new [ChatResponseRefPrisms] with [prisms] for all fields via a pointer to [ChatResponse]
+//
+// [prisms]: __prism.Prism
+func MakeChatResponseRefPrisms() ChatResponseRefPrisms {
+	return ChatResponseRefPrisms{
+		TaskID:           MakeChatResponseTaskIDRefPrism(),
+		ID:               MakeChatResponseIDRefPrism(),
+		ModelID:          MakeChatResponseModelIDRefPrism(),
+		FinishReason:     MakeChatResponseFinishReasonRefPrism(),
+		Usage:            MakeChatResponseUsageRefPrism(),
+		Text:             MakeChatResponseTextRefPrism(),
+		ToolCalls:        MakeChatResponseToolCallsRefPrism(),
+		ResponseMessages: MakeChatResponseResponseMessagesRefPrism(),
+	}
+}
+
 // RecordLenses provides [lenses] for accessing fields of [Record]
 //
 // [lenses]: __lens.Lens
