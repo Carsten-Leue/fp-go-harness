@@ -2,7 +2,6 @@ package replay
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -114,9 +113,11 @@ func TestRedactInvalidData(t *testing.T) {
 // of the repository.
 const envRedactTerms = "REPLAY_REDACT_TERMS"
 
-func redactTerms() []string {
-	return F.Pipe2(
-		strings.Split(os.Getenv(envRedactTerms), ","),
+func redactTerms(t *testing.T) []string {
+	return F.Pipe4(
+		lookupTestEnv(t, envRedactTerms),
+		result.GetOrElse(F.Constant1[error]("")),
+		F.Bind2nd(strings.Split, ","),
 		A.Map(strings.TrimSpace),
 		A.Filter(S.IsNonEmpty),
 	)
@@ -151,7 +152,7 @@ func TestRedactRecordings(t *testing.T) {
 		t.Skip("recordings not available")
 	}
 
-	terms := redactTerms()
+	terms := redactTerms(t)
 	leaks := leakPatterns(terms)
 	redact := Redact(F.Flow2(
 		RedactText(),

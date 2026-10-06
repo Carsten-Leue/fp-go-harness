@@ -2370,3 +2370,255 @@ func MakeRecordRefPrisms() RecordRefPrisms {
 		Data:   MakeRecordDataRefPrism(),
 	}
 }
+
+// ToolInvocationLenses provides [lenses] for accessing fields of [ToolInvocation]
+//
+// [lenses]: __lens.Lens
+type ToolInvocationLenses struct {
+	// ToolCallID is a [__lens.Lens] for the ToolCallID field of [ToolInvocation]
+	ToolCallID __lens.Lens[ToolInvocation, string]
+	// ToolName is a [__lens.Lens] for the ToolName field of [ToolInvocation]
+	ToolName __lens.Lens[ToolInvocation, string]
+	// Input is a [__lens.Lens] for the Input field of [ToolInvocation]
+	Input __lens.Lens[ToolInvocation, encoding_json.RawMessage]
+	// ToolCallIDO is a [__lens_option.LensO] for the ToolCallID field of [ToolInvocation], treating the zero value as absent
+	ToolCallIDO __lens_option.LensO[ToolInvocation, string]
+	// ToolNameO is a [__lens_option.LensO] for the ToolName field of [ToolInvocation], treating the zero value as absent
+	ToolNameO __lens_option.LensO[ToolInvocation, string]
+}
+
+// ToolInvocationRefLenses provides [lenses] for accessing fields of [ToolInvocation] via a pointer to [ToolInvocation]
+//
+// [lenses]: __lens.Lens
+type ToolInvocationRefLenses struct {
+	// ToolCallID is a [__lens.Lens] for the ToolCallID field of [ToolInvocation] via a pointer receiver
+	ToolCallID __lens.Lens[*ToolInvocation, string]
+	// ToolName is a [__lens.Lens] for the ToolName field of [ToolInvocation] via a pointer receiver
+	ToolName __lens.Lens[*ToolInvocation, string]
+	// Input is a [__lens.Lens] for the Input field of [ToolInvocation] via a pointer receiver
+	Input __lens.Lens[*ToolInvocation, encoding_json.RawMessage]
+	// ToolCallIDO is a [__lens_option.LensO] for the ToolCallID field of [ToolInvocation] via a pointer receiver, treating the zero value as absent
+	ToolCallIDO __lens_option.LensO[*ToolInvocation, string]
+	// ToolNameO is a [__lens_option.LensO] for the ToolName field of [ToolInvocation] via a pointer receiver, treating the zero value as absent
+	ToolNameO __lens_option.LensO[*ToolInvocation, string]
+}
+
+// ToolInvocationPrisms provides [prisms] for accessing fields of [ToolInvocation]
+//
+// [prisms]: __prism.Prism
+type ToolInvocationPrisms struct {
+	// ToolCallID is a [__prism.Prism] for the ToolCallID field of [ToolInvocation]
+	ToolCallID __prism.Prism[ToolInvocation, string]
+	// ToolName is a [__prism.Prism] for the ToolName field of [ToolInvocation]
+	ToolName __prism.Prism[ToolInvocation, string]
+	// Input is a [__prism.Prism] for the Input field of [ToolInvocation]
+	Input __prism.Prism[ToolInvocation, encoding_json.RawMessage]
+}
+
+// ToolInvocationRefPrisms provides [prisms] for accessing fields of [ToolInvocation] via a pointer to [ToolInvocation]
+//
+// [prisms]: __prism.Prism
+type ToolInvocationRefPrisms struct {
+	// ToolCallID is a [__prism.Prism] for the ToolCallID field of [ToolInvocation] via a pointer receiver
+	ToolCallID __prism.Prism[*ToolInvocation, string]
+	// ToolName is a [__prism.Prism] for the ToolName field of [ToolInvocation] via a pointer receiver
+	ToolName __prism.Prism[*ToolInvocation, string]
+	// Input is a [__prism.Prism] for the Input field of [ToolInvocation] via a pointer receiver
+	Input __prism.Prism[*ToolInvocation, encoding_json.RawMessage]
+}
+
+// MakeToolInvocationToolCallIDLens returns a [__lens.Lens] for the ToolCallID field of [ToolInvocation]
+func MakeToolInvocationToolCallIDLens() __lens.Lens[ToolInvocation, string] {
+	return __lens.MakeLensWithName(
+		func(s ToolInvocation) string { return s.ToolCallID },
+		func(s ToolInvocation, v string) ToolInvocation { s.ToolCallID = v; return s },
+		"ToolInvocation.ToolCallID",
+	)
+}
+
+// MakeToolInvocationToolCallIDLensO returns a [__lens_option.LensO] for the ToolCallID field of [ToolInvocation]
+func MakeToolInvocationToolCallIDLensO() __lens_option.LensO[ToolInvocation, string] {
+	return __lens_option.FromIso[ToolInvocation](__iso_option.FromZero[string]())(MakeToolInvocationToolCallIDLens())
+}
+
+// MakeToolInvocationToolCallIDRefLens returns a [__lens.Lens] for the ToolCallID field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolCallIDRefLens() __lens.Lens[*ToolInvocation, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ToolInvocation) string { return s.ToolCallID },
+		func(s *ToolInvocation, v string) *ToolInvocation { s.ToolCallID = v; return s },
+		"(*ToolInvocation).ToolCallID",
+	)
+}
+
+// MakeToolInvocationToolCallIDRefLensO returns a [__lens_option.LensO] for the ToolCallID field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolCallIDRefLensO() __lens_option.LensO[*ToolInvocation, string] {
+	return __lens_option.FromIso[*ToolInvocation](__iso_option.FromZero[string]())(MakeToolInvocationToolCallIDRefLens())
+}
+
+// MakeToolInvocationToolCallIDPrism returns a [__prism.Prism] for the ToolCallID field of [ToolInvocation]
+func MakeToolInvocationToolCallIDPrism() __prism.Prism[ToolInvocation, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ToolInvocation) __option.Option[string] { return _fromNonZero(s.ToolCallID) },
+		func(v string) ToolInvocation {
+			return ToolInvocation{ToolCallID: v}
+		},
+		"ToolInvocation.ToolCallID",
+	)
+}
+
+// MakeToolInvocationToolCallIDRefPrism returns a [__prism.Prism] for the ToolCallID field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolCallIDRefPrism() __prism.Prism[*ToolInvocation, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ToolInvocation) __option.Option[string] { return _fromNonZero(s.ToolCallID) },
+		func(v string) *ToolInvocation {
+			return &ToolInvocation{ToolCallID: v}
+		},
+		"ToolInvocation.ToolCallID",
+	)
+}
+
+// MakeToolInvocationToolNameLens returns a [__lens.Lens] for the ToolName field of [ToolInvocation]
+func MakeToolInvocationToolNameLens() __lens.Lens[ToolInvocation, string] {
+	return __lens.MakeLensWithName(
+		func(s ToolInvocation) string { return s.ToolName },
+		func(s ToolInvocation, v string) ToolInvocation { s.ToolName = v; return s },
+		"ToolInvocation.ToolName",
+	)
+}
+
+// MakeToolInvocationToolNameLensO returns a [__lens_option.LensO] for the ToolName field of [ToolInvocation]
+func MakeToolInvocationToolNameLensO() __lens_option.LensO[ToolInvocation, string] {
+	return __lens_option.FromIso[ToolInvocation](__iso_option.FromZero[string]())(MakeToolInvocationToolNameLens())
+}
+
+// MakeToolInvocationToolNameRefLens returns a [__lens.Lens] for the ToolName field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolNameRefLens() __lens.Lens[*ToolInvocation, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ToolInvocation) string { return s.ToolName },
+		func(s *ToolInvocation, v string) *ToolInvocation { s.ToolName = v; return s },
+		"(*ToolInvocation).ToolName",
+	)
+}
+
+// MakeToolInvocationToolNameRefLensO returns a [__lens_option.LensO] for the ToolName field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolNameRefLensO() __lens_option.LensO[*ToolInvocation, string] {
+	return __lens_option.FromIso[*ToolInvocation](__iso_option.FromZero[string]())(MakeToolInvocationToolNameRefLens())
+}
+
+// MakeToolInvocationToolNamePrism returns a [__prism.Prism] for the ToolName field of [ToolInvocation]
+func MakeToolInvocationToolNamePrism() __prism.Prism[ToolInvocation, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ToolInvocation) __option.Option[string] { return _fromNonZero(s.ToolName) },
+		func(v string) ToolInvocation {
+			return ToolInvocation{ToolName: v}
+		},
+		"ToolInvocation.ToolName",
+	)
+}
+
+// MakeToolInvocationToolNameRefPrism returns a [__prism.Prism] for the ToolName field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationToolNameRefPrism() __prism.Prism[*ToolInvocation, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ToolInvocation) __option.Option[string] { return _fromNonZero(s.ToolName) },
+		func(v string) *ToolInvocation {
+			return &ToolInvocation{ToolName: v}
+		},
+		"ToolInvocation.ToolName",
+	)
+}
+
+// MakeToolInvocationInputLens returns a [__lens.Lens] for the Input field of [ToolInvocation]
+func MakeToolInvocationInputLens() __lens.Lens[ToolInvocation, encoding_json.RawMessage] {
+	return __lens.MakeLensWithName(
+		func(s ToolInvocation) encoding_json.RawMessage { return s.Input },
+		func(s ToolInvocation, v encoding_json.RawMessage) ToolInvocation { s.Input = v; return s },
+		"ToolInvocation.Input",
+	)
+}
+
+// MakeToolInvocationInputRefLens returns a [__lens.Lens] for the Input field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationInputRefLens() __lens.Lens[*ToolInvocation, encoding_json.RawMessage] {
+	return __lens.MakeLensRefWithName(
+		func(s *ToolInvocation) encoding_json.RawMessage { return s.Input },
+		func(s *ToolInvocation, v encoding_json.RawMessage) *ToolInvocation { s.Input = v; return s },
+		"(*ToolInvocation).Input",
+	)
+}
+
+// MakeToolInvocationInputPrism returns a [__prism.Prism] for the Input field of [ToolInvocation]
+func MakeToolInvocationInputPrism() __prism.Prism[ToolInvocation, encoding_json.RawMessage] {
+	return __prism.MakePrismWithName(
+		func(s ToolInvocation) __option.Option[encoding_json.RawMessage] { return __option.Some(s.Input) },
+		func(v encoding_json.RawMessage) ToolInvocation {
+			return ToolInvocation{Input: v}
+		},
+		"ToolInvocation.Input",
+	)
+}
+
+// MakeToolInvocationInputRefPrism returns a [__prism.Prism] for the Input field of [ToolInvocation] via a pointer receiver
+func MakeToolInvocationInputRefPrism() __prism.Prism[*ToolInvocation, encoding_json.RawMessage] {
+	return __prism.MakePrismWithName(
+		func(s *ToolInvocation) __option.Option[encoding_json.RawMessage] { return __option.Some(s.Input) },
+		func(v encoding_json.RawMessage) *ToolInvocation {
+			return &ToolInvocation{Input: v}
+		},
+		"ToolInvocation.Input",
+	)
+}
+
+// MakeToolInvocationLenses creates a new [ToolInvocationLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeToolInvocationLenses() ToolInvocationLenses {
+	return ToolInvocationLenses{
+		// mandatory lenses
+		ToolCallID: MakeToolInvocationToolCallIDLens(),
+		ToolName:   MakeToolInvocationToolNameLens(),
+		Input:      MakeToolInvocationInputLens(),
+		// optional lenses
+		ToolCallIDO: MakeToolInvocationToolCallIDLensO(),
+		ToolNameO:   MakeToolInvocationToolNameLensO(),
+	}
+}
+
+// MakeToolInvocationRefLenses creates a new [ToolInvocationRefLenses] with [lenses] for all fields via a pointer to [ToolInvocation]
+//
+// [lenses]: __lens.Lens
+func MakeToolInvocationRefLenses() ToolInvocationRefLenses {
+	return ToolInvocationRefLenses{
+		// mandatory lenses
+		ToolCallID: MakeToolInvocationToolCallIDRefLens(),
+		ToolName:   MakeToolInvocationToolNameRefLens(),
+		Input:      MakeToolInvocationInputRefLens(),
+		// optional lenses
+		ToolCallIDO: MakeToolInvocationToolCallIDRefLensO(),
+		ToolNameO:   MakeToolInvocationToolNameRefLensO(),
+	}
+}
+
+// MakeToolInvocationPrisms creates a new [ToolInvocationPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeToolInvocationPrisms() ToolInvocationPrisms {
+	return ToolInvocationPrisms{
+		ToolCallID: MakeToolInvocationToolCallIDPrism(),
+		ToolName:   MakeToolInvocationToolNamePrism(),
+		Input:      MakeToolInvocationInputPrism(),
+	}
+}
+
+// MakeToolInvocationRefPrisms creates a new [ToolInvocationRefPrisms] with [prisms] for all fields via a pointer to [ToolInvocation]
+//
+// [prisms]: __prism.Prism
+func MakeToolInvocationRefPrisms() ToolInvocationRefPrisms {
+	return ToolInvocationRefPrisms{
+		ToolCallID: MakeToolInvocationToolCallIDRefPrism(),
+		ToolName:   MakeToolInvocationToolNameRefPrism(),
+		Input:      MakeToolInvocationInputRefPrism(),
+	}
+}

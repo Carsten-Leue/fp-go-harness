@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Carsten-Leue/fp-go-harness/env"
 	A "github.com/IBM/fp-go/v2/array"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/iterator/iterresult"
@@ -22,10 +23,26 @@ import (
 // skipped when it is not set.
 const envRecordingsDir = "REPLAY_RECORDINGS_DIR"
 
+// dotEnvPath is the repository's .env file, seen from this package.
+const dotEnvPath = "../" + env.DotEnvFile
+
+// lookupTestEnv reads a variable from the process environment or, if it is not
+// set there, from the repository's .env file.
+func lookupTestEnv(t *testing.T, key string) Result[string] {
+	t.Helper()
+
+	deps, err := result.Unwrap(env.MakeDotEnvEnvironmentDeps()(A.Of(dotEnvPath))())
+	require.NoError(t, err)
+
+	return deps.GetLookupEnv()(key)()
+}
+
 func recordingsDir(t *testing.T) string {
-	dir, ok := os.LookupEnv(envRecordingsDir)
-	if !ok {
-		t.Skipf("%s not set", envRecordingsDir)
+	t.Helper()
+
+	dir, err := result.Unwrap(lookupTestEnv(t, envRecordingsDir))
+	if err != nil {
+		t.Skip(err)
 	}
 	return dir
 }

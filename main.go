@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"os/signal"
 	"strings"
@@ -17,13 +15,13 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
+	"github.com/IBM/fp-go/v2/ioresult"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
 	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
-	"github.com/joho/godotenv"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -35,8 +33,18 @@ type deepSeekDeps struct {
 	env.EnvironmentDeps
 }
 
-func makeDeepSeekDeps() oai.DeepSeekDeps {
-	return &deepSeekDeps{http.MakeDefaultHttpDeps(), env.MakeEnvironmentDeps()}
+func newDeepSeekDeps(e env.EnvironmentDeps) oai.DeepSeekDeps {
+	return &deepSeekDeps{http.MakeDefaultHttpDeps(), e}
+}
+
+// makeDeepSeekDeps reads the environment from the process and from the .env
+// file in the working directory, which fills in what the process doesn't set.
+func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
+	return F.Pipe2(
+		A.Of(env.DotEnvFile),
+		env.MakeDotEnvEnvironmentDeps(),
+		ioresult.Map(newDeepSeekDeps),
+	)
 }
 
 // makeRequest builds the Ask mode request for a single user prompt, including
@@ -122,11 +130,6 @@ func formatResult() func(session.FinalResult) string {
 }
 
 func main() {
-	if err := godotenv.Load(); err != nil && !errors.Is(err, fs.ErrNotExist) {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
 	prompt := strings.Join(os.Args[1:], " ")
 	if prompt == "" {
 		fmt.Fprintln(os.Stderr, "usage: fp-go-harness <prompt>")
@@ -136,9 +139,10 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	final, err := effect.RunSync(F.Pipe1(
+	final, err := effect.RunSync(F.Pipe2(
 		answer(tools.MakeToolRegistry())(prompt),
-		effect.Provide[session.FinalResult](makeDeepSeekDeps()),
+		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
+		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

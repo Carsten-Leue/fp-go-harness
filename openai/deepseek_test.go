@@ -1,21 +1,22 @@
 package openai
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
 	"github.com/Carsten-Leue/fp-go-harness/http"
+	A "github.com/IBM/fp-go/v2/array"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/result"
-	"github.com/joho/godotenv"
 	"github.com/openai/openai-go/v3"
 	"github.com/stretchr/testify/require"
 )
+
+// dotEnvPath is the repository's .env file, seen from this package.
+const dotEnvPath = "../" + env.DotEnvFile
 
 func makeDeepSeekChatCompletionDeps(h http.HttpDeps, e env.EnvironmentDeps) DeepSeekDeps {
 	type combined struct {
@@ -43,16 +44,16 @@ func makeSampleResponse() Effect[ChatCompletionDeps, *openai.ChatCompletion] {
 }
 
 func TestMakeDeepSeekChatCompletionDeps(t *testing.T) {
-	if err := godotenv.Load("../.env"); errors.Is(err, os.ErrNotExist) {
-		t.Skip(".env file not found")
-	} else {
-		require.NoError(t, err)
+	environment, err := result.Unwrap(env.MakeDotEnvEnvironmentDeps()(A.Of(dotEnvPath))())
+	require.NoError(t, err)
+	if result.IsLeft(environment.GetLookupEnv()(deepSeekAPIKeyEnvVar)()) {
+		t.Skipf("%s not set in the environment or in %s", deepSeekAPIKeyEnvVar, dotEnvPath)
 	}
 
 	resp := makeSampleResponse()
 
 	seekDeps := F.Pipe1(
-		makeDeepSeekChatCompletionDeps(http.MakeDefaultHttpDeps(), env.MakeEnvironmentDeps()),
+		makeDeepSeekChatCompletionDeps(http.MakeDefaultHttpDeps(), environment),
 		MakeDeepSeekChatCompletionDeps(),
 	)
 
