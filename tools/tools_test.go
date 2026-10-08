@@ -8,6 +8,7 @@ import (
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
+	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
@@ -57,6 +58,89 @@ func decodeErrorResult(t *testing.T, msg openai.ChatCompletionMessageParamUnion)
 	require.NoError(t, json.Unmarshal([]byte(msg.OfTool.Content.OfString.Value), &res))
 
 	return res
+}
+
+func TestMakeToolDeps_GetToolCaller(t *testing.T) {
+	var echo ToolCall = thunk.Of[string]
+	deps := MakeToolDeps(makeToolCaller(map[string]ToolCall{"echo": echo}))
+
+	assert.True(t, option.IsSome(deps.GetToolCaller()("echo")))
+	assert.True(t, option.IsNone(deps.GetToolCaller()("missing")))
+}
+
+func TestAsToolDeps(t *testing.T) {
+	deps := MakeToolDeps(makeToolCaller(map[string]ToolCall{}))
+
+	assert.Equal(t, deps, AsToolDeps(deps))
+}
+
+func TestMakeErrorResult(t *testing.T) {
+	assert.Equal(t, errorResult{Error: true, Message: "boom"}, makeErrorResult("boom"))
+}
+
+func TestMakeSuccessChatCompletionMessageParamUnion(t *testing.T) {
+	call := makeToolCallUnion("call_1", "echo", `{}`)
+
+	msg := makeSuccessChatCompletionMessageParamUnion()("done")(call)
+
+	assert.Equal(t, openai.ToolMessage("done", "call_1"), msg)
+}
+
+func TestMakeErrorChatCompletionMessageParamUnion(t *testing.T) {
+	call := makeToolCallUnion("call_1", "echo", `{}`)
+
+	msg, err := result.Unwrap(makeErrorChatCompletionMessageParamUnion()("boom")(call))
+	require.NoError(t, err)
+
+	assert.Equal(t, openai.ToolMessage(`{"error":true,"message":"boom"}`, "call_1"), msg)
+}
+
+func TestMakeToolCalls_KeepsOrder(t *testing.T) {
+	var echo ToolCall = thunk.Of[string]
+	deps := MakeToolDeps(makeToolCaller(map[string]ToolCall{"echo": echo}))
+	calls := []openai.ChatCompletionMessageToolCallUnion{
+		makeToolCallUnion("call_1", "echo", "a"),
+		makeToolCallUnion("call_2", "echo", "b"),
+	}
+
+	msgs, err := result.Unwrap(MakeToolCalls()(calls)(deps)(t.Context())())
+	require.NoError(t, err)
+
+	assert.Equal(t, []openai.ChatCompletionMessageParamUnion{
+		openai.ToolMessage("a", "call_1"),
+		openai.ToolMessage("b", "call_2"),
+	}, msgs)
+}
+
+func TestMakeToolCalls_Empty(t *testing.T) {
+	deps := MakeToolDeps(makeToolCaller(map[string]ToolCall{}))
+
+	msgs, err := result.Unwrap(MakeToolCalls()(nil)(deps)(t.Context())())
+	require.NoError(t, err)
+
+	assert.Empty(t, msgs)
+}
+
+func TestHandleToolCallsForChoice(t *testing.T) {
+	deps := MakeToolDeps(makeToolCaller(map[string]ToolCall{}))
+	call := makeToolCallUnion("call_1", "unknown_tool", `{}`)
+	message := openai.ChatCompletionMessage{ToolCalls: []openai.ChatCompletionMessageToolCallUnion{call}}
+	original := openai.ChatCompletionNewParams{Messages: []openai.ChatCompletionMessageParamUnion{openai.UserMessage("hi")}}
+
+	run := func(choice openai.ChatCompletionChoice) openai.ChatCompletionNewParams {
+		endo, err := result.Unwrap(handleToolCallsForChoice()(choice)(deps)(t.Context())())
+		require.NoError(t, err)
+		return endo(original)
+	}
+
+	// no tool calls: the identity
+	assert.Equal(t, original, run(openai.ChatCompletionChoice{}))
+
+	// tool calls: the assistant message, then one tool message per call
+	updated := run(openai.ChatCompletionChoice{Message: message})
+	require.Len(t, updated.Messages, 3)
+	assert.Equal(t, message.ToParam(), updated.Messages[1])
+	assert.Equal(t, "Unable to find tool 'unknown_tool'.", decodeErrorResult(t, updated.Messages[2]).Message)
 }
 
 func TestMakeToolCall_Success(t *testing.T) {

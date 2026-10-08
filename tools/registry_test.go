@@ -6,6 +6,7 @@ import (
 
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/option"
+	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,55 @@ func makeEchoTool(name, prefix string) Tool {
 			return thunk.Of(prefix + arguments)
 		},
 	)
+}
+
+// runCall runs a tool call with the given arguments and unwraps its result.
+func runCall(t *testing.T, call ToolCall, arguments string) string {
+	t.Helper()
+
+	out, err := result.Unwrap(call(arguments)(t.Context())())
+	require.NoError(t, err)
+
+	return out
+}
+
+func TestMakeTool_Accessors(t *testing.T) {
+	tool := makeEchoTool("echo", "echo: ")
+
+	assert.Equal(t, "echo", toolDefinition(tool).Name)
+	assert.Equal(t, "echo: x", runCall(t, toolCall(tool), "x"))
+}
+
+func TestToolEntry_KeysByName(t *testing.T) {
+	tool := makeEchoTool("echo", "")
+
+	entry := toolEntry()(tool)
+
+	assert.Equal(t, "echo", pair.Head(entry))
+	assert.Equal(t, toolDefinition(tool), toolDefinition(pair.Tail(entry)))
+}
+
+func TestToToolParams_SortedByName(t *testing.T) {
+	registry := MakeToolRegistry(makeEchoTool("zeta", ""), makeEchoTool("alpha", ""))
+
+	params := ToToolParams()(registry)
+
+	require.Len(t, params, 2)
+	assert.Equal(t, "alpha", params[0].GetFunction().Name)
+	assert.Equal(t, "zeta", params[1].GetFunction().Name)
+}
+
+func TestToToolParams_Empty(t *testing.T) {
+	assert.Empty(t, ToToolParams()(MakeToolRegistry()))
+}
+
+func TestMakeRegistryToolDeps(t *testing.T) {
+	deps := MakeRegistryToolDeps()(MakeToolRegistry(makeEchoTool("echo", "echo: ")))
+
+	call, ok := option.Unwrap(deps.GetToolCaller()("echo"))
+	require.True(t, ok)
+	assert.Equal(t, "echo: x", runCall(t, call, "x"))
+	assert.True(t, option.IsNone(deps.GetToolCaller()("missing")))
 }
 
 func TestToToolCaller_ResolvesRegisteredTools(t *testing.T) {
