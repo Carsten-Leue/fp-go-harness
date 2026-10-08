@@ -80,3 +80,23 @@ func TestMakeEnvironmentDeps(t *testing.T) {
 
 	assert.Equal(t, result.Of("v"), lookup(MakeEnvironmentDeps(), key))
 }
+
+func TestAsEnvironmentDeps(t *testing.T) {
+	deps := MakeEnvironmentDeps()
+
+	assert.Equal(t, deps, AsEnvironmentDeps(deps))
+}
+
+func TestLookupEnvThunk(t *testing.T) {
+	const (
+		set   = "FP_GO_HARNESS_TEST_THUNK_SET"
+		unset = "FP_GO_HARNESS_TEST_THUNK_UNSET"
+	)
+	t.Setenv(set, "v")
+	deps := MakeEnvironmentDeps()
+
+	assert.Equal(t, result.Of("v"), LookupEnvThunk(set)(deps)(t.Context())())
+
+	_, err := result.Unwrap(LookupEnvThunk(unset)(deps)(t.Context())())
+	assert.EqualError(t, err, `environment variable "`+unset+`" is not set`)
+}
