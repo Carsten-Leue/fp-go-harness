@@ -5,6 +5,7 @@ import (
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
+	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
@@ -118,4 +119,31 @@ func TestRun_StopsAtMaxIterations(t *testing.T) {
 	var maxErr *MaxIterationsError
 	require.ErrorAs(t, err, &maxErr)
 	assert.Equal(t, 3, maxErr.MaxIterations)
+}
+
+func TestMakeLoopDeps(t *testing.T) {
+	deps := MakeLoopDeps(7)
+
+	assert.Equal(t, 7, deps.GetMaxIterations())
+	assert.Equal(t, deps, AsLoopDeps(deps))
+}
+
+func TestMaxIterationsError_Error(t *testing.T) {
+	assert.EqualError(t, makeMaxIterationsError(3), "agent loop stopped after reaching the maximum of 3 iterations")
+}
+
+// TestMakeSessionDeps asserts that the composed deps delegate each getter to
+// the part that provides it.
+func TestMakeSessionDeps(t *testing.T) {
+	stub := makeSequencedSessionDeps(t, []openai.ChatCompletion{makeStopCompletion("chatcmpl-1", "done")}, makeWeatherRegistry(), 10)
+
+	deps := MakeSessionDeps(stub, tools.MakeToolDeps(stub.GetToolCaller()), MakeLoopDeps(4))
+
+	assert.Equal(t, 4, deps.GetMaxIterations())
+	assert.Same(t, stub.GetChatCompletionService(), deps.GetChatCompletionService())
+	assert.True(t, option.IsSome(deps.GetToolCaller()("get_weather")))
+
+	final, err := result.Unwrap(Run()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
+	require.NoError(t, err)
+	assert.Equal(t, "done", pair.Tail(final).Choices[0].Message.Content)
 }
