@@ -79,6 +79,38 @@ func TestResolvePath(t *testing.T) {
 	}
 }
 
+func TestResolveIn(t *testing.T) {
+	root := t.TempDir()
+	deps := MakeWorkspaceDeps(root)
+	resolve := func(path string) result.Result[string] {
+		return resolveIn[WorkspaceDeps]()(path)(deps)(t.Context())()
+	}
+
+	assert.Equal(t, result.Of(filepath.Join(root, "a", "b")), resolve("a/b"))
+	assert.Equal(t, result.Of(root), resolve("."))
+
+	_, err := result.Unwrap(resolve(".."))
+	assert.EqualError(t, err, "path '"+filepath.Dir(root)+"' is outside the workspace '"+root+"'")
+
+	_, err = result.Unwrap(resolve(""))
+	assert.ErrorIs(t, err, errEmptyPath)
+}
+
+func TestRelativeIn(t *testing.T) {
+	root := t.TempDir()
+	deps := MakeWorkspaceDeps(root)
+	relative := func(path string) result.Result[string] {
+		return relativeIn[WorkspaceDeps]()(path)(deps)(t.Context())()
+	}
+
+	assert.Equal(t, result.Of("."), relative(root))
+	assert.Equal(t, result.Of(filepath.Join("a", "b")), relative(filepath.Join(root, "a", "b")))
+
+	// filepath.Rel fails for a relative target against an absolute root
+	_, err := result.Unwrap(relative("relative"))
+	assert.Error(t, err)
+}
+
 func TestResolvePathRejects(t *testing.T) {
 	root := t.TempDir()
 	resolve := ResolvePath()(root)

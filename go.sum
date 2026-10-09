@@ -2,6 +2,8 @@ github.com/IBM/fp-go/gen/v2 v2.4.0 h1:sk9KM8wMgTk3W7rFlF1R7EBr9ebekSigmAiNJts6cd
 github.com/IBM/fp-go/gen/v2 v2.4.0/go.mod h1:1s6aiWP6qQa0MhuUrVp8vTPh5m5TPazXqT1V8iqSEgE=
 github.com/IBM/fp-go/v2 v2.4.0 h1:7wPjIurWYM0PcJps/yFD/Z2O52rcjuKPna7OP/YWi3w=
 github.com/IBM/fp-go/v2 v2.4.0/go.mod h1:9ozfAXTDdMHzGwK4/lcuHwVv61/6Dp0SBoF8i8u1xG0=
+github.com/bmatcuk/doublestar/v4 v4.10.2 h1:eF7W7HWKg3z9NrWV9pTLnNeoXaqq3Tq9DNKXVMfoCnw=
+github.com/bmatcuk/doublestar/v4 v4.10.2/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
