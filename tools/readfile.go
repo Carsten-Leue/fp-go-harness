@@ -3,7 +3,6 @@ package tools
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -208,24 +207,6 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 	)
 }
 
-// resolveFile resolves a path against the workspace root.
-func resolveFile() effect.Kleisli[ReadFileDeps, string, string] {
-	return F.Flow2(
-		F.Flip(F.Flow2(ReadFileDeps.GetWorkspaceRoot, ResolvePath())),
-		effect.FromReaderResult[ReadFileDeps, string],
-	)
-}
-
-// relativeName names an absolute path inside the workspace relative to its
-// root, as the recordings do.
-func relativeName() effect.Kleisli[ReadFileDeps, string, string] {
-	return F.Flow3(
-		F.Flip(F.Curry2(result.Eitherize2(filepath.Rel))),
-		reader.Local[Result[string]](ReadFileDeps.GetWorkspaceRoot),
-		effect.FromReaderResult[ReadFileDeps, string],
-	)
-}
-
 // readBytes reads the file at an absolute path.
 func readBytes(path string) Effect[ReadFileDeps, []byte] {
 	return F.Pipe1(
@@ -250,8 +231,8 @@ func ReadFile() effect.Kleisli[ReadFileDeps, string, string] {
 
 	return F.Flow5(
 		F.Flow3(S.ToBytes, J.Unmarshal[ReadFileArgs], effect.FromResult[ReadFileDeps, ReadFileArgs]),
-		effect.Bind(pathLens.Set, F.Flow2(pathLens.Get, resolveFile())),
-		effect.Bind(nameLens.Set, F.Flow2(pathLens.Get, relativeName())),
+		effect.Bind(pathLens.Set, F.Flow2(pathLens.Get, resolveIn[ReadFileDeps]())),
+		effect.Bind(nameLens.Set, F.Flow2(pathLens.Get, relativeIn[ReadFileDeps]())),
 		effect.Bind(contentLens.Set, F.Flow2(pathLens.Get, readBytes)),
 		effect.ChainResultK[ReadFileDeps](renderFile()),
 	)

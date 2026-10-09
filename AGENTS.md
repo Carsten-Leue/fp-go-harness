@@ -55,6 +55,40 @@ materializes the log) and the `Load*` functions materialize (`IOResult[[]Record]
 [replay/task.go](replay/task.go) `GroupTasks` is a `result.Kleisli[[]Record, []Task]` that
 composes with either through `ioresult.ChainResultK`.
 
+### Composition as a value is a `reader` combinator
+
+A function `func(R) A` *is* a `Reader[R, A]`, so whenever function composition has to be
+passed around as a value (into `reader.Map`, `reader.Ap`, a `Flow`), use the named
+combinator instead of rebuilding it from `F.Flow2` with explicit type arguments:
+
+| Hand-built | Concept | Use instead |
+|---|---|---|
+| `F.Bind2nd(F.Flow2[…], g)` — `f ↦ g ∘ f` | post-compose (functor map) | `reader.Map[R](g)` |
+| `F.Flip(F.Curry2(F.Flow2[…]))` — `g ↦ f ↦ g ∘ f` | the same, curried | `reader.Map[R, A, B]` |
+| `F.Curry2(F.Flow2[…])` — `f ↦ g ↦ g ∘ f` | the same, in data-flow order | `reader.Compose[C, R, B]` |
+| `F.Bind1st(F.Flow2[…], g)` — `f ↦ f ∘ g` | pre-compose (contramap) | `reader.Local[A](g)` |
+
+Direct `F.Flow2(f, g)` over two known functions stays as it is; the combinators only pay
+off when the composition itself is the argument.
+
+**Two stages, each read from the same environment**, are composed one way in this
+repository: in data-flow order, the stage that runs first comes first, `reader.Compose`
+is mapped over it and the later stage is applied:
+
+```go
+F.Pipe2(
+	first,                                   // Reader[E, func(A) B]
+	reader.Map[E](reader.Compose[C, A, B]),  // Reader[E, func(func(B) C) func(A) C]
+	reader.Ap[func(A) C](second),            // second: Reader[E, func(B) C]
+)
+```
+
+Don't swap the stages to make `reader.Map[…]` fit instead; it reads backwards.
+[tools/workspace.go](tools/workspace.go) `ResolvePath` and
+[tools/listfiles.go](tools/listfiles.go) `listingOf` are the worked examples; `listingOf`'s
+first stage also post-composes with `reader.Map[[]FileEntry](joinLines())`.
+[tools/glob.go](tools/glob.go) `globListing` shows `reader.Local` for pre-composition.
+
 ### Combinators that don't exist, and what to use instead
 
 Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:

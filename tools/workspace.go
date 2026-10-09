@@ -4,6 +4,7 @@ import (
 	"errors"
 	"path/filepath"
 
+	"github.com/IBM/fp-go/v2/effect"
 	ER "github.com/IBM/fp-go/v2/errors"
 	"github.com/IBM/fp-go/v2/file"
 	F "github.com/IBM/fp-go/v2/function"
@@ -100,5 +101,23 @@ func ResolveWorkspacePath() Reader[WorkspaceDeps, ReaderResult[string, string]] 
 	return F.Flow2(
 		WorkspaceDeps.GetWorkspaceRoot,
 		ResolvePath(),
+	)
+}
+
+// resolveIn resolves a path argument against the workspace root of R.
+func resolveIn[R WorkspaceDeps]() effect.Kleisli[R, string, string] {
+	return F.Flow2(
+		F.Flip(F.Flow2(AsWorkspaceDeps[R], ResolveWorkspacePath())),
+		effect.FromReaderResult[R, string],
+	)
+}
+
+// relativeIn names an absolute path inside the workspace of R relative to
+// its root, as the recordings do.
+func relativeIn[R WorkspaceDeps]() effect.Kleisli[R, string, string] {
+	return F.Flow3(
+		F.Flip(F.Curry2(result.Eitherize2(filepath.Rel))),
+		reader.Local[Result[string]](F.Flow2(AsWorkspaceDeps[R], WorkspaceDeps.GetWorkspaceRoot)),
+		effect.FromReaderResult[R, string],
 	)
 }

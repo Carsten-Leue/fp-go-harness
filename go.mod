@@ -4,6 +4,7 @@ go 1.27.0
 
 require (
 	github.com/IBM/fp-go/v2 v2.4.0
+	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v3 v3.52.0
 	github.com/stretchr/testify v1.12.1

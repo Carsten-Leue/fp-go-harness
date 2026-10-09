@@ -9,7 +9,652 @@ import (
 	__lens_option "github.com/IBM/fp-go/v2/optics/lens/option"
 	__prism "github.com/IBM/fp-go/v2/optics/prism"
 	__option "github.com/IBM/fp-go/v2/option"
+	time "time"
 )
+
+// GlobArgsLenses provides [lenses] for accessing fields of [GlobArgs]
+//
+// [lenses]: __lens.Lens
+type GlobArgsLenses struct {
+	// Pattern is a [__lens.Lens] for the Pattern field of [GlobArgs]
+	Pattern __lens.Lens[GlobArgs, string]
+	// Path is a [__lens.Lens] for the Path field of [GlobArgs]
+	Path __lens.Lens[GlobArgs, string]
+	// Name is a [__lens.Lens] for the Name field of [GlobArgs]
+	Name __lens.Lens[GlobArgs, string]
+	// Entries is a [__lens.Lens] for the Entries field of [GlobArgs]
+	Entries __lens.Lens[GlobArgs, []FileEntry]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [GlobArgs], treating the zero value as absent
+	PatternO __lens_option.LensO[GlobArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [GlobArgs], treating the zero value as absent
+	PathO __lens_option.LensO[GlobArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [GlobArgs], treating the zero value as absent
+	NameO __lens_option.LensO[GlobArgs, string]
+}
+
+// GlobArgsRefLenses provides [lenses] for accessing fields of [GlobArgs] via a pointer to [GlobArgs]
+//
+// [lenses]: __lens.Lens
+type GlobArgsRefLenses struct {
+	// Pattern is a [__lens.Lens] for the Pattern field of [GlobArgs] via a pointer receiver
+	Pattern __lens.Lens[*GlobArgs, string]
+	// Path is a [__lens.Lens] for the Path field of [GlobArgs] via a pointer receiver
+	Path __lens.Lens[*GlobArgs, string]
+	// Name is a [__lens.Lens] for the Name field of [GlobArgs] via a pointer receiver
+	Name __lens.Lens[*GlobArgs, string]
+	// Entries is a [__lens.Lens] for the Entries field of [GlobArgs] via a pointer receiver
+	Entries __lens.Lens[*GlobArgs, []FileEntry]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [GlobArgs] via a pointer receiver, treating the zero value as absent
+	PatternO __lens_option.LensO[*GlobArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [GlobArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*GlobArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [GlobArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*GlobArgs, string]
+}
+
+// GlobArgsPrisms provides [prisms] for accessing fields of [GlobArgs]
+//
+// [prisms]: __prism.Prism
+type GlobArgsPrisms struct {
+	// Pattern is a [__prism.Prism] for the Pattern field of [GlobArgs]
+	Pattern __prism.Prism[GlobArgs, string]
+	// Path is a [__prism.Prism] for the Path field of [GlobArgs]
+	Path __prism.Prism[GlobArgs, string]
+	// Name is a [__prism.Prism] for the Name field of [GlobArgs]
+	Name __prism.Prism[GlobArgs, string]
+	// Entries is a [__prism.Prism] for the Entries field of [GlobArgs]
+	Entries __prism.Prism[GlobArgs, []FileEntry]
+}
+
+// GlobArgsRefPrisms provides [prisms] for accessing fields of [GlobArgs] via a pointer to [GlobArgs]
+//
+// [prisms]: __prism.Prism
+type GlobArgsRefPrisms struct {
+	// Pattern is a [__prism.Prism] for the Pattern field of [GlobArgs] via a pointer receiver
+	Pattern __prism.Prism[*GlobArgs, string]
+	// Path is a [__prism.Prism] for the Path field of [GlobArgs] via a pointer receiver
+	Path __prism.Prism[*GlobArgs, string]
+	// Name is a [__prism.Prism] for the Name field of [GlobArgs] via a pointer receiver
+	Name __prism.Prism[*GlobArgs, string]
+	// Entries is a [__prism.Prism] for the Entries field of [GlobArgs] via a pointer receiver
+	Entries __prism.Prism[*GlobArgs, []FileEntry]
+}
+
+// MakeGlobArgsPatternLens returns a [__lens.Lens] for the Pattern field of [GlobArgs]
+func MakeGlobArgsPatternLens() __lens.Lens[GlobArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GlobArgs) string { return s.Pattern },
+		func(s GlobArgs, v string) GlobArgs { s.Pattern = v; return s },
+		"GlobArgs.Pattern",
+	)
+}
+
+// MakeGlobArgsPatternLensO returns a [__lens_option.LensO] for the Pattern field of [GlobArgs]
+func MakeGlobArgsPatternLensO() __lens_option.LensO[GlobArgs, string] {
+	return __lens_option.FromIso[GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsPatternLens())
+}
+
+// MakeGlobArgsPatternRefLens returns a [__lens.Lens] for the Pattern field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPatternRefLens() __lens.Lens[*GlobArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GlobArgs) string { return s.Pattern },
+		func(s *GlobArgs, v string) *GlobArgs { s.Pattern = v; return s },
+		"(*GlobArgs).Pattern",
+	)
+}
+
+// MakeGlobArgsPatternRefLensO returns a [__lens_option.LensO] for the Pattern field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPatternRefLensO() __lens_option.LensO[*GlobArgs, string] {
+	return __lens_option.FromIso[*GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsPatternRefLens())
+}
+
+// MakeGlobArgsPatternPrism returns a [__prism.Prism] for the Pattern field of [GlobArgs]
+func MakeGlobArgsPatternPrism() __prism.Prism[GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GlobArgs) __option.Option[string] { return _fromNonZero(s.Pattern) },
+		func(v string) GlobArgs {
+			return GlobArgs{Pattern: v}
+		},
+		"GlobArgs.Pattern",
+	)
+}
+
+// MakeGlobArgsPatternRefPrism returns a [__prism.Prism] for the Pattern field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPatternRefPrism() __prism.Prism[*GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GlobArgs) __option.Option[string] { return _fromNonZero(s.Pattern) },
+		func(v string) *GlobArgs {
+			return &GlobArgs{Pattern: v}
+		},
+		"GlobArgs.Pattern",
+	)
+}
+
+// MakeGlobArgsPathLens returns a [__lens.Lens] for the Path field of [GlobArgs]
+func MakeGlobArgsPathLens() __lens.Lens[GlobArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GlobArgs) string { return s.Path },
+		func(s GlobArgs, v string) GlobArgs { s.Path = v; return s },
+		"GlobArgs.Path",
+	)
+}
+
+// MakeGlobArgsPathLensO returns a [__lens_option.LensO] for the Path field of [GlobArgs]
+func MakeGlobArgsPathLensO() __lens_option.LensO[GlobArgs, string] {
+	return __lens_option.FromIso[GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsPathLens())
+}
+
+// MakeGlobArgsPathRefLens returns a [__lens.Lens] for the Path field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPathRefLens() __lens.Lens[*GlobArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GlobArgs) string { return s.Path },
+		func(s *GlobArgs, v string) *GlobArgs { s.Path = v; return s },
+		"(*GlobArgs).Path",
+	)
+}
+
+// MakeGlobArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPathRefLensO() __lens_option.LensO[*GlobArgs, string] {
+	return __lens_option.FromIso[*GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsPathRefLens())
+}
+
+// MakeGlobArgsPathPrism returns a [__prism.Prism] for the Path field of [GlobArgs]
+func MakeGlobArgsPathPrism() __prism.Prism[GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GlobArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) GlobArgs {
+			return GlobArgs{Path: v}
+		},
+		"GlobArgs.Path",
+	)
+}
+
+// MakeGlobArgsPathRefPrism returns a [__prism.Prism] for the Path field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsPathRefPrism() __prism.Prism[*GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GlobArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *GlobArgs {
+			return &GlobArgs{Path: v}
+		},
+		"GlobArgs.Path",
+	)
+}
+
+// MakeGlobArgsNameLens returns a [__lens.Lens] for the Name field of [GlobArgs]
+func MakeGlobArgsNameLens() __lens.Lens[GlobArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GlobArgs) string { return s.Name },
+		func(s GlobArgs, v string) GlobArgs { s.Name = v; return s },
+		"GlobArgs.Name",
+	)
+}
+
+// MakeGlobArgsNameLensO returns a [__lens_option.LensO] for the Name field of [GlobArgs]
+func MakeGlobArgsNameLensO() __lens_option.LensO[GlobArgs, string] {
+	return __lens_option.FromIso[GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsNameLens())
+}
+
+// MakeGlobArgsNameRefLens returns a [__lens.Lens] for the Name field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsNameRefLens() __lens.Lens[*GlobArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GlobArgs) string { return s.Name },
+		func(s *GlobArgs, v string) *GlobArgs { s.Name = v; return s },
+		"(*GlobArgs).Name",
+	)
+}
+
+// MakeGlobArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsNameRefLensO() __lens_option.LensO[*GlobArgs, string] {
+	return __lens_option.FromIso[*GlobArgs](__iso_option.FromZero[string]())(MakeGlobArgsNameRefLens())
+}
+
+// MakeGlobArgsNamePrism returns a [__prism.Prism] for the Name field of [GlobArgs]
+func MakeGlobArgsNamePrism() __prism.Prism[GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GlobArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) GlobArgs {
+			return GlobArgs{Name: v}
+		},
+		"GlobArgs.Name",
+	)
+}
+
+// MakeGlobArgsNameRefPrism returns a [__prism.Prism] for the Name field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsNameRefPrism() __prism.Prism[*GlobArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GlobArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *GlobArgs {
+			return &GlobArgs{Name: v}
+		},
+		"GlobArgs.Name",
+	)
+}
+
+// MakeGlobArgsEntriesLens returns a [__lens.Lens] for the Entries field of [GlobArgs]
+func MakeGlobArgsEntriesLens() __lens.Lens[GlobArgs, []FileEntry] {
+	return __lens.MakeLensWithName(
+		func(s GlobArgs) []FileEntry { return s.Entries },
+		func(s GlobArgs, v []FileEntry) GlobArgs { s.Entries = v; return s },
+		"GlobArgs.Entries",
+	)
+}
+
+// MakeGlobArgsEntriesRefLens returns a [__lens.Lens] for the Entries field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsEntriesRefLens() __lens.Lens[*GlobArgs, []FileEntry] {
+	return __lens.MakeLensRefWithName(
+		func(s *GlobArgs) []FileEntry { return s.Entries },
+		func(s *GlobArgs, v []FileEntry) *GlobArgs { s.Entries = v; return s },
+		"(*GlobArgs).Entries",
+	)
+}
+
+// MakeGlobArgsEntriesPrism returns a [__prism.Prism] for the Entries field of [GlobArgs]
+func MakeGlobArgsEntriesPrism() __prism.Prism[GlobArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s GlobArgs) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) GlobArgs {
+			return GlobArgs{Entries: v}
+		},
+		"GlobArgs.Entries",
+	)
+}
+
+// MakeGlobArgsEntriesRefPrism returns a [__prism.Prism] for the Entries field of [GlobArgs] via a pointer receiver
+func MakeGlobArgsEntriesRefPrism() __prism.Prism[*GlobArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s *GlobArgs) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) *GlobArgs {
+			return &GlobArgs{Entries: v}
+		},
+		"GlobArgs.Entries",
+	)
+}
+
+// MakeGlobArgsLenses creates a new [GlobArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeGlobArgsLenses() GlobArgsLenses {
+	return GlobArgsLenses{
+		// mandatory lenses
+		Pattern: MakeGlobArgsPatternLens(),
+		Path:    MakeGlobArgsPathLens(),
+		Name:    MakeGlobArgsNameLens(),
+		Entries: MakeGlobArgsEntriesLens(),
+		// optional lenses
+		PatternO: MakeGlobArgsPatternLensO(),
+		PathO:    MakeGlobArgsPathLensO(),
+		NameO:    MakeGlobArgsNameLensO(),
+	}
+}
+
+// MakeGlobArgsRefLenses creates a new [GlobArgsRefLenses] with [lenses] for all fields via a pointer to [GlobArgs]
+//
+// [lenses]: __lens.Lens
+func MakeGlobArgsRefLenses() GlobArgsRefLenses {
+	return GlobArgsRefLenses{
+		// mandatory lenses
+		Pattern: MakeGlobArgsPatternRefLens(),
+		Path:    MakeGlobArgsPathRefLens(),
+		Name:    MakeGlobArgsNameRefLens(),
+		Entries: MakeGlobArgsEntriesRefLens(),
+		// optional lenses
+		PatternO: MakeGlobArgsPatternRefLensO(),
+		PathO:    MakeGlobArgsPathRefLensO(),
+		NameO:    MakeGlobArgsNameRefLensO(),
+	}
+}
+
+// MakeGlobArgsPrisms creates a new [GlobArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeGlobArgsPrisms() GlobArgsPrisms {
+	return GlobArgsPrisms{
+		Pattern: MakeGlobArgsPatternPrism(),
+		Path:    MakeGlobArgsPathPrism(),
+		Name:    MakeGlobArgsNamePrism(),
+		Entries: MakeGlobArgsEntriesPrism(),
+	}
+}
+
+// MakeGlobArgsRefPrisms creates a new [GlobArgsRefPrisms] with [prisms] for all fields via a pointer to [GlobArgs]
+//
+// [prisms]: __prism.Prism
+func MakeGlobArgsRefPrisms() GlobArgsRefPrisms {
+	return GlobArgsRefPrisms{
+		Pattern: MakeGlobArgsPatternRefPrism(),
+		Path:    MakeGlobArgsPathRefPrism(),
+		Name:    MakeGlobArgsNameRefPrism(),
+		Entries: MakeGlobArgsEntriesRefPrism(),
+	}
+}
+
+// ListFilesArgsLenses provides [lenses] for accessing fields of [ListFilesArgs]
+//
+// [lenses]: __lens.Lens
+type ListFilesArgsLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [ListFilesArgs]
+	Path __lens.Lens[ListFilesArgs, string]
+	// Recursive is a [__lens.Lens] for the Recursive field of [ListFilesArgs]
+	Recursive __lens.Lens[ListFilesArgs, bool]
+	// Name is a [__lens.Lens] for the Name field of [ListFilesArgs]
+	Name __lens.Lens[ListFilesArgs, string]
+	// Entries is a [__lens.Lens] for the Entries field of [ListFilesArgs]
+	Entries __lens.Lens[ListFilesArgs, []FileEntry]
+	// PathO is a [__lens_option.LensO] for the Path field of [ListFilesArgs], treating the zero value as absent
+	PathO __lens_option.LensO[ListFilesArgs, string]
+	// RecursiveO is a [__lens_option.LensO] for the Recursive field of [ListFilesArgs], treating the zero value as absent
+	RecursiveO __lens_option.LensO[ListFilesArgs, bool]
+	// NameO is a [__lens_option.LensO] for the Name field of [ListFilesArgs], treating the zero value as absent
+	NameO __lens_option.LensO[ListFilesArgs, string]
+}
+
+// ListFilesArgsRefLenses provides [lenses] for accessing fields of [ListFilesArgs] via a pointer to [ListFilesArgs]
+//
+// [lenses]: __lens.Lens
+type ListFilesArgsRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [ListFilesArgs] via a pointer receiver
+	Path __lens.Lens[*ListFilesArgs, string]
+	// Recursive is a [__lens.Lens] for the Recursive field of [ListFilesArgs] via a pointer receiver
+	Recursive __lens.Lens[*ListFilesArgs, bool]
+	// Name is a [__lens.Lens] for the Name field of [ListFilesArgs] via a pointer receiver
+	Name __lens.Lens[*ListFilesArgs, string]
+	// Entries is a [__lens.Lens] for the Entries field of [ListFilesArgs] via a pointer receiver
+	Entries __lens.Lens[*ListFilesArgs, []FileEntry]
+	// PathO is a [__lens_option.LensO] for the Path field of [ListFilesArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*ListFilesArgs, string]
+	// RecursiveO is a [__lens_option.LensO] for the Recursive field of [ListFilesArgs] via a pointer receiver, treating the zero value as absent
+	RecursiveO __lens_option.LensO[*ListFilesArgs, bool]
+	// NameO is a [__lens_option.LensO] for the Name field of [ListFilesArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*ListFilesArgs, string]
+}
+
+// ListFilesArgsPrisms provides [prisms] for accessing fields of [ListFilesArgs]
+//
+// [prisms]: __prism.Prism
+type ListFilesArgsPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [ListFilesArgs]
+	Path __prism.Prism[ListFilesArgs, string]
+	// Recursive is a [__prism.Prism] for the Recursive field of [ListFilesArgs]
+	Recursive __prism.Prism[ListFilesArgs, bool]
+	// Name is a [__prism.Prism] for the Name field of [ListFilesArgs]
+	Name __prism.Prism[ListFilesArgs, string]
+	// Entries is a [__prism.Prism] for the Entries field of [ListFilesArgs]
+	Entries __prism.Prism[ListFilesArgs, []FileEntry]
+}
+
+// ListFilesArgsRefPrisms provides [prisms] for accessing fields of [ListFilesArgs] via a pointer to [ListFilesArgs]
+//
+// [prisms]: __prism.Prism
+type ListFilesArgsRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [ListFilesArgs] via a pointer receiver
+	Path __prism.Prism[*ListFilesArgs, string]
+	// Recursive is a [__prism.Prism] for the Recursive field of [ListFilesArgs] via a pointer receiver
+	Recursive __prism.Prism[*ListFilesArgs, bool]
+	// Name is a [__prism.Prism] for the Name field of [ListFilesArgs] via a pointer receiver
+	Name __prism.Prism[*ListFilesArgs, string]
+	// Entries is a [__prism.Prism] for the Entries field of [ListFilesArgs] via a pointer receiver
+	Entries __prism.Prism[*ListFilesArgs, []FileEntry]
+}
+
+// MakeListFilesArgsPathLens returns a [__lens.Lens] for the Path field of [ListFilesArgs]
+func MakeListFilesArgsPathLens() __lens.Lens[ListFilesArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ListFilesArgs) string { return s.Path },
+		func(s ListFilesArgs, v string) ListFilesArgs { s.Path = v; return s },
+		"ListFilesArgs.Path",
+	)
+}
+
+// MakeListFilesArgsPathLensO returns a [__lens_option.LensO] for the Path field of [ListFilesArgs]
+func MakeListFilesArgsPathLensO() __lens_option.LensO[ListFilesArgs, string] {
+	return __lens_option.FromIso[ListFilesArgs](__iso_option.FromZero[string]())(MakeListFilesArgsPathLens())
+}
+
+// MakeListFilesArgsPathRefLens returns a [__lens.Lens] for the Path field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsPathRefLens() __lens.Lens[*ListFilesArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ListFilesArgs) string { return s.Path },
+		func(s *ListFilesArgs, v string) *ListFilesArgs { s.Path = v; return s },
+		"(*ListFilesArgs).Path",
+	)
+}
+
+// MakeListFilesArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsPathRefLensO() __lens_option.LensO[*ListFilesArgs, string] {
+	return __lens_option.FromIso[*ListFilesArgs](__iso_option.FromZero[string]())(MakeListFilesArgsPathRefLens())
+}
+
+// MakeListFilesArgsPathPrism returns a [__prism.Prism] for the Path field of [ListFilesArgs]
+func MakeListFilesArgsPathPrism() __prism.Prism[ListFilesArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ListFilesArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) ListFilesArgs {
+			return ListFilesArgs{Path: v}
+		},
+		"ListFilesArgs.Path",
+	)
+}
+
+// MakeListFilesArgsPathRefPrism returns a [__prism.Prism] for the Path field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsPathRefPrism() __prism.Prism[*ListFilesArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ListFilesArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *ListFilesArgs {
+			return &ListFilesArgs{Path: v}
+		},
+		"ListFilesArgs.Path",
+	)
+}
+
+// MakeListFilesArgsRecursiveLens returns a [__lens.Lens] for the Recursive field of [ListFilesArgs]
+func MakeListFilesArgsRecursiveLens() __lens.Lens[ListFilesArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s ListFilesArgs) bool { return s.Recursive },
+		func(s ListFilesArgs, v bool) ListFilesArgs { s.Recursive = v; return s },
+		"ListFilesArgs.Recursive",
+	)
+}
+
+// MakeListFilesArgsRecursiveLensO returns a [__lens_option.LensO] for the Recursive field of [ListFilesArgs]
+func MakeListFilesArgsRecursiveLensO() __lens_option.LensO[ListFilesArgs, bool] {
+	return __lens_option.FromIso[ListFilesArgs](__iso_option.FromZero[bool]())(MakeListFilesArgsRecursiveLens())
+}
+
+// MakeListFilesArgsRecursiveRefLens returns a [__lens.Lens] for the Recursive field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsRecursiveRefLens() __lens.Lens[*ListFilesArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ListFilesArgs) bool { return s.Recursive },
+		func(s *ListFilesArgs, v bool) *ListFilesArgs { s.Recursive = v; return s },
+		"(*ListFilesArgs).Recursive",
+	)
+}
+
+// MakeListFilesArgsRecursiveRefLensO returns a [__lens_option.LensO] for the Recursive field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsRecursiveRefLensO() __lens_option.LensO[*ListFilesArgs, bool] {
+	return __lens_option.FromIso[*ListFilesArgs](__iso_option.FromZero[bool]())(MakeListFilesArgsRecursiveRefLens())
+}
+
+// MakeListFilesArgsRecursivePrism returns a [__prism.Prism] for the Recursive field of [ListFilesArgs]
+func MakeListFilesArgsRecursivePrism() __prism.Prism[ListFilesArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s ListFilesArgs) __option.Option[bool] { return _fromNonZero(s.Recursive) },
+		func(v bool) ListFilesArgs {
+			return ListFilesArgs{Recursive: v}
+		},
+		"ListFilesArgs.Recursive",
+	)
+}
+
+// MakeListFilesArgsRecursiveRefPrism returns a [__prism.Prism] for the Recursive field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsRecursiveRefPrism() __prism.Prism[*ListFilesArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *ListFilesArgs) __option.Option[bool] { return _fromNonZero(s.Recursive) },
+		func(v bool) *ListFilesArgs {
+			return &ListFilesArgs{Recursive: v}
+		},
+		"ListFilesArgs.Recursive",
+	)
+}
+
+// MakeListFilesArgsNameLens returns a [__lens.Lens] for the Name field of [ListFilesArgs]
+func MakeListFilesArgsNameLens() __lens.Lens[ListFilesArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ListFilesArgs) string { return s.Name },
+		func(s ListFilesArgs, v string) ListFilesArgs { s.Name = v; return s },
+		"ListFilesArgs.Name",
+	)
+}
+
+// MakeListFilesArgsNameLensO returns a [__lens_option.LensO] for the Name field of [ListFilesArgs]
+func MakeListFilesArgsNameLensO() __lens_option.LensO[ListFilesArgs, string] {
+	return __lens_option.FromIso[ListFilesArgs](__iso_option.FromZero[string]())(MakeListFilesArgsNameLens())
+}
+
+// MakeListFilesArgsNameRefLens returns a [__lens.Lens] for the Name field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsNameRefLens() __lens.Lens[*ListFilesArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ListFilesArgs) string { return s.Name },
+		func(s *ListFilesArgs, v string) *ListFilesArgs { s.Name = v; return s },
+		"(*ListFilesArgs).Name",
+	)
+}
+
+// MakeListFilesArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsNameRefLensO() __lens_option.LensO[*ListFilesArgs, string] {
+	return __lens_option.FromIso[*ListFilesArgs](__iso_option.FromZero[string]())(MakeListFilesArgsNameRefLens())
+}
+
+// MakeListFilesArgsNamePrism returns a [__prism.Prism] for the Name field of [ListFilesArgs]
+func MakeListFilesArgsNamePrism() __prism.Prism[ListFilesArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ListFilesArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) ListFilesArgs {
+			return ListFilesArgs{Name: v}
+		},
+		"ListFilesArgs.Name",
+	)
+}
+
+// MakeListFilesArgsNameRefPrism returns a [__prism.Prism] for the Name field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsNameRefPrism() __prism.Prism[*ListFilesArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ListFilesArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *ListFilesArgs {
+			return &ListFilesArgs{Name: v}
+		},
+		"ListFilesArgs.Name",
+	)
+}
+
+// MakeListFilesArgsEntriesLens returns a [__lens.Lens] for the Entries field of [ListFilesArgs]
+func MakeListFilesArgsEntriesLens() __lens.Lens[ListFilesArgs, []FileEntry] {
+	return __lens.MakeLensWithName(
+		func(s ListFilesArgs) []FileEntry { return s.Entries },
+		func(s ListFilesArgs, v []FileEntry) ListFilesArgs { s.Entries = v; return s },
+		"ListFilesArgs.Entries",
+	)
+}
+
+// MakeListFilesArgsEntriesRefLens returns a [__lens.Lens] for the Entries field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsEntriesRefLens() __lens.Lens[*ListFilesArgs, []FileEntry] {
+	return __lens.MakeLensRefWithName(
+		func(s *ListFilesArgs) []FileEntry { return s.Entries },
+		func(s *ListFilesArgs, v []FileEntry) *ListFilesArgs { s.Entries = v; return s },
+		"(*ListFilesArgs).Entries",
+	)
+}
+
+// MakeListFilesArgsEntriesPrism returns a [__prism.Prism] for the Entries field of [ListFilesArgs]
+func MakeListFilesArgsEntriesPrism() __prism.Prism[ListFilesArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s ListFilesArgs) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) ListFilesArgs {
+			return ListFilesArgs{Entries: v}
+		},
+		"ListFilesArgs.Entries",
+	)
+}
+
+// MakeListFilesArgsEntriesRefPrism returns a [__prism.Prism] for the Entries field of [ListFilesArgs] via a pointer receiver
+func MakeListFilesArgsEntriesRefPrism() __prism.Prism[*ListFilesArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s *ListFilesArgs) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) *ListFilesArgs {
+			return &ListFilesArgs{Entries: v}
+		},
+		"ListFilesArgs.Entries",
+	)
+}
+
+// MakeListFilesArgsLenses creates a new [ListFilesArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeListFilesArgsLenses() ListFilesArgsLenses {
+	return ListFilesArgsLenses{
+		// mandatory lenses
+		Path:      MakeListFilesArgsPathLens(),
+		Recursive: MakeListFilesArgsRecursiveLens(),
+		Name:      MakeListFilesArgsNameLens(),
+		Entries:   MakeListFilesArgsEntriesLens(),
+		// optional lenses
+		PathO:      MakeListFilesArgsPathLensO(),
+		RecursiveO: MakeListFilesArgsRecursiveLensO(),
+		NameO:      MakeListFilesArgsNameLensO(),
+	}
+}
+
+// MakeListFilesArgsRefLenses creates a new [ListFilesArgsRefLenses] with [lenses] for all fields via a pointer to [ListFilesArgs]
+//
+// [lenses]: __lens.Lens
+func MakeListFilesArgsRefLenses() ListFilesArgsRefLenses {
+	return ListFilesArgsRefLenses{
+		// mandatory lenses
+		Path:      MakeListFilesArgsPathRefLens(),
+		Recursive: MakeListFilesArgsRecursiveRefLens(),
+		Name:      MakeListFilesArgsNameRefLens(),
+		Entries:   MakeListFilesArgsEntriesRefLens(),
+		// optional lenses
+		PathO:      MakeListFilesArgsPathRefLensO(),
+		RecursiveO: MakeListFilesArgsRecursiveRefLensO(),
+		NameO:      MakeListFilesArgsNameRefLensO(),
+	}
+}
+
+// MakeListFilesArgsPrisms creates a new [ListFilesArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeListFilesArgsPrisms() ListFilesArgsPrisms {
+	return ListFilesArgsPrisms{
+		Path:      MakeListFilesArgsPathPrism(),
+		Recursive: MakeListFilesArgsRecursivePrism(),
+		Name:      MakeListFilesArgsNamePrism(),
+		Entries:   MakeListFilesArgsEntriesPrism(),
+	}
+}
+
+// MakeListFilesArgsRefPrisms creates a new [ListFilesArgsRefPrisms] with [prisms] for all fields via a pointer to [ListFilesArgs]
+//
+// [prisms]: __prism.Prism
+func MakeListFilesArgsRefPrisms() ListFilesArgsRefPrisms {
+	return ListFilesArgsRefPrisms{
+		Path:      MakeListFilesArgsPathRefPrism(),
+		Recursive: MakeListFilesArgsRecursiveRefPrism(),
+		Name:      MakeListFilesArgsNameRefPrism(),
+		Entries:   MakeListFilesArgsEntriesRefPrism(),
+	}
+}
 
 // ReadFileArgsLenses provides [lenses] for accessing fields of [ReadFileArgs]
 //
@@ -330,5 +975,257 @@ func MakeReadFileArgsRefPrisms() ReadFileArgsRefPrisms {
 		Range:   MakeReadFileArgsRangeRefPrism(),
 		Name:    MakeReadFileArgsNameRefPrism(),
 		Content: MakeReadFileArgsContentRefPrism(),
+	}
+}
+
+// FileEntryLenses provides [lenses] for accessing fields of [FileEntry]
+//
+// [lenses]: __lens.Lens
+type FileEntryLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [FileEntry]
+	Path __lens.Lens[FileEntry, string]
+	// IsDir is a [__lens.Lens] for the IsDir field of [FileEntry]
+	IsDir __lens.Lens[FileEntry, bool]
+	// ModTime is a [__lens.Lens] for the ModTime field of [FileEntry]
+	ModTime __lens.Lens[FileEntry, time.Time]
+	// PathO is a [__lens_option.LensO] for the Path field of [FileEntry], treating the zero value as absent
+	PathO __lens_option.LensO[FileEntry, string]
+	// IsDirO is a [__lens_option.LensO] for the IsDir field of [FileEntry], treating the zero value as absent
+	IsDirO __lens_option.LensO[FileEntry, bool]
+}
+
+// FileEntryRefLenses provides [lenses] for accessing fields of [FileEntry] via a pointer to [FileEntry]
+//
+// [lenses]: __lens.Lens
+type FileEntryRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [FileEntry] via a pointer receiver
+	Path __lens.Lens[*FileEntry, string]
+	// IsDir is a [__lens.Lens] for the IsDir field of [FileEntry] via a pointer receiver
+	IsDir __lens.Lens[*FileEntry, bool]
+	// ModTime is a [__lens.Lens] for the ModTime field of [FileEntry] via a pointer receiver
+	ModTime __lens.Lens[*FileEntry, time.Time]
+	// PathO is a [__lens_option.LensO] for the Path field of [FileEntry] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*FileEntry, string]
+	// IsDirO is a [__lens_option.LensO] for the IsDir field of [FileEntry] via a pointer receiver, treating the zero value as absent
+	IsDirO __lens_option.LensO[*FileEntry, bool]
+}
+
+// FileEntryPrisms provides [prisms] for accessing fields of [FileEntry]
+//
+// [prisms]: __prism.Prism
+type FileEntryPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [FileEntry]
+	Path __prism.Prism[FileEntry, string]
+	// IsDir is a [__prism.Prism] for the IsDir field of [FileEntry]
+	IsDir __prism.Prism[FileEntry, bool]
+	// ModTime is a [__prism.Prism] for the ModTime field of [FileEntry]
+	ModTime __prism.Prism[FileEntry, time.Time]
+}
+
+// FileEntryRefPrisms provides [prisms] for accessing fields of [FileEntry] via a pointer to [FileEntry]
+//
+// [prisms]: __prism.Prism
+type FileEntryRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [FileEntry] via a pointer receiver
+	Path __prism.Prism[*FileEntry, string]
+	// IsDir is a [__prism.Prism] for the IsDir field of [FileEntry] via a pointer receiver
+	IsDir __prism.Prism[*FileEntry, bool]
+	// ModTime is a [__prism.Prism] for the ModTime field of [FileEntry] via a pointer receiver
+	ModTime __prism.Prism[*FileEntry, time.Time]
+}
+
+// MakeFileEntryPathLens returns a [__lens.Lens] for the Path field of [FileEntry]
+func MakeFileEntryPathLens() __lens.Lens[FileEntry, string] {
+	return __lens.MakeLensWithName(
+		func(s FileEntry) string { return s.Path },
+		func(s FileEntry, v string) FileEntry { s.Path = v; return s },
+		"FileEntry.Path",
+	)
+}
+
+// MakeFileEntryPathLensO returns a [__lens_option.LensO] for the Path field of [FileEntry]
+func MakeFileEntryPathLensO() __lens_option.LensO[FileEntry, string] {
+	return __lens_option.FromIso[FileEntry](__iso_option.FromZero[string]())(MakeFileEntryPathLens())
+}
+
+// MakeFileEntryPathRefLens returns a [__lens.Lens] for the Path field of [FileEntry] via a pointer receiver
+func MakeFileEntryPathRefLens() __lens.Lens[*FileEntry, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *FileEntry) string { return s.Path },
+		func(s *FileEntry, v string) *FileEntry { s.Path = v; return s },
+		"(*FileEntry).Path",
+	)
+}
+
+// MakeFileEntryPathRefLensO returns a [__lens_option.LensO] for the Path field of [FileEntry] via a pointer receiver
+func MakeFileEntryPathRefLensO() __lens_option.LensO[*FileEntry, string] {
+	return __lens_option.FromIso[*FileEntry](__iso_option.FromZero[string]())(MakeFileEntryPathRefLens())
+}
+
+// MakeFileEntryPathPrism returns a [__prism.Prism] for the Path field of [FileEntry]
+func MakeFileEntryPathPrism() __prism.Prism[FileEntry, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s FileEntry) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) FileEntry {
+			return FileEntry{Path: v}
+		},
+		"FileEntry.Path",
+	)
+}
+
+// MakeFileEntryPathRefPrism returns a [__prism.Prism] for the Path field of [FileEntry] via a pointer receiver
+func MakeFileEntryPathRefPrism() __prism.Prism[*FileEntry, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *FileEntry) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *FileEntry {
+			return &FileEntry{Path: v}
+		},
+		"FileEntry.Path",
+	)
+}
+
+// MakeFileEntryIsDirLens returns a [__lens.Lens] for the IsDir field of [FileEntry]
+func MakeFileEntryIsDirLens() __lens.Lens[FileEntry, bool] {
+	return __lens.MakeLensWithName(
+		func(s FileEntry) bool { return s.IsDir },
+		func(s FileEntry, v bool) FileEntry { s.IsDir = v; return s },
+		"FileEntry.IsDir",
+	)
+}
+
+// MakeFileEntryIsDirLensO returns a [__lens_option.LensO] for the IsDir field of [FileEntry]
+func MakeFileEntryIsDirLensO() __lens_option.LensO[FileEntry, bool] {
+	return __lens_option.FromIso[FileEntry](__iso_option.FromZero[bool]())(MakeFileEntryIsDirLens())
+}
+
+// MakeFileEntryIsDirRefLens returns a [__lens.Lens] for the IsDir field of [FileEntry] via a pointer receiver
+func MakeFileEntryIsDirRefLens() __lens.Lens[*FileEntry, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *FileEntry) bool { return s.IsDir },
+		func(s *FileEntry, v bool) *FileEntry { s.IsDir = v; return s },
+		"(*FileEntry).IsDir",
+	)
+}
+
+// MakeFileEntryIsDirRefLensO returns a [__lens_option.LensO] for the IsDir field of [FileEntry] via a pointer receiver
+func MakeFileEntryIsDirRefLensO() __lens_option.LensO[*FileEntry, bool] {
+	return __lens_option.FromIso[*FileEntry](__iso_option.FromZero[bool]())(MakeFileEntryIsDirRefLens())
+}
+
+// MakeFileEntryIsDirPrism returns a [__prism.Prism] for the IsDir field of [FileEntry]
+func MakeFileEntryIsDirPrism() __prism.Prism[FileEntry, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s FileEntry) __option.Option[bool] { return _fromNonZero(s.IsDir) },
+		func(v bool) FileEntry {
+			return FileEntry{IsDir: v}
+		},
+		"FileEntry.IsDir",
+	)
+}
+
+// MakeFileEntryIsDirRefPrism returns a [__prism.Prism] for the IsDir field of [FileEntry] via a pointer receiver
+func MakeFileEntryIsDirRefPrism() __prism.Prism[*FileEntry, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *FileEntry) __option.Option[bool] { return _fromNonZero(s.IsDir) },
+		func(v bool) *FileEntry {
+			return &FileEntry{IsDir: v}
+		},
+		"FileEntry.IsDir",
+	)
+}
+
+// MakeFileEntryModTimeLens returns a [__lens.Lens] for the ModTime field of [FileEntry]
+func MakeFileEntryModTimeLens() __lens.Lens[FileEntry, time.Time] {
+	return __lens.MakeLensWithName(
+		func(s FileEntry) time.Time { return s.ModTime },
+		func(s FileEntry, v time.Time) FileEntry { s.ModTime = v; return s },
+		"FileEntry.ModTime",
+	)
+}
+
+// MakeFileEntryModTimeRefLens returns a [__lens.Lens] for the ModTime field of [FileEntry] via a pointer receiver
+func MakeFileEntryModTimeRefLens() __lens.Lens[*FileEntry, time.Time] {
+	return __lens.MakeLensRefWithName(
+		func(s *FileEntry) time.Time { return s.ModTime },
+		func(s *FileEntry, v time.Time) *FileEntry { s.ModTime = v; return s },
+		"(*FileEntry).ModTime",
+	)
+}
+
+// MakeFileEntryModTimePrism returns a [__prism.Prism] for the ModTime field of [FileEntry]
+func MakeFileEntryModTimePrism() __prism.Prism[FileEntry, time.Time] {
+	return __prism.MakePrismWithName(
+		func(s FileEntry) __option.Option[time.Time] { return __option.Some(s.ModTime) },
+		func(v time.Time) FileEntry {
+			return FileEntry{ModTime: v}
+		},
+		"FileEntry.ModTime",
+	)
+}
+
+// MakeFileEntryModTimeRefPrism returns a [__prism.Prism] for the ModTime field of [FileEntry] via a pointer receiver
+func MakeFileEntryModTimeRefPrism() __prism.Prism[*FileEntry, time.Time] {
+	return __prism.MakePrismWithName(
+		func(s *FileEntry) __option.Option[time.Time] { return __option.Some(s.ModTime) },
+		func(v time.Time) *FileEntry {
+			return &FileEntry{ModTime: v}
+		},
+		"FileEntry.ModTime",
+	)
+}
+
+// MakeFileEntryLenses creates a new [FileEntryLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeFileEntryLenses() FileEntryLenses {
+	return FileEntryLenses{
+		// mandatory lenses
+		Path:    MakeFileEntryPathLens(),
+		IsDir:   MakeFileEntryIsDirLens(),
+		ModTime: MakeFileEntryModTimeLens(),
+		// optional lenses
+		PathO:  MakeFileEntryPathLensO(),
+		IsDirO: MakeFileEntryIsDirLensO(),
+	}
+}
+
+// MakeFileEntryRefLenses creates a new [FileEntryRefLenses] with [lenses] for all fields via a pointer to [FileEntry]
+//
+// [lenses]: __lens.Lens
+func MakeFileEntryRefLenses() FileEntryRefLenses {
+	return FileEntryRefLenses{
+		// mandatory lenses
+		Path:    MakeFileEntryPathRefLens(),
+		IsDir:   MakeFileEntryIsDirRefLens(),
+		ModTime: MakeFileEntryModTimeRefLens(),
+		// optional lenses
+		PathO:  MakeFileEntryPathRefLensO(),
+		IsDirO: MakeFileEntryIsDirRefLensO(),
+	}
+}
+
+// MakeFileEntryPrisms creates a new [FileEntryPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeFileEntryPrisms() FileEntryPrisms {
+	return FileEntryPrisms{
+		Path:    MakeFileEntryPathPrism(),
+		IsDir:   MakeFileEntryIsDirPrism(),
+		ModTime: MakeFileEntryModTimePrism(),
+	}
+}
+
+// MakeFileEntryRefPrisms creates a new [FileEntryRefPrisms] with [prisms] for all fields via a pointer to [FileEntry]
+//
+// [prisms]: __prism.Prism
+func MakeFileEntryRefPrisms() FileEntryRefPrisms {
+	return FileEntryRefPrisms{
+		Path:    MakeFileEntryPathRefPrism(),
+		IsDir:   MakeFileEntryIsDirRefPrism(),
+		ModTime: MakeFileEntryModTimeRefPrism(),
 	}
 }

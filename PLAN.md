@@ -111,7 +111,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `ReaderResult[string, string]`.
 - [ ] **C2 `read_file`.** Read a file with line numbers and an optional `range` (`start-end`). Output format:
   `Contents of file X:\n\n1 | …`, matching the recordings.
-- [ ] **C3 `list_files`, `glob`.** Implement with `io/fs.WalkDir` behind a getter; return paths relative to the workspace.
+- [x] **C3 `list_files`, `glob`.** Implement with `io/fs.WalkDir` behind a getter; return paths relative to the workspace.
 - [ ] **C4 `grep`.** Search with `regexp` (or call `rg` when it is installed, through `ProcessDeps`). Support
   `include`, `ignore_case`, `files_with_matches`, cap the results at 100 and group them by file.
 - [ ] **C5 `execute_command` (foreground).** Add `ProcessDeps` (`exec.CommandContext` wrapped once).
