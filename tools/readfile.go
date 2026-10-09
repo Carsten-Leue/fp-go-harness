@@ -207,11 +207,11 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 	)
 }
 
-// readBytes reads the file at an absolute path.
-func readBytes(path string) Effect[ReadFileDeps, []byte] {
+// readBytes reads the file at an absolute path through the [FileDeps] of R.
+func readBytes[R FileDeps](path string) Effect[R, []byte] {
 	return F.Pipe1(
-		effect.Asks(ReadFileDeps.GetReadFile),
-		effect.ChainThunkK[ReadFileDeps](F.Flow2(
+		effect.Asks(F.Flow2(AsFileDeps[R], FileDeps.GetReadFile)),
+		effect.ChainThunkK[R](F.Flow2(
 			reader.Read[ioresult.IOResult[[]byte]](path),
 			thunk.FromIOResult[[]byte],
 		)),
@@ -233,7 +233,7 @@ func ReadFile() effect.Kleisli[ReadFileDeps, string, string] {
 		F.Flow3(S.ToBytes, J.Unmarshal[ReadFileArgs], effect.FromResult[ReadFileDeps, ReadFileArgs]),
 		effect.Bind(pathLens.Set, F.Flow2(pathLens.Get, resolveIn[ReadFileDeps]())),
 		effect.Bind(nameLens.Set, F.Flow2(pathLens.Get, relativeIn[ReadFileDeps]())),
-		effect.Bind(contentLens.Set, F.Flow2(pathLens.Get, readBytes)),
+		effect.Bind(contentLens.Set, F.Flow2(pathLens.Get, readBytes[ReadFileDeps])),
 		effect.ChainResultK[ReadFileDeps](renderFile()),
 	)
 }
