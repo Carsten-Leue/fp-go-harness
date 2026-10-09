@@ -112,8 +112,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
 - [ ] **C2 `read_file`.** Read a file with line numbers and an optional `range` (`start-end`). Output format:
   `Contents of file X:\n\n1 | …`, matching the recordings.
 - [x] **C3 `list_files`, `glob`.** Implement with `io/fs.WalkDir` behind a getter; return paths relative to the workspace.
-- [ ] **C4 `grep`.** Search with `regexp` (or call `rg` when it is installed, through `ProcessDeps`). Support
-  `include`, `ignore_case`, `files_with_matches`, cap the results at 100 and group them by file.
+- [x] **C4 `grep`.** Search with `regexp` (or call `rg` when it is installed, through `ProcessDeps`). Support
+  `include`, `ignore_case`, `invert_match`, `word_regexp`, `files_with_matches`, cap the results at 100 and group them by file.
+  Skip what `.gitignore` files exclude (`github.com/go-git/go-git/v5/plumbing/format/gitignore`): `.git/info/exclude`,
+  the `.gitignore` files from the workspace root down to the searched directory, and those below it.
+  Not done yet: the `rg` fallback (needs `ProcessDeps` from C5) and `core.excludesFile`.
 - [ ] **C5 `execute_command` (foreground).** Add `ProcessDeps` (`exec.CommandContext` wrapped once).
   Support `cwd` and `timeout_seconds` through `context.WithTimeout` inside the `Thunk`.
   Output format: stdout plus a `Stderr:` section, and the exit code if it is not zero.

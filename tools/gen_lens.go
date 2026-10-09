@@ -9,6 +9,8 @@ import (
 	__lens_option "github.com/IBM/fp-go/v2/optics/lens/option"
 	__prism "github.com/IBM/fp-go/v2/optics/prism"
 	__option "github.com/IBM/fp-go/v2/option"
+	github_com_go_git_go_git_v5_plumbing_format_gitignore "github.com/go-git/go-git/v5/plumbing/format/gitignore"
+	regexp "regexp"
 	time "time"
 )
 
@@ -331,6 +333,1548 @@ func MakeGlobArgsRefPrisms() GlobArgsRefPrisms {
 		Path:    MakeGlobArgsPathRefPrism(),
 		Name:    MakeGlobArgsNameRefPrism(),
 		Entries: MakeGlobArgsEntriesRefPrism(),
+	}
+}
+
+// GrepScopeLenses provides [lenses] for accessing fields of [GrepScope]
+//
+// [lenses]: __lens.Lens
+type GrepScopeLenses struct {
+	// Dir is a [__lens.Lens] for the Dir field of [GrepScope]
+	Dir __lens.Lens[GrepScope, string]
+	// Entries is a [__lens.Lens] for the Entries field of [GrepScope]
+	Entries __lens.Lens[GrepScope, []FileEntry]
+	// DirO is a [__lens_option.LensO] for the Dir field of [GrepScope], treating the zero value as absent
+	DirO __lens_option.LensO[GrepScope, string]
+}
+
+// GrepScopeRefLenses provides [lenses] for accessing fields of [GrepScope] via a pointer to [GrepScope]
+//
+// [lenses]: __lens.Lens
+type GrepScopeRefLenses struct {
+	// Dir is a [__lens.Lens] for the Dir field of [GrepScope] via a pointer receiver
+	Dir __lens.Lens[*GrepScope, string]
+	// Entries is a [__lens.Lens] for the Entries field of [GrepScope] via a pointer receiver
+	Entries __lens.Lens[*GrepScope, []FileEntry]
+	// DirO is a [__lens_option.LensO] for the Dir field of [GrepScope] via a pointer receiver, treating the zero value as absent
+	DirO __lens_option.LensO[*GrepScope, string]
+}
+
+// GrepScopePrisms provides [prisms] for accessing fields of [GrepScope]
+//
+// [prisms]: __prism.Prism
+type GrepScopePrisms struct {
+	// Dir is a [__prism.Prism] for the Dir field of [GrepScope]
+	Dir __prism.Prism[GrepScope, string]
+	// Entries is a [__prism.Prism] for the Entries field of [GrepScope]
+	Entries __prism.Prism[GrepScope, []FileEntry]
+}
+
+// GrepScopeRefPrisms provides [prisms] for accessing fields of [GrepScope] via a pointer to [GrepScope]
+//
+// [prisms]: __prism.Prism
+type GrepScopeRefPrisms struct {
+	// Dir is a [__prism.Prism] for the Dir field of [GrepScope] via a pointer receiver
+	Dir __prism.Prism[*GrepScope, string]
+	// Entries is a [__prism.Prism] for the Entries field of [GrepScope] via a pointer receiver
+	Entries __prism.Prism[*GrepScope, []FileEntry]
+}
+
+// MakeGrepScopeDirLens returns a [__lens.Lens] for the Dir field of [GrepScope]
+func MakeGrepScopeDirLens() __lens.Lens[GrepScope, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepScope) string { return s.Dir },
+		func(s GrepScope, v string) GrepScope { s.Dir = v; return s },
+		"GrepScope.Dir",
+	)
+}
+
+// MakeGrepScopeDirLensO returns a [__lens_option.LensO] for the Dir field of [GrepScope]
+func MakeGrepScopeDirLensO() __lens_option.LensO[GrepScope, string] {
+	return __lens_option.FromIso[GrepScope](__iso_option.FromZero[string]())(MakeGrepScopeDirLens())
+}
+
+// MakeGrepScopeDirRefLens returns a [__lens.Lens] for the Dir field of [GrepScope] via a pointer receiver
+func MakeGrepScopeDirRefLens() __lens.Lens[*GrepScope, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepScope) string { return s.Dir },
+		func(s *GrepScope, v string) *GrepScope { s.Dir = v; return s },
+		"(*GrepScope).Dir",
+	)
+}
+
+// MakeGrepScopeDirRefLensO returns a [__lens_option.LensO] for the Dir field of [GrepScope] via a pointer receiver
+func MakeGrepScopeDirRefLensO() __lens_option.LensO[*GrepScope, string] {
+	return __lens_option.FromIso[*GrepScope](__iso_option.FromZero[string]())(MakeGrepScopeDirRefLens())
+}
+
+// MakeGrepScopeDirPrism returns a [__prism.Prism] for the Dir field of [GrepScope]
+func MakeGrepScopeDirPrism() __prism.Prism[GrepScope, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepScope) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) GrepScope {
+			return GrepScope{Dir: v}
+		},
+		"GrepScope.Dir",
+	)
+}
+
+// MakeGrepScopeDirRefPrism returns a [__prism.Prism] for the Dir field of [GrepScope] via a pointer receiver
+func MakeGrepScopeDirRefPrism() __prism.Prism[*GrepScope, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepScope) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) *GrepScope {
+			return &GrepScope{Dir: v}
+		},
+		"GrepScope.Dir",
+	)
+}
+
+// MakeGrepScopeEntriesLens returns a [__lens.Lens] for the Entries field of [GrepScope]
+func MakeGrepScopeEntriesLens() __lens.Lens[GrepScope, []FileEntry] {
+	return __lens.MakeLensWithName(
+		func(s GrepScope) []FileEntry { return s.Entries },
+		func(s GrepScope, v []FileEntry) GrepScope { s.Entries = v; return s },
+		"GrepScope.Entries",
+	)
+}
+
+// MakeGrepScopeEntriesRefLens returns a [__lens.Lens] for the Entries field of [GrepScope] via a pointer receiver
+func MakeGrepScopeEntriesRefLens() __lens.Lens[*GrepScope, []FileEntry] {
+	return __lens.MakeLensRefWithName(
+		func(s *GrepScope) []FileEntry { return s.Entries },
+		func(s *GrepScope, v []FileEntry) *GrepScope { s.Entries = v; return s },
+		"(*GrepScope).Entries",
+	)
+}
+
+// MakeGrepScopeEntriesPrism returns a [__prism.Prism] for the Entries field of [GrepScope]
+func MakeGrepScopeEntriesPrism() __prism.Prism[GrepScope, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s GrepScope) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) GrepScope {
+			return GrepScope{Entries: v}
+		},
+		"GrepScope.Entries",
+	)
+}
+
+// MakeGrepScopeEntriesRefPrism returns a [__prism.Prism] for the Entries field of [GrepScope] via a pointer receiver
+func MakeGrepScopeEntriesRefPrism() __prism.Prism[*GrepScope, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s *GrepScope) __option.Option[[]FileEntry] { return __option.Some(s.Entries) },
+		func(v []FileEntry) *GrepScope {
+			return &GrepScope{Entries: v}
+		},
+		"GrepScope.Entries",
+	)
+}
+
+// MakeGrepScopeLenses creates a new [GrepScopeLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeGrepScopeLenses() GrepScopeLenses {
+	return GrepScopeLenses{
+		// mandatory lenses
+		Dir:     MakeGrepScopeDirLens(),
+		Entries: MakeGrepScopeEntriesLens(),
+		// optional lenses
+		DirO: MakeGrepScopeDirLensO(),
+	}
+}
+
+// MakeGrepScopeRefLenses creates a new [GrepScopeRefLenses] with [lenses] for all fields via a pointer to [GrepScope]
+//
+// [lenses]: __lens.Lens
+func MakeGrepScopeRefLenses() GrepScopeRefLenses {
+	return GrepScopeRefLenses{
+		// mandatory lenses
+		Dir:     MakeGrepScopeDirRefLens(),
+		Entries: MakeGrepScopeEntriesRefLens(),
+		// optional lenses
+		DirO: MakeGrepScopeDirRefLensO(),
+	}
+}
+
+// MakeGrepScopePrisms creates a new [GrepScopePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeGrepScopePrisms() GrepScopePrisms {
+	return GrepScopePrisms{
+		Dir:     MakeGrepScopeDirPrism(),
+		Entries: MakeGrepScopeEntriesPrism(),
+	}
+}
+
+// MakeGrepScopeRefPrisms creates a new [GrepScopeRefPrisms] with [prisms] for all fields via a pointer to [GrepScope]
+//
+// [prisms]: __prism.Prism
+func MakeGrepScopeRefPrisms() GrepScopeRefPrisms {
+	return GrepScopeRefPrisms{
+		Dir:     MakeGrepScopeDirRefPrism(),
+		Entries: MakeGrepScopeEntriesRefPrism(),
+	}
+}
+
+// GrepLineLenses provides [lenses] for accessing fields of [GrepLine]
+//
+// [lenses]: __lens.Lens
+type GrepLineLenses struct {
+	// File is a [__lens.Lens] for the File field of [GrepLine]
+	File __lens.Lens[GrepLine, string]
+	// Number is a [__lens.Lens] for the Number field of [GrepLine]
+	Number __lens.Lens[GrepLine, int]
+	// Text is a [__lens.Lens] for the Text field of [GrepLine]
+	Text __lens.Lens[GrepLine, string]
+	// FileO is a [__lens_option.LensO] for the File field of [GrepLine], treating the zero value as absent
+	FileO __lens_option.LensO[GrepLine, string]
+	// NumberO is a [__lens_option.LensO] for the Number field of [GrepLine], treating the zero value as absent
+	NumberO __lens_option.LensO[GrepLine, int]
+	// TextO is a [__lens_option.LensO] for the Text field of [GrepLine], treating the zero value as absent
+	TextO __lens_option.LensO[GrepLine, string]
+}
+
+// GrepLineRefLenses provides [lenses] for accessing fields of [GrepLine] via a pointer to [GrepLine]
+//
+// [lenses]: __lens.Lens
+type GrepLineRefLenses struct {
+	// File is a [__lens.Lens] for the File field of [GrepLine] via a pointer receiver
+	File __lens.Lens[*GrepLine, string]
+	// Number is a [__lens.Lens] for the Number field of [GrepLine] via a pointer receiver
+	Number __lens.Lens[*GrepLine, int]
+	// Text is a [__lens.Lens] for the Text field of [GrepLine] via a pointer receiver
+	Text __lens.Lens[*GrepLine, string]
+	// FileO is a [__lens_option.LensO] for the File field of [GrepLine] via a pointer receiver, treating the zero value as absent
+	FileO __lens_option.LensO[*GrepLine, string]
+	// NumberO is a [__lens_option.LensO] for the Number field of [GrepLine] via a pointer receiver, treating the zero value as absent
+	NumberO __lens_option.LensO[*GrepLine, int]
+	// TextO is a [__lens_option.LensO] for the Text field of [GrepLine] via a pointer receiver, treating the zero value as absent
+	TextO __lens_option.LensO[*GrepLine, string]
+}
+
+// GrepLinePrisms provides [prisms] for accessing fields of [GrepLine]
+//
+// [prisms]: __prism.Prism
+type GrepLinePrisms struct {
+	// File is a [__prism.Prism] for the File field of [GrepLine]
+	File __prism.Prism[GrepLine, string]
+	// Number is a [__prism.Prism] for the Number field of [GrepLine]
+	Number __prism.Prism[GrepLine, int]
+	// Text is a [__prism.Prism] for the Text field of [GrepLine]
+	Text __prism.Prism[GrepLine, string]
+}
+
+// GrepLineRefPrisms provides [prisms] for accessing fields of [GrepLine] via a pointer to [GrepLine]
+//
+// [prisms]: __prism.Prism
+type GrepLineRefPrisms struct {
+	// File is a [__prism.Prism] for the File field of [GrepLine] via a pointer receiver
+	File __prism.Prism[*GrepLine, string]
+	// Number is a [__prism.Prism] for the Number field of [GrepLine] via a pointer receiver
+	Number __prism.Prism[*GrepLine, int]
+	// Text is a [__prism.Prism] for the Text field of [GrepLine] via a pointer receiver
+	Text __prism.Prism[*GrepLine, string]
+}
+
+// MakeGrepLineFileLens returns a [__lens.Lens] for the File field of [GrepLine]
+func MakeGrepLineFileLens() __lens.Lens[GrepLine, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepLine) string { return s.File },
+		func(s GrepLine, v string) GrepLine { s.File = v; return s },
+		"GrepLine.File",
+	)
+}
+
+// MakeGrepLineFileLensO returns a [__lens_option.LensO] for the File field of [GrepLine]
+func MakeGrepLineFileLensO() __lens_option.LensO[GrepLine, string] {
+	return __lens_option.FromIso[GrepLine](__iso_option.FromZero[string]())(MakeGrepLineFileLens())
+}
+
+// MakeGrepLineFileRefLens returns a [__lens.Lens] for the File field of [GrepLine] via a pointer receiver
+func MakeGrepLineFileRefLens() __lens.Lens[*GrepLine, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepLine) string { return s.File },
+		func(s *GrepLine, v string) *GrepLine { s.File = v; return s },
+		"(*GrepLine).File",
+	)
+}
+
+// MakeGrepLineFileRefLensO returns a [__lens_option.LensO] for the File field of [GrepLine] via a pointer receiver
+func MakeGrepLineFileRefLensO() __lens_option.LensO[*GrepLine, string] {
+	return __lens_option.FromIso[*GrepLine](__iso_option.FromZero[string]())(MakeGrepLineFileRefLens())
+}
+
+// MakeGrepLineFilePrism returns a [__prism.Prism] for the File field of [GrepLine]
+func MakeGrepLineFilePrism() __prism.Prism[GrepLine, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepLine) __option.Option[string] { return _fromNonZero(s.File) },
+		func(v string) GrepLine {
+			return GrepLine{File: v}
+		},
+		"GrepLine.File",
+	)
+}
+
+// MakeGrepLineFileRefPrism returns a [__prism.Prism] for the File field of [GrepLine] via a pointer receiver
+func MakeGrepLineFileRefPrism() __prism.Prism[*GrepLine, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepLine) __option.Option[string] { return _fromNonZero(s.File) },
+		func(v string) *GrepLine {
+			return &GrepLine{File: v}
+		},
+		"GrepLine.File",
+	)
+}
+
+// MakeGrepLineNumberLens returns a [__lens.Lens] for the Number field of [GrepLine]
+func MakeGrepLineNumberLens() __lens.Lens[GrepLine, int] {
+	return __lens.MakeLensWithName(
+		func(s GrepLine) int { return s.Number },
+		func(s GrepLine, v int) GrepLine { s.Number = v; return s },
+		"GrepLine.Number",
+	)
+}
+
+// MakeGrepLineNumberLensO returns a [__lens_option.LensO] for the Number field of [GrepLine]
+func MakeGrepLineNumberLensO() __lens_option.LensO[GrepLine, int] {
+	return __lens_option.FromIso[GrepLine](__iso_option.FromZero[int]())(MakeGrepLineNumberLens())
+}
+
+// MakeGrepLineNumberRefLens returns a [__lens.Lens] for the Number field of [GrepLine] via a pointer receiver
+func MakeGrepLineNumberRefLens() __lens.Lens[*GrepLine, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepLine) int { return s.Number },
+		func(s *GrepLine, v int) *GrepLine { s.Number = v; return s },
+		"(*GrepLine).Number",
+	)
+}
+
+// MakeGrepLineNumberRefLensO returns a [__lens_option.LensO] for the Number field of [GrepLine] via a pointer receiver
+func MakeGrepLineNumberRefLensO() __lens_option.LensO[*GrepLine, int] {
+	return __lens_option.FromIso[*GrepLine](__iso_option.FromZero[int]())(MakeGrepLineNumberRefLens())
+}
+
+// MakeGrepLineNumberPrism returns a [__prism.Prism] for the Number field of [GrepLine]
+func MakeGrepLineNumberPrism() __prism.Prism[GrepLine, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s GrepLine) __option.Option[int] { return _fromNonZero(s.Number) },
+		func(v int) GrepLine {
+			return GrepLine{Number: v}
+		},
+		"GrepLine.Number",
+	)
+}
+
+// MakeGrepLineNumberRefPrism returns a [__prism.Prism] for the Number field of [GrepLine] via a pointer receiver
+func MakeGrepLineNumberRefPrism() __prism.Prism[*GrepLine, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *GrepLine) __option.Option[int] { return _fromNonZero(s.Number) },
+		func(v int) *GrepLine {
+			return &GrepLine{Number: v}
+		},
+		"GrepLine.Number",
+	)
+}
+
+// MakeGrepLineTextLens returns a [__lens.Lens] for the Text field of [GrepLine]
+func MakeGrepLineTextLens() __lens.Lens[GrepLine, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepLine) string { return s.Text },
+		func(s GrepLine, v string) GrepLine { s.Text = v; return s },
+		"GrepLine.Text",
+	)
+}
+
+// MakeGrepLineTextLensO returns a [__lens_option.LensO] for the Text field of [GrepLine]
+func MakeGrepLineTextLensO() __lens_option.LensO[GrepLine, string] {
+	return __lens_option.FromIso[GrepLine](__iso_option.FromZero[string]())(MakeGrepLineTextLens())
+}
+
+// MakeGrepLineTextRefLens returns a [__lens.Lens] for the Text field of [GrepLine] via a pointer receiver
+func MakeGrepLineTextRefLens() __lens.Lens[*GrepLine, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepLine) string { return s.Text },
+		func(s *GrepLine, v string) *GrepLine { s.Text = v; return s },
+		"(*GrepLine).Text",
+	)
+}
+
+// MakeGrepLineTextRefLensO returns a [__lens_option.LensO] for the Text field of [GrepLine] via a pointer receiver
+func MakeGrepLineTextRefLensO() __lens_option.LensO[*GrepLine, string] {
+	return __lens_option.FromIso[*GrepLine](__iso_option.FromZero[string]())(MakeGrepLineTextRefLens())
+}
+
+// MakeGrepLineTextPrism returns a [__prism.Prism] for the Text field of [GrepLine]
+func MakeGrepLineTextPrism() __prism.Prism[GrepLine, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepLine) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) GrepLine {
+			return GrepLine{Text: v}
+		},
+		"GrepLine.Text",
+	)
+}
+
+// MakeGrepLineTextRefPrism returns a [__prism.Prism] for the Text field of [GrepLine] via a pointer receiver
+func MakeGrepLineTextRefPrism() __prism.Prism[*GrepLine, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepLine) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) *GrepLine {
+			return &GrepLine{Text: v}
+		},
+		"GrepLine.Text",
+	)
+}
+
+// MakeGrepLineLenses creates a new [GrepLineLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeGrepLineLenses() GrepLineLenses {
+	return GrepLineLenses{
+		// mandatory lenses
+		File:   MakeGrepLineFileLens(),
+		Number: MakeGrepLineNumberLens(),
+		Text:   MakeGrepLineTextLens(),
+		// optional lenses
+		FileO:   MakeGrepLineFileLensO(),
+		NumberO: MakeGrepLineNumberLensO(),
+		TextO:   MakeGrepLineTextLensO(),
+	}
+}
+
+// MakeGrepLineRefLenses creates a new [GrepLineRefLenses] with [lenses] for all fields via a pointer to [GrepLine]
+//
+// [lenses]: __lens.Lens
+func MakeGrepLineRefLenses() GrepLineRefLenses {
+	return GrepLineRefLenses{
+		// mandatory lenses
+		File:   MakeGrepLineFileRefLens(),
+		Number: MakeGrepLineNumberRefLens(),
+		Text:   MakeGrepLineTextRefLens(),
+		// optional lenses
+		FileO:   MakeGrepLineFileRefLensO(),
+		NumberO: MakeGrepLineNumberRefLensO(),
+		TextO:   MakeGrepLineTextRefLensO(),
+	}
+}
+
+// MakeGrepLinePrisms creates a new [GrepLinePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeGrepLinePrisms() GrepLinePrisms {
+	return GrepLinePrisms{
+		File:   MakeGrepLineFilePrism(),
+		Number: MakeGrepLineNumberPrism(),
+		Text:   MakeGrepLineTextPrism(),
+	}
+}
+
+// MakeGrepLineRefPrisms creates a new [GrepLineRefPrisms] with [prisms] for all fields via a pointer to [GrepLine]
+//
+// [prisms]: __prism.Prism
+func MakeGrepLineRefPrisms() GrepLineRefPrisms {
+	return GrepLineRefPrisms{
+		File:   MakeGrepLineFileRefPrism(),
+		Number: MakeGrepLineNumberRefPrism(),
+		Text:   MakeGrepLineTextRefPrism(),
+	}
+}
+
+// IgnoreFileLenses provides [lenses] for accessing fields of [IgnoreFile]
+//
+// [lenses]: __lens.Lens
+type IgnoreFileLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [IgnoreFile]
+	Path __lens.Lens[IgnoreFile, string]
+	// Domain is a [__lens.Lens] for the Domain field of [IgnoreFile]
+	Domain __lens.Lens[IgnoreFile, []string]
+	// PathO is a [__lens_option.LensO] for the Path field of [IgnoreFile], treating the zero value as absent
+	PathO __lens_option.LensO[IgnoreFile, string]
+}
+
+// IgnoreFileRefLenses provides [lenses] for accessing fields of [IgnoreFile] via a pointer to [IgnoreFile]
+//
+// [lenses]: __lens.Lens
+type IgnoreFileRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [IgnoreFile] via a pointer receiver
+	Path __lens.Lens[*IgnoreFile, string]
+	// Domain is a [__lens.Lens] for the Domain field of [IgnoreFile] via a pointer receiver
+	Domain __lens.Lens[*IgnoreFile, []string]
+	// PathO is a [__lens_option.LensO] for the Path field of [IgnoreFile] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*IgnoreFile, string]
+}
+
+// IgnoreFilePrisms provides [prisms] for accessing fields of [IgnoreFile]
+//
+// [prisms]: __prism.Prism
+type IgnoreFilePrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [IgnoreFile]
+	Path __prism.Prism[IgnoreFile, string]
+	// Domain is a [__prism.Prism] for the Domain field of [IgnoreFile]
+	Domain __prism.Prism[IgnoreFile, []string]
+}
+
+// IgnoreFileRefPrisms provides [prisms] for accessing fields of [IgnoreFile] via a pointer to [IgnoreFile]
+//
+// [prisms]: __prism.Prism
+type IgnoreFileRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [IgnoreFile] via a pointer receiver
+	Path __prism.Prism[*IgnoreFile, string]
+	// Domain is a [__prism.Prism] for the Domain field of [IgnoreFile] via a pointer receiver
+	Domain __prism.Prism[*IgnoreFile, []string]
+}
+
+// MakeIgnoreFilePathLens returns a [__lens.Lens] for the Path field of [IgnoreFile]
+func MakeIgnoreFilePathLens() __lens.Lens[IgnoreFile, string] {
+	return __lens.MakeLensWithName(
+		func(s IgnoreFile) string { return s.Path },
+		func(s IgnoreFile, v string) IgnoreFile { s.Path = v; return s },
+		"IgnoreFile.Path",
+	)
+}
+
+// MakeIgnoreFilePathLensO returns a [__lens_option.LensO] for the Path field of [IgnoreFile]
+func MakeIgnoreFilePathLensO() __lens_option.LensO[IgnoreFile, string] {
+	return __lens_option.FromIso[IgnoreFile](__iso_option.FromZero[string]())(MakeIgnoreFilePathLens())
+}
+
+// MakeIgnoreFilePathRefLens returns a [__lens.Lens] for the Path field of [IgnoreFile] via a pointer receiver
+func MakeIgnoreFilePathRefLens() __lens.Lens[*IgnoreFile, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *IgnoreFile) string { return s.Path },
+		func(s *IgnoreFile, v string) *IgnoreFile { s.Path = v; return s },
+		"(*IgnoreFile).Path",
+	)
+}
+
+// MakeIgnoreFilePathRefLensO returns a [__lens_option.LensO] for the Path field of [IgnoreFile] via a pointer receiver
+func MakeIgnoreFilePathRefLensO() __lens_option.LensO[*IgnoreFile, string] {
+	return __lens_option.FromIso[*IgnoreFile](__iso_option.FromZero[string]())(MakeIgnoreFilePathRefLens())
+}
+
+// MakeIgnoreFilePathPrism returns a [__prism.Prism] for the Path field of [IgnoreFile]
+func MakeIgnoreFilePathPrism() __prism.Prism[IgnoreFile, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s IgnoreFile) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) IgnoreFile {
+			return IgnoreFile{Path: v}
+		},
+		"IgnoreFile.Path",
+	)
+}
+
+// MakeIgnoreFilePathRefPrism returns a [__prism.Prism] for the Path field of [IgnoreFile] via a pointer receiver
+func MakeIgnoreFilePathRefPrism() __prism.Prism[*IgnoreFile, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *IgnoreFile) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *IgnoreFile {
+			return &IgnoreFile{Path: v}
+		},
+		"IgnoreFile.Path",
+	)
+}
+
+// MakeIgnoreFileDomainLens returns a [__lens.Lens] for the Domain field of [IgnoreFile]
+func MakeIgnoreFileDomainLens() __lens.Lens[IgnoreFile, []string] {
+	return __lens.MakeLensWithName(
+		func(s IgnoreFile) []string { return s.Domain },
+		func(s IgnoreFile, v []string) IgnoreFile { s.Domain = v; return s },
+		"IgnoreFile.Domain",
+	)
+}
+
+// MakeIgnoreFileDomainRefLens returns a [__lens.Lens] for the Domain field of [IgnoreFile] via a pointer receiver
+func MakeIgnoreFileDomainRefLens() __lens.Lens[*IgnoreFile, []string] {
+	return __lens.MakeLensRefWithName(
+		func(s *IgnoreFile) []string { return s.Domain },
+		func(s *IgnoreFile, v []string) *IgnoreFile { s.Domain = v; return s },
+		"(*IgnoreFile).Domain",
+	)
+}
+
+// MakeIgnoreFileDomainPrism returns a [__prism.Prism] for the Domain field of [IgnoreFile]
+func MakeIgnoreFileDomainPrism() __prism.Prism[IgnoreFile, []string] {
+	return __prism.MakePrismWithName(
+		func(s IgnoreFile) __option.Option[[]string] { return __option.Some(s.Domain) },
+		func(v []string) IgnoreFile {
+			return IgnoreFile{Domain: v}
+		},
+		"IgnoreFile.Domain",
+	)
+}
+
+// MakeIgnoreFileDomainRefPrism returns a [__prism.Prism] for the Domain field of [IgnoreFile] via a pointer receiver
+func MakeIgnoreFileDomainRefPrism() __prism.Prism[*IgnoreFile, []string] {
+	return __prism.MakePrismWithName(
+		func(s *IgnoreFile) __option.Option[[]string] { return __option.Some(s.Domain) },
+		func(v []string) *IgnoreFile {
+			return &IgnoreFile{Domain: v}
+		},
+		"IgnoreFile.Domain",
+	)
+}
+
+// MakeIgnoreFileLenses creates a new [IgnoreFileLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeIgnoreFileLenses() IgnoreFileLenses {
+	return IgnoreFileLenses{
+		// mandatory lenses
+		Path:   MakeIgnoreFilePathLens(),
+		Domain: MakeIgnoreFileDomainLens(),
+		// optional lenses
+		PathO: MakeIgnoreFilePathLensO(),
+	}
+}
+
+// MakeIgnoreFileRefLenses creates a new [IgnoreFileRefLenses] with [lenses] for all fields via a pointer to [IgnoreFile]
+//
+// [lenses]: __lens.Lens
+func MakeIgnoreFileRefLenses() IgnoreFileRefLenses {
+	return IgnoreFileRefLenses{
+		// mandatory lenses
+		Path:   MakeIgnoreFilePathRefLens(),
+		Domain: MakeIgnoreFileDomainRefLens(),
+		// optional lenses
+		PathO: MakeIgnoreFilePathRefLensO(),
+	}
+}
+
+// MakeIgnoreFilePrisms creates a new [IgnoreFilePrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeIgnoreFilePrisms() IgnoreFilePrisms {
+	return IgnoreFilePrisms{
+		Path:   MakeIgnoreFilePathPrism(),
+		Domain: MakeIgnoreFileDomainPrism(),
+	}
+}
+
+// MakeIgnoreFileRefPrisms creates a new [IgnoreFileRefPrisms] with [prisms] for all fields via a pointer to [IgnoreFile]
+//
+// [prisms]: __prism.Prism
+func MakeIgnoreFileRefPrisms() IgnoreFileRefPrisms {
+	return IgnoreFileRefPrisms{
+		Path:   MakeIgnoreFilePathRefPrism(),
+		Domain: MakeIgnoreFileDomainRefPrism(),
+	}
+}
+
+// GrepArgsLenses provides [lenses] for accessing fields of [GrepArgs]
+//
+// [lenses]: __lens.Lens
+type GrepArgsLenses struct {
+	// Pattern is a [__lens.Lens] for the Pattern field of [GrepArgs]
+	Pattern __lens.Lens[GrepArgs, string]
+	// Path is a [__lens.Lens] for the Path field of [GrepArgs]
+	Path __lens.Lens[GrepArgs, string]
+	// Include is a [__lens.Lens] for the Include field of [GrepArgs]
+	Include __lens.Lens[GrepArgs, string]
+	// IgnoreCase is a [__lens.Lens] for the IgnoreCase field of [GrepArgs]
+	IgnoreCase __lens.Lens[GrepArgs, bool]
+	// InvertMatch is a [__lens.Lens] for the InvertMatch field of [GrepArgs]
+	InvertMatch __lens.Lens[GrepArgs, bool]
+	// WordRegexp is a [__lens.Lens] for the WordRegexp field of [GrepArgs]
+	WordRegexp __lens.Lens[GrepArgs, bool]
+	// FilesWithMatches is a [__lens.Lens] for the FilesWithMatches field of [GrepArgs]
+	FilesWithMatches __lens.Lens[GrepArgs, bool]
+	// Regexp is a [__lens.Lens] for the Regexp field of [GrepArgs]
+	Regexp __lens.Lens[GrepArgs, *regexp.Regexp]
+	// Scope is a [__lens.Lens] for the Scope field of [GrepArgs]
+	Scope __lens.Lens[GrepArgs, GrepScope]
+	// Name is a [__lens.Lens] for the Name field of [GrepArgs]
+	Name __lens.Lens[GrepArgs, string]
+	// Ignores is a [__lens.Lens] for the Ignores field of [GrepArgs]
+	Ignores __lens.Lens[GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern]
+	// Candidates is a [__lens.Lens] for the Candidates field of [GrepArgs]
+	Candidates __lens.Lens[GrepArgs, []FileEntry]
+	// Lines is a [__lens.Lens] for the Lines field of [GrepArgs]
+	Lines __lens.Lens[GrepArgs, []GrepLine]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [GrepArgs], treating the zero value as absent
+	PatternO __lens_option.LensO[GrepArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [GrepArgs], treating the zero value as absent
+	PathO __lens_option.LensO[GrepArgs, string]
+	// IncludeO is a [__lens_option.LensO] for the Include field of [GrepArgs], treating the zero value as absent
+	IncludeO __lens_option.LensO[GrepArgs, string]
+	// IgnoreCaseO is a [__lens_option.LensO] for the IgnoreCase field of [GrepArgs], treating the zero value as absent
+	IgnoreCaseO __lens_option.LensO[GrepArgs, bool]
+	// InvertMatchO is a [__lens_option.LensO] for the InvertMatch field of [GrepArgs], treating the zero value as absent
+	InvertMatchO __lens_option.LensO[GrepArgs, bool]
+	// WordRegexpO is a [__lens_option.LensO] for the WordRegexp field of [GrepArgs], treating the zero value as absent
+	WordRegexpO __lens_option.LensO[GrepArgs, bool]
+	// FilesWithMatchesO is a [__lens_option.LensO] for the FilesWithMatches field of [GrepArgs], treating the zero value as absent
+	FilesWithMatchesO __lens_option.LensO[GrepArgs, bool]
+	// RegexpO is a [__lens_option.LensO] for the Regexp field of [GrepArgs], treating the zero value as absent
+	RegexpO __lens_option.LensO[GrepArgs, *regexp.Regexp]
+	// NameO is a [__lens_option.LensO] for the Name field of [GrepArgs], treating the zero value as absent
+	NameO __lens_option.LensO[GrepArgs, string]
+}
+
+// GrepArgsRefLenses provides [lenses] for accessing fields of [GrepArgs] via a pointer to [GrepArgs]
+//
+// [lenses]: __lens.Lens
+type GrepArgsRefLenses struct {
+	// Pattern is a [__lens.Lens] for the Pattern field of [GrepArgs] via a pointer receiver
+	Pattern __lens.Lens[*GrepArgs, string]
+	// Path is a [__lens.Lens] for the Path field of [GrepArgs] via a pointer receiver
+	Path __lens.Lens[*GrepArgs, string]
+	// Include is a [__lens.Lens] for the Include field of [GrepArgs] via a pointer receiver
+	Include __lens.Lens[*GrepArgs, string]
+	// IgnoreCase is a [__lens.Lens] for the IgnoreCase field of [GrepArgs] via a pointer receiver
+	IgnoreCase __lens.Lens[*GrepArgs, bool]
+	// InvertMatch is a [__lens.Lens] for the InvertMatch field of [GrepArgs] via a pointer receiver
+	InvertMatch __lens.Lens[*GrepArgs, bool]
+	// WordRegexp is a [__lens.Lens] for the WordRegexp field of [GrepArgs] via a pointer receiver
+	WordRegexp __lens.Lens[*GrepArgs, bool]
+	// FilesWithMatches is a [__lens.Lens] for the FilesWithMatches field of [GrepArgs] via a pointer receiver
+	FilesWithMatches __lens.Lens[*GrepArgs, bool]
+	// Regexp is a [__lens.Lens] for the Regexp field of [GrepArgs] via a pointer receiver
+	Regexp __lens.Lens[*GrepArgs, *regexp.Regexp]
+	// Scope is a [__lens.Lens] for the Scope field of [GrepArgs] via a pointer receiver
+	Scope __lens.Lens[*GrepArgs, GrepScope]
+	// Name is a [__lens.Lens] for the Name field of [GrepArgs] via a pointer receiver
+	Name __lens.Lens[*GrepArgs, string]
+	// Ignores is a [__lens.Lens] for the Ignores field of [GrepArgs] via a pointer receiver
+	Ignores __lens.Lens[*GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern]
+	// Candidates is a [__lens.Lens] for the Candidates field of [GrepArgs] via a pointer receiver
+	Candidates __lens.Lens[*GrepArgs, []FileEntry]
+	// Lines is a [__lens.Lens] for the Lines field of [GrepArgs] via a pointer receiver
+	Lines __lens.Lens[*GrepArgs, []GrepLine]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	PatternO __lens_option.LensO[*GrepArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*GrepArgs, string]
+	// IncludeO is a [__lens_option.LensO] for the Include field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	IncludeO __lens_option.LensO[*GrepArgs, string]
+	// IgnoreCaseO is a [__lens_option.LensO] for the IgnoreCase field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	IgnoreCaseO __lens_option.LensO[*GrepArgs, bool]
+	// InvertMatchO is a [__lens_option.LensO] for the InvertMatch field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	InvertMatchO __lens_option.LensO[*GrepArgs, bool]
+	// WordRegexpO is a [__lens_option.LensO] for the WordRegexp field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	WordRegexpO __lens_option.LensO[*GrepArgs, bool]
+	// FilesWithMatchesO is a [__lens_option.LensO] for the FilesWithMatches field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	FilesWithMatchesO __lens_option.LensO[*GrepArgs, bool]
+	// RegexpO is a [__lens_option.LensO] for the Regexp field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	RegexpO __lens_option.LensO[*GrepArgs, *regexp.Regexp]
+	// NameO is a [__lens_option.LensO] for the Name field of [GrepArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*GrepArgs, string]
+}
+
+// GrepArgsPrisms provides [prisms] for accessing fields of [GrepArgs]
+//
+// [prisms]: __prism.Prism
+type GrepArgsPrisms struct {
+	// Pattern is a [__prism.Prism] for the Pattern field of [GrepArgs]
+	Pattern __prism.Prism[GrepArgs, string]
+	// Path is a [__prism.Prism] for the Path field of [GrepArgs]
+	Path __prism.Prism[GrepArgs, string]
+	// Include is a [__prism.Prism] for the Include field of [GrepArgs]
+	Include __prism.Prism[GrepArgs, string]
+	// IgnoreCase is a [__prism.Prism] for the IgnoreCase field of [GrepArgs]
+	IgnoreCase __prism.Prism[GrepArgs, bool]
+	// InvertMatch is a [__prism.Prism] for the InvertMatch field of [GrepArgs]
+	InvertMatch __prism.Prism[GrepArgs, bool]
+	// WordRegexp is a [__prism.Prism] for the WordRegexp field of [GrepArgs]
+	WordRegexp __prism.Prism[GrepArgs, bool]
+	// FilesWithMatches is a [__prism.Prism] for the FilesWithMatches field of [GrepArgs]
+	FilesWithMatches __prism.Prism[GrepArgs, bool]
+	// Regexp is a [__prism.Prism] for the Regexp field of [GrepArgs]
+	Regexp __prism.Prism[GrepArgs, *regexp.Regexp]
+	// Scope is a [__prism.Prism] for the Scope field of [GrepArgs]
+	Scope __prism.Prism[GrepArgs, GrepScope]
+	// Name is a [__prism.Prism] for the Name field of [GrepArgs]
+	Name __prism.Prism[GrepArgs, string]
+	// Ignores is a [__prism.Prism] for the Ignores field of [GrepArgs]
+	Ignores __prism.Prism[GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern]
+	// Candidates is a [__prism.Prism] for the Candidates field of [GrepArgs]
+	Candidates __prism.Prism[GrepArgs, []FileEntry]
+	// Lines is a [__prism.Prism] for the Lines field of [GrepArgs]
+	Lines __prism.Prism[GrepArgs, []GrepLine]
+}
+
+// GrepArgsRefPrisms provides [prisms] for accessing fields of [GrepArgs] via a pointer to [GrepArgs]
+//
+// [prisms]: __prism.Prism
+type GrepArgsRefPrisms struct {
+	// Pattern is a [__prism.Prism] for the Pattern field of [GrepArgs] via a pointer receiver
+	Pattern __prism.Prism[*GrepArgs, string]
+	// Path is a [__prism.Prism] for the Path field of [GrepArgs] via a pointer receiver
+	Path __prism.Prism[*GrepArgs, string]
+	// Include is a [__prism.Prism] for the Include field of [GrepArgs] via a pointer receiver
+	Include __prism.Prism[*GrepArgs, string]
+	// IgnoreCase is a [__prism.Prism] for the IgnoreCase field of [GrepArgs] via a pointer receiver
+	IgnoreCase __prism.Prism[*GrepArgs, bool]
+	// InvertMatch is a [__prism.Prism] for the InvertMatch field of [GrepArgs] via a pointer receiver
+	InvertMatch __prism.Prism[*GrepArgs, bool]
+	// WordRegexp is a [__prism.Prism] for the WordRegexp field of [GrepArgs] via a pointer receiver
+	WordRegexp __prism.Prism[*GrepArgs, bool]
+	// FilesWithMatches is a [__prism.Prism] for the FilesWithMatches field of [GrepArgs] via a pointer receiver
+	FilesWithMatches __prism.Prism[*GrepArgs, bool]
+	// Regexp is a [__prism.Prism] for the Regexp field of [GrepArgs] via a pointer receiver
+	Regexp __prism.Prism[*GrepArgs, *regexp.Regexp]
+	// Scope is a [__prism.Prism] for the Scope field of [GrepArgs] via a pointer receiver
+	Scope __prism.Prism[*GrepArgs, GrepScope]
+	// Name is a [__prism.Prism] for the Name field of [GrepArgs] via a pointer receiver
+	Name __prism.Prism[*GrepArgs, string]
+	// Ignores is a [__prism.Prism] for the Ignores field of [GrepArgs] via a pointer receiver
+	Ignores __prism.Prism[*GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern]
+	// Candidates is a [__prism.Prism] for the Candidates field of [GrepArgs] via a pointer receiver
+	Candidates __prism.Prism[*GrepArgs, []FileEntry]
+	// Lines is a [__prism.Prism] for the Lines field of [GrepArgs] via a pointer receiver
+	Lines __prism.Prism[*GrepArgs, []GrepLine]
+}
+
+// MakeGrepArgsPatternLens returns a [__lens.Lens] for the Pattern field of [GrepArgs]
+func MakeGrepArgsPatternLens() __lens.Lens[GrepArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) string { return s.Pattern },
+		func(s GrepArgs, v string) GrepArgs { s.Pattern = v; return s },
+		"GrepArgs.Pattern",
+	)
+}
+
+// MakeGrepArgsPatternLensO returns a [__lens_option.LensO] for the Pattern field of [GrepArgs]
+func MakeGrepArgsPatternLensO() __lens_option.LensO[GrepArgs, string] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsPatternLens())
+}
+
+// MakeGrepArgsPatternRefLens returns a [__lens.Lens] for the Pattern field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPatternRefLens() __lens.Lens[*GrepArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) string { return s.Pattern },
+		func(s *GrepArgs, v string) *GrepArgs { s.Pattern = v; return s },
+		"(*GrepArgs).Pattern",
+	)
+}
+
+// MakeGrepArgsPatternRefLensO returns a [__lens_option.LensO] for the Pattern field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPatternRefLensO() __lens_option.LensO[*GrepArgs, string] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsPatternRefLens())
+}
+
+// MakeGrepArgsPatternPrism returns a [__prism.Prism] for the Pattern field of [GrepArgs]
+func MakeGrepArgsPatternPrism() __prism.Prism[GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[string] { return _fromNonZero(s.Pattern) },
+		func(v string) GrepArgs {
+			return GrepArgs{Pattern: v}
+		},
+		"GrepArgs.Pattern",
+	)
+}
+
+// MakeGrepArgsPatternRefPrism returns a [__prism.Prism] for the Pattern field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPatternRefPrism() __prism.Prism[*GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[string] { return _fromNonZero(s.Pattern) },
+		func(v string) *GrepArgs {
+			return &GrepArgs{Pattern: v}
+		},
+		"GrepArgs.Pattern",
+	)
+}
+
+// MakeGrepArgsPathLens returns a [__lens.Lens] for the Path field of [GrepArgs]
+func MakeGrepArgsPathLens() __lens.Lens[GrepArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) string { return s.Path },
+		func(s GrepArgs, v string) GrepArgs { s.Path = v; return s },
+		"GrepArgs.Path",
+	)
+}
+
+// MakeGrepArgsPathLensO returns a [__lens_option.LensO] for the Path field of [GrepArgs]
+func MakeGrepArgsPathLensO() __lens_option.LensO[GrepArgs, string] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsPathLens())
+}
+
+// MakeGrepArgsPathRefLens returns a [__lens.Lens] for the Path field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPathRefLens() __lens.Lens[*GrepArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) string { return s.Path },
+		func(s *GrepArgs, v string) *GrepArgs { s.Path = v; return s },
+		"(*GrepArgs).Path",
+	)
+}
+
+// MakeGrepArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPathRefLensO() __lens_option.LensO[*GrepArgs, string] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsPathRefLens())
+}
+
+// MakeGrepArgsPathPrism returns a [__prism.Prism] for the Path field of [GrepArgs]
+func MakeGrepArgsPathPrism() __prism.Prism[GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) GrepArgs {
+			return GrepArgs{Path: v}
+		},
+		"GrepArgs.Path",
+	)
+}
+
+// MakeGrepArgsPathRefPrism returns a [__prism.Prism] for the Path field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsPathRefPrism() __prism.Prism[*GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *GrepArgs {
+			return &GrepArgs{Path: v}
+		},
+		"GrepArgs.Path",
+	)
+}
+
+// MakeGrepArgsIncludeLens returns a [__lens.Lens] for the Include field of [GrepArgs]
+func MakeGrepArgsIncludeLens() __lens.Lens[GrepArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) string { return s.Include },
+		func(s GrepArgs, v string) GrepArgs { s.Include = v; return s },
+		"GrepArgs.Include",
+	)
+}
+
+// MakeGrepArgsIncludeLensO returns a [__lens_option.LensO] for the Include field of [GrepArgs]
+func MakeGrepArgsIncludeLensO() __lens_option.LensO[GrepArgs, string] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsIncludeLens())
+}
+
+// MakeGrepArgsIncludeRefLens returns a [__lens.Lens] for the Include field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIncludeRefLens() __lens.Lens[*GrepArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) string { return s.Include },
+		func(s *GrepArgs, v string) *GrepArgs { s.Include = v; return s },
+		"(*GrepArgs).Include",
+	)
+}
+
+// MakeGrepArgsIncludeRefLensO returns a [__lens_option.LensO] for the Include field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIncludeRefLensO() __lens_option.LensO[*GrepArgs, string] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsIncludeRefLens())
+}
+
+// MakeGrepArgsIncludePrism returns a [__prism.Prism] for the Include field of [GrepArgs]
+func MakeGrepArgsIncludePrism() __prism.Prism[GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[string] { return _fromNonZero(s.Include) },
+		func(v string) GrepArgs {
+			return GrepArgs{Include: v}
+		},
+		"GrepArgs.Include",
+	)
+}
+
+// MakeGrepArgsIncludeRefPrism returns a [__prism.Prism] for the Include field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIncludeRefPrism() __prism.Prism[*GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[string] { return _fromNonZero(s.Include) },
+		func(v string) *GrepArgs {
+			return &GrepArgs{Include: v}
+		},
+		"GrepArgs.Include",
+	)
+}
+
+// MakeGrepArgsIgnoreCaseLens returns a [__lens.Lens] for the IgnoreCase field of [GrepArgs]
+func MakeGrepArgsIgnoreCaseLens() __lens.Lens[GrepArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) bool { return s.IgnoreCase },
+		func(s GrepArgs, v bool) GrepArgs { s.IgnoreCase = v; return s },
+		"GrepArgs.IgnoreCase",
+	)
+}
+
+// MakeGrepArgsIgnoreCaseLensO returns a [__lens_option.LensO] for the IgnoreCase field of [GrepArgs]
+func MakeGrepArgsIgnoreCaseLensO() __lens_option.LensO[GrepArgs, bool] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsIgnoreCaseLens())
+}
+
+// MakeGrepArgsIgnoreCaseRefLens returns a [__lens.Lens] for the IgnoreCase field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIgnoreCaseRefLens() __lens.Lens[*GrepArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) bool { return s.IgnoreCase },
+		func(s *GrepArgs, v bool) *GrepArgs { s.IgnoreCase = v; return s },
+		"(*GrepArgs).IgnoreCase",
+	)
+}
+
+// MakeGrepArgsIgnoreCaseRefLensO returns a [__lens_option.LensO] for the IgnoreCase field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIgnoreCaseRefLensO() __lens_option.LensO[*GrepArgs, bool] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsIgnoreCaseRefLens())
+}
+
+// MakeGrepArgsIgnoreCasePrism returns a [__prism.Prism] for the IgnoreCase field of [GrepArgs]
+func MakeGrepArgsIgnoreCasePrism() __prism.Prism[GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[bool] { return _fromNonZero(s.IgnoreCase) },
+		func(v bool) GrepArgs {
+			return GrepArgs{IgnoreCase: v}
+		},
+		"GrepArgs.IgnoreCase",
+	)
+}
+
+// MakeGrepArgsIgnoreCaseRefPrism returns a [__prism.Prism] for the IgnoreCase field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIgnoreCaseRefPrism() __prism.Prism[*GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[bool] { return _fromNonZero(s.IgnoreCase) },
+		func(v bool) *GrepArgs {
+			return &GrepArgs{IgnoreCase: v}
+		},
+		"GrepArgs.IgnoreCase",
+	)
+}
+
+// MakeGrepArgsInvertMatchLens returns a [__lens.Lens] for the InvertMatch field of [GrepArgs]
+func MakeGrepArgsInvertMatchLens() __lens.Lens[GrepArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) bool { return s.InvertMatch },
+		func(s GrepArgs, v bool) GrepArgs { s.InvertMatch = v; return s },
+		"GrepArgs.InvertMatch",
+	)
+}
+
+// MakeGrepArgsInvertMatchLensO returns a [__lens_option.LensO] for the InvertMatch field of [GrepArgs]
+func MakeGrepArgsInvertMatchLensO() __lens_option.LensO[GrepArgs, bool] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsInvertMatchLens())
+}
+
+// MakeGrepArgsInvertMatchRefLens returns a [__lens.Lens] for the InvertMatch field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsInvertMatchRefLens() __lens.Lens[*GrepArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) bool { return s.InvertMatch },
+		func(s *GrepArgs, v bool) *GrepArgs { s.InvertMatch = v; return s },
+		"(*GrepArgs).InvertMatch",
+	)
+}
+
+// MakeGrepArgsInvertMatchRefLensO returns a [__lens_option.LensO] for the InvertMatch field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsInvertMatchRefLensO() __lens_option.LensO[*GrepArgs, bool] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsInvertMatchRefLens())
+}
+
+// MakeGrepArgsInvertMatchPrism returns a [__prism.Prism] for the InvertMatch field of [GrepArgs]
+func MakeGrepArgsInvertMatchPrism() __prism.Prism[GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[bool] { return _fromNonZero(s.InvertMatch) },
+		func(v bool) GrepArgs {
+			return GrepArgs{InvertMatch: v}
+		},
+		"GrepArgs.InvertMatch",
+	)
+}
+
+// MakeGrepArgsInvertMatchRefPrism returns a [__prism.Prism] for the InvertMatch field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsInvertMatchRefPrism() __prism.Prism[*GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[bool] { return _fromNonZero(s.InvertMatch) },
+		func(v bool) *GrepArgs {
+			return &GrepArgs{InvertMatch: v}
+		},
+		"GrepArgs.InvertMatch",
+	)
+}
+
+// MakeGrepArgsWordRegexpLens returns a [__lens.Lens] for the WordRegexp field of [GrepArgs]
+func MakeGrepArgsWordRegexpLens() __lens.Lens[GrepArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) bool { return s.WordRegexp },
+		func(s GrepArgs, v bool) GrepArgs { s.WordRegexp = v; return s },
+		"GrepArgs.WordRegexp",
+	)
+}
+
+// MakeGrepArgsWordRegexpLensO returns a [__lens_option.LensO] for the WordRegexp field of [GrepArgs]
+func MakeGrepArgsWordRegexpLensO() __lens_option.LensO[GrepArgs, bool] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsWordRegexpLens())
+}
+
+// MakeGrepArgsWordRegexpRefLens returns a [__lens.Lens] for the WordRegexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsWordRegexpRefLens() __lens.Lens[*GrepArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) bool { return s.WordRegexp },
+		func(s *GrepArgs, v bool) *GrepArgs { s.WordRegexp = v; return s },
+		"(*GrepArgs).WordRegexp",
+	)
+}
+
+// MakeGrepArgsWordRegexpRefLensO returns a [__lens_option.LensO] for the WordRegexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsWordRegexpRefLensO() __lens_option.LensO[*GrepArgs, bool] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsWordRegexpRefLens())
+}
+
+// MakeGrepArgsWordRegexpPrism returns a [__prism.Prism] for the WordRegexp field of [GrepArgs]
+func MakeGrepArgsWordRegexpPrism() __prism.Prism[GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[bool] { return _fromNonZero(s.WordRegexp) },
+		func(v bool) GrepArgs {
+			return GrepArgs{WordRegexp: v}
+		},
+		"GrepArgs.WordRegexp",
+	)
+}
+
+// MakeGrepArgsWordRegexpRefPrism returns a [__prism.Prism] for the WordRegexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsWordRegexpRefPrism() __prism.Prism[*GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[bool] { return _fromNonZero(s.WordRegexp) },
+		func(v bool) *GrepArgs {
+			return &GrepArgs{WordRegexp: v}
+		},
+		"GrepArgs.WordRegexp",
+	)
+}
+
+// MakeGrepArgsFilesWithMatchesLens returns a [__lens.Lens] for the FilesWithMatches field of [GrepArgs]
+func MakeGrepArgsFilesWithMatchesLens() __lens.Lens[GrepArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) bool { return s.FilesWithMatches },
+		func(s GrepArgs, v bool) GrepArgs { s.FilesWithMatches = v; return s },
+		"GrepArgs.FilesWithMatches",
+	)
+}
+
+// MakeGrepArgsFilesWithMatchesLensO returns a [__lens_option.LensO] for the FilesWithMatches field of [GrepArgs]
+func MakeGrepArgsFilesWithMatchesLensO() __lens_option.LensO[GrepArgs, bool] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsFilesWithMatchesLens())
+}
+
+// MakeGrepArgsFilesWithMatchesRefLens returns a [__lens.Lens] for the FilesWithMatches field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsFilesWithMatchesRefLens() __lens.Lens[*GrepArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) bool { return s.FilesWithMatches },
+		func(s *GrepArgs, v bool) *GrepArgs { s.FilesWithMatches = v; return s },
+		"(*GrepArgs).FilesWithMatches",
+	)
+}
+
+// MakeGrepArgsFilesWithMatchesRefLensO returns a [__lens_option.LensO] for the FilesWithMatches field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsFilesWithMatchesRefLensO() __lens_option.LensO[*GrepArgs, bool] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[bool]())(MakeGrepArgsFilesWithMatchesRefLens())
+}
+
+// MakeGrepArgsFilesWithMatchesPrism returns a [__prism.Prism] for the FilesWithMatches field of [GrepArgs]
+func MakeGrepArgsFilesWithMatchesPrism() __prism.Prism[GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[bool] { return _fromNonZero(s.FilesWithMatches) },
+		func(v bool) GrepArgs {
+			return GrepArgs{FilesWithMatches: v}
+		},
+		"GrepArgs.FilesWithMatches",
+	)
+}
+
+// MakeGrepArgsFilesWithMatchesRefPrism returns a [__prism.Prism] for the FilesWithMatches field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsFilesWithMatchesRefPrism() __prism.Prism[*GrepArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[bool] { return _fromNonZero(s.FilesWithMatches) },
+		func(v bool) *GrepArgs {
+			return &GrepArgs{FilesWithMatches: v}
+		},
+		"GrepArgs.FilesWithMatches",
+	)
+}
+
+// MakeGrepArgsRegexpLens returns a [__lens.Lens] for the Regexp field of [GrepArgs]
+func MakeGrepArgsRegexpLens() __lens.Lens[GrepArgs, *regexp.Regexp] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) *regexp.Regexp { return s.Regexp },
+		func(s GrepArgs, v *regexp.Regexp) GrepArgs { s.Regexp = v; return s },
+		"GrepArgs.Regexp",
+	)
+}
+
+// MakeGrepArgsRegexpLensO returns a [__lens_option.LensO] for the Regexp field of [GrepArgs]
+func MakeGrepArgsRegexpLensO() __lens_option.LensO[GrepArgs, *regexp.Regexp] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[*regexp.Regexp]())(MakeGrepArgsRegexpLens())
+}
+
+// MakeGrepArgsRegexpRefLens returns a [__lens.Lens] for the Regexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsRegexpRefLens() __lens.Lens[*GrepArgs, *regexp.Regexp] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) *regexp.Regexp { return s.Regexp },
+		func(s *GrepArgs, v *regexp.Regexp) *GrepArgs { s.Regexp = v; return s },
+		"(*GrepArgs).Regexp",
+	)
+}
+
+// MakeGrepArgsRegexpRefLensO returns a [__lens_option.LensO] for the Regexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsRegexpRefLensO() __lens_option.LensO[*GrepArgs, *regexp.Regexp] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[*regexp.Regexp]())(MakeGrepArgsRegexpRefLens())
+}
+
+// MakeGrepArgsRegexpPrism returns a [__prism.Prism] for the Regexp field of [GrepArgs]
+func MakeGrepArgsRegexpPrism() __prism.Prism[GrepArgs, *regexp.Regexp] {
+	_fromNonZero := __option.FromNonZero[*regexp.Regexp]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[*regexp.Regexp] { return _fromNonZero(s.Regexp) },
+		func(v *regexp.Regexp) GrepArgs {
+			return GrepArgs{Regexp: v}
+		},
+		"GrepArgs.Regexp",
+	)
+}
+
+// MakeGrepArgsRegexpRefPrism returns a [__prism.Prism] for the Regexp field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsRegexpRefPrism() __prism.Prism[*GrepArgs, *regexp.Regexp] {
+	_fromNonZero := __option.FromNonZero[*regexp.Regexp]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[*regexp.Regexp] { return _fromNonZero(s.Regexp) },
+		func(v *regexp.Regexp) *GrepArgs {
+			return &GrepArgs{Regexp: v}
+		},
+		"GrepArgs.Regexp",
+	)
+}
+
+// MakeGrepArgsScopeLens returns a [__lens.Lens] for the Scope field of [GrepArgs]
+func MakeGrepArgsScopeLens() __lens.Lens[GrepArgs, GrepScope] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) GrepScope { return s.Scope },
+		func(s GrepArgs, v GrepScope) GrepArgs { s.Scope = v; return s },
+		"GrepArgs.Scope",
+	)
+}
+
+// MakeGrepArgsScopeRefLens returns a [__lens.Lens] for the Scope field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsScopeRefLens() __lens.Lens[*GrepArgs, GrepScope] {
+	return __lens.MakeLensRefWithName(
+		func(s *GrepArgs) GrepScope { return s.Scope },
+		func(s *GrepArgs, v GrepScope) *GrepArgs { s.Scope = v; return s },
+		"(*GrepArgs).Scope",
+	)
+}
+
+// MakeGrepArgsScopePrism returns a [__prism.Prism] for the Scope field of [GrepArgs]
+func MakeGrepArgsScopePrism() __prism.Prism[GrepArgs, GrepScope] {
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[GrepScope] { return __option.Some(s.Scope) },
+		func(v GrepScope) GrepArgs {
+			return GrepArgs{Scope: v}
+		},
+		"GrepArgs.Scope",
+	)
+}
+
+// MakeGrepArgsScopeRefPrism returns a [__prism.Prism] for the Scope field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsScopeRefPrism() __prism.Prism[*GrepArgs, GrepScope] {
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[GrepScope] { return __option.Some(s.Scope) },
+		func(v GrepScope) *GrepArgs {
+			return &GrepArgs{Scope: v}
+		},
+		"GrepArgs.Scope",
+	)
+}
+
+// MakeGrepArgsNameLens returns a [__lens.Lens] for the Name field of [GrepArgs]
+func MakeGrepArgsNameLens() __lens.Lens[GrepArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) string { return s.Name },
+		func(s GrepArgs, v string) GrepArgs { s.Name = v; return s },
+		"GrepArgs.Name",
+	)
+}
+
+// MakeGrepArgsNameLensO returns a [__lens_option.LensO] for the Name field of [GrepArgs]
+func MakeGrepArgsNameLensO() __lens_option.LensO[GrepArgs, string] {
+	return __lens_option.FromIso[GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsNameLens())
+}
+
+// MakeGrepArgsNameRefLens returns a [__lens.Lens] for the Name field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsNameRefLens() __lens.Lens[*GrepArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *GrepArgs) string { return s.Name },
+		func(s *GrepArgs, v string) *GrepArgs { s.Name = v; return s },
+		"(*GrepArgs).Name",
+	)
+}
+
+// MakeGrepArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsNameRefLensO() __lens_option.LensO[*GrepArgs, string] {
+	return __lens_option.FromIso[*GrepArgs](__iso_option.FromZero[string]())(MakeGrepArgsNameRefLens())
+}
+
+// MakeGrepArgsNamePrism returns a [__prism.Prism] for the Name field of [GrepArgs]
+func MakeGrepArgsNamePrism() __prism.Prism[GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) GrepArgs {
+			return GrepArgs{Name: v}
+		},
+		"GrepArgs.Name",
+	)
+}
+
+// MakeGrepArgsNameRefPrism returns a [__prism.Prism] for the Name field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsNameRefPrism() __prism.Prism[*GrepArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *GrepArgs {
+			return &GrepArgs{Name: v}
+		},
+		"GrepArgs.Name",
+	)
+}
+
+// MakeGrepArgsIgnoresLens returns a [__lens.Lens] for the Ignores field of [GrepArgs]
+func MakeGrepArgsIgnoresLens() __lens.Lens[GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern { return s.Ignores },
+		func(s GrepArgs, v []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern) GrepArgs {
+			s.Ignores = v
+			return s
+		},
+		"GrepArgs.Ignores",
+	)
+}
+
+// MakeGrepArgsIgnoresRefLens returns a [__lens.Lens] for the Ignores field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIgnoresRefLens() __lens.Lens[*GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+	return __lens.MakeLensRefWithName(
+		func(s *GrepArgs) []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern { return s.Ignores },
+		func(s *GrepArgs, v []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern) *GrepArgs {
+			s.Ignores = v
+			return s
+		},
+		"(*GrepArgs).Ignores",
+	)
+}
+
+// MakeGrepArgsIgnoresPrism returns a [__prism.Prism] for the Ignores field of [GrepArgs]
+func MakeGrepArgsIgnoresPrism() __prism.Prism[GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[[]github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+			return __option.Some(s.Ignores)
+		},
+		func(v []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern) GrepArgs {
+			return GrepArgs{Ignores: v}
+		},
+		"GrepArgs.Ignores",
+	)
+}
+
+// MakeGrepArgsIgnoresRefPrism returns a [__prism.Prism] for the Ignores field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsIgnoresRefPrism() __prism.Prism[*GrepArgs, []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[[]github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern] {
+			return __option.Some(s.Ignores)
+		},
+		func(v []github_com_go_git_go_git_v5_plumbing_format_gitignore.Pattern) *GrepArgs {
+			return &GrepArgs{Ignores: v}
+		},
+		"GrepArgs.Ignores",
+	)
+}
+
+// MakeGrepArgsCandidatesLens returns a [__lens.Lens] for the Candidates field of [GrepArgs]
+func MakeGrepArgsCandidatesLens() __lens.Lens[GrepArgs, []FileEntry] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) []FileEntry { return s.Candidates },
+		func(s GrepArgs, v []FileEntry) GrepArgs { s.Candidates = v; return s },
+		"GrepArgs.Candidates",
+	)
+}
+
+// MakeGrepArgsCandidatesRefLens returns a [__lens.Lens] for the Candidates field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsCandidatesRefLens() __lens.Lens[*GrepArgs, []FileEntry] {
+	return __lens.MakeLensRefWithName(
+		func(s *GrepArgs) []FileEntry { return s.Candidates },
+		func(s *GrepArgs, v []FileEntry) *GrepArgs { s.Candidates = v; return s },
+		"(*GrepArgs).Candidates",
+	)
+}
+
+// MakeGrepArgsCandidatesPrism returns a [__prism.Prism] for the Candidates field of [GrepArgs]
+func MakeGrepArgsCandidatesPrism() __prism.Prism[GrepArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[[]FileEntry] { return __option.Some(s.Candidates) },
+		func(v []FileEntry) GrepArgs {
+			return GrepArgs{Candidates: v}
+		},
+		"GrepArgs.Candidates",
+	)
+}
+
+// MakeGrepArgsCandidatesRefPrism returns a [__prism.Prism] for the Candidates field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsCandidatesRefPrism() __prism.Prism[*GrepArgs, []FileEntry] {
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[[]FileEntry] { return __option.Some(s.Candidates) },
+		func(v []FileEntry) *GrepArgs {
+			return &GrepArgs{Candidates: v}
+		},
+		"GrepArgs.Candidates",
+	)
+}
+
+// MakeGrepArgsLinesLens returns a [__lens.Lens] for the Lines field of [GrepArgs]
+func MakeGrepArgsLinesLens() __lens.Lens[GrepArgs, []GrepLine] {
+	return __lens.MakeLensWithName(
+		func(s GrepArgs) []GrepLine { return s.Lines },
+		func(s GrepArgs, v []GrepLine) GrepArgs { s.Lines = v; return s },
+		"GrepArgs.Lines",
+	)
+}
+
+// MakeGrepArgsLinesRefLens returns a [__lens.Lens] for the Lines field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsLinesRefLens() __lens.Lens[*GrepArgs, []GrepLine] {
+	return __lens.MakeLensRefWithName(
+		func(s *GrepArgs) []GrepLine { return s.Lines },
+		func(s *GrepArgs, v []GrepLine) *GrepArgs { s.Lines = v; return s },
+		"(*GrepArgs).Lines",
+	)
+}
+
+// MakeGrepArgsLinesPrism returns a [__prism.Prism] for the Lines field of [GrepArgs]
+func MakeGrepArgsLinesPrism() __prism.Prism[GrepArgs, []GrepLine] {
+	return __prism.MakePrismWithName(
+		func(s GrepArgs) __option.Option[[]GrepLine] { return __option.Some(s.Lines) },
+		func(v []GrepLine) GrepArgs {
+			return GrepArgs{Lines: v}
+		},
+		"GrepArgs.Lines",
+	)
+}
+
+// MakeGrepArgsLinesRefPrism returns a [__prism.Prism] for the Lines field of [GrepArgs] via a pointer receiver
+func MakeGrepArgsLinesRefPrism() __prism.Prism[*GrepArgs, []GrepLine] {
+	return __prism.MakePrismWithName(
+		func(s *GrepArgs) __option.Option[[]GrepLine] { return __option.Some(s.Lines) },
+		func(v []GrepLine) *GrepArgs {
+			return &GrepArgs{Lines: v}
+		},
+		"GrepArgs.Lines",
+	)
+}
+
+// MakeGrepArgsLenses creates a new [GrepArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeGrepArgsLenses() GrepArgsLenses {
+	return GrepArgsLenses{
+		// mandatory lenses
+		Pattern:          MakeGrepArgsPatternLens(),
+		Path:             MakeGrepArgsPathLens(),
+		Include:          MakeGrepArgsIncludeLens(),
+		IgnoreCase:       MakeGrepArgsIgnoreCaseLens(),
+		InvertMatch:      MakeGrepArgsInvertMatchLens(),
+		WordRegexp:       MakeGrepArgsWordRegexpLens(),
+		FilesWithMatches: MakeGrepArgsFilesWithMatchesLens(),
+		Regexp:           MakeGrepArgsRegexpLens(),
+		Scope:            MakeGrepArgsScopeLens(),
+		Name:             MakeGrepArgsNameLens(),
+		Ignores:          MakeGrepArgsIgnoresLens(),
+		Candidates:       MakeGrepArgsCandidatesLens(),
+		Lines:            MakeGrepArgsLinesLens(),
+		// optional lenses
+		PatternO:          MakeGrepArgsPatternLensO(),
+		PathO:             MakeGrepArgsPathLensO(),
+		IncludeO:          MakeGrepArgsIncludeLensO(),
+		IgnoreCaseO:       MakeGrepArgsIgnoreCaseLensO(),
+		InvertMatchO:      MakeGrepArgsInvertMatchLensO(),
+		WordRegexpO:       MakeGrepArgsWordRegexpLensO(),
+		FilesWithMatchesO: MakeGrepArgsFilesWithMatchesLensO(),
+		RegexpO:           MakeGrepArgsRegexpLensO(),
+		NameO:             MakeGrepArgsNameLensO(),
+	}
+}
+
+// MakeGrepArgsRefLenses creates a new [GrepArgsRefLenses] with [lenses] for all fields via a pointer to [GrepArgs]
+//
+// [lenses]: __lens.Lens
+func MakeGrepArgsRefLenses() GrepArgsRefLenses {
+	return GrepArgsRefLenses{
+		// mandatory lenses
+		Pattern:          MakeGrepArgsPatternRefLens(),
+		Path:             MakeGrepArgsPathRefLens(),
+		Include:          MakeGrepArgsIncludeRefLens(),
+		IgnoreCase:       MakeGrepArgsIgnoreCaseRefLens(),
+		InvertMatch:      MakeGrepArgsInvertMatchRefLens(),
+		WordRegexp:       MakeGrepArgsWordRegexpRefLens(),
+		FilesWithMatches: MakeGrepArgsFilesWithMatchesRefLens(),
+		Regexp:           MakeGrepArgsRegexpRefLens(),
+		Scope:            MakeGrepArgsScopeRefLens(),
+		Name:             MakeGrepArgsNameRefLens(),
+		Ignores:          MakeGrepArgsIgnoresRefLens(),
+		Candidates:       MakeGrepArgsCandidatesRefLens(),
+		Lines:            MakeGrepArgsLinesRefLens(),
+		// optional lenses
+		PatternO:          MakeGrepArgsPatternRefLensO(),
+		PathO:             MakeGrepArgsPathRefLensO(),
+		IncludeO:          MakeGrepArgsIncludeRefLensO(),
+		IgnoreCaseO:       MakeGrepArgsIgnoreCaseRefLensO(),
+		InvertMatchO:      MakeGrepArgsInvertMatchRefLensO(),
+		WordRegexpO:       MakeGrepArgsWordRegexpRefLensO(),
+		FilesWithMatchesO: MakeGrepArgsFilesWithMatchesRefLensO(),
+		RegexpO:           MakeGrepArgsRegexpRefLensO(),
+		NameO:             MakeGrepArgsNameRefLensO(),
+	}
+}
+
+// MakeGrepArgsPrisms creates a new [GrepArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeGrepArgsPrisms() GrepArgsPrisms {
+	return GrepArgsPrisms{
+		Pattern:          MakeGrepArgsPatternPrism(),
+		Path:             MakeGrepArgsPathPrism(),
+		Include:          MakeGrepArgsIncludePrism(),
+		IgnoreCase:       MakeGrepArgsIgnoreCasePrism(),
+		InvertMatch:      MakeGrepArgsInvertMatchPrism(),
+		WordRegexp:       MakeGrepArgsWordRegexpPrism(),
+		FilesWithMatches: MakeGrepArgsFilesWithMatchesPrism(),
+		Regexp:           MakeGrepArgsRegexpPrism(),
+		Scope:            MakeGrepArgsScopePrism(),
+		Name:             MakeGrepArgsNamePrism(),
+		Ignores:          MakeGrepArgsIgnoresPrism(),
+		Candidates:       MakeGrepArgsCandidatesPrism(),
+		Lines:            MakeGrepArgsLinesPrism(),
+	}
+}
+
+// MakeGrepArgsRefPrisms creates a new [GrepArgsRefPrisms] with [prisms] for all fields via a pointer to [GrepArgs]
+//
+// [prisms]: __prism.Prism
+func MakeGrepArgsRefPrisms() GrepArgsRefPrisms {
+	return GrepArgsRefPrisms{
+		Pattern:          MakeGrepArgsPatternRefPrism(),
+		Path:             MakeGrepArgsPathRefPrism(),
+		Include:          MakeGrepArgsIncludeRefPrism(),
+		IgnoreCase:       MakeGrepArgsIgnoreCaseRefPrism(),
+		InvertMatch:      MakeGrepArgsInvertMatchRefPrism(),
+		WordRegexp:       MakeGrepArgsWordRegexpRefPrism(),
+		FilesWithMatches: MakeGrepArgsFilesWithMatchesRefPrism(),
+		Regexp:           MakeGrepArgsRegexpRefPrism(),
+		Scope:            MakeGrepArgsScopeRefPrism(),
+		Name:             MakeGrepArgsNameRefPrism(),
+		Ignores:          MakeGrepArgsIgnoresRefPrism(),
+		Candidates:       MakeGrepArgsCandidatesRefPrism(),
+		Lines:            MakeGrepArgsLinesRefPrism(),
 	}
 }
 

@@ -63,6 +63,11 @@ func TestCapResults(t *testing.T) {
 	assert.Equal(t, strings.Join(names(maxGlobResults), "\n"), capResults()(names(maxGlobResults)))
 	// above the cap: the first ones and the note
 	assert.Equal(t, strings.Join(names(maxGlobResults), "\n")+globTruncated, capResults()(names(maxGlobResults+1)))
+
+	// a reused operator does not keep the length of a shorter, earlier input
+	reused := capResults()
+	assert.Equal(t, "a\nb", reused([]string{"a", "b"}))
+	assert.Equal(t, strings.Join(names(maxGlobResults), "\n")+globTruncated, reused(names(maxGlobResults+1)))
 }
 
 func TestGlobListing(t *testing.T) {

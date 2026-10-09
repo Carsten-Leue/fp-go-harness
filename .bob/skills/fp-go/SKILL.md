@@ -327,6 +327,22 @@ What makes it work:
 - `consecutiveRanges` in the same file is the degenerate case of the applicative shape
   (`reader.Ap` with `F.Identity` as the second reader); `chunkBounds` is the same shape
   with a real one.
+- **`reader.Map(k)` followed by `reader.Ap(reader.Ask[R]())` is `reader.Chain(k)`.** When
+  a step produces a curried `func(A) func(R) B` and its result is fed back to the same
+  environment, that `func(A) func(R) B` already is a `reader.Kleisli[R, A, B]`: chain it
+  instead of mapping and re-applying `Ask`. Spotted by an explicit `reader.Ask` in an
+  `Ap`, or by `reader.Map[R]` / `reader.Ap[B]` needing type arguments that `Chain` infers.
+  [tools/grep.go](../../../tools/grep.go) `ancestorIgnore` is the example: the directory
+  is read from the segments, and the segments are read again as the `Domain`:
+
+  ```go
+  // AVOID: map to func([]string) IgnoreFile, then apply it to the same segments
+  reader.Map[[]string](F.Flow2(file.Join(gitignoreFile), F.Curry2(makeIgnoreFile))),
+  reader.Ap[IgnoreFile](reader.Ask[[]string]()),
+
+  // PREFER: the curried constructor is a Kleisli[[]string, string, IgnoreFile]
+  reader.Chain(F.Flow2(file.Join(gitignoreFile), F.Curry2(makeIgnoreFile))),
+  ```
 
 Watch the empty case: `reader.TraverseArray` over an empty slice yields `nil` where
 `A.Map` yielded an empty slice, so tests comparing with `assert.Equal` expect `nil`.
