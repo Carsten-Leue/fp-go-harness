@@ -14,6 +14,346 @@ import (
 	time "time"
 )
 
+// ExecuteCommandArgsLenses provides [lenses] for accessing fields of [ExecuteCommandArgs]
+//
+// [lenses]: __lens.Lens
+type ExecuteCommandArgsLenses struct {
+	// Command is a [__lens.Lens] for the Command field of [ExecuteCommandArgs]
+	Command __lens.Lens[ExecuteCommandArgs, string]
+	// Cwd is a [__lens.Lens] for the Cwd field of [ExecuteCommandArgs]
+	Cwd __lens.Lens[ExecuteCommandArgs, string]
+	// TimeoutSeconds is a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs]
+	TimeoutSeconds __lens.Lens[ExecuteCommandArgs, int]
+	// Dir is a [__lens.Lens] for the Dir field of [ExecuteCommandArgs]
+	Dir __lens.Lens[ExecuteCommandArgs, string]
+	// CommandO is a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs], treating the zero value as absent
+	CommandO __lens_option.LensO[ExecuteCommandArgs, string]
+	// CwdO is a [__lens_option.LensO] for the Cwd field of [ExecuteCommandArgs], treating the zero value as absent
+	CwdO __lens_option.LensO[ExecuteCommandArgs, string]
+	// TimeoutSecondsO is a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs], treating the zero value as absent
+	TimeoutSecondsO __lens_option.LensO[ExecuteCommandArgs, int]
+	// DirO is a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs], treating the zero value as absent
+	DirO __lens_option.LensO[ExecuteCommandArgs, string]
+}
+
+// ExecuteCommandArgsRefLenses provides [lenses] for accessing fields of [ExecuteCommandArgs] via a pointer to [ExecuteCommandArgs]
+//
+// [lenses]: __lens.Lens
+type ExecuteCommandArgsRefLenses struct {
+	// Command is a [__lens.Lens] for the Command field of [ExecuteCommandArgs] via a pointer receiver
+	Command __lens.Lens[*ExecuteCommandArgs, string]
+	// Cwd is a [__lens.Lens] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver
+	Cwd __lens.Lens[*ExecuteCommandArgs, string]
+	// TimeoutSeconds is a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
+	TimeoutSeconds __lens.Lens[*ExecuteCommandArgs, int]
+	// Dir is a [__lens.Lens] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
+	Dir __lens.Lens[*ExecuteCommandArgs, string]
+	// CommandO is a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
+	CommandO __lens_option.LensO[*ExecuteCommandArgs, string]
+	// CwdO is a [__lens_option.LensO] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
+	CwdO __lens_option.LensO[*ExecuteCommandArgs, string]
+	// TimeoutSecondsO is a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
+	TimeoutSecondsO __lens_option.LensO[*ExecuteCommandArgs, int]
+	// DirO is a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
+	DirO __lens_option.LensO[*ExecuteCommandArgs, string]
+}
+
+// ExecuteCommandArgsPrisms provides [prisms] for accessing fields of [ExecuteCommandArgs]
+//
+// [prisms]: __prism.Prism
+type ExecuteCommandArgsPrisms struct {
+	// Command is a [__prism.Prism] for the Command field of [ExecuteCommandArgs]
+	Command __prism.Prism[ExecuteCommandArgs, string]
+	// Cwd is a [__prism.Prism] for the Cwd field of [ExecuteCommandArgs]
+	Cwd __prism.Prism[ExecuteCommandArgs, string]
+	// TimeoutSeconds is a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs]
+	TimeoutSeconds __prism.Prism[ExecuteCommandArgs, int]
+	// Dir is a [__prism.Prism] for the Dir field of [ExecuteCommandArgs]
+	Dir __prism.Prism[ExecuteCommandArgs, string]
+}
+
+// ExecuteCommandArgsRefPrisms provides [prisms] for accessing fields of [ExecuteCommandArgs] via a pointer to [ExecuteCommandArgs]
+//
+// [prisms]: __prism.Prism
+type ExecuteCommandArgsRefPrisms struct {
+	// Command is a [__prism.Prism] for the Command field of [ExecuteCommandArgs] via a pointer receiver
+	Command __prism.Prism[*ExecuteCommandArgs, string]
+	// Cwd is a [__prism.Prism] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver
+	Cwd __prism.Prism[*ExecuteCommandArgs, string]
+	// TimeoutSeconds is a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
+	TimeoutSeconds __prism.Prism[*ExecuteCommandArgs, int]
+	// Dir is a [__prism.Prism] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
+	Dir __prism.Prism[*ExecuteCommandArgs, string]
+}
+
+// MakeExecuteCommandArgsCommandLens returns a [__lens.Lens] for the Command field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCommandLens() __lens.Lens[ExecuteCommandArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ExecuteCommandArgs) string { return s.Command },
+		func(s ExecuteCommandArgs, v string) ExecuteCommandArgs { s.Command = v; return s },
+		"ExecuteCommandArgs.Command",
+	)
+}
+
+// MakeExecuteCommandArgsCommandLensO returns a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCommandLensO() __lens_option.LensO[ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsCommandLens())
+}
+
+// MakeExecuteCommandArgsCommandRefLens returns a [__lens.Lens] for the Command field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCommandRefLens() __lens.Lens[*ExecuteCommandArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ExecuteCommandArgs) string { return s.Command },
+		func(s *ExecuteCommandArgs, v string) *ExecuteCommandArgs { s.Command = v; return s },
+		"(*ExecuteCommandArgs).Command",
+	)
+}
+
+// MakeExecuteCommandArgsCommandRefLensO returns a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCommandRefLensO() __lens_option.LensO[*ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[*ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsCommandRefLens())
+}
+
+// MakeExecuteCommandArgsCommandPrism returns a [__prism.Prism] for the Command field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCommandPrism() __prism.Prism[ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) ExecuteCommandArgs {
+			return ExecuteCommandArgs{Command: v}
+		},
+		"ExecuteCommandArgs.Command",
+	)
+}
+
+// MakeExecuteCommandArgsCommandRefPrism returns a [__prism.Prism] for the Command field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCommandRefPrism() __prism.Prism[*ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) *ExecuteCommandArgs {
+			return &ExecuteCommandArgs{Command: v}
+		},
+		"ExecuteCommandArgs.Command",
+	)
+}
+
+// MakeExecuteCommandArgsCwdLens returns a [__lens.Lens] for the Cwd field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCwdLens() __lens.Lens[ExecuteCommandArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ExecuteCommandArgs) string { return s.Cwd },
+		func(s ExecuteCommandArgs, v string) ExecuteCommandArgs { s.Cwd = v; return s },
+		"ExecuteCommandArgs.Cwd",
+	)
+}
+
+// MakeExecuteCommandArgsCwdLensO returns a [__lens_option.LensO] for the Cwd field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCwdLensO() __lens_option.LensO[ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsCwdLens())
+}
+
+// MakeExecuteCommandArgsCwdRefLens returns a [__lens.Lens] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCwdRefLens() __lens.Lens[*ExecuteCommandArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ExecuteCommandArgs) string { return s.Cwd },
+		func(s *ExecuteCommandArgs, v string) *ExecuteCommandArgs { s.Cwd = v; return s },
+		"(*ExecuteCommandArgs).Cwd",
+	)
+}
+
+// MakeExecuteCommandArgsCwdRefLensO returns a [__lens_option.LensO] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCwdRefLensO() __lens_option.LensO[*ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[*ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsCwdRefLens())
+}
+
+// MakeExecuteCommandArgsCwdPrism returns a [__prism.Prism] for the Cwd field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsCwdPrism() __prism.Prism[ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Cwd) },
+		func(v string) ExecuteCommandArgs {
+			return ExecuteCommandArgs{Cwd: v}
+		},
+		"ExecuteCommandArgs.Cwd",
+	)
+}
+
+// MakeExecuteCommandArgsCwdRefPrism returns a [__prism.Prism] for the Cwd field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsCwdRefPrism() __prism.Prism[*ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Cwd) },
+		func(v string) *ExecuteCommandArgs {
+			return &ExecuteCommandArgs{Cwd: v}
+		},
+		"ExecuteCommandArgs.Cwd",
+	)
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsLens returns a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsTimeoutSecondsLens() __lens.Lens[ExecuteCommandArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s ExecuteCommandArgs) int { return s.TimeoutSeconds },
+		func(s ExecuteCommandArgs, v int) ExecuteCommandArgs { s.TimeoutSeconds = v; return s },
+		"ExecuteCommandArgs.TimeoutSeconds",
+	)
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsLensO returns a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsTimeoutSecondsLensO() __lens_option.LensO[ExecuteCommandArgs, int] {
+	return __lens_option.FromIso[ExecuteCommandArgs](__iso_option.FromZero[int]())(MakeExecuteCommandArgsTimeoutSecondsLens())
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsRefLens returns a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsTimeoutSecondsRefLens() __lens.Lens[*ExecuteCommandArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ExecuteCommandArgs) int { return s.TimeoutSeconds },
+		func(s *ExecuteCommandArgs, v int) *ExecuteCommandArgs { s.TimeoutSeconds = v; return s },
+		"(*ExecuteCommandArgs).TimeoutSeconds",
+	)
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsRefLensO returns a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsTimeoutSecondsRefLensO() __lens_option.LensO[*ExecuteCommandArgs, int] {
+	return __lens_option.FromIso[*ExecuteCommandArgs](__iso_option.FromZero[int]())(MakeExecuteCommandArgsTimeoutSecondsRefLens())
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsPrism returns a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsTimeoutSecondsPrism() __prism.Prism[ExecuteCommandArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s ExecuteCommandArgs) __option.Option[int] { return _fromNonZero(s.TimeoutSeconds) },
+		func(v int) ExecuteCommandArgs {
+			return ExecuteCommandArgs{TimeoutSeconds: v}
+		},
+		"ExecuteCommandArgs.TimeoutSeconds",
+	)
+}
+
+// MakeExecuteCommandArgsTimeoutSecondsRefPrism returns a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsTimeoutSecondsRefPrism() __prism.Prism[*ExecuteCommandArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *ExecuteCommandArgs) __option.Option[int] { return _fromNonZero(s.TimeoutSeconds) },
+		func(v int) *ExecuteCommandArgs {
+			return &ExecuteCommandArgs{TimeoutSeconds: v}
+		},
+		"ExecuteCommandArgs.TimeoutSeconds",
+	)
+}
+
+// MakeExecuteCommandArgsDirLens returns a [__lens.Lens] for the Dir field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsDirLens() __lens.Lens[ExecuteCommandArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ExecuteCommandArgs) string { return s.Dir },
+		func(s ExecuteCommandArgs, v string) ExecuteCommandArgs { s.Dir = v; return s },
+		"ExecuteCommandArgs.Dir",
+	)
+}
+
+// MakeExecuteCommandArgsDirLensO returns a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsDirLensO() __lens_option.LensO[ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsDirLens())
+}
+
+// MakeExecuteCommandArgsDirRefLens returns a [__lens.Lens] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsDirRefLens() __lens.Lens[*ExecuteCommandArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ExecuteCommandArgs) string { return s.Dir },
+		func(s *ExecuteCommandArgs, v string) *ExecuteCommandArgs { s.Dir = v; return s },
+		"(*ExecuteCommandArgs).Dir",
+	)
+}
+
+// MakeExecuteCommandArgsDirRefLensO returns a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsDirRefLensO() __lens_option.LensO[*ExecuteCommandArgs, string] {
+	return __lens_option.FromIso[*ExecuteCommandArgs](__iso_option.FromZero[string]())(MakeExecuteCommandArgsDirRefLens())
+}
+
+// MakeExecuteCommandArgsDirPrism returns a [__prism.Prism] for the Dir field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsDirPrism() __prism.Prism[ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) ExecuteCommandArgs {
+			return ExecuteCommandArgs{Dir: v}
+		},
+		"ExecuteCommandArgs.Dir",
+	)
+}
+
+// MakeExecuteCommandArgsDirRefPrism returns a [__prism.Prism] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsDirRefPrism() __prism.Prism[*ExecuteCommandArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ExecuteCommandArgs) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) *ExecuteCommandArgs {
+			return &ExecuteCommandArgs{Dir: v}
+		},
+		"ExecuteCommandArgs.Dir",
+	)
+}
+
+// MakeExecuteCommandArgsLenses creates a new [ExecuteCommandArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeExecuteCommandArgsLenses() ExecuteCommandArgsLenses {
+	return ExecuteCommandArgsLenses{
+		// mandatory lenses
+		Command:        MakeExecuteCommandArgsCommandLens(),
+		Cwd:            MakeExecuteCommandArgsCwdLens(),
+		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsLens(),
+		Dir:            MakeExecuteCommandArgsDirLens(),
+		// optional lenses
+		CommandO:        MakeExecuteCommandArgsCommandLensO(),
+		CwdO:            MakeExecuteCommandArgsCwdLensO(),
+		TimeoutSecondsO: MakeExecuteCommandArgsTimeoutSecondsLensO(),
+		DirO:            MakeExecuteCommandArgsDirLensO(),
+	}
+}
+
+// MakeExecuteCommandArgsRefLenses creates a new [ExecuteCommandArgsRefLenses] with [lenses] for all fields via a pointer to [ExecuteCommandArgs]
+//
+// [lenses]: __lens.Lens
+func MakeExecuteCommandArgsRefLenses() ExecuteCommandArgsRefLenses {
+	return ExecuteCommandArgsRefLenses{
+		// mandatory lenses
+		Command:        MakeExecuteCommandArgsCommandRefLens(),
+		Cwd:            MakeExecuteCommandArgsCwdRefLens(),
+		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsRefLens(),
+		Dir:            MakeExecuteCommandArgsDirRefLens(),
+		// optional lenses
+		CommandO:        MakeExecuteCommandArgsCommandRefLensO(),
+		CwdO:            MakeExecuteCommandArgsCwdRefLensO(),
+		TimeoutSecondsO: MakeExecuteCommandArgsTimeoutSecondsRefLensO(),
+		DirO:            MakeExecuteCommandArgsDirRefLensO(),
+	}
+}
+
+// MakeExecuteCommandArgsPrisms creates a new [ExecuteCommandArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeExecuteCommandArgsPrisms() ExecuteCommandArgsPrisms {
+	return ExecuteCommandArgsPrisms{
+		Command:        MakeExecuteCommandArgsCommandPrism(),
+		Cwd:            MakeExecuteCommandArgsCwdPrism(),
+		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsPrism(),
+		Dir:            MakeExecuteCommandArgsDirPrism(),
+	}
+}
+
+// MakeExecuteCommandArgsRefPrisms creates a new [ExecuteCommandArgsRefPrisms] with [prisms] for all fields via a pointer to [ExecuteCommandArgs]
+//
+// [prisms]: __prism.Prism
+func MakeExecuteCommandArgsRefPrisms() ExecuteCommandArgsRefPrisms {
+	return ExecuteCommandArgsRefPrisms{
+		Command:        MakeExecuteCommandArgsCommandRefPrism(),
+		Cwd:            MakeExecuteCommandArgsCwdRefPrism(),
+		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsRefPrism(),
+		Dir:            MakeExecuteCommandArgsDirRefPrism(),
+	}
+}
+
 // GlobArgsLenses provides [lenses] for accessing fields of [GlobArgs]
 //
 // [lenses]: __lens.Lens
@@ -2197,6 +2537,476 @@ func MakeListFilesArgsRefPrisms() ListFilesArgsRefPrisms {
 		Recursive: MakeListFilesArgsRecursiveRefPrism(),
 		Name:      MakeListFilesArgsNameRefPrism(),
 		Entries:   MakeListFilesArgsEntriesRefPrism(),
+	}
+}
+
+// ProcessLenses provides [lenses] for accessing fields of [Process]
+//
+// [lenses]: __lens.Lens
+type ProcessLenses struct {
+	// Command is a [__lens.Lens] for the Command field of [Process]
+	Command __lens.Lens[Process, string]
+	// Dir is a [__lens.Lens] for the Dir field of [Process]
+	Dir __lens.Lens[Process, string]
+	// CommandO is a [__lens_option.LensO] for the Command field of [Process], treating the zero value as absent
+	CommandO __lens_option.LensO[Process, string]
+	// DirO is a [__lens_option.LensO] for the Dir field of [Process], treating the zero value as absent
+	DirO __lens_option.LensO[Process, string]
+}
+
+// ProcessRefLenses provides [lenses] for accessing fields of [Process] via a pointer to [Process]
+//
+// [lenses]: __lens.Lens
+type ProcessRefLenses struct {
+	// Command is a [__lens.Lens] for the Command field of [Process] via a pointer receiver
+	Command __lens.Lens[*Process, string]
+	// Dir is a [__lens.Lens] for the Dir field of [Process] via a pointer receiver
+	Dir __lens.Lens[*Process, string]
+	// CommandO is a [__lens_option.LensO] for the Command field of [Process] via a pointer receiver, treating the zero value as absent
+	CommandO __lens_option.LensO[*Process, string]
+	// DirO is a [__lens_option.LensO] for the Dir field of [Process] via a pointer receiver, treating the zero value as absent
+	DirO __lens_option.LensO[*Process, string]
+}
+
+// ProcessPrisms provides [prisms] for accessing fields of [Process]
+//
+// [prisms]: __prism.Prism
+type ProcessPrisms struct {
+	// Command is a [__prism.Prism] for the Command field of [Process]
+	Command __prism.Prism[Process, string]
+	// Dir is a [__prism.Prism] for the Dir field of [Process]
+	Dir __prism.Prism[Process, string]
+}
+
+// ProcessRefPrisms provides [prisms] for accessing fields of [Process] via a pointer to [Process]
+//
+// [prisms]: __prism.Prism
+type ProcessRefPrisms struct {
+	// Command is a [__prism.Prism] for the Command field of [Process] via a pointer receiver
+	Command __prism.Prism[*Process, string]
+	// Dir is a [__prism.Prism] for the Dir field of [Process] via a pointer receiver
+	Dir __prism.Prism[*Process, string]
+}
+
+// MakeProcessCommandLens returns a [__lens.Lens] for the Command field of [Process]
+func MakeProcessCommandLens() __lens.Lens[Process, string] {
+	return __lens.MakeLensWithName(
+		func(s Process) string { return s.Command },
+		func(s Process, v string) Process { s.Command = v; return s },
+		"Process.Command",
+	)
+}
+
+// MakeProcessCommandLensO returns a [__lens_option.LensO] for the Command field of [Process]
+func MakeProcessCommandLensO() __lens_option.LensO[Process, string] {
+	return __lens_option.FromIso[Process](__iso_option.FromZero[string]())(MakeProcessCommandLens())
+}
+
+// MakeProcessCommandRefLens returns a [__lens.Lens] for the Command field of [Process] via a pointer receiver
+func MakeProcessCommandRefLens() __lens.Lens[*Process, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Process) string { return s.Command },
+		func(s *Process, v string) *Process { s.Command = v; return s },
+		"(*Process).Command",
+	)
+}
+
+// MakeProcessCommandRefLensO returns a [__lens_option.LensO] for the Command field of [Process] via a pointer receiver
+func MakeProcessCommandRefLensO() __lens_option.LensO[*Process, string] {
+	return __lens_option.FromIso[*Process](__iso_option.FromZero[string]())(MakeProcessCommandRefLens())
+}
+
+// MakeProcessCommandPrism returns a [__prism.Prism] for the Command field of [Process]
+func MakeProcessCommandPrism() __prism.Prism[Process, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s Process) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) Process {
+			return Process{Command: v}
+		},
+		"Process.Command",
+	)
+}
+
+// MakeProcessCommandRefPrism returns a [__prism.Prism] for the Command field of [Process] via a pointer receiver
+func MakeProcessCommandRefPrism() __prism.Prism[*Process, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *Process) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) *Process {
+			return &Process{Command: v}
+		},
+		"Process.Command",
+	)
+}
+
+// MakeProcessDirLens returns a [__lens.Lens] for the Dir field of [Process]
+func MakeProcessDirLens() __lens.Lens[Process, string] {
+	return __lens.MakeLensWithName(
+		func(s Process) string { return s.Dir },
+		func(s Process, v string) Process { s.Dir = v; return s },
+		"Process.Dir",
+	)
+}
+
+// MakeProcessDirLensO returns a [__lens_option.LensO] for the Dir field of [Process]
+func MakeProcessDirLensO() __lens_option.LensO[Process, string] {
+	return __lens_option.FromIso[Process](__iso_option.FromZero[string]())(MakeProcessDirLens())
+}
+
+// MakeProcessDirRefLens returns a [__lens.Lens] for the Dir field of [Process] via a pointer receiver
+func MakeProcessDirRefLens() __lens.Lens[*Process, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Process) string { return s.Dir },
+		func(s *Process, v string) *Process { s.Dir = v; return s },
+		"(*Process).Dir",
+	)
+}
+
+// MakeProcessDirRefLensO returns a [__lens_option.LensO] for the Dir field of [Process] via a pointer receiver
+func MakeProcessDirRefLensO() __lens_option.LensO[*Process, string] {
+	return __lens_option.FromIso[*Process](__iso_option.FromZero[string]())(MakeProcessDirRefLens())
+}
+
+// MakeProcessDirPrism returns a [__prism.Prism] for the Dir field of [Process]
+func MakeProcessDirPrism() __prism.Prism[Process, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s Process) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) Process {
+			return Process{Dir: v}
+		},
+		"Process.Dir",
+	)
+}
+
+// MakeProcessDirRefPrism returns a [__prism.Prism] for the Dir field of [Process] via a pointer receiver
+func MakeProcessDirRefPrism() __prism.Prism[*Process, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *Process) __option.Option[string] { return _fromNonZero(s.Dir) },
+		func(v string) *Process {
+			return &Process{Dir: v}
+		},
+		"Process.Dir",
+	)
+}
+
+// MakeProcessLenses creates a new [ProcessLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeProcessLenses() ProcessLenses {
+	return ProcessLenses{
+		// mandatory lenses
+		Command: MakeProcessCommandLens(),
+		Dir:     MakeProcessDirLens(),
+		// optional lenses
+		CommandO: MakeProcessCommandLensO(),
+		DirO:     MakeProcessDirLensO(),
+	}
+}
+
+// MakeProcessRefLenses creates a new [ProcessRefLenses] with [lenses] for all fields via a pointer to [Process]
+//
+// [lenses]: __lens.Lens
+func MakeProcessRefLenses() ProcessRefLenses {
+	return ProcessRefLenses{
+		// mandatory lenses
+		Command: MakeProcessCommandRefLens(),
+		Dir:     MakeProcessDirRefLens(),
+		// optional lenses
+		CommandO: MakeProcessCommandRefLensO(),
+		DirO:     MakeProcessDirRefLensO(),
+	}
+}
+
+// MakeProcessPrisms creates a new [ProcessPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeProcessPrisms() ProcessPrisms {
+	return ProcessPrisms{
+		Command: MakeProcessCommandPrism(),
+		Dir:     MakeProcessDirPrism(),
+	}
+}
+
+// MakeProcessRefPrisms creates a new [ProcessRefPrisms] with [prisms] for all fields via a pointer to [Process]
+//
+// [prisms]: __prism.Prism
+func MakeProcessRefPrisms() ProcessRefPrisms {
+	return ProcessRefPrisms{
+		Command: MakeProcessCommandRefPrism(),
+		Dir:     MakeProcessDirRefPrism(),
+	}
+}
+
+// ProcessOutputLenses provides [lenses] for accessing fields of [ProcessOutput]
+//
+// [lenses]: __lens.Lens
+type ProcessOutputLenses struct {
+	// Stdout is a [__lens.Lens] for the Stdout field of [ProcessOutput]
+	Stdout __lens.Lens[ProcessOutput, string]
+	// Stderr is a [__lens.Lens] for the Stderr field of [ProcessOutput]
+	Stderr __lens.Lens[ProcessOutput, string]
+	// ExitCode is a [__lens.Lens] for the ExitCode field of [ProcessOutput]
+	ExitCode __lens.Lens[ProcessOutput, int]
+	// StdoutO is a [__lens_option.LensO] for the Stdout field of [ProcessOutput], treating the zero value as absent
+	StdoutO __lens_option.LensO[ProcessOutput, string]
+	// StderrO is a [__lens_option.LensO] for the Stderr field of [ProcessOutput], treating the zero value as absent
+	StderrO __lens_option.LensO[ProcessOutput, string]
+	// ExitCodeO is a [__lens_option.LensO] for the ExitCode field of [ProcessOutput], treating the zero value as absent
+	ExitCodeO __lens_option.LensO[ProcessOutput, int]
+}
+
+// ProcessOutputRefLenses provides [lenses] for accessing fields of [ProcessOutput] via a pointer to [ProcessOutput]
+//
+// [lenses]: __lens.Lens
+type ProcessOutputRefLenses struct {
+	// Stdout is a [__lens.Lens] for the Stdout field of [ProcessOutput] via a pointer receiver
+	Stdout __lens.Lens[*ProcessOutput, string]
+	// Stderr is a [__lens.Lens] for the Stderr field of [ProcessOutput] via a pointer receiver
+	Stderr __lens.Lens[*ProcessOutput, string]
+	// ExitCode is a [__lens.Lens] for the ExitCode field of [ProcessOutput] via a pointer receiver
+	ExitCode __lens.Lens[*ProcessOutput, int]
+	// StdoutO is a [__lens_option.LensO] for the Stdout field of [ProcessOutput] via a pointer receiver, treating the zero value as absent
+	StdoutO __lens_option.LensO[*ProcessOutput, string]
+	// StderrO is a [__lens_option.LensO] for the Stderr field of [ProcessOutput] via a pointer receiver, treating the zero value as absent
+	StderrO __lens_option.LensO[*ProcessOutput, string]
+	// ExitCodeO is a [__lens_option.LensO] for the ExitCode field of [ProcessOutput] via a pointer receiver, treating the zero value as absent
+	ExitCodeO __lens_option.LensO[*ProcessOutput, int]
+}
+
+// ProcessOutputPrisms provides [prisms] for accessing fields of [ProcessOutput]
+//
+// [prisms]: __prism.Prism
+type ProcessOutputPrisms struct {
+	// Stdout is a [__prism.Prism] for the Stdout field of [ProcessOutput]
+	Stdout __prism.Prism[ProcessOutput, string]
+	// Stderr is a [__prism.Prism] for the Stderr field of [ProcessOutput]
+	Stderr __prism.Prism[ProcessOutput, string]
+	// ExitCode is a [__prism.Prism] for the ExitCode field of [ProcessOutput]
+	ExitCode __prism.Prism[ProcessOutput, int]
+}
+
+// ProcessOutputRefPrisms provides [prisms] for accessing fields of [ProcessOutput] via a pointer to [ProcessOutput]
+//
+// [prisms]: __prism.Prism
+type ProcessOutputRefPrisms struct {
+	// Stdout is a [__prism.Prism] for the Stdout field of [ProcessOutput] via a pointer receiver
+	Stdout __prism.Prism[*ProcessOutput, string]
+	// Stderr is a [__prism.Prism] for the Stderr field of [ProcessOutput] via a pointer receiver
+	Stderr __prism.Prism[*ProcessOutput, string]
+	// ExitCode is a [__prism.Prism] for the ExitCode field of [ProcessOutput] via a pointer receiver
+	ExitCode __prism.Prism[*ProcessOutput, int]
+}
+
+// MakeProcessOutputStdoutLens returns a [__lens.Lens] for the Stdout field of [ProcessOutput]
+func MakeProcessOutputStdoutLens() __lens.Lens[ProcessOutput, string] {
+	return __lens.MakeLensWithName(
+		func(s ProcessOutput) string { return s.Stdout },
+		func(s ProcessOutput, v string) ProcessOutput { s.Stdout = v; return s },
+		"ProcessOutput.Stdout",
+	)
+}
+
+// MakeProcessOutputStdoutLensO returns a [__lens_option.LensO] for the Stdout field of [ProcessOutput]
+func MakeProcessOutputStdoutLensO() __lens_option.LensO[ProcessOutput, string] {
+	return __lens_option.FromIso[ProcessOutput](__iso_option.FromZero[string]())(MakeProcessOutputStdoutLens())
+}
+
+// MakeProcessOutputStdoutRefLens returns a [__lens.Lens] for the Stdout field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStdoutRefLens() __lens.Lens[*ProcessOutput, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ProcessOutput) string { return s.Stdout },
+		func(s *ProcessOutput, v string) *ProcessOutput { s.Stdout = v; return s },
+		"(*ProcessOutput).Stdout",
+	)
+}
+
+// MakeProcessOutputStdoutRefLensO returns a [__lens_option.LensO] for the Stdout field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStdoutRefLensO() __lens_option.LensO[*ProcessOutput, string] {
+	return __lens_option.FromIso[*ProcessOutput](__iso_option.FromZero[string]())(MakeProcessOutputStdoutRefLens())
+}
+
+// MakeProcessOutputStdoutPrism returns a [__prism.Prism] for the Stdout field of [ProcessOutput]
+func MakeProcessOutputStdoutPrism() __prism.Prism[ProcessOutput, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ProcessOutput) __option.Option[string] { return _fromNonZero(s.Stdout) },
+		func(v string) ProcessOutput {
+			return ProcessOutput{Stdout: v}
+		},
+		"ProcessOutput.Stdout",
+	)
+}
+
+// MakeProcessOutputStdoutRefPrism returns a [__prism.Prism] for the Stdout field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStdoutRefPrism() __prism.Prism[*ProcessOutput, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ProcessOutput) __option.Option[string] { return _fromNonZero(s.Stdout) },
+		func(v string) *ProcessOutput {
+			return &ProcessOutput{Stdout: v}
+		},
+		"ProcessOutput.Stdout",
+	)
+}
+
+// MakeProcessOutputStderrLens returns a [__lens.Lens] for the Stderr field of [ProcessOutput]
+func MakeProcessOutputStderrLens() __lens.Lens[ProcessOutput, string] {
+	return __lens.MakeLensWithName(
+		func(s ProcessOutput) string { return s.Stderr },
+		func(s ProcessOutput, v string) ProcessOutput { s.Stderr = v; return s },
+		"ProcessOutput.Stderr",
+	)
+}
+
+// MakeProcessOutputStderrLensO returns a [__lens_option.LensO] for the Stderr field of [ProcessOutput]
+func MakeProcessOutputStderrLensO() __lens_option.LensO[ProcessOutput, string] {
+	return __lens_option.FromIso[ProcessOutput](__iso_option.FromZero[string]())(MakeProcessOutputStderrLens())
+}
+
+// MakeProcessOutputStderrRefLens returns a [__lens.Lens] for the Stderr field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStderrRefLens() __lens.Lens[*ProcessOutput, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ProcessOutput) string { return s.Stderr },
+		func(s *ProcessOutput, v string) *ProcessOutput { s.Stderr = v; return s },
+		"(*ProcessOutput).Stderr",
+	)
+}
+
+// MakeProcessOutputStderrRefLensO returns a [__lens_option.LensO] for the Stderr field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStderrRefLensO() __lens_option.LensO[*ProcessOutput, string] {
+	return __lens_option.FromIso[*ProcessOutput](__iso_option.FromZero[string]())(MakeProcessOutputStderrRefLens())
+}
+
+// MakeProcessOutputStderrPrism returns a [__prism.Prism] for the Stderr field of [ProcessOutput]
+func MakeProcessOutputStderrPrism() __prism.Prism[ProcessOutput, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ProcessOutput) __option.Option[string] { return _fromNonZero(s.Stderr) },
+		func(v string) ProcessOutput {
+			return ProcessOutput{Stderr: v}
+		},
+		"ProcessOutput.Stderr",
+	)
+}
+
+// MakeProcessOutputStderrRefPrism returns a [__prism.Prism] for the Stderr field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputStderrRefPrism() __prism.Prism[*ProcessOutput, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ProcessOutput) __option.Option[string] { return _fromNonZero(s.Stderr) },
+		func(v string) *ProcessOutput {
+			return &ProcessOutput{Stderr: v}
+		},
+		"ProcessOutput.Stderr",
+	)
+}
+
+// MakeProcessOutputExitCodeLens returns a [__lens.Lens] for the ExitCode field of [ProcessOutput]
+func MakeProcessOutputExitCodeLens() __lens.Lens[ProcessOutput, int] {
+	return __lens.MakeLensWithName(
+		func(s ProcessOutput) int { return s.ExitCode },
+		func(s ProcessOutput, v int) ProcessOutput { s.ExitCode = v; return s },
+		"ProcessOutput.ExitCode",
+	)
+}
+
+// MakeProcessOutputExitCodeLensO returns a [__lens_option.LensO] for the ExitCode field of [ProcessOutput]
+func MakeProcessOutputExitCodeLensO() __lens_option.LensO[ProcessOutput, int] {
+	return __lens_option.FromIso[ProcessOutput](__iso_option.FromZero[int]())(MakeProcessOutputExitCodeLens())
+}
+
+// MakeProcessOutputExitCodeRefLens returns a [__lens.Lens] for the ExitCode field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputExitCodeRefLens() __lens.Lens[*ProcessOutput, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ProcessOutput) int { return s.ExitCode },
+		func(s *ProcessOutput, v int) *ProcessOutput { s.ExitCode = v; return s },
+		"(*ProcessOutput).ExitCode",
+	)
+}
+
+// MakeProcessOutputExitCodeRefLensO returns a [__lens_option.LensO] for the ExitCode field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputExitCodeRefLensO() __lens_option.LensO[*ProcessOutput, int] {
+	return __lens_option.FromIso[*ProcessOutput](__iso_option.FromZero[int]())(MakeProcessOutputExitCodeRefLens())
+}
+
+// MakeProcessOutputExitCodePrism returns a [__prism.Prism] for the ExitCode field of [ProcessOutput]
+func MakeProcessOutputExitCodePrism() __prism.Prism[ProcessOutput, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s ProcessOutput) __option.Option[int] { return _fromNonZero(s.ExitCode) },
+		func(v int) ProcessOutput {
+			return ProcessOutput{ExitCode: v}
+		},
+		"ProcessOutput.ExitCode",
+	)
+}
+
+// MakeProcessOutputExitCodeRefPrism returns a [__prism.Prism] for the ExitCode field of [ProcessOutput] via a pointer receiver
+func MakeProcessOutputExitCodeRefPrism() __prism.Prism[*ProcessOutput, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *ProcessOutput) __option.Option[int] { return _fromNonZero(s.ExitCode) },
+		func(v int) *ProcessOutput {
+			return &ProcessOutput{ExitCode: v}
+		},
+		"ProcessOutput.ExitCode",
+	)
+}
+
+// MakeProcessOutputLenses creates a new [ProcessOutputLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeProcessOutputLenses() ProcessOutputLenses {
+	return ProcessOutputLenses{
+		// mandatory lenses
+		Stdout:   MakeProcessOutputStdoutLens(),
+		Stderr:   MakeProcessOutputStderrLens(),
+		ExitCode: MakeProcessOutputExitCodeLens(),
+		// optional lenses
+		StdoutO:   MakeProcessOutputStdoutLensO(),
+		StderrO:   MakeProcessOutputStderrLensO(),
+		ExitCodeO: MakeProcessOutputExitCodeLensO(),
+	}
+}
+
+// MakeProcessOutputRefLenses creates a new [ProcessOutputRefLenses] with [lenses] for all fields via a pointer to [ProcessOutput]
+//
+// [lenses]: __lens.Lens
+func MakeProcessOutputRefLenses() ProcessOutputRefLenses {
+	return ProcessOutputRefLenses{
+		// mandatory lenses
+		Stdout:   MakeProcessOutputStdoutRefLens(),
+		Stderr:   MakeProcessOutputStderrRefLens(),
+		ExitCode: MakeProcessOutputExitCodeRefLens(),
+		// optional lenses
+		StdoutO:   MakeProcessOutputStdoutRefLensO(),
+		StderrO:   MakeProcessOutputStderrRefLensO(),
+		ExitCodeO: MakeProcessOutputExitCodeRefLensO(),
+	}
+}
+
+// MakeProcessOutputPrisms creates a new [ProcessOutputPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeProcessOutputPrisms() ProcessOutputPrisms {
+	return ProcessOutputPrisms{
+		Stdout:   MakeProcessOutputStdoutPrism(),
+		Stderr:   MakeProcessOutputStderrPrism(),
+		ExitCode: MakeProcessOutputExitCodePrism(),
+	}
+}
+
+// MakeProcessOutputRefPrisms creates a new [ProcessOutputRefPrisms] with [prisms] for all fields via a pointer to [ProcessOutput]
+//
+// [prisms]: __prism.Prism
+func MakeProcessOutputRefPrisms() ProcessOutputRefPrisms {
+	return ProcessOutputRefPrisms{
+		Stdout:   MakeProcessOutputStdoutRefPrism(),
+		Stderr:   MakeProcessOutputStderrRefPrism(),
+		ExitCode: MakeProcessOutputExitCodeRefPrism(),
 	}
 }
 

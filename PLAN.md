@@ -117,9 +117,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
   Skip what `.gitignore` files exclude (`github.com/go-git/go-git/v5/plumbing/format/gitignore`): `.git/info/exclude`,
   the `.gitignore` files from the workspace root down to the searched directory, and those below it.
   Not done yet: the `rg` fallback (needs `ProcessDeps` from C5) and `core.excludesFile`.
-- [ ] **C5 `execute_command` (foreground).** Add `ProcessDeps` (`exec.CommandContext` wrapped once).
+- [x] **C5 `execute_command` (foreground).** Add `ProcessDeps` (`exec.CommandContext` wrapped once).
   Support `cwd` and `timeout_seconds` through `context.WithTimeout` inside the `Thunk`.
   Output format: stdout plus a `Stderr:` section, and the exit code if it is not zero.
+  A non-zero exit code fails the call, so the model sees `Exit code: N\n\nStdout:\n…\n\nStderr:\n…`
+  as the tool error, as recorded. `background` is not in the definition yet (C6).
 - [ ] **C6 `execute_command` (background).** Start the process, send its output to a log file and return the pid and path
   (format as in the recordings). Register the process in an `IORef`-backed table owned by `ProcessDeps`.
 - [ ] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
