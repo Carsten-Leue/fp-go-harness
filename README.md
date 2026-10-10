@@ -11,8 +11,8 @@ through getters, state changes go through generated lenses, and the agent loop i
 stack-safe trampoline. So the whole harness can run against a real API, a fake, or a
 replayed recording without code changes.
 
-The goal is a harness in the style of the Bob coding agent. [PLAN.md](PLAN.md) derives the
-steps from recorded Bob sessions.
+The goal is a complete coding-agent harness. [PLAN.md](PLAN.md) derives the steps from
+recorded agent sessions.
 
 ## ✅ What works today
 
@@ -82,4 +82,4 @@ race detector on the latest Go release. Every push to `main` runs semantic relea
 derives the version and release notes from the conventional commit messages.
 
 The coding rules (fp-go composition patterns, generated lenses, naming, PR conventions) are
-in [AGENTS.md](AGENTS.md) and the skills under [.bob/skills](.bob/skills/).
+in [AGENTS.md](AGENTS.md) and the [repository skills](.bob/skills/).
