@@ -1,5 +1,48 @@
 # AGENTS.md
 
+## README
+
+[README.md](README.md) is the overview of what this repository does: what works today, the
+packages and the roadmap status. Keep it up to date in the same PR as the change. Update it
+when a PR adds or removes a package, a tool or a CLI capability, wires something into
+[main.go](main.go), finishes a [PLAN.md](PLAN.md) step, or changes how to build, run or test.
+Tick the step's checkbox in PLAN.md in the same PR.
+
+## Pull requests and issues
+
+PR and issue titles start with an emoji that matches the change, followed by the
+conventional-commit title: `✨ feat: add grep tool (C4)`.
+
+| Emoji | Type | Use for |
+|---|---|---|
+| ✨ | `feat` | a new feature, tool or plan step |
+| 🐛 | `fix` | a bug fix |
+| ♻️ | `refactor` | a refactoring without a behavior change |
+| 📝 | `docs` | README, AGENTS.md, PLAN.md, skills, doc comments |
+| ✅ | `test` | tests and fixtures only |
+| 👷 | `ci` | GitHub Actions and release configuration |
+| ⬆️ | `build` | dependency upgrades, `go.mod` |
+| 🔧 | `chore` | tooling and configuration |
+| ⚡️ | `perf` | performance |
+| 💥 | | breaking change (in addition to the type's emoji) |
+
+The PR body uses emoji section headings:
+
+```markdown
+## 🎯 What
+## 🧩 How
+## 🧪 Tests
+## 📚 Docs
+```
+
+Issues use `🐛 Bug`, `💡 Idea` or `🗺️ Plan step` in the title, and the same headings where
+they fit. Use emojis in headings and titles, not in every sentence.
+
+**Commit messages stay plain conventional commits, without emojis.** Semantic release parses
+them, and a leading emoji hides the type. PRs are merged with merge commits, so the emoji in
+the PR title never reaches the parsed history. If a PR is ever squash-merged, remove the emoji
+from the squash commit title.
+
 ## fp-go
 
 This project is built on [github.com/IBM/fp-go](https://github.com/IBM/fp-go) (functional programming
