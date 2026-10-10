@@ -691,24 +691,24 @@ func TestSearchScope(t *testing.T) {
 	}, nil)
 
 	// a file is searched alone, in the scope of its parent directory
-	scope, err := result.Unwrap(runEffect(t, deps, searchScope(filepath.Join(fakeRoot, "a.go"))))
+	scope, err := result.Unwrap(runEffect(t, deps, searchScope()(filepath.Join(fakeRoot, "a.go"))))
 	require.NoError(t, err)
 	assert.Equal(t, fakeRoot, scope.Dir)
 	assert.Equal(t, []string{"a.go"}, entryPaths(scope.Entries))
 
-	file, err := result.Unwrap(runEffect(t, deps, searchScope(filepath.Join(fakeRoot, "sub", "b.go"))))
+	file, err := result.Unwrap(runEffect(t, deps, searchScope()(filepath.Join(fakeRoot, "sub", "b.go"))))
 	require.NoError(t, err)
 	assert.Equal(t, filepath.Join(fakeRoot, "sub"), file.Dir)
 	assert.Equal(t, []string{"b.go"}, entryPaths(file.Entries))
 
 	// a directory is walked recursively
-	dir, err := result.Unwrap(runEffect(t, deps, searchScope(filepath.Join(fakeRoot, "sub"))))
+	dir, err := result.Unwrap(runEffect(t, deps, searchScope()(filepath.Join(fakeRoot, "sub"))))
 	require.NoError(t, err)
 	assert.Equal(t, filepath.Join(fakeRoot, "sub"), dir.Dir)
 	assert.ElementsMatch(t, []string{"b.go", "c.go"}, entryPaths(dir.Entries))
 
 	// a path below a missing directory fails in the walk
-	_, err = result.Unwrap(runEffect(t, deps, searchScope(filepath.Join(fakeRoot, "missing", "x.go"))))
+	_, err = result.Unwrap(runEffect(t, deps, searchScope()(filepath.Join(fakeRoot, "missing", "x.go"))))
 	assert.ErrorContains(t, err, "cannot list directory")
 }
 

@@ -157,18 +157,20 @@ func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionCh
 		reader.Read[Endomorphism[openai.ChatCompletionNewParams]](messagesLens),
 	)
 
-	return F.Pipe4(
-		toolCallsFromChoiceOptional.GetOption,
-		readeroption.Map[openai.ChatCompletionChoice](makeToolCalls),
-		readeroption.ApS(
-			F.Flow2(
-				A.Prepend[openai.ChatCompletionMessageParamUnion],
-				effect.Map[ToolDeps],
-			), F.Pipe1(
-				messageToParam,
-				readeroption.Asks,
-			),
-		),
+	// the assistant message comes before the tool messages; both are read from
+	// the choice independently
+	prependMessage := F.Flow3(
+		messageToParam,
+		A.Prepend[openai.ChatCompletionMessageParamUnion],
+		effect.Map[ToolDeps, []openai.ChatCompletionMessageParamUnion, []openai.ChatCompletionMessageParamUnion],
+	)
+
+	return F.Pipe3(
+		readeroption.Asks(prependMessage),
+		readeroption.Ap[Effect[ToolDeps, []openai.ChatCompletionMessageParamUnion]](F.Pipe1(
+			toolCallsFromChoiceOptional.GetOption,
+			readeroption.Map[openai.ChatCompletionChoice](makeToolCalls),
+		)),
 		readeroption.Map[openai.ChatCompletionChoice](
 			F.Pipe1(
 				appendMessages,

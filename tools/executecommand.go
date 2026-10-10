@@ -220,11 +220,11 @@ func outputText() Reader[ProcessOutput, string] {
 // the text; a failed one fails with it, so that the model sees it as the
 // error of the tool, as in the recordings.
 func renderOutput() result.Kleisli[ProcessOutput, string] {
-	fail := F.Flow2(errors.New, result.Left[string])
+	text := outputText()
 
-	return F.Pipe1(
-		P.Fold(F.Constant1[ProcessOutput](fail), F.Constant1[ProcessOutput](result.Of[string]))(isSuccess),
-		reader.Ap[Result[string]](outputText()),
+	return F.Flow2(
+		result.FromPredicate(isSuccess, F.Flow2(text, errors.New)),
+		result.Map(text),
 	)
 }
 

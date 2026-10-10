@@ -70,28 +70,21 @@ func MakeDeepSeekChatCompletionDeps() Effect[DeepSeekDeps, ChatCompletionDeps] {
 		effect.Local[string, DeepSeekDeps](env.AsEnvironmentDeps),
 	)
 
-	baseUrlOpt := F.Pipe1(
+	baseUrlOpts := F.Pipe2(
 		deepSeekBaseURL,
 		opt.WithBaseURL,
-	)
-
-	httpOpt := F.Pipe1(
-		DeepSeekDeps.GetHttpClient,
-		reader.Map[DeepSeekDeps](F.Flow2(
-			asHTTPClient,
-			opt.WithHTTPClient,
-		)),
-	)
-
-	openaiClient := F.Pipe4(
-		baseUrlOpt,
 		A.Of,
-		reader.Of[DeepSeekDeps],
-		reader.ApS(A.Push, httpOpt),
-		reader.Map[DeepSeekDeps](F.Flow2(
-			newClient,
-			F.Ref,
-		)),
+	)
+
+	// only the HTTP client is read from the deps, so the options are a plain
+	// function of it: the base URL first, then the client
+	openaiClient := F.Flow6(
+		DeepSeekDeps.GetHttpClient,
+		asHTTPClient,
+		opt.WithHTTPClient,
+		F.Bind1st(A.Append[opt.RequestOption], baseUrlOpts),
+		newClient,
+		F.Ref,
 	)
 
 	return F.Pipe3(

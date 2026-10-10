@@ -233,15 +233,15 @@ func taskIDs() reader.Reader[[]Record, []string] {
 // Grouping needs every record before it can produce anything, so it is a pure
 // operation over a slice. Compose it with [LoadLogFile] or [LoadRecords] to
 // read a log, or collect a SeqResult with iterresult.Collect to group an
-// already filtered stream. The identifiers and the contents of the tasks are
-// both read from the same records, so the reader is flattened.
+// already filtered stream. The contents of the tasks are read from the same
+// records as their identifiers, so the traversal is chained on the reader.
 //
 // Example:
 //
 //	tasks := F.Pipe2(path, LoadLogFile(), ioresult.ChainResultK(GroupTasks()))
 func GroupTasks() result.Kleisli[[]Record, []Task] {
 	return F.Pipe1(
-		F.Flow2(taskIDs(), readerresult.TraverseArray(taskOf)),
-		reader.Flatten[[]Record, Result[[]Task]],
+		taskIDs(),
+		reader.Chain(readerresult.TraverseArray(taskOf)),
 	)
 }
