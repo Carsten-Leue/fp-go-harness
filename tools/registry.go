@@ -45,10 +45,15 @@ func toolEntry() func(Tool) pair.Pair[string, Tool] {
 	)
 }
 
-// MakeToolRegistry indexes tools by their definition name. If several tools
+// ToToolRegistry indexes tools by their definition name. If several tools
 // share a name, the last one wins.
+func ToToolRegistry() func([]Tool) ToolRegistry {
+	return R.FromArrayMap[Tool, string](Mg.Second[Tool]())(toolEntry())
+}
+
+// MakeToolRegistry is the variadic form of [ToToolRegistry].
 func MakeToolRegistry(tools ...Tool) ToolRegistry {
-	return R.FromArrayMap[Tool, string](Mg.Second[Tool]())(toolEntry())(tools)
+	return ToToolRegistry()(tools)
 }
 
 // ToToolCaller derives the [ToolCaller] lookup from a registry.
