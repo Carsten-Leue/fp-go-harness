@@ -68,21 +68,21 @@ Don't write signatures from memory.
 
 ### Phase A: Close the loop (smallest working agent)
 
-- [ ] **A1 Clean up TODOs.** Move `headPrism` ([session/session.go](session/session.go)) and
+- [x] **A1 Clean up TODOs.** Move `headPrism` ([session/session.go](session/session.go)) and
   `effectFromReaderResult` ([tools/tools.go](tools/tools.go)) to a small `internal/fpx` package.
   First check whether fp-go already has them (`A.Head` prism, `effect.FromReaderResult`) and use
   those if it does. *Test:* the existing tests pass.
-- [ ] **A2 Loop driver.** Add `session.Run() effect.Kleisli[SessionDeps, Session, FinalResult]`, which drives
+- [x] **A2 Loop driver.** Add `session.Run() effect.Kleisli[SessionDeps, Session, FinalResult]`, which drives
   `Next` to `Land`. Use an effect-level tailrec combinator if fp-go has one; otherwise write one helper in `internal/fpx`.
   *Test:* a fake `ChatCompletionDeps` that returns `tool_calls` twice and then `stop` → 3 iterations,
   history length 2, usage summed.
-- [ ] **A3 Iteration limit.** Add a `MaxIterations` option to `SessionDeps` (getter). When it is reached, `Next` lands
+- [x] **A3 Iteration limit.** Add a `MaxIterations` option to `SessionDeps` (getter). When it is reached, `Next` lands
   with a typed error result. *Test:* a fake that always returns tool calls stops at N.
-- [ ] **A4 Tool definitions in the request.** `ToolCaller` is a lookup only, so the model never sees the tools.
+- [x] **A4 Tool definitions in the request.** `ToolCaller` is a lookup only, so the model never sees the tools.
   Add `ToolRegistry` (name → `{definition openai.ChatCompletionToolUnionParam, call ToolCall}`). Derive
   `ToolCaller` from it, and add an endomorphism that puts `Tools` into `ChatCompletionNewParams`.
   *Test:* the registry serialises to the expected JSON schema.
-- [ ] **A5 `main.go` CLI.** Read a prompt from the arguments, use ask mode (`openai.ForAskMode`) with
+- [x] **A5 `main.go` CLI.** Read a prompt from the arguments, use ask mode (`openai.ForAskMode`) with
   DeepSeek, run `session.Run` and print the final message and usage. Compose all wiring as
   `Effect`s and run them only once, in `main`. *Test:* a manual smoke test with `DEEPSEEK_API_KEY`.
 
@@ -90,12 +90,12 @@ Don't write signatures from memory.
 
 These come before the real tools so that every later step can be tested against real traffic.
 
-- [ ] **B1 Log reader.** Add a `replay` package that streams JSONL records (`ts`, `level`, `module`, `msg`, `taskId`, `data`)
+- [x] **B1 Log reader.** Add a `replay` package that streams JSONL records (`ts`, `level`, `module`, `msg`, `taskId`, `data`)
   as an `IOResult` sequence. *Test:* it parses the small 2026-09-24 log.
-- [ ] **B2 Payload extraction.** Use a prism to pick out `HTTP request body for /chat/completions:` and
+- [x] **B2 Payload extraction.** Use a prism to pick out `HTTP request body for /chat/completions:` and
   `Assembled chat response:` records and decode them into `openai.ChatCompletionNewParams` and a
   response DTO. *Test:* the payload count matches the counts above (126 requests, 71 responses).
-- [ ] **B3 Task grouping.** Group the records by `taskId` into `[]Turn` (request, response, invoked tools).
+- [x] **B3 Task grouping.** Group the records by `taskId` into `[]Turn` (request, response, invoked tools).
 - [ ] **B4 Replay `ChatCompletionDeps`.** Make a fake that answers with the recorded responses in order.
   Then `session.Run` replays a recorded task end to end without a network.
 - [ ] **B5 Copy the fixtures.** Copy 2–3 redacted tasks into `testdata/` (no tokens or internal URLs).
@@ -107,9 +107,9 @@ Each tool is its own `tools/<name>` file. It provides a `ToolRegistry` entry, a 
 (decoded with `J.Unmarshal` into `Result`), its own `XxxDeps` (filesystem/process access behind getters)
 and a text result. Validation errors (such as "path must be absolute") come back as tool text.
 
-- [ ] **C1 Workspace dependency.** Add `WorkspaceDeps` with `GetWorkspaceRoot()` and path resolution/validation as a
+- [x] **C1 Workspace dependency.** Add `WorkspaceDeps` with `GetWorkspaceRoot()` and path resolution/validation as a
   `ReaderResult[string, string]`.
-- [ ] **C2 `read_file`.** Read a file with line numbers and an optional `range` (`start-end`). Output format:
+- [x] **C2 `read_file`.** Read a file with line numbers and an optional `range` (`start-end`). Output format:
   `Contents of file X:\n\n1 | …`, matching the recordings.
 - [x] **C3 `list_files`, `glob`.** Implement with `io/fs.WalkDir` behind a getter; return paths relative to the workspace.
 - [x] **C4 `grep`.** Search with `regexp` (or call `rg` when it is installed, through `ProcessDeps`). Support
