@@ -102,6 +102,7 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | pair each element with its successor | `A.Pairwise` | `A.Zip` over the slice and `A.SliceRight(1)` of it |
 | add context to a `Result`'s error | | `result.MapLeft[A](ER.OnError("task %q", id))`, which wraps with `%w` |
 | `Option[A]` to `Result[A]` | | `result.FromOption[A](ER.OnNone("..."))` |
+| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainThunkK(F.Flow2(reader.Read(x), thunk.FromIOResult))`, as in `tools/walk.go` `walkDir` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones
 that return an `Operator` sit in an indented block that `grep "^func"` skips.

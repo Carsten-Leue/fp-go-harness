@@ -380,23 +380,39 @@ func notIgnored(prefix []string, ps []gitignore.Pattern) P.Predicate[FileEntry] 
 	}
 }
 
-// searchScope finds what the absolute path p names. A file is searched alone,
-// in the scope of its parent directory; anything else is walked as a
-// directory. A parent that cannot be listed leaves the decision to the walk.
-func searchScope(p string) Effect[GrepDeps, GrepScope] {
+// fileScope is the scope of the file the absolute path p names: its parent
+// directory and the file. It fails when the parent cannot be listed or has no
+// file of that name. It is a leaf over p: parent, base name and error each
+// read it, and the reader form would need a helper per read.
+func fileScope(p string) Effect[GrepDeps, GrepScope] {
 	dir := filepath.Dir(p)
 
-	walkScope := F.Pipe1(
-		walkDir[GrepDeps](true)(p),
-		effect.Map[GrepDeps](F.Curry2(MakeGrepScope)(p)),
-	)
-	fileScope := F.Flow2(F.Curry2(MakeGrepScope)(dir), effect.Of[GrepDeps, GrepScope])
-
-	return F.Pipe3(
+	return F.Pipe2(
 		walkDir[GrepDeps](false)(dir),
-		effect.Alt(lazy.Of(effect.Of[GrepDeps](A.Empty[FileEntry]()))),
-		effect.Map[GrepDeps](A.Filter(isFileNamed()(filepath.Base(p)))),
-		effect.Chain(P.Fold(F.Constant1[[]FileEntry](walkScope), fileScope)(A.IsNonEmpty[FileEntry])),
+		effect.ChainResultK[GrepDeps](F.Flow2(
+			A.FindFirst(isFileNamed()(filepath.Base(p))),
+			result.FromOption[FileEntry](ER.OnNone("'%s' is not a file", p)),
+		)),
+		effect.Map[GrepDeps](F.Flow2(A.Of[FileEntry], F.Curry2(MakeGrepScope)(dir))),
+	)
+}
+
+// dirScope is the scope of the directory the absolute path p names: the
+// directory and everything below it.
+func dirScope() effect.Kleisli[GrepDeps, string, GrepScope] {
+	return F.Pipe1(
+		F.Flow2(F.Curry2(MakeGrepScope), effect.Map[GrepDeps, []FileEntry, GrepScope]),
+		reader.Ap[Effect[GrepDeps, GrepScope]](walkDir[GrepDeps](true)),
+	)
+}
+
+// searchScope finds what the absolute path p names. A file is searched alone,
+// in the scope of its parent directory; anything else is walked as a
+// directory, and only the error of that walk is reported.
+func searchScope() effect.Kleisli[GrepDeps, string, GrepScope] {
+	return F.Pipe1(
+		F.Flow3(dirScope(), lazy.Of, effect.Alt[GrepDeps, GrepScope]),
+		reader.Ap[Effect[GrepDeps, GrepScope]](fileScope),
 	)
 }
 
@@ -449,9 +465,9 @@ func candidates() ReaderResult[GrepArgs, []FileEntry] {
 
 	return F.Pipe3(
 		F.Flow3(includeLens.Get, includeMatcher(), result.Map(selectCandidates)),
-		readerresult.Ap[candidatesFromIgnores](F.Flow3(nameLens.Get, segments(), result.Of[[]string])),
-		readerresult.Ap[Endomorphism[[]FileEntry]](F.Flow2(ignoresLens.Get, result.Of[[]gitignore.Pattern])),
-		readerresult.Ap[[]FileEntry](F.Flow3(scopeLens.Get, entriesLens.Get, result.Of[[]FileEntry])),
+		readerresult.Ap[candidatesFromIgnores](readerresult.Asks(F.Flow2(nameLens.Get, segments()))),
+		readerresult.Ap[Endomorphism[[]FileEntry]](readerresult.Asks(ignoresLens.Get)),
+		readerresult.Ap[[]FileEntry](readerresult.Asks(F.Flow2(scopeLens.Get, entriesLens.Get))),
 	)
 }
 
@@ -646,7 +662,7 @@ func Grep() effect.Kleisli[GrepDeps, string, string] {
 		F.Flow3(S.ToBytes, J.Unmarshal[GrepArgs], effect.FromResult[GrepDeps, GrepArgs]),
 		effect.Bind(regexpLens.Set, F.Flow2(compilePattern(), effect.FromResult[GrepDeps, *regexp.Regexp])),
 		effect.Bind(pathLens.Set, F.Flow3(pathLens.Get, orRoot, resolveIn[GrepDeps]())),
-		effect.Bind(scopeLens.Set, F.Flow2(pathLens.Get, searchScope)),
+		effect.Bind(scopeLens.Set, F.Flow2(pathLens.Get, searchScope())),
 		effect.Bind(nameLens.Set, F.Flow3(scopeLens.Get, dirLens.Get, relativeIn[GrepDeps]())),
 		effect.Bind(ignoresLens.Set, loadIgnores()),
 		effect.Bind(candidatesLens.Set, F.Flow2(candidates(), effect.FromResult[GrepDeps, []FileEntry])),

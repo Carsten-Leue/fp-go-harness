@@ -1,6 +1,6 @@
 ---
 name: fp-go
-description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the four rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, readers instead of closures over a pipeline's input (reader.Ap/Chain/TraverseArray), the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
+description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the four rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, readers instead of closures over a pipeline's input (reader.Ap/Chain/TraverseArray), the combinator that matches the operation (ApS without a setter is Ap, Map+Flatten is Chain, Fold over Left/Right is FromPredicate, empty fallback is Alt), the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
 ---
 # fp-go — the rules for every code change, and the MCP server behind them
 
@@ -393,6 +393,71 @@ Use `Bind` with do-notation and generated lenses **instead** when a later field 
 *from* an earlier one — that is what the accumulator struct is for. Independent fields are
 applicative; dependent fields are monadic.
 
+## The combinator that matches the operation
+
+A pipeline can compute the right value with the wrong concept: `ApS` without a struct,
+`Map` followed by `Flatten`, a `Fold` that picks `Left` or `Right`. It compiles and the
+tests pass, but the reader has to work out what is really happening, and the next
+change builds on the wrong idea. Name each step for what it does. Every row below was
+found in this repository and replaced; the rewrites changed no behaviour.
+
+| Shape in the code | What it really is | Use instead |
+|---|---|---|
+| `reader.ApS(setter, fa)` / `readeroption.ApS(…)` where the "setter" is not a field setter (`A.Prepend`, `A.Push`, `F.Flip(lens.Modify)` composed with `effect.Map`) | applicative application | `F.Pipe1(F.Flow2(fa', setter), reader.Ap[B](fb))`. `ApS` / `Bind` are do-notation and belong with a struct and its lens setters. |
+| `reader.Of(x)` + `reader.ApS(A.Push, fa)`, with only one value read from the environment | `Map` over that one reader | plain composition: `F.FlowN(getter, …, F.Bind1st(A.Append[T], A.Of(x)))` |
+| `identity.Bind(pair.MapHead, f)` | the pair is read twice: once to compute the update, once to apply it | `F.Pipe1(f, reader.Chain(pair.MapHead[B, A, A]))` |
+| `reader.Map(f)` + `reader.Chain(reader.Sequence(g))` | two independent reads of one input | `F.Pipe1(g, reader.Ap[B](f))` |
+| `F.Flow2(…, k)` + `reader.Flatten` | `Map` then `Flatten` | `reader.Chain(k)` |
+| `readerresult.Ap(…)` + `readerresult.ChainResultK(F.Identity[Result[A]])` | the applied function can fail, so it is a bind | `readerresult.Chain(k)`; `reader.Local[Result[B]](getter)` turns a `result.Kleisli[X, B]` into the `ReaderResult` that `Chain` needs |
+| `F.Flow2(lens.Get, result.Of[T])` as an argument of `readerresult.Ap` | lifting a reader that cannot fail | `readerresult.Asks(lens.Get)` (also `readeroption.Asks`, `effect.Asks`) |
+| `P.Fold(F.Constant1(fail), F.Constant1(result.Of))(pred)` + `reader.Ap(text)` | validation | `F.Flow2(result.FromPredicate(pred, F.Flow2(text, errors.New)), result.Map(text))` |
+| `effect.Alt(empty)` + `Filter` + `Chain(P.Fold(…)(A.IsNonEmpty))` | "try this, otherwise that" | an effect that fails when the first case doesn't apply (`A.FindFirst` + `result.FromOption`), then `effect.Alt(lazy.Of(second))` |
+| `reader.Local(f)(g)` over two known functions | composition | `F.Flow2(f, g)` |
+
+Worked examples:
+
+- [session/session.go](../../../session/session.go) `Next`: request and session paired
+  with `reader.Ap`; usage, iteration count and history updated with
+  `reader.Chain(pair.MapHead…)`; tool messages applied with `reader.Ap` and
+  `F.Flip(currentLens.Modify)`; the tool-call branch is a plain `F.Flow3`.
+- [tools/tools.go](../../../tools/tools.go) `handleToolCallsForChoice`:
+  `readeroption.Asks(prependMessage)` + `readeroption.Ap` instead of `readeroption.ApS`.
+- [tools/readfile.go](../../../tools/readfile.go) `renderFile`: `readerresult.Chain`
+  with `reader.Local`.
+- [tools/executecommand.go](../../../tools/executecommand.go) `renderOutput`:
+  `result.FromPredicate` + `result.Map`.
+- [tools/grep.go](../../../tools/grep.go) `searchScope`: `fileScope` with `effect.Alt`
+  falling back to `dirScope`.
+- [replay/task.go](../../../replay/task.go) `GroupTasks`: `reader.Chain` instead of
+  `reader.Flatten`.
+- [openai/deepseek.go](../../../openai/deepseek.go) `MakeDeepSeekChatCompletionDeps`:
+  the client options are a plain `F.Flow6`.
+
+How to spot them:
+
+- **`ApS` / `Bind` without a lens setter or a constructor as the first argument.** If
+  the "state" is an `Effect`, a slice or a function rather than a struct, it is `Ap` or
+  `Chain`.
+- **`Sequence`, `Flatten` or `ChainXxxK(F.Identity)` right after a `Map`.** The pair is
+  `Chain` or `Ap`.
+- **`F.Constant1(result.Of)` / `F.Constant1(result.Left)` inside a `Fold`.** That is
+  `FromPredicate`, `FromOption` or `FromError`.
+- **A fallback to an empty value followed by a test for emptiness.** That is `Alt`.
+
+Not a finding:
+
+- `effect.Asks(getter)` + `effect.ChainThunkK(F.Flow2(reader.Read(x),
+  thunk.FromIOResult))` lifts a getter that returns a `ReaderIOResult` (`walkDir`,
+  `readBytes`, `env.LookupEnvThunk`). `effect` has no `FromReaderIOResult` (fp-go
+  v2.5.1), so this is already the right form.
+- A function over its input that reads the input three or more times, where the reader
+  form needs a helper per read (`grep.go` `fileScope`). Keep it, and say why in its doc
+  comment (Rule 4).
+
+When you change a function's shape (for example `searchScope(p)` becomes
+`searchScope()` returning a `Kleisli`), update its tests too, and run `go test` on the
+package before you move on.
+
 ## Composing `Effect[C, A]`
 
 `Effect[C, A]` (`github.com/IBM/fp-go/v2/effect`) is an alias of
@@ -580,6 +645,9 @@ MCP servers or restart the session and the tools come up quickly.
       where a combinator exists; imperative code only at the boundary or a leaf, with a reason
 - [ ] Point-free (Rule 4): lambdas only at the leaves; combinators, lens getters and
       `F.FlowN` above them; pipelines returned from functions
+- [ ] Each step uses the combinator that matches the operation: no `ApS`/`Bind`
+      without a lens setter, no `Map`+`Flatten`, no `Fold` choosing `Left`/`Right`, no
+      "empty fallback, then test for empty" (see *The combinator that matches the operation*)
 - [ ] Effects built with `effect`'s combinators (`Asks`/`Map`/`Ap`/`Chain`/`FromThunk`),
       reused under another environment with `Local`; dependencies as getter interfaces;
       loops with `effect.TailRec`; run only at the boundary with `Provide` + `RunSync`

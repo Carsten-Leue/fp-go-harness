@@ -121,9 +121,9 @@ func renderGlob() ReaderResult[GlobArgs, string] {
 
 	return F.Pipe3(
 		readerresult.Of[GlobArgs](globListing()),
-		readerresult.Ap[globFromMatch](F.Flow2(nameLens.Get, result.Of[string])),
+		readerresult.Ap[globFromMatch](readerresult.Asks(nameLens.Get)),
 		readerresult.Ap[globFromEntries](F.Flow2(patternLens.Get, globMatcher())),
-		readerresult.Ap[string](F.Flow2(entriesLens.Get, result.Of[[]FileEntry])),
+		readerresult.Ap[string](readerresult.Asks(entriesLens.Get)),
 	)
 }
 

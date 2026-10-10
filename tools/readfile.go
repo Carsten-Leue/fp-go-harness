@@ -195,14 +195,14 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 	rangeLens := MakeReadFileArgsRangeLens()
 	contentLens := MakeReadFileArgsContentLens()
 
-	body := F.Pipe2(
+	// the selector read from the range runs on the lines read from the content
+	body := F.Pipe1(
 		F.Flow2(rangeLens.Get, lineSelector()),
-		readerresult.Ap[Result[string]](F.Flow3(contentLens.Get, splitLines(), result.Of[[]string])),
-		readerresult.ChainResultK[ReadFileArgs](F.Identity[Result[string]]),
+		readerresult.Chain(reader.Local[Result[string]](F.Flow2(contentLens.Get, splitLines()))),
 	)
 
 	return F.Pipe1(
-		F.Flow4(nameLens.Get, S.Format[string]("Contents of file %s:\n\n"), S.Prepend, result.Of[Endomorphism[string]]),
+		readerresult.Asks(F.Flow3(nameLens.Get, S.Format[string]("Contents of file %s:\n\n"), S.Prepend)),
 		readerresult.Ap[string](body),
 	)
 }

@@ -6,7 +6,6 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
-	I "github.com/IBM/fp-go/v2/identity"
 	N "github.com/IBM/fp-go/v2/number"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
@@ -118,40 +117,47 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		usageLens.Modify,
 	)
 
+	// the session after one more request, with the usage of its completion
+	countCompletion := F.Flow3(
+		usageFromCompletionLens.Get,
+		addUsage,
+		reader.Map[Session](incIterations),
+	)
+
 	addHistoryEntry := F.Flow2(
 		A.Push[HistoryEntry],
 		historyLens.Modify,
 	)
 
-	addToHistory := I.Bind(
-		pair.MapHead[*openai.ChatCompletion, Session, Session],
-		F.Flow2(
-			pair.MapHead[*openai.ChatCompletion](currentLens.Get),
-			addHistoryEntry,
-		),
+	// The session is updated from the completion next to it: the pair is read
+	// once for the update and once more to apply it, hence reader.Chain.
+	updateSession := reader.Chain(pair.MapHead[*openai.ChatCompletion, Session, Session])
+
+	recordCompletion := F.Pipe1(
+		F.Flow2(pair.Tail[Session, *openai.ChatCompletion], countCompletion),
+		updateSession,
 	)
 
-	toFinalResult := reader.Sequence(F.Flow2(
-		pair.FromHead[*openai.ChatCompletion, Session],
-		effect.Map[SessionDeps],
-	))
+	addToHistory := F.Pipe1(
+		F.Flow2(pair.MapHead[*openai.ChatCompletion](currentLens.Get), addHistoryEntry),
+		updateSession,
+	)
 
-	bounceToolCall := F.Pipe4(
-		pair.Tail[Session, *openai.ChatCompletion],
-		reader.Map[FinalResult](handleToolCalls),
-		reader.ApS(
-			F.Flow3(
-				reader.Read[Session],
-				reader.Local[Session](currentLens.Modify),
-				effect.Map[SessionDeps],
-			),
+	// the session with the messages of the tool calls appended to its request;
+	// session and tool calls are two independent reads of the same pair
+	applyToolCalls := F.Pipe1(
+		F.Flow3(
 			pair.Head[Session, *openai.ChatCompletion],
+			F.Flip(currentLens.Modify),
+			effect.Map[SessionDeps, Endomorphism[openai.ChatCompletionNewParams], Session],
 		),
-		reader.Map[FinalResult](F.Pipe1(
-			tailrec.Bounce[FinalResult, Session],
-			effect.Map[SessionDeps],
-		)),
-		reader.Local[Effect[SessionDeps, NextStep]](addToHistory),
+		reader.Ap[Effect[SessionDeps, Session]](F.Flow2(pair.Tail[Session, *openai.ChatCompletion], handleToolCalls)),
+	)
+
+	bounceToolCall := F.Flow3(
+		addToHistory,
+		applyToolCalls,
+		effect.Map[SessionDeps](tailrec.Bounce[FinalResult, Session]),
 	)
 
 	landFinalResult := F.Flow2(
@@ -171,22 +177,13 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		),
 	)
 
-	return F.Pipe3(
-		currentLens.Get,
-		reader.Map[Session](chatCompletion),
-		reader.Chain(toFinalResult),
+	// the request and the session it is paired with are independent reads of
+	// the session
+	return F.Pipe2(
+		F.Flow2(pair.FromHead[*openai.ChatCompletion, Session], effect.Map[SessionDeps, *openai.ChatCompletion, FinalResult]),
+		reader.Ap[Effect[SessionDeps, FinalResult]](F.Flow2(currentLens.Get, chatCompletion)),
 		reader.Map[Session](F.Flow2(
-			effect.Map[SessionDeps](F.Flow2(
-				pair.MapHead[*openai.ChatCompletion](incIterations),
-				I.Bind(
-					pair.MapHead[*openai.ChatCompletion, Session],
-					F.Flow3(
-						pair.Tail[Session, *openai.ChatCompletion],
-						usageFromCompletionLens.Get,
-						addUsage,
-					),
-				),
-			)),
+			effect.Map[SessionDeps](recordCompletion),
 			effect.Chain(dispatch),
 		)),
 	)
