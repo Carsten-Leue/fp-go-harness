@@ -24,6 +24,8 @@ type ExecuteCommandArgsLenses struct {
 	Cwd __lens.Lens[ExecuteCommandArgs, string]
 	// TimeoutSeconds is a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs]
 	TimeoutSeconds __lens.Lens[ExecuteCommandArgs, int]
+	// Background is a [__lens.Lens] for the Background field of [ExecuteCommandArgs]
+	Background __lens.Lens[ExecuteCommandArgs, bool]
 	// Dir is a [__lens.Lens] for the Dir field of [ExecuteCommandArgs]
 	Dir __lens.Lens[ExecuteCommandArgs, string]
 	// CommandO is a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs], treating the zero value as absent
@@ -32,6 +34,8 @@ type ExecuteCommandArgsLenses struct {
 	CwdO __lens_option.LensO[ExecuteCommandArgs, string]
 	// TimeoutSecondsO is a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs], treating the zero value as absent
 	TimeoutSecondsO __lens_option.LensO[ExecuteCommandArgs, int]
+	// BackgroundO is a [__lens_option.LensO] for the Background field of [ExecuteCommandArgs], treating the zero value as absent
+	BackgroundO __lens_option.LensO[ExecuteCommandArgs, bool]
 	// DirO is a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs], treating the zero value as absent
 	DirO __lens_option.LensO[ExecuteCommandArgs, string]
 }
@@ -46,6 +50,8 @@ type ExecuteCommandArgsRefLenses struct {
 	Cwd __lens.Lens[*ExecuteCommandArgs, string]
 	// TimeoutSeconds is a [__lens.Lens] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
 	TimeoutSeconds __lens.Lens[*ExecuteCommandArgs, int]
+	// Background is a [__lens.Lens] for the Background field of [ExecuteCommandArgs] via a pointer receiver
+	Background __lens.Lens[*ExecuteCommandArgs, bool]
 	// Dir is a [__lens.Lens] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
 	Dir __lens.Lens[*ExecuteCommandArgs, string]
 	// CommandO is a [__lens_option.LensO] for the Command field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
@@ -54,6 +60,8 @@ type ExecuteCommandArgsRefLenses struct {
 	CwdO __lens_option.LensO[*ExecuteCommandArgs, string]
 	// TimeoutSecondsO is a [__lens_option.LensO] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
 	TimeoutSecondsO __lens_option.LensO[*ExecuteCommandArgs, int]
+	// BackgroundO is a [__lens_option.LensO] for the Background field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
+	BackgroundO __lens_option.LensO[*ExecuteCommandArgs, bool]
 	// DirO is a [__lens_option.LensO] for the Dir field of [ExecuteCommandArgs] via a pointer receiver, treating the zero value as absent
 	DirO __lens_option.LensO[*ExecuteCommandArgs, string]
 }
@@ -68,6 +76,8 @@ type ExecuteCommandArgsPrisms struct {
 	Cwd __prism.Prism[ExecuteCommandArgs, string]
 	// TimeoutSeconds is a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs]
 	TimeoutSeconds __prism.Prism[ExecuteCommandArgs, int]
+	// Background is a [__prism.Prism] for the Background field of [ExecuteCommandArgs]
+	Background __prism.Prism[ExecuteCommandArgs, bool]
 	// Dir is a [__prism.Prism] for the Dir field of [ExecuteCommandArgs]
 	Dir __prism.Prism[ExecuteCommandArgs, string]
 }
@@ -82,6 +92,8 @@ type ExecuteCommandArgsRefPrisms struct {
 	Cwd __prism.Prism[*ExecuteCommandArgs, string]
 	// TimeoutSeconds is a [__prism.Prism] for the TimeoutSeconds field of [ExecuteCommandArgs] via a pointer receiver
 	TimeoutSeconds __prism.Prism[*ExecuteCommandArgs, int]
+	// Background is a [__prism.Prism] for the Background field of [ExecuteCommandArgs] via a pointer receiver
+	Background __prism.Prism[*ExecuteCommandArgs, bool]
 	// Dir is a [__prism.Prism] for the Dir field of [ExecuteCommandArgs] via a pointer receiver
 	Dir __prism.Prism[*ExecuteCommandArgs, string]
 }
@@ -242,6 +254,58 @@ func MakeExecuteCommandArgsTimeoutSecondsRefPrism() __prism.Prism[*ExecuteComman
 	)
 }
 
+// MakeExecuteCommandArgsBackgroundLens returns a [__lens.Lens] for the Background field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsBackgroundLens() __lens.Lens[ExecuteCommandArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s ExecuteCommandArgs) bool { return s.Background },
+		func(s ExecuteCommandArgs, v bool) ExecuteCommandArgs { s.Background = v; return s },
+		"ExecuteCommandArgs.Background",
+	)
+}
+
+// MakeExecuteCommandArgsBackgroundLensO returns a [__lens_option.LensO] for the Background field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsBackgroundLensO() __lens_option.LensO[ExecuteCommandArgs, bool] {
+	return __lens_option.FromIso[ExecuteCommandArgs](__iso_option.FromZero[bool]())(MakeExecuteCommandArgsBackgroundLens())
+}
+
+// MakeExecuteCommandArgsBackgroundRefLens returns a [__lens.Lens] for the Background field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsBackgroundRefLens() __lens.Lens[*ExecuteCommandArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ExecuteCommandArgs) bool { return s.Background },
+		func(s *ExecuteCommandArgs, v bool) *ExecuteCommandArgs { s.Background = v; return s },
+		"(*ExecuteCommandArgs).Background",
+	)
+}
+
+// MakeExecuteCommandArgsBackgroundRefLensO returns a [__lens_option.LensO] for the Background field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsBackgroundRefLensO() __lens_option.LensO[*ExecuteCommandArgs, bool] {
+	return __lens_option.FromIso[*ExecuteCommandArgs](__iso_option.FromZero[bool]())(MakeExecuteCommandArgsBackgroundRefLens())
+}
+
+// MakeExecuteCommandArgsBackgroundPrism returns a [__prism.Prism] for the Background field of [ExecuteCommandArgs]
+func MakeExecuteCommandArgsBackgroundPrism() __prism.Prism[ExecuteCommandArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s ExecuteCommandArgs) __option.Option[bool] { return _fromNonZero(s.Background) },
+		func(v bool) ExecuteCommandArgs {
+			return ExecuteCommandArgs{Background: v}
+		},
+		"ExecuteCommandArgs.Background",
+	)
+}
+
+// MakeExecuteCommandArgsBackgroundRefPrism returns a [__prism.Prism] for the Background field of [ExecuteCommandArgs] via a pointer receiver
+func MakeExecuteCommandArgsBackgroundRefPrism() __prism.Prism[*ExecuteCommandArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *ExecuteCommandArgs) __option.Option[bool] { return _fromNonZero(s.Background) },
+		func(v bool) *ExecuteCommandArgs {
+			return &ExecuteCommandArgs{Background: v}
+		},
+		"ExecuteCommandArgs.Background",
+	)
+}
+
 // MakeExecuteCommandArgsDirLens returns a [__lens.Lens] for the Dir field of [ExecuteCommandArgs]
 func MakeExecuteCommandArgsDirLens() __lens.Lens[ExecuteCommandArgs, string] {
 	return __lens.MakeLensWithName(
@@ -303,11 +367,13 @@ func MakeExecuteCommandArgsLenses() ExecuteCommandArgsLenses {
 		Command:        MakeExecuteCommandArgsCommandLens(),
 		Cwd:            MakeExecuteCommandArgsCwdLens(),
 		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsLens(),
+		Background:     MakeExecuteCommandArgsBackgroundLens(),
 		Dir:            MakeExecuteCommandArgsDirLens(),
 		// optional lenses
 		CommandO:        MakeExecuteCommandArgsCommandLensO(),
 		CwdO:            MakeExecuteCommandArgsCwdLensO(),
 		TimeoutSecondsO: MakeExecuteCommandArgsTimeoutSecondsLensO(),
+		BackgroundO:     MakeExecuteCommandArgsBackgroundLensO(),
 		DirO:            MakeExecuteCommandArgsDirLensO(),
 	}
 }
@@ -321,11 +387,13 @@ func MakeExecuteCommandArgsRefLenses() ExecuteCommandArgsRefLenses {
 		Command:        MakeExecuteCommandArgsCommandRefLens(),
 		Cwd:            MakeExecuteCommandArgsCwdRefLens(),
 		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsRefLens(),
+		Background:     MakeExecuteCommandArgsBackgroundRefLens(),
 		Dir:            MakeExecuteCommandArgsDirRefLens(),
 		// optional lenses
 		CommandO:        MakeExecuteCommandArgsCommandRefLensO(),
 		CwdO:            MakeExecuteCommandArgsCwdRefLensO(),
 		TimeoutSecondsO: MakeExecuteCommandArgsTimeoutSecondsRefLensO(),
+		BackgroundO:     MakeExecuteCommandArgsBackgroundRefLensO(),
 		DirO:            MakeExecuteCommandArgsDirRefLensO(),
 	}
 }
@@ -338,6 +406,7 @@ func MakeExecuteCommandArgsPrisms() ExecuteCommandArgsPrisms {
 		Command:        MakeExecuteCommandArgsCommandPrism(),
 		Cwd:            MakeExecuteCommandArgsCwdPrism(),
 		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsPrism(),
+		Background:     MakeExecuteCommandArgsBackgroundPrism(),
 		Dir:            MakeExecuteCommandArgsDirPrism(),
 	}
 }
@@ -350,6 +419,7 @@ func MakeExecuteCommandArgsRefPrisms() ExecuteCommandArgsRefPrisms {
 		Command:        MakeExecuteCommandArgsCommandRefPrism(),
 		Cwd:            MakeExecuteCommandArgsCwdRefPrism(),
 		TimeoutSeconds: MakeExecuteCommandArgsTimeoutSecondsRefPrism(),
+		Background:     MakeExecuteCommandArgsBackgroundRefPrism(),
 		Dir:            MakeExecuteCommandArgsDirRefPrism(),
 	}
 }
@@ -3007,6 +3077,276 @@ func MakeProcessOutputRefPrisms() ProcessOutputRefPrisms {
 		Stdout:   MakeProcessOutputStdoutRefPrism(),
 		Stderr:   MakeProcessOutputStderrRefPrism(),
 		ExitCode: MakeProcessOutputExitCodeRefPrism(),
+	}
+}
+
+// BackgroundProcessLenses provides [lenses] for accessing fields of [BackgroundProcess]
+//
+// [lenses]: __lens.Lens
+type BackgroundProcessLenses struct {
+	// Pid is a [__lens.Lens] for the Pid field of [BackgroundProcess]
+	Pid __lens.Lens[BackgroundProcess, int]
+	// Command is a [__lens.Lens] for the Command field of [BackgroundProcess]
+	Command __lens.Lens[BackgroundProcess, string]
+	// LogPath is a [__lens.Lens] for the LogPath field of [BackgroundProcess]
+	LogPath __lens.Lens[BackgroundProcess, string]
+	// PidO is a [__lens_option.LensO] for the Pid field of [BackgroundProcess], treating the zero value as absent
+	PidO __lens_option.LensO[BackgroundProcess, int]
+	// CommandO is a [__lens_option.LensO] for the Command field of [BackgroundProcess], treating the zero value as absent
+	CommandO __lens_option.LensO[BackgroundProcess, string]
+	// LogPathO is a [__lens_option.LensO] for the LogPath field of [BackgroundProcess], treating the zero value as absent
+	LogPathO __lens_option.LensO[BackgroundProcess, string]
+}
+
+// BackgroundProcessRefLenses provides [lenses] for accessing fields of [BackgroundProcess] via a pointer to [BackgroundProcess]
+//
+// [lenses]: __lens.Lens
+type BackgroundProcessRefLenses struct {
+	// Pid is a [__lens.Lens] for the Pid field of [BackgroundProcess] via a pointer receiver
+	Pid __lens.Lens[*BackgroundProcess, int]
+	// Command is a [__lens.Lens] for the Command field of [BackgroundProcess] via a pointer receiver
+	Command __lens.Lens[*BackgroundProcess, string]
+	// LogPath is a [__lens.Lens] for the LogPath field of [BackgroundProcess] via a pointer receiver
+	LogPath __lens.Lens[*BackgroundProcess, string]
+	// PidO is a [__lens_option.LensO] for the Pid field of [BackgroundProcess] via a pointer receiver, treating the zero value as absent
+	PidO __lens_option.LensO[*BackgroundProcess, int]
+	// CommandO is a [__lens_option.LensO] for the Command field of [BackgroundProcess] via a pointer receiver, treating the zero value as absent
+	CommandO __lens_option.LensO[*BackgroundProcess, string]
+	// LogPathO is a [__lens_option.LensO] for the LogPath field of [BackgroundProcess] via a pointer receiver, treating the zero value as absent
+	LogPathO __lens_option.LensO[*BackgroundProcess, string]
+}
+
+// BackgroundProcessPrisms provides [prisms] for accessing fields of [BackgroundProcess]
+//
+// [prisms]: __prism.Prism
+type BackgroundProcessPrisms struct {
+	// Pid is a [__prism.Prism] for the Pid field of [BackgroundProcess]
+	Pid __prism.Prism[BackgroundProcess, int]
+	// Command is a [__prism.Prism] for the Command field of [BackgroundProcess]
+	Command __prism.Prism[BackgroundProcess, string]
+	// LogPath is a [__prism.Prism] for the LogPath field of [BackgroundProcess]
+	LogPath __prism.Prism[BackgroundProcess, string]
+}
+
+// BackgroundProcessRefPrisms provides [prisms] for accessing fields of [BackgroundProcess] via a pointer to [BackgroundProcess]
+//
+// [prisms]: __prism.Prism
+type BackgroundProcessRefPrisms struct {
+	// Pid is a [__prism.Prism] for the Pid field of [BackgroundProcess] via a pointer receiver
+	Pid __prism.Prism[*BackgroundProcess, int]
+	// Command is a [__prism.Prism] for the Command field of [BackgroundProcess] via a pointer receiver
+	Command __prism.Prism[*BackgroundProcess, string]
+	// LogPath is a [__prism.Prism] for the LogPath field of [BackgroundProcess] via a pointer receiver
+	LogPath __prism.Prism[*BackgroundProcess, string]
+}
+
+// MakeBackgroundProcessPidLens returns a [__lens.Lens] for the Pid field of [BackgroundProcess]
+func MakeBackgroundProcessPidLens() __lens.Lens[BackgroundProcess, int] {
+	return __lens.MakeLensWithName(
+		func(s BackgroundProcess) int { return s.Pid },
+		func(s BackgroundProcess, v int) BackgroundProcess { s.Pid = v; return s },
+		"BackgroundProcess.Pid",
+	)
+}
+
+// MakeBackgroundProcessPidLensO returns a [__lens_option.LensO] for the Pid field of [BackgroundProcess]
+func MakeBackgroundProcessPidLensO() __lens_option.LensO[BackgroundProcess, int] {
+	return __lens_option.FromIso[BackgroundProcess](__iso_option.FromZero[int]())(MakeBackgroundProcessPidLens())
+}
+
+// MakeBackgroundProcessPidRefLens returns a [__lens.Lens] for the Pid field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessPidRefLens() __lens.Lens[*BackgroundProcess, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *BackgroundProcess) int { return s.Pid },
+		func(s *BackgroundProcess, v int) *BackgroundProcess { s.Pid = v; return s },
+		"(*BackgroundProcess).Pid",
+	)
+}
+
+// MakeBackgroundProcessPidRefLensO returns a [__lens_option.LensO] for the Pid field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessPidRefLensO() __lens_option.LensO[*BackgroundProcess, int] {
+	return __lens_option.FromIso[*BackgroundProcess](__iso_option.FromZero[int]())(MakeBackgroundProcessPidRefLens())
+}
+
+// MakeBackgroundProcessPidPrism returns a [__prism.Prism] for the Pid field of [BackgroundProcess]
+func MakeBackgroundProcessPidPrism() __prism.Prism[BackgroundProcess, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s BackgroundProcess) __option.Option[int] { return _fromNonZero(s.Pid) },
+		func(v int) BackgroundProcess {
+			return BackgroundProcess{Pid: v}
+		},
+		"BackgroundProcess.Pid",
+	)
+}
+
+// MakeBackgroundProcessPidRefPrism returns a [__prism.Prism] for the Pid field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessPidRefPrism() __prism.Prism[*BackgroundProcess, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *BackgroundProcess) __option.Option[int] { return _fromNonZero(s.Pid) },
+		func(v int) *BackgroundProcess {
+			return &BackgroundProcess{Pid: v}
+		},
+		"BackgroundProcess.Pid",
+	)
+}
+
+// MakeBackgroundProcessCommandLens returns a [__lens.Lens] for the Command field of [BackgroundProcess]
+func MakeBackgroundProcessCommandLens() __lens.Lens[BackgroundProcess, string] {
+	return __lens.MakeLensWithName(
+		func(s BackgroundProcess) string { return s.Command },
+		func(s BackgroundProcess, v string) BackgroundProcess { s.Command = v; return s },
+		"BackgroundProcess.Command",
+	)
+}
+
+// MakeBackgroundProcessCommandLensO returns a [__lens_option.LensO] for the Command field of [BackgroundProcess]
+func MakeBackgroundProcessCommandLensO() __lens_option.LensO[BackgroundProcess, string] {
+	return __lens_option.FromIso[BackgroundProcess](__iso_option.FromZero[string]())(MakeBackgroundProcessCommandLens())
+}
+
+// MakeBackgroundProcessCommandRefLens returns a [__lens.Lens] for the Command field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessCommandRefLens() __lens.Lens[*BackgroundProcess, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *BackgroundProcess) string { return s.Command },
+		func(s *BackgroundProcess, v string) *BackgroundProcess { s.Command = v; return s },
+		"(*BackgroundProcess).Command",
+	)
+}
+
+// MakeBackgroundProcessCommandRefLensO returns a [__lens_option.LensO] for the Command field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessCommandRefLensO() __lens_option.LensO[*BackgroundProcess, string] {
+	return __lens_option.FromIso[*BackgroundProcess](__iso_option.FromZero[string]())(MakeBackgroundProcessCommandRefLens())
+}
+
+// MakeBackgroundProcessCommandPrism returns a [__prism.Prism] for the Command field of [BackgroundProcess]
+func MakeBackgroundProcessCommandPrism() __prism.Prism[BackgroundProcess, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s BackgroundProcess) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) BackgroundProcess {
+			return BackgroundProcess{Command: v}
+		},
+		"BackgroundProcess.Command",
+	)
+}
+
+// MakeBackgroundProcessCommandRefPrism returns a [__prism.Prism] for the Command field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessCommandRefPrism() __prism.Prism[*BackgroundProcess, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *BackgroundProcess) __option.Option[string] { return _fromNonZero(s.Command) },
+		func(v string) *BackgroundProcess {
+			return &BackgroundProcess{Command: v}
+		},
+		"BackgroundProcess.Command",
+	)
+}
+
+// MakeBackgroundProcessLogPathLens returns a [__lens.Lens] for the LogPath field of [BackgroundProcess]
+func MakeBackgroundProcessLogPathLens() __lens.Lens[BackgroundProcess, string] {
+	return __lens.MakeLensWithName(
+		func(s BackgroundProcess) string { return s.LogPath },
+		func(s BackgroundProcess, v string) BackgroundProcess { s.LogPath = v; return s },
+		"BackgroundProcess.LogPath",
+	)
+}
+
+// MakeBackgroundProcessLogPathLensO returns a [__lens_option.LensO] for the LogPath field of [BackgroundProcess]
+func MakeBackgroundProcessLogPathLensO() __lens_option.LensO[BackgroundProcess, string] {
+	return __lens_option.FromIso[BackgroundProcess](__iso_option.FromZero[string]())(MakeBackgroundProcessLogPathLens())
+}
+
+// MakeBackgroundProcessLogPathRefLens returns a [__lens.Lens] for the LogPath field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessLogPathRefLens() __lens.Lens[*BackgroundProcess, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *BackgroundProcess) string { return s.LogPath },
+		func(s *BackgroundProcess, v string) *BackgroundProcess { s.LogPath = v; return s },
+		"(*BackgroundProcess).LogPath",
+	)
+}
+
+// MakeBackgroundProcessLogPathRefLensO returns a [__lens_option.LensO] for the LogPath field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessLogPathRefLensO() __lens_option.LensO[*BackgroundProcess, string] {
+	return __lens_option.FromIso[*BackgroundProcess](__iso_option.FromZero[string]())(MakeBackgroundProcessLogPathRefLens())
+}
+
+// MakeBackgroundProcessLogPathPrism returns a [__prism.Prism] for the LogPath field of [BackgroundProcess]
+func MakeBackgroundProcessLogPathPrism() __prism.Prism[BackgroundProcess, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s BackgroundProcess) __option.Option[string] { return _fromNonZero(s.LogPath) },
+		func(v string) BackgroundProcess {
+			return BackgroundProcess{LogPath: v}
+		},
+		"BackgroundProcess.LogPath",
+	)
+}
+
+// MakeBackgroundProcessLogPathRefPrism returns a [__prism.Prism] for the LogPath field of [BackgroundProcess] via a pointer receiver
+func MakeBackgroundProcessLogPathRefPrism() __prism.Prism[*BackgroundProcess, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *BackgroundProcess) __option.Option[string] { return _fromNonZero(s.LogPath) },
+		func(v string) *BackgroundProcess {
+			return &BackgroundProcess{LogPath: v}
+		},
+		"BackgroundProcess.LogPath",
+	)
+}
+
+// MakeBackgroundProcessLenses creates a new [BackgroundProcessLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeBackgroundProcessLenses() BackgroundProcessLenses {
+	return BackgroundProcessLenses{
+		// mandatory lenses
+		Pid:     MakeBackgroundProcessPidLens(),
+		Command: MakeBackgroundProcessCommandLens(),
+		LogPath: MakeBackgroundProcessLogPathLens(),
+		// optional lenses
+		PidO:     MakeBackgroundProcessPidLensO(),
+		CommandO: MakeBackgroundProcessCommandLensO(),
+		LogPathO: MakeBackgroundProcessLogPathLensO(),
+	}
+}
+
+// MakeBackgroundProcessRefLenses creates a new [BackgroundProcessRefLenses] with [lenses] for all fields via a pointer to [BackgroundProcess]
+//
+// [lenses]: __lens.Lens
+func MakeBackgroundProcessRefLenses() BackgroundProcessRefLenses {
+	return BackgroundProcessRefLenses{
+		// mandatory lenses
+		Pid:     MakeBackgroundProcessPidRefLens(),
+		Command: MakeBackgroundProcessCommandRefLens(),
+		LogPath: MakeBackgroundProcessLogPathRefLens(),
+		// optional lenses
+		PidO:     MakeBackgroundProcessPidRefLensO(),
+		CommandO: MakeBackgroundProcessCommandRefLensO(),
+		LogPathO: MakeBackgroundProcessLogPathRefLensO(),
+	}
+}
+
+// MakeBackgroundProcessPrisms creates a new [BackgroundProcessPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeBackgroundProcessPrisms() BackgroundProcessPrisms {
+	return BackgroundProcessPrisms{
+		Pid:     MakeBackgroundProcessPidPrism(),
+		Command: MakeBackgroundProcessCommandPrism(),
+		LogPath: MakeBackgroundProcessLogPathPrism(),
+	}
+}
+
+// MakeBackgroundProcessRefPrisms creates a new [BackgroundProcessRefPrisms] with [prisms] for all fields via a pointer to [BackgroundProcess]
+//
+// [prisms]: __prism.Prism
+func MakeBackgroundProcessRefPrisms() BackgroundProcessRefPrisms {
+	return BackgroundProcessRefPrisms{
+		Pid:     MakeBackgroundProcessPidRefPrism(),
+		Command: MakeBackgroundProcessCommandRefPrism(),
+		LogPath: MakeBackgroundProcessLogPathRefPrism(),
 	}
 }
 

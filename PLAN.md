@@ -122,8 +122,10 @@ and a text result. Validation errors (such as "path must be absolute") come back
   Output format: stdout plus a `Stderr:` section, and the exit code if it is not zero.
   A non-zero exit code fails the call, so the model sees `Exit code: N\n\nStdout:\n…\n\nStderr:\n…`
   as the tool error, as recorded. `background` is not in the definition yet (C6).
-- [ ] **C6 `execute_command` (background).** Start the process, send its output to a log file and return the pid and path
+- [x] **C6 `execute_command` (background).** Start the process, send its output to a log file and return the pid and path
   (format as in the recordings). Register the process in an `IORef`-backed table owned by `ProcessDeps`.
+  The result text was written without comparing it to the recordings. The log directory is a parameter of `MakeDefaultProcessDeps`; it has to lie inside the workspace so that
+  `read_file` can read the logs. Processes leave the table when they exit. Not done yet: stopping them (E4).
 - [ ] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
 - [ ] **C8 `search_and_replace`.** Replace literal text or a regex, optionally within a line range. Implement it as a pure
   `Endomorphism[string]` with I/O only around it.
