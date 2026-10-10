@@ -2622,3 +2622,185 @@ func MakeToolInvocationRefPrisms() ToolInvocationRefPrisms {
 		Input:      MakeToolInvocationInputRefPrism(),
 	}
 }
+
+// TaskLenses provides [lenses] for accessing fields of [Task]
+//
+// [lenses]: __lens.Lens
+type TaskLenses struct {
+	// TaskID is a [__lens.Lens] for the TaskID field of [Task]
+	TaskID __lens.Lens[Task, string]
+	// Turns is a [__lens.Lens] for the Turns field of [Task]
+	Turns __lens.Lens[Task, []Turn]
+	// TaskIDO is a [__lens_option.LensO] for the TaskID field of [Task], treating the zero value as absent
+	TaskIDO __lens_option.LensO[Task, string]
+}
+
+// TaskRefLenses provides [lenses] for accessing fields of [Task] via a pointer to [Task]
+//
+// [lenses]: __lens.Lens
+type TaskRefLenses struct {
+	// TaskID is a [__lens.Lens] for the TaskID field of [Task] via a pointer receiver
+	TaskID __lens.Lens[*Task, string]
+	// Turns is a [__lens.Lens] for the Turns field of [Task] via a pointer receiver
+	Turns __lens.Lens[*Task, []Turn]
+	// TaskIDO is a [__lens_option.LensO] for the TaskID field of [Task] via a pointer receiver, treating the zero value as absent
+	TaskIDO __lens_option.LensO[*Task, string]
+}
+
+// TaskPrisms provides [prisms] for accessing fields of [Task]
+//
+// [prisms]: __prism.Prism
+type TaskPrisms struct {
+	// TaskID is a [__prism.Prism] for the TaskID field of [Task]
+	TaskID __prism.Prism[Task, string]
+	// Turns is a [__prism.Prism] for the Turns field of [Task]
+	Turns __prism.Prism[Task, []Turn]
+}
+
+// TaskRefPrisms provides [prisms] for accessing fields of [Task] via a pointer to [Task]
+//
+// [prisms]: __prism.Prism
+type TaskRefPrisms struct {
+	// TaskID is a [__prism.Prism] for the TaskID field of [Task] via a pointer receiver
+	TaskID __prism.Prism[*Task, string]
+	// Turns is a [__prism.Prism] for the Turns field of [Task] via a pointer receiver
+	Turns __prism.Prism[*Task, []Turn]
+}
+
+// MakeTaskTaskIDLens returns a [__lens.Lens] for the TaskID field of [Task]
+func MakeTaskTaskIDLens() __lens.Lens[Task, string] {
+	return __lens.MakeLensWithName(
+		func(s Task) string { return s.TaskID },
+		func(s Task, v string) Task { s.TaskID = v; return s },
+		"Task.TaskID",
+	)
+}
+
+// MakeTaskTaskIDLensO returns a [__lens_option.LensO] for the TaskID field of [Task]
+func MakeTaskTaskIDLensO() __lens_option.LensO[Task, string] {
+	return __lens_option.FromIso[Task](__iso_option.FromZero[string]())(MakeTaskTaskIDLens())
+}
+
+// MakeTaskTaskIDRefLens returns a [__lens.Lens] for the TaskID field of [Task] via a pointer receiver
+func MakeTaskTaskIDRefLens() __lens.Lens[*Task, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Task) string { return s.TaskID },
+		func(s *Task, v string) *Task { s.TaskID = v; return s },
+		"(*Task).TaskID",
+	)
+}
+
+// MakeTaskTaskIDRefLensO returns a [__lens_option.LensO] for the TaskID field of [Task] via a pointer receiver
+func MakeTaskTaskIDRefLensO() __lens_option.LensO[*Task, string] {
+	return __lens_option.FromIso[*Task](__iso_option.FromZero[string]())(MakeTaskTaskIDRefLens())
+}
+
+// MakeTaskTaskIDPrism returns a [__prism.Prism] for the TaskID field of [Task]
+func MakeTaskTaskIDPrism() __prism.Prism[Task, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s Task) __option.Option[string] { return _fromNonZero(s.TaskID) },
+		func(v string) Task {
+			return Task{TaskID: v}
+		},
+		"Task.TaskID",
+	)
+}
+
+// MakeTaskTaskIDRefPrism returns a [__prism.Prism] for the TaskID field of [Task] via a pointer receiver
+func MakeTaskTaskIDRefPrism() __prism.Prism[*Task, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *Task) __option.Option[string] { return _fromNonZero(s.TaskID) },
+		func(v string) *Task {
+			return &Task{TaskID: v}
+		},
+		"Task.TaskID",
+	)
+}
+
+// MakeTaskTurnsLens returns a [__lens.Lens] for the Turns field of [Task]
+func MakeTaskTurnsLens() __lens.Lens[Task, []Turn] {
+	return __lens.MakeLensWithName(
+		func(s Task) []Turn { return s.Turns },
+		func(s Task, v []Turn) Task { s.Turns = v; return s },
+		"Task.Turns",
+	)
+}
+
+// MakeTaskTurnsRefLens returns a [__lens.Lens] for the Turns field of [Task] via a pointer receiver
+func MakeTaskTurnsRefLens() __lens.Lens[*Task, []Turn] {
+	return __lens.MakeLensRefWithName(
+		func(s *Task) []Turn { return s.Turns },
+		func(s *Task, v []Turn) *Task { s.Turns = v; return s },
+		"(*Task).Turns",
+	)
+}
+
+// MakeTaskTurnsPrism returns a [__prism.Prism] for the Turns field of [Task]
+func MakeTaskTurnsPrism() __prism.Prism[Task, []Turn] {
+	return __prism.MakePrismWithName(
+		func(s Task) __option.Option[[]Turn] { return __option.Some(s.Turns) },
+		func(v []Turn) Task {
+			return Task{Turns: v}
+		},
+		"Task.Turns",
+	)
+}
+
+// MakeTaskTurnsRefPrism returns a [__prism.Prism] for the Turns field of [Task] via a pointer receiver
+func MakeTaskTurnsRefPrism() __prism.Prism[*Task, []Turn] {
+	return __prism.MakePrismWithName(
+		func(s *Task) __option.Option[[]Turn] { return __option.Some(s.Turns) },
+		func(v []Turn) *Task {
+			return &Task{Turns: v}
+		},
+		"Task.Turns",
+	)
+}
+
+// MakeTaskLenses creates a new [TaskLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeTaskLenses() TaskLenses {
+	return TaskLenses{
+		// mandatory lenses
+		TaskID: MakeTaskTaskIDLens(),
+		Turns:  MakeTaskTurnsLens(),
+		// optional lenses
+		TaskIDO: MakeTaskTaskIDLensO(),
+	}
+}
+
+// MakeTaskRefLenses creates a new [TaskRefLenses] with [lenses] for all fields via a pointer to [Task]
+//
+// [lenses]: __lens.Lens
+func MakeTaskRefLenses() TaskRefLenses {
+	return TaskRefLenses{
+		// mandatory lenses
+		TaskID: MakeTaskTaskIDRefLens(),
+		Turns:  MakeTaskTurnsRefLens(),
+		// optional lenses
+		TaskIDO: MakeTaskTaskIDRefLensO(),
+	}
+}
+
+// MakeTaskPrisms creates a new [TaskPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeTaskPrisms() TaskPrisms {
+	return TaskPrisms{
+		TaskID: MakeTaskTaskIDPrism(),
+		Turns:  MakeTaskTurnsPrism(),
+	}
+}
+
+// MakeTaskRefPrisms creates a new [TaskRefPrisms] with [prisms] for all fields via a pointer to [Task]
+//
+// [prisms]: __prism.Prism
+func MakeTaskRefPrisms() TaskRefPrisms {
+	return TaskRefPrisms{
+		TaskID: MakeTaskTaskIDRefPrism(),
+		Turns:  MakeTaskTurnsRefPrism(),
+	}
+}

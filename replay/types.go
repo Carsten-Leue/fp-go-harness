@@ -2,6 +2,7 @@ package replay
 
 import (
 	"github.com/IBM/fp-go/v2/endomorphism"
+	"github.com/IBM/fp-go/v2/ioref"
 	"github.com/IBM/fp-go/v2/iterator/iterresult"
 	"github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
@@ -21,4 +22,5 @@ type (
 	Pair[A, B any]         = pair.Pair[A, B]
 	Predicate[A any]       = predicate.Predicate[A]
 	ReaderResult[R, A any] = readerresult.ReaderResult[R, A]
+	IORef[A any]           = ioref.IORef[A]
 )

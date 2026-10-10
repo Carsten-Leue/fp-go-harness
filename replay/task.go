@@ -32,6 +32,10 @@ type ToolInvocation struct {
 
 // Turn is one request/response step of a recorded agent session, together
 // with the tool invocations the model made after the response.
+//
+// Turn has no generated lenses: its request and response are not comparable,
+// and the generator's optional lenses need comparable fields. The leaf
+// accessors [turnRequest] and [turnResponse] read it instead.
 type Turn struct {
 	Request  openai.ChatCompletionNewParams
 	Response ChatResponse
@@ -40,6 +44,8 @@ type Turn struct {
 
 // Task groups the turns of one recorded agent session, identified by its
 // task identifier as it appears in the log records.
+//
+// fp-go:Lens
 type Task struct {
 	TaskID string
 	Turns  []Turn
@@ -48,6 +54,16 @@ type Task struct {
 // newTurn is a leaf: a constructor over the three fields of a turn.
 func newTurn(request openai.ChatCompletionNewParams, response ChatResponse, tools []ToolInvocation) Turn {
 	return Turn{Request: request, Response: response, Tools: tools}
+}
+
+// turnRequest is a leaf accessor for the request of a turn.
+func turnRequest(t Turn) openai.ChatCompletionNewParams {
+	return t.Request
+}
+
+// turnResponse is a leaf accessor for the response of a turn.
+func turnResponse(t Turn) ChatResponse {
+	return t.Response
 }
 
 // newTask is a leaf: a constructor over the two fields of a task.
