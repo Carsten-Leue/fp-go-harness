@@ -1,5 +1,7 @@
 # 🧩 fp-go-harness
 
+[![CI](https://github.com/Carsten-Leue/fp-go-harness/actions/workflows/build.yml/badge.svg)](https://github.com/Carsten-Leue/fp-go-harness/actions/workflows/build.yml)
+
 An agentic coding harness in Go, built entirely from the functional effects of
 [fp-go](https://github.com/IBM/fp-go). It sends a prompt to an LLM, runs the tools the model
 asks for, feeds the results back, and repeats until the model answers.
@@ -72,6 +74,10 @@ replay tests.
 go test ./...      # live and replay tests are skipped without their .env variables
 go generate ./...  # regenerates the lenses (directives in each package's doc.go)
 ```
+
+[CI](.github/workflows/build.yml) checks `go mod tidy`, runs `go vet` and the tests with the
+race detector on the latest Go release. Every push to `main` runs semantic release, which
+derives the version and release notes from the conventional commit messages.
 
 The coding rules (fp-go composition patterns, generated lenses, naming, PR conventions) are
 in [AGENTS.md](AGENTS.md) and the skills under [.bob/skills](.bob/skills/).
