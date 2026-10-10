@@ -96,7 +96,7 @@ These come before the real tools so that every later step can be tested against 
   `Assembled chat response:` records and decode them into `openai.ChatCompletionNewParams` and a
   response DTO. *Test:* the payload count matches the counts above (126 requests, 71 responses).
 - [x] **B3 Task grouping.** Group the records by `taskId` into `[]Turn` (request, response, invoked tools).
-- [ ] **B4 Replay `ChatCompletionDeps`.** Make a fake that answers with the recorded responses in order.
+- [x] **B4 Replay `ChatCompletionDeps`.** Make a fake that answers with the recorded responses in order.
   Then `session.Run` replays a recorded task end to end without a network.
 - [ ] **B5 Copy the fixtures.** Copy 2–3 redacted tasks into `testdata/` (no tokens or internal URLs).
   Remove secrets with an endomorphism over the parsed records.

@@ -28,6 +28,8 @@ recorded agent sessions.
   current directory. `execute_command` waits for command approval (PLAN.md I1).
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
+  A grouped task replays through `session.Run` without a network: replay
+  `ChatCompletionDeps` answer each request with the next recorded response.
 
 ## 🚀 Quick start
 
@@ -50,7 +52,7 @@ replay tests.
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
-| [`replay`](replay/) | Reads, redacts and groups recorded session logs for tests |
+| [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
 | [`env`](env/) | Environment variables from the process and `.env` |
 | [`http`](http/) | HTTP client dependency |
 
@@ -61,7 +63,7 @@ replay tests.
 | Phase | Topic | Status |
 |---|---|---|
 | A | Close the loop | ✅ done |
-| B | Replay fixtures from the recordings | 🚧 B1–B3 done, B4–B5 open |
+| B | Replay fixtures from the recordings | 🚧 B1–B4 done, B5 open |
 | C | Core tools | 🚧 C1–C5 done, C6–C11 open |
 | D | Prompt assembly | ⏳ open |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
