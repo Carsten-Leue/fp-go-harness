@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/IBM/fp-go/v2/ioref"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMakeProcess(t *testing.T) {
@@ -20,10 +23,106 @@ func TestMakeProcess(t *testing.T) {
 
 func TestMakeProcessDeps(t *testing.T) {
 	fake := &fakeRun{out: ProcessOutput{Stdout: "x"}}
-	deps := MakeProcessDeps(fake.run)
+	start := &fakeStart{}
+	table := ioref.MakeIORef(ProcessTable{})()
+	deps := MakeProcessDeps(fake.run, start.start, table)
 
 	assert.Equal(t, result.Of(ProcessOutput{Stdout: "x"}), deps.GetRunProcess()(MakeProcess("c", "d"))(t.Context())())
 	assert.Equal(t, []Process{{Command: "c", Dir: "d"}}, fake.got)
+
+	assert.Equal(t, result.Of(BackgroundProcess{Pid: 42, Command: "s", LogPath: filepath.Join("d", "command.log")}),
+		deps.GetStartProcess()(MakeProcess("s", "d"))(t.Context())())
+	assert.Equal(t, []Process{{Command: "s", Dir: "d"}}, start.got)
+
+	assert.Same(t, table, deps.GetProcessTable())
+}
+
+func TestShellArgs(t *testing.T) {
+	shell := []string{"sh", "-c"}
+
+	assert.Equal(t, []string{"-c", "ls"}, shellArgs(shell, "ls"))
+	assert.Equal(t, []string{"sh", "-c"}, shell)
+}
+
+func tableOf(table IORef[ProcessTable]) ProcessTable {
+	return ioref.Read(table)()
+}
+
+func TestStartShell_NotFound(t *testing.T) {
+	logDir := t.TempDir()
+	table := ioref.MakeIORef(ProcessTable{})()
+	start := StartShell([]string{"fp-go-harness-no-such-shell"}, logDir)(table)
+
+	_, err := result.Unwrap(start(MakeProcess("exit 0", t.TempDir()))(t.Context())())
+	assert.ErrorIs(t, err, exec.ErrNotFound)
+
+	// the log of a process that did not start is removed
+	entries, err := os.ReadDir(logDir)
+	require.NoError(t, err)
+	assert.Empty(t, entries)
+	assert.Empty(t, tableOf(table))
+}
+
+func TestStartShell_Cancelled(t *testing.T) {
+	logDir := filepath.Join(t.TempDir(), "logs")
+	table := ioref.MakeIORef(ProcessTable{})()
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	_, err := result.Unwrap(StartShell(DefaultShell(), logDir)(table)(MakeProcess("exit 0", t.TempDir()))(ctx)())
+	assert.ErrorIs(t, err, context.Canceled)
+	assert.NoDirExists(t, logDir)
+}
+
+// TestStartShell_OperatingSystem starts real commands in the default shell.
+func TestStartShell_OperatingSystem(t *testing.T) {
+	if testing.Short() {
+		t.Skip("starts shell processes")
+	}
+
+	cmds := commandsFor()
+
+	t.Run("output goes to the log", func(t *testing.T) {
+		logDir := filepath.Join(t.TempDir(), "logs")
+		table := ioref.MakeIORef(ProcessTable{})()
+		start := StartShell(DefaultShell(), logDir)(table)
+
+		started, err := result.Unwrap(start(MakeProcess(cmds.stdoutAndStderr, t.TempDir()))(t.Context())())
+		require.NoError(t, err)
+		assert.Positive(t, started.Pid)
+		assert.Equal(t, cmds.stdoutAndStderr, started.Command)
+		assert.Equal(t, logDir, filepath.Dir(started.LogPath))
+
+		// the process leaves the table when it exits
+		assert.Eventually(t, func() bool { return len(tableOf(table)) == 0 }, 20*time.Second, 50*time.Millisecond)
+
+		log, err := os.ReadFile(started.LogPath)
+		require.NoError(t, err)
+		assert.Contains(t, string(log), "out")
+		assert.Contains(t, string(log), "err")
+	})
+
+	t.Run("running process is in the table", func(t *testing.T) {
+		table := ioref.MakeIORef(ProcessTable{})()
+		start := StartShell(DefaultShell(), t.TempDir())(table)
+
+		started, err := result.Unwrap(start(MakeProcess(cmds.sleep, t.TempDir()))(t.Context())())
+		require.NoError(t, err)
+		assert.Equal(t, ProcessTable{started.Pid: started}, tableOf(table))
+
+		// the process outlives the context of the call; stop it here
+		p, err := os.FindProcess(started.Pid)
+		require.NoError(t, err)
+		require.NoError(t, p.Kill())
+		assert.Eventually(t, func() bool { return len(tableOf(table)) == 0 }, 20*time.Second, 50*time.Millisecond)
+	})
+}
+
+func TestMakeDefaultProcessDeps(t *testing.T) {
+	deps := MakeDefaultProcessDeps(t.TempDir())()
+
+	assert.Empty(t, tableOf(deps.GetProcessTable()))
+	assert.NotSame(t, deps.GetProcessTable(), MakeDefaultProcessDeps(t.TempDir())().GetProcessTable())
 }
 
 func TestIsExit(t *testing.T) {
@@ -113,7 +212,7 @@ func TestWithTimeLimit(t *testing.T) {
 
 func TestWorkingDir(t *testing.T) {
 	root := t.TempDir()
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), MakeProcessDeps((&fakeRun{}).run))
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), fakeProcessDeps((&fakeRun{}).run, (&fakeStart{}).start))
 	outside := filepath.Join(filepath.Dir(root), "other")
 
 	for name, tc := range map[string]struct {

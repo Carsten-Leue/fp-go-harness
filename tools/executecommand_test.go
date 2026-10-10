@@ -11,6 +11,7 @@ import (
 	"time"
 
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
+	"github.com/IBM/fp-go/v2/ioref"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/stretchr/testify/assert"
@@ -39,6 +40,31 @@ func (f *fakeRun) run(p Process) Thunk[ProcessOutput] {
 			return result.Of(f.out)
 		}
 	}
+}
+
+// fakeStart records the processes it is asked to start and answers each with
+// a background process of pid 42 and a log file named after its directory,
+// or fails with err.
+type fakeStart struct {
+	got []Process
+	err error
+}
+
+func (f *fakeStart) start(p Process) Thunk[BackgroundProcess] {
+	return func(context.Context) func() result.Result[BackgroundProcess] {
+		return func() result.Result[BackgroundProcess] {
+			f.got = append(f.got, p)
+			if f.err != nil {
+				return result.Left[BackgroundProcess](f.err)
+			}
+			return result.Of(BackgroundProcess{Pid: 42, Command: p.Command, LogPath: filepath.Join(p.Dir, "command.log")})
+		}
+	}
+}
+
+// fakeProcessDeps builds [ProcessDeps] over fakes, with an empty process table.
+func fakeProcessDeps(run RunProcess, start StartProcess) ProcessDeps {
+	return MakeProcessDeps(run, start, ioref.MakeIORef(ProcessTable{})())
 }
 
 func runExecuteCommand(t *testing.T, deps ExecuteCommandDeps, arguments string) result.Result[string] {
@@ -100,7 +126,7 @@ func TestTimeoutError(t *testing.T) {
 func TestExecuteCommand_Fake(t *testing.T) {
 	root := t.TempDir()
 	fake := &fakeRun{out: ProcessOutput{Stdout: "hello\n"}}
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), MakeProcessDeps(fake.run))
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), fakeProcessDeps(fake.run, (&fakeStart{}).start))
 
 	assert.Equal(t, result.Of("hello"), runExecuteCommand(t, deps, `{"command":"echo hello"}`))
 	assert.Equal(t, result.Of("hello"), runExecuteCommand(t, deps, `{"command":"ls","cwd":"sub","timeout_seconds":120}`))
@@ -116,9 +142,35 @@ func TestExecuteCommand_Fake(t *testing.T) {
 	}, fake.got)
 }
 
+func TestStartedText(t *testing.T) {
+	assert.Equal(t,
+		"Command started in the background.\nPID: 7\nLog file: /logs/command-1.log\n\n"+
+			"The log file receives its standard output and standard error. Read it with read_file to check on the command.",
+		startedText(BackgroundProcess{Pid: 7, Command: "serve", LogPath: "/logs/command-1.log"}))
+}
+
+func TestExecuteCommand_Background(t *testing.T) {
+	root := t.TempDir()
+	run := &fakeRun{}
+	start := &fakeStart{}
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), fakeProcessDeps(run.run, start.start))
+
+	assert.Equal(t,
+		result.Of(startedText(BackgroundProcess{Pid: 42, Command: "serve", LogPath: filepath.Join(root, "sub", "command.log")})),
+		runExecuteCommand(t, deps, `{"command":"serve","cwd":"sub","background":true,"timeout_seconds":5}`))
+
+	assert.Equal(t, []Process{{Command: "serve", Dir: filepath.Join(root, "sub")}}, start.got)
+	assert.Empty(t, run.got)
+
+	// a command that cannot be started fails the call
+	failing := &fakeStart{err: errors.New("cannot start")}
+	failingDeps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), fakeProcessDeps(run.run, failing.start))
+	assert.Equal(t, result.Left[string](failing.err), runExecuteCommand(t, failingDeps, `{"command":"serve","background":true}`))
+}
+
 func TestExecuteCommand_TimeoutInContext(t *testing.T) {
 	fake := &fakeRun{}
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), MakeProcessDeps(fake.run))
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), fakeProcessDeps(fake.run, (&fakeStart{}).start))
 
 	runExecuteCommand(t, deps, `{"command":"x","timeout_seconds":120}`)
 	assert.InDelta(t, float64(120*time.Second), float64(fake.deadline), float64(time.Second))
@@ -129,7 +181,7 @@ func TestExecuteCommand_TimeoutInContext(t *testing.T) {
 
 func TestExecuteCommand_Failures(t *testing.T) {
 	fake := &fakeRun{out: ProcessOutput{Stderr: "boom", ExitCode: 3}}
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), MakeProcessDeps(fake.run))
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), fakeProcessDeps(fake.run, (&fakeStart{}).start))
 
 	for name, tc := range map[string]struct {
 		arguments string
@@ -147,7 +199,7 @@ func TestExecuteCommand_Failures(t *testing.T) {
 
 	// an infrastructure error, e.g. a missing shell, is passed on unchanged
 	failing := &fakeRun{err: errors.New("cannot start")}
-	failingDeps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), MakeProcessDeps(failing.run))
+	failingDeps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), fakeProcessDeps(failing.run, (&fakeStart{}).start))
 	_, err := result.Unwrap(runExecuteCommand(t, failingDeps, `{"command":"x"}`))
 	assert.EqualError(t, err, "cannot start")
 }
@@ -182,7 +234,7 @@ func TestExecuteCommand_OperatingSystem(t *testing.T) {
 
 	root := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(root, "sub"), 0o700))
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), MakeDefaultProcessDeps())
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), MakeDefaultProcessDeps(t.TempDir())())
 	cmds := commandsFor()
 
 	t.Run("stdout and stderr", func(t *testing.T) {
@@ -239,7 +291,7 @@ func TestDefaultShell(t *testing.T) {
 func TestMakeExecuteCommandTool(t *testing.T) {
 	root := t.TempDir()
 	fake := &fakeRun{out: ProcessOutput{Stdout: "hi"}}
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), MakeProcessDeps(fake.run))
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(root), fakeProcessDeps(fake.run, (&fakeStart{}).start))
 
 	registry := MakeToolRegistry(MakeExecuteCommandTool()(deps))
 
@@ -252,13 +304,14 @@ func TestMakeExecuteCommandTool(t *testing.T) {
 	assert.Equal(t, []string{"command"}, definition.Parameters["required"])
 
 	properties := definition.Parameters["properties"].(map[string]any)
-	assert.Len(t, properties, 3)
+	assert.Len(t, properties, 4)
 	assert.Contains(t, properties["cwd"].(map[string]any)["description"], root)
 	assert.Equal(t, "integer", properties["timeout_seconds"].(map[string]any)["type"])
+	assert.Equal(t, "boolean", properties["background"].(map[string]any)["type"])
 }
 
 func TestAsExecuteCommandDeps(t *testing.T) {
-	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), MakeDefaultProcessDeps())
+	deps := MakeExecuteCommandDeps(MakeWorkspaceDeps(t.TempDir()), MakeDefaultProcessDeps(t.TempDir())())
 
 	assert.Equal(t, deps, AsExecuteCommandDeps(deps))
 	assert.Equal(t, ProcessDeps(deps), AsProcessDeps(deps))

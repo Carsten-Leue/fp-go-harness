@@ -3,6 +3,8 @@ package tools
 import (
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/endomorphism"
+	"github.com/IBM/fp-go/v2/io"
+	"github.com/IBM/fp-go/v2/ioref"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
@@ -21,4 +23,6 @@ type (
 	Option[A any]          = option.Option[A]
 	Endomorphism[A any]    = endomorphism.Endomorphism[A]
 	Pair[A, B any]         = pair.Pair[A, B]
+	IO[A any]              = io.IO[A]
+	IORef[A any]           = ioref.IORef[A]
 )

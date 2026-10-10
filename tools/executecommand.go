@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -69,6 +70,7 @@ type ExecuteCommandArgs struct {
 	Command        string `json:"command"`
 	Cwd            string `json:"cwd"`
 	TimeoutSeconds int    `json:"timeout_seconds"`
+	Background     bool   `json:"background"`
 	Dir            string `json:"-"`
 }
 
@@ -132,23 +134,34 @@ func workingDir() effect.Kleisli[ExecuteCommandDeps, string, string] {
 	)
 }
 
+// processOf is the command line and the working directory of a call.
+func processOf() Reader[ExecuteCommandArgs, Process] {
+	commandLens := MakeExecuteCommandArgsCommandLens()
+	dirLens := MakeExecuteCommandArgsDirLens()
+
+	return F.Pipe1(
+		F.Flow2(commandLens.Get, F.Curry2(MakeProcess)),
+		reader.Ap[Process](dirLens.Get),
+	)
+}
+
 // invokeProcess turns a call into the effect that runs it: it hands the
 // command and the working directory to the [RunProcess] it depends on and
 // limits the time the process may take.
 func invokeProcess() effect.Kleisli[RunProcess, ExecuteCommandArgs, ProcessOutput] {
-	commandLens := MakeExecuteCommandArgsCommandLens()
-	dirLens := MakeExecuteCommandArgsDirLens()
 	timeoutLens := MakeExecuteCommandArgsTimeoutSecondsLens()
-
-	process := F.Pipe1(
-		F.Flow2(commandLens.Get, F.Curry2(MakeProcess)),
-		reader.Ap[Process](dirLens.Get),
-	)
 
 	return F.Pipe1(
 		F.Flow3(timeoutLens.Get, withTimeLimit(), reader.Map[RunProcess, Thunk[ProcessOutput], Thunk[ProcessOutput]]),
-		reader.Ap[Effect[RunProcess, ProcessOutput]](F.Flow2(process, reader.Read[Thunk[ProcessOutput], Process])),
+		reader.Ap[Effect[RunProcess, ProcessOutput]](F.Flow2(processOf(), reader.Read[Thunk[ProcessOutput], Process])),
 	)
+}
+
+// invokeStart turns a call into the effect that starts it with the
+// [StartProcess] it depends on. The timeout does not apply: nothing waits for
+// the process.
+func invokeStart() effect.Kleisli[StartProcess, ExecuteCommandArgs, BackgroundProcess] {
+	return F.Flow2(processOf(), reader.Read[Thunk[BackgroundProcess], Process])
 }
 
 // runCommand runs a call with the [RunProcess] of the [ProcessDeps].
@@ -156,6 +169,14 @@ func runCommand() effect.Kleisli[ExecuteCommandDeps, ExecuteCommandArgs, Process
 	return F.Flow2(
 		invokeProcess(),
 		effect.Local[ProcessOutput](ExecuteCommandDeps.GetRunProcess),
+	)
+}
+
+// startCommand starts a call with the [StartProcess] of the [ProcessDeps].
+func startCommand() effect.Kleisli[ExecuteCommandDeps, ExecuteCommandArgs, BackgroundProcess] {
+	return F.Flow2(
+		invokeStart(),
+		effect.Local[BackgroundProcess](ExecuteCommandDeps.GetStartProcess),
 	)
 }
 
@@ -228,35 +249,67 @@ func renderOutput() result.Kleisli[ProcessOutput, string] {
 	)
 }
 
-// ExecuteCommand runs an execute_command call in the foreground: it decodes
-// the JSON arguments, resolves the working directory against the workspace
-// (the workspace root when cwd is empty), runs the command line in the shell
-// and waits for it, at most timeout_seconds (30 by default, at most 270).
+// startedText is a leaf: one formatter over several fields. It tells the
+// model where the output of a background process goes.
+func startedText(p BackgroundProcess) string {
+	return fmt.Sprintf(
+		"Command started in the background.\nPID: %d\nLog file: %s\n\nThe log file receives its standard output and standard error. Read it with %s to check on the command.",
+		p.Pid,
+		p.LogPath,
+		ReadFileName,
+	)
+}
+
+// foreground runs a call and renders what it produced.
+func foreground() effect.Kleisli[ExecuteCommandDeps, ExecuteCommandArgs, string] {
+	return F.Flow2(
+		runCommand(),
+		effect.ChainResultK[ExecuteCommandDeps](renderOutput()),
+	)
+}
+
+// background starts a call and renders its process id and log file.
+func background() effect.Kleisli[ExecuteCommandDeps, ExecuteCommandArgs, string] {
+	return F.Flow2(
+		startCommand(),
+		effect.Map[ExecuteCommandDeps](startedText),
+	)
+}
+
+// ExecuteCommand runs an execute_command call: it decodes the JSON
+// arguments, resolves the working directory against the workspace (the
+// workspace root when cwd is empty) and hands the command line to the shell.
 //
-// The result is the standard output followed by a "Stderr:" section. A
-// non-zero exit code, invalid arguments, a command that cannot be started
-// and one that runs out of time fail the effect; [MakeToolCall] turns the
-// failure into a tool message for the model.
+// In the foreground it waits for the command, at most timeout_seconds (30 by
+// default, at most 270). The result is the standard output followed by a
+// "Stderr:" section. A non-zero exit code and a command that runs out of
+// time fail the effect.
+//
+// With background set it returns as soon as the command has started, with
+// its process id and the log file that receives its output.
+//
+// Invalid arguments and a command that cannot be started fail the effect;
+// [MakeToolCall] turns every failure into a tool message for the model.
 func ExecuteCommand() effect.Kleisli[ExecuteCommandDeps, string, string] {
 	commandLens := MakeExecuteCommandArgsCommandLens()
 	cwdLens := MakeExecuteCommandArgsCwdLens()
 	dirLens := MakeExecuteCommandArgsDirLens()
+	backgroundLens := MakeExecuteCommandArgsBackgroundLens()
 
 	nonEmpty := result.FromPredicate(
 		F.Flow2(commandLens.Get, S.IsNonEmpty),
 		F.Constant1[ExecuteCommandArgs](errEmptyCommand),
 	)
 
-	return F.Flow4(
+	return F.Flow3(
 		F.Flow4(S.ToBytes, J.Unmarshal[ExecuteCommandArgs], result.Chain(nonEmpty), effect.FromResult[ExecuteCommandDeps, ExecuteCommandArgs]),
 		effect.Bind(dirLens.Set, F.Flow2(cwdLens.Get, workingDir())),
-		effect.Chain(runCommand()),
-		effect.ChainResultK[ExecuteCommandDeps](renderOutput()),
+		effect.Chain(P.Fold(foreground(), background())(backgroundLens.Get)),
 	)
 }
 
 // executeCommandDefinition describes execute_command to the model, following
-// the recorded definition. It leaves out background, which is not supported yet.
+// the recorded definition.
 func executeCommandDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        ExecuteCommandName,
@@ -275,6 +328,10 @@ func executeCommandDefinition(root string) openai.FunctionDefinitionParam {
 				"timeout_seconds": map[string]any{
 					"type":        "integer",
 					"description": "Override the default 30s timeout for known slow commands (e.g. large installs, builds, test suites). Must be set to the minimum time reasonably needed, do not set arbitrarily large values. Maximum allowed: 270s. Invalid or missing values default to 30s.",
+				},
+				"background": map[string]any{
+					"type":        "boolean",
+					"description": "Start the command in the background and return at once, for long-running processes such as servers or watchers. Returns the process id and the path of a log file that receives the standard output and standard error; read it with read_file. timeout_seconds does not apply.",
 				},
 			},
 			"required": []string{"command"},
