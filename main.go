@@ -136,11 +136,18 @@ func main() {
 		os.Exit(2)
 	}
 
+	// The working directory is the workspace the tools read.
+	root, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
 	final, err := effect.RunSync(F.Pipe2(
-		answer(tools.MakeToolRegistry())(prompt),
+		answer(tools.MakeReadTools()(tools.MakeDefaultReadToolsDeps(root)))(prompt),
 		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
 		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)

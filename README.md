@@ -19,11 +19,13 @@ steps from recorded Bob sessions.
 - **Agent loop**: `session.Run` drives the conversation until the model stops calling
   tools, or until the iteration limit (25 in the CLI) is reached. It accumulates token usage
   with a monoid. Tool failures go back to the model as tool messages and never stop the loop.
-- **CLI (ask mode)**: `go run . "<prompt>"` asks DeepSeek once, with the ask-mode system
-  prompt, and prints the answer and the token usage.
+- **CLI (ask mode)**: `go run . "<prompt>"` answers one prompt with DeepSeek and the
+  ask-mode system prompt. The model can read the current directory with the read-only
+  tools. The CLI prints the answer and the token usage.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep` and `execute_command` (foreground),
-  each with its definition for the model, confined to the workspace root.
-  They are not yet registered in the CLI, which still runs with an empty tool registry.
+  each with its definition for the model, confined to the workspace root. The CLI
+  registers the read-only ones (`read_file`, `list_files`, `glob`, `grep`) for the
+  current directory. `execute_command` waits for command approval (PLAN.md I1).
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
 
