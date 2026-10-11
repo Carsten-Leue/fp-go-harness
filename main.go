@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -23,6 +24,7 @@ import (
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
+	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -52,14 +54,14 @@ func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
 	)
 }
 
-// makeRequest builds the Ask mode request for a single user prompt, including
-// the tool definitions from the registry.
-func makeRequest(registry tools.ToolRegistry) func(string) openai.ChatCompletionNewParams {
+// makeRequest builds the request of a mode for a single user prompt,
+// including the tool definitions from the registry.
+func makeRequest(request openai.ChatCompletionNewParams, registry tools.ToolRegistry) func(string) openai.ChatCompletionNewParams {
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
 
 	base := F.Pipe2(
-		oai.ForAskMode(),
+		request,
 		modelLens.Set(oai.DeepSeekModelFlash),
 		tools.WithTools()(registry),
 	)
@@ -77,14 +79,14 @@ func makeRequest(registry tools.ToolRegistry) func(string) openai.ChatCompletion
 // session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
 // the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
 // from DeepSeekDeps with the effectful [oai.MakeDeepSeekChatCompletionDeps].
-func answer(registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+func answer(request openai.ChatCompletionNewParams, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
 	toSessionDeps := F.Bind23of3(session.MakeSessionDeps)(
 		tools.MakeRegistryToolDeps()(registry),
 		session.MakeLoopDeps(maxIterations),
 	)
 
 	return F.Flow5(
-		makeRequest(registry),
+		makeRequest(request, registry),
 		session.MakeSession,
 		session.Run(),
 		effect.Local[session.FinalResult](toSessionDeps),
@@ -135,9 +137,22 @@ func formatResult() func(session.FinalResult) string {
 }
 
 func main() {
-	prompt := strings.Join(os.Args[1:], " ")
+	modeName := flag.String("mode", askMode, "ask (read-only tools) or agent (all tools, changes the workspace)")
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stderr, "usage: fp-go-harness [-mode ask|agent] <prompt>")
+		flag.PrintDefaults()
+	}
+	flag.Parse()
+
+	prompt := strings.Join(flag.Args(), " ")
 	if prompt == "" {
-		fmt.Fprintln(os.Stderr, "usage: fp-go-harness <prompt>")
+		flag.Usage()
+		os.Exit(2)
+	}
+
+	m, err := result.Unwrap(lookupMode()(*modeName))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
 
@@ -152,7 +167,7 @@ func main() {
 	defer stop()
 
 	final, err := effect.RunSync(F.Pipe2(
-		answer(tools.MakeTools()(tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))()))(prompt),
+		answer(m.request, m.tools(tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))()))(prompt),
 		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
 		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)
