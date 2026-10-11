@@ -17,18 +17,29 @@ func MakeDefaultReadToolsDeps(root string) ReadToolsDeps {
 	return MakeGrepDeps(MakeWorkspaceDeps(root), MakeDefaultWalkDeps(), MakeDefaultFileDeps())
 }
 
-// MakeReadTools builds the registry of the tools that read the workspace
-// without changing it: read_file, list_files, glob and grep. Each tool reads
-// its own dependencies from [ReadToolsDeps] through [reader.Local].
-func MakeReadTools() Reader[ReadToolsDeps, ToolRegistry] {
-	return F.Pipe2(
-		A.From(
-			reader.Local[Tool](AsReadFileDeps[ReadToolsDeps])(MakeReadFileTool()),
-			reader.Local[Tool](AsDirectoryDeps[ReadToolsDeps])(MakeListFilesTool()),
-			reader.Local[Tool](AsDirectoryDeps[ReadToolsDeps])(MakeGlobTool()),
-			MakeGrepTool(),
-		),
-		reader.SequenceArray[ReadToolsDeps, Tool],
-		reader.Map[ReadToolsDeps](ToToolRegistry()),
+// readTools are the tools that read the workspace without changing it:
+// read_file, list_files, glob and grep. Each tool reads its own dependencies
+// from R through [reader.Local].
+func readTools[R ReadToolsDeps]() []Reader[R, Tool] {
+	return A.From(
+		reader.Local[Tool](AsReadFileDeps[R])(MakeReadFileTool()),
+		reader.Local[Tool](AsDirectoryDeps[R])(MakeListFilesTool()),
+		reader.Local[Tool](AsDirectoryDeps[R])(MakeGlobTool()),
+		reader.Local[Tool](AsGrepDeps[R])(MakeGrepTool()),
 	)
+}
+
+// toRegistry builds the registry of tools that each read the same
+// dependencies.
+func toRegistry[R any]() func([]Reader[R, Tool]) Reader[R, ToolRegistry] {
+	return F.Flow2(
+		reader.SequenceArray[R, Tool],
+		reader.Map[R](ToToolRegistry()),
+	)
+}
+
+// MakeReadTools builds the registry of the read-only tools: read_file,
+// list_files, glob and grep.
+func MakeReadTools() Reader[ReadToolsDeps, ToolRegistry] {
+	return toRegistry[ReadToolsDeps]()(readTools[ReadToolsDeps]())
 }

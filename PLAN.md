@@ -128,8 +128,8 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `read_file` can read the logs. Processes leave the table when they exit. Not done yet: stopping them (E4).
 - [x] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
   Content with fewer lines than `line_count` fails as truncated; more lines pass, because models miscount the last line.
-  The definition and the result text were written without comparing them to the recordings. Not registered in the CLI yet
-  (waits for approval, I1).
+  The definition and the result text were written without comparing them to the recordings. Registered in the CLI
+  without approval until I1.
 - [ ] **C8 `search_and_replace`.** Replace literal text or a regex, optionally within a line range. Implement it as a pure
   `Endomorphism[string]` with I/O only around it.
 - [ ] **C9 `apply_diff`.** Parse `SEARCH`/`REPLACE` blocks. Applying them is a pure `func(string) Result[string]`
@@ -211,6 +211,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
 
 - [ ] **I1 Approval hook.** Add `ApprovalDeps.Approve: Kleisli[ToolInvocation, bool]` and wrap write/exec tools in it.
   A denial goes back to the model as a tool message.
+  The CLI already registers `write_file` and `execute_command` (`tools.MakeTools`) without approval: wrap them there.
 - [ ] **I2 Allow and deny lists** for commands (prefix match) and paths outside the workspace.
 - [ ] **I3 External-change detection.** Take a snapshot of file mtimes after each turn and report the diff as
   `<external_changes>` (Phase D6).

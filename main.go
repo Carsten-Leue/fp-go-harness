@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
@@ -27,6 +28,10 @@ import (
 
 // maxIterations bounds the number of chat completion requests per prompt.
 const maxIterations = 25
+
+// logDir is where background commands write their output, relative to the
+// workspace: read_file only reads inside the workspace.
+var logDir = filepath.Join(".fp-go-harness", "logs")
 
 type deepSeekDeps struct {
 	http.HttpDeps
@@ -136,7 +141,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	// The working directory is the workspace the tools read.
+	// The working directory is the workspace the tools work in.
 	root, err := os.Getwd()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -147,7 +152,7 @@ func main() {
 	defer stop()
 
 	final, err := effect.RunSync(F.Pipe2(
-		answer(tools.MakeReadTools()(tools.MakeDefaultReadToolsDeps(root)))(prompt),
+		answer(tools.MakeTools()(tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))()))(prompt),
 		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
 		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)
