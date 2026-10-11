@@ -19,9 +19,12 @@ recorded agent sessions.
 - **Agent loop**: `session.Run` drives the conversation until the model stops calling
   tools, or until the iteration limit (25 in the CLI) is reached. It accumulates token usage
   with a monoid. Tool failures go back to the model as tool messages and never stop the loop.
-- **CLI (ask mode)**: `go run . "<prompt>"` answers one prompt with DeepSeek and the
-  ask-mode system prompt. The model works in the current directory with all tools,
-  without approval yet (PLAN.md I1). The CLI prints the answer and the token usage.
+- **CLI (ask and agent mode)**: `go run . [-mode ask|agent] "<prompt>"` runs one prompt
+  with DeepSeek in the current directory and prints the answer and the token usage.
+  - **ask** (the default) answers questions with the read-only tools (`read_file`,
+    `list_files`, `glob`, `grep`).
+  - **agent** carries out a task with every tool, including `write_file` and
+    `execute_command`. These run without approval until PLAN.md I1.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
   `apply_diff`, `insert_content` and `execute_command`, each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
@@ -55,6 +58,7 @@ Requires Go 1.27 or later and a DeepSeek API key.
 ```sh
 cp .env.example .env        # then set DEEPSEEK_API_KEY
 go run . "What is a Kleisli arrow?"
+go run . -mode agent "Add a doc comment to every exported function in env/env.go"
 ```
 
 Variables set in the process environment take precedence over `.env`.
@@ -70,7 +74,7 @@ replay tests.
 
 | Package | What it does |
 |---|---|
-| [`main`](main.go) | CLI: reads the prompt from the arguments, wires the DeepSeek dependencies, runs the loop |
+| [`main`](main.go) | CLI: reads the mode and the prompt from the arguments, picks the mode's system prompt and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
