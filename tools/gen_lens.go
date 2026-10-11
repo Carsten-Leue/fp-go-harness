@@ -3923,3 +3923,343 @@ func MakeFileEntryRefPrisms() FileEntryRefPrisms {
 		ModTime: MakeFileEntryModTimeRefPrism(),
 	}
 }
+
+// WriteFileArgsLenses provides [lenses] for accessing fields of [WriteFileArgs]
+//
+// [lenses]: __lens.Lens
+type WriteFileArgsLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [WriteFileArgs]
+	Path __lens.Lens[WriteFileArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [WriteFileArgs]
+	Content __lens.Lens[WriteFileArgs, string]
+	// LineCount is a [__lens.Lens] for the LineCount field of [WriteFileArgs]
+	LineCount __lens.Lens[WriteFileArgs, int]
+	// Name is a [__lens.Lens] for the Name field of [WriteFileArgs]
+	Name __lens.Lens[WriteFileArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [WriteFileArgs], treating the zero value as absent
+	PathO __lens_option.LensO[WriteFileArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [WriteFileArgs], treating the zero value as absent
+	ContentO __lens_option.LensO[WriteFileArgs, string]
+	// LineCountO is a [__lens_option.LensO] for the LineCount field of [WriteFileArgs], treating the zero value as absent
+	LineCountO __lens_option.LensO[WriteFileArgs, int]
+	// NameO is a [__lens_option.LensO] for the Name field of [WriteFileArgs], treating the zero value as absent
+	NameO __lens_option.LensO[WriteFileArgs, string]
+}
+
+// WriteFileArgsRefLenses provides [lenses] for accessing fields of [WriteFileArgs] via a pointer to [WriteFileArgs]
+//
+// [lenses]: __lens.Lens
+type WriteFileArgsRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [WriteFileArgs] via a pointer receiver
+	Path __lens.Lens[*WriteFileArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [WriteFileArgs] via a pointer receiver
+	Content __lens.Lens[*WriteFileArgs, string]
+	// LineCount is a [__lens.Lens] for the LineCount field of [WriteFileArgs] via a pointer receiver
+	LineCount __lens.Lens[*WriteFileArgs, int]
+	// Name is a [__lens.Lens] for the Name field of [WriteFileArgs] via a pointer receiver
+	Name __lens.Lens[*WriteFileArgs, string]
+	// PathO is a [__lens_option.LensO] for the Path field of [WriteFileArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*WriteFileArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [WriteFileArgs] via a pointer receiver, treating the zero value as absent
+	ContentO __lens_option.LensO[*WriteFileArgs, string]
+	// LineCountO is a [__lens_option.LensO] for the LineCount field of [WriteFileArgs] via a pointer receiver, treating the zero value as absent
+	LineCountO __lens_option.LensO[*WriteFileArgs, int]
+	// NameO is a [__lens_option.LensO] for the Name field of [WriteFileArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*WriteFileArgs, string]
+}
+
+// WriteFileArgsPrisms provides [prisms] for accessing fields of [WriteFileArgs]
+//
+// [prisms]: __prism.Prism
+type WriteFileArgsPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [WriteFileArgs]
+	Path __prism.Prism[WriteFileArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [WriteFileArgs]
+	Content __prism.Prism[WriteFileArgs, string]
+	// LineCount is a [__prism.Prism] for the LineCount field of [WriteFileArgs]
+	LineCount __prism.Prism[WriteFileArgs, int]
+	// Name is a [__prism.Prism] for the Name field of [WriteFileArgs]
+	Name __prism.Prism[WriteFileArgs, string]
+}
+
+// WriteFileArgsRefPrisms provides [prisms] for accessing fields of [WriteFileArgs] via a pointer to [WriteFileArgs]
+//
+// [prisms]: __prism.Prism
+type WriteFileArgsRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [WriteFileArgs] via a pointer receiver
+	Path __prism.Prism[*WriteFileArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [WriteFileArgs] via a pointer receiver
+	Content __prism.Prism[*WriteFileArgs, string]
+	// LineCount is a [__prism.Prism] for the LineCount field of [WriteFileArgs] via a pointer receiver
+	LineCount __prism.Prism[*WriteFileArgs, int]
+	// Name is a [__prism.Prism] for the Name field of [WriteFileArgs] via a pointer receiver
+	Name __prism.Prism[*WriteFileArgs, string]
+}
+
+// MakeWriteFileArgsPathLens returns a [__lens.Lens] for the Path field of [WriteFileArgs]
+func MakeWriteFileArgsPathLens() __lens.Lens[WriteFileArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s WriteFileArgs) string { return s.Path },
+		func(s WriteFileArgs, v string) WriteFileArgs { s.Path = v; return s },
+		"WriteFileArgs.Path",
+	)
+}
+
+// MakeWriteFileArgsPathLensO returns a [__lens_option.LensO] for the Path field of [WriteFileArgs]
+func MakeWriteFileArgsPathLensO() __lens_option.LensO[WriteFileArgs, string] {
+	return __lens_option.FromIso[WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsPathLens())
+}
+
+// MakeWriteFileArgsPathRefLens returns a [__lens.Lens] for the Path field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsPathRefLens() __lens.Lens[*WriteFileArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *WriteFileArgs) string { return s.Path },
+		func(s *WriteFileArgs, v string) *WriteFileArgs { s.Path = v; return s },
+		"(*WriteFileArgs).Path",
+	)
+}
+
+// MakeWriteFileArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsPathRefLensO() __lens_option.LensO[*WriteFileArgs, string] {
+	return __lens_option.FromIso[*WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsPathRefLens())
+}
+
+// MakeWriteFileArgsPathPrism returns a [__prism.Prism] for the Path field of [WriteFileArgs]
+func MakeWriteFileArgsPathPrism() __prism.Prism[WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) WriteFileArgs {
+			return WriteFileArgs{Path: v}
+		},
+		"WriteFileArgs.Path",
+	)
+}
+
+// MakeWriteFileArgsPathRefPrism returns a [__prism.Prism] for the Path field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsPathRefPrism() __prism.Prism[*WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *WriteFileArgs {
+			return &WriteFileArgs{Path: v}
+		},
+		"WriteFileArgs.Path",
+	)
+}
+
+// MakeWriteFileArgsContentLens returns a [__lens.Lens] for the Content field of [WriteFileArgs]
+func MakeWriteFileArgsContentLens() __lens.Lens[WriteFileArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s WriteFileArgs) string { return s.Content },
+		func(s WriteFileArgs, v string) WriteFileArgs { s.Content = v; return s },
+		"WriteFileArgs.Content",
+	)
+}
+
+// MakeWriteFileArgsContentLensO returns a [__lens_option.LensO] for the Content field of [WriteFileArgs]
+func MakeWriteFileArgsContentLensO() __lens_option.LensO[WriteFileArgs, string] {
+	return __lens_option.FromIso[WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsContentLens())
+}
+
+// MakeWriteFileArgsContentRefLens returns a [__lens.Lens] for the Content field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsContentRefLens() __lens.Lens[*WriteFileArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *WriteFileArgs) string { return s.Content },
+		func(s *WriteFileArgs, v string) *WriteFileArgs { s.Content = v; return s },
+		"(*WriteFileArgs).Content",
+	)
+}
+
+// MakeWriteFileArgsContentRefLensO returns a [__lens_option.LensO] for the Content field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsContentRefLensO() __lens_option.LensO[*WriteFileArgs, string] {
+	return __lens_option.FromIso[*WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsContentRefLens())
+}
+
+// MakeWriteFileArgsContentPrism returns a [__prism.Prism] for the Content field of [WriteFileArgs]
+func MakeWriteFileArgsContentPrism() __prism.Prism[WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) WriteFileArgs {
+			return WriteFileArgs{Content: v}
+		},
+		"WriteFileArgs.Content",
+	)
+}
+
+// MakeWriteFileArgsContentRefPrism returns a [__prism.Prism] for the Content field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsContentRefPrism() __prism.Prism[*WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) *WriteFileArgs {
+			return &WriteFileArgs{Content: v}
+		},
+		"WriteFileArgs.Content",
+	)
+}
+
+// MakeWriteFileArgsLineCountLens returns a [__lens.Lens] for the LineCount field of [WriteFileArgs]
+func MakeWriteFileArgsLineCountLens() __lens.Lens[WriteFileArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s WriteFileArgs) int { return s.LineCount },
+		func(s WriteFileArgs, v int) WriteFileArgs { s.LineCount = v; return s },
+		"WriteFileArgs.LineCount",
+	)
+}
+
+// MakeWriteFileArgsLineCountLensO returns a [__lens_option.LensO] for the LineCount field of [WriteFileArgs]
+func MakeWriteFileArgsLineCountLensO() __lens_option.LensO[WriteFileArgs, int] {
+	return __lens_option.FromIso[WriteFileArgs](__iso_option.FromZero[int]())(MakeWriteFileArgsLineCountLens())
+}
+
+// MakeWriteFileArgsLineCountRefLens returns a [__lens.Lens] for the LineCount field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsLineCountRefLens() __lens.Lens[*WriteFileArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *WriteFileArgs) int { return s.LineCount },
+		func(s *WriteFileArgs, v int) *WriteFileArgs { s.LineCount = v; return s },
+		"(*WriteFileArgs).LineCount",
+	)
+}
+
+// MakeWriteFileArgsLineCountRefLensO returns a [__lens_option.LensO] for the LineCount field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsLineCountRefLensO() __lens_option.LensO[*WriteFileArgs, int] {
+	return __lens_option.FromIso[*WriteFileArgs](__iso_option.FromZero[int]())(MakeWriteFileArgsLineCountRefLens())
+}
+
+// MakeWriteFileArgsLineCountPrism returns a [__prism.Prism] for the LineCount field of [WriteFileArgs]
+func MakeWriteFileArgsLineCountPrism() __prism.Prism[WriteFileArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s WriteFileArgs) __option.Option[int] { return _fromNonZero(s.LineCount) },
+		func(v int) WriteFileArgs {
+			return WriteFileArgs{LineCount: v}
+		},
+		"WriteFileArgs.LineCount",
+	)
+}
+
+// MakeWriteFileArgsLineCountRefPrism returns a [__prism.Prism] for the LineCount field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsLineCountRefPrism() __prism.Prism[*WriteFileArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *WriteFileArgs) __option.Option[int] { return _fromNonZero(s.LineCount) },
+		func(v int) *WriteFileArgs {
+			return &WriteFileArgs{LineCount: v}
+		},
+		"WriteFileArgs.LineCount",
+	)
+}
+
+// MakeWriteFileArgsNameLens returns a [__lens.Lens] for the Name field of [WriteFileArgs]
+func MakeWriteFileArgsNameLens() __lens.Lens[WriteFileArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s WriteFileArgs) string { return s.Name },
+		func(s WriteFileArgs, v string) WriteFileArgs { s.Name = v; return s },
+		"WriteFileArgs.Name",
+	)
+}
+
+// MakeWriteFileArgsNameLensO returns a [__lens_option.LensO] for the Name field of [WriteFileArgs]
+func MakeWriteFileArgsNameLensO() __lens_option.LensO[WriteFileArgs, string] {
+	return __lens_option.FromIso[WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsNameLens())
+}
+
+// MakeWriteFileArgsNameRefLens returns a [__lens.Lens] for the Name field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsNameRefLens() __lens.Lens[*WriteFileArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *WriteFileArgs) string { return s.Name },
+		func(s *WriteFileArgs, v string) *WriteFileArgs { s.Name = v; return s },
+		"(*WriteFileArgs).Name",
+	)
+}
+
+// MakeWriteFileArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsNameRefLensO() __lens_option.LensO[*WriteFileArgs, string] {
+	return __lens_option.FromIso[*WriteFileArgs](__iso_option.FromZero[string]())(MakeWriteFileArgsNameRefLens())
+}
+
+// MakeWriteFileArgsNamePrism returns a [__prism.Prism] for the Name field of [WriteFileArgs]
+func MakeWriteFileArgsNamePrism() __prism.Prism[WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) WriteFileArgs {
+			return WriteFileArgs{Name: v}
+		},
+		"WriteFileArgs.Name",
+	)
+}
+
+// MakeWriteFileArgsNameRefPrism returns a [__prism.Prism] for the Name field of [WriteFileArgs] via a pointer receiver
+func MakeWriteFileArgsNameRefPrism() __prism.Prism[*WriteFileArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *WriteFileArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *WriteFileArgs {
+			return &WriteFileArgs{Name: v}
+		},
+		"WriteFileArgs.Name",
+	)
+}
+
+// MakeWriteFileArgsLenses creates a new [WriteFileArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeWriteFileArgsLenses() WriteFileArgsLenses {
+	return WriteFileArgsLenses{
+		// mandatory lenses
+		Path:      MakeWriteFileArgsPathLens(),
+		Content:   MakeWriteFileArgsContentLens(),
+		LineCount: MakeWriteFileArgsLineCountLens(),
+		Name:      MakeWriteFileArgsNameLens(),
+		// optional lenses
+		PathO:      MakeWriteFileArgsPathLensO(),
+		ContentO:   MakeWriteFileArgsContentLensO(),
+		LineCountO: MakeWriteFileArgsLineCountLensO(),
+		NameO:      MakeWriteFileArgsNameLensO(),
+	}
+}
+
+// MakeWriteFileArgsRefLenses creates a new [WriteFileArgsRefLenses] with [lenses] for all fields via a pointer to [WriteFileArgs]
+//
+// [lenses]: __lens.Lens
+func MakeWriteFileArgsRefLenses() WriteFileArgsRefLenses {
+	return WriteFileArgsRefLenses{
+		// mandatory lenses
+		Path:      MakeWriteFileArgsPathRefLens(),
+		Content:   MakeWriteFileArgsContentRefLens(),
+		LineCount: MakeWriteFileArgsLineCountRefLens(),
+		Name:      MakeWriteFileArgsNameRefLens(),
+		// optional lenses
+		PathO:      MakeWriteFileArgsPathRefLensO(),
+		ContentO:   MakeWriteFileArgsContentRefLensO(),
+		LineCountO: MakeWriteFileArgsLineCountRefLensO(),
+		NameO:      MakeWriteFileArgsNameRefLensO(),
+	}
+}
+
+// MakeWriteFileArgsPrisms creates a new [WriteFileArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeWriteFileArgsPrisms() WriteFileArgsPrisms {
+	return WriteFileArgsPrisms{
+		Path:      MakeWriteFileArgsPathPrism(),
+		Content:   MakeWriteFileArgsContentPrism(),
+		LineCount: MakeWriteFileArgsLineCountPrism(),
+		Name:      MakeWriteFileArgsNamePrism(),
+	}
+}
+
+// MakeWriteFileArgsRefPrisms creates a new [WriteFileArgsRefPrisms] with [prisms] for all fields via a pointer to [WriteFileArgs]
+//
+// [prisms]: __prism.Prism
+func MakeWriteFileArgsRefPrisms() WriteFileArgsRefPrisms {
+	return WriteFileArgsRefPrisms{
+		Path:      MakeWriteFileArgsPathRefPrism(),
+		Content:   MakeWriteFileArgsContentRefPrism(),
+		LineCount: MakeWriteFileArgsLineCountRefPrism(),
+		Name:      MakeWriteFileArgsNameRefPrism(),
+	}
+}

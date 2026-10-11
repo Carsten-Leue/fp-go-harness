@@ -22,11 +22,13 @@ recorded agent sessions.
 - **CLI (ask mode)**: `go run . "<prompt>"` answers one prompt with DeepSeek and the
   ask-mode system prompt. The model can read the current directory with the read-only
   tools. The CLI prints the answer and the token usage.
-- **Tools**: `read_file`, `list_files`, `glob`, `grep` and `execute_command`, each with
-  its definition for the model, confined to the workspace root. `execute_command` waits
+- **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file` and `execute_command`,
+  each with its definition for the model, confined to the workspace root. `write_file`
+  replaces a whole file, creates missing parent directories and rejects content that is
+  shorter than its announced `line_count`. `execute_command` waits
   for a command, or starts it in the background and returns its process id and log file. The CLI
   registers the read-only ones (`read_file`, `list_files`, `glob`, `grep`) for the
-  current directory. `execute_command` waits for command approval (PLAN.md I1).
+  current directory. `write_file` and `execute_command` wait for approval (PLAN.md I1).
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -65,7 +67,7 @@ replay tests.
 |---|---|---|
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | 🚧 B1–B4 done, B5 open |
-| C | Core tools | 🚧 C1–C6 done, C7–C11 open |
+| C | Core tools | 🚧 C1–C7 done, C8–C11 open |
 | D | Prompt assembly | ⏳ open |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |

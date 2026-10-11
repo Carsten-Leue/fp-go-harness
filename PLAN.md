@@ -126,7 +126,10 @@ and a text result. Validation errors (such as "path must be absolute") come back
   (format as in the recordings). Register the process in an `IORef`-backed table owned by `ProcessDeps`.
   The result text was written without comparing it to the recordings. The log directory is a parameter of `MakeDefaultProcessDeps`; it has to lie inside the workspace so that
   `read_file` can read the logs. Processes leave the table when they exit. Not done yet: stopping them (E4).
-- [ ] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
+- [x] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
+  Content with fewer lines than `line_count` fails as truncated; more lines pass, because models miscount the last line.
+  The definition and the result text were written without comparing them to the recordings. Not registered in the CLI yet
+  (waits for approval, I1).
 - [ ] **C8 `search_and_replace`.** Replace literal text or a regex, optionally within a line range. Implement it as a pure
   `Endomorphism[string]` with I/O only around it.
 - [ ] **C9 `apply_diff`.** Parse `SEARCH`/`REPLACE` blocks. Applying them is a pure `func(string) Result[string]`
