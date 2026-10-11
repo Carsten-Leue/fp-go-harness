@@ -37,3 +37,27 @@ func TestMakeReadTools_NoExecuteCommand(t *testing.T) {
 
 	assert.NotContains(t, registry, ExecuteCommandName)
 }
+
+func TestMakeTools(t *testing.T) {
+	root := t.TempDir()
+	deps := MakeDefaultToolsDeps(root, filepath.Join(root, "logs"))()
+
+	registry := MakeTools()(deps)
+
+	assert.ElementsMatch(t,
+		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, ExecuteCommandName},
+		R.Keys(registry))
+
+	caller := ToToolCaller()(registry)
+	run := func(name, arguments string) string {
+		call, ok := option.Unwrap(caller(name))
+		require.True(t, ok, name)
+		return runCall(t, call, arguments)
+	}
+
+	// what write_file writes, read_file reads
+	assert.Equal(t, "Wrote x.txt (line count: 1).", run(WriteFileName, `{"path":"x.txt","content":"hello\n","line_count":1}`))
+	assert.Equal(t, "Contents of file x.txt:\n\n1 | hello\n2 |", run(ReadFileName, `{"path":"x.txt"}`))
+
+	assert.Equal(t, deps, AsToolsDeps(deps))
+}

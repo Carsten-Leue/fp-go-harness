@@ -29,3 +29,6 @@ go.work.sum
 
 # Bob scratch files
 .bob/tmp/
+
+# Logs of background commands started by the harness
+.fp-go-harness/
