@@ -3672,6 +3672,906 @@ func MakeReadFileArgsRefPrisms() ReadFileArgsRefPrisms {
 	}
 }
 
+// SearchAndReplaceArgsLenses provides [lenses] for accessing fields of [SearchAndReplaceArgs]
+//
+// [lenses]: __lens.Lens
+type SearchAndReplaceArgsLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [SearchAndReplaceArgs]
+	Path __lens.Lens[SearchAndReplaceArgs, string]
+	// Search is a [__lens.Lens] for the Search field of [SearchAndReplaceArgs]
+	Search __lens.Lens[SearchAndReplaceArgs, string]
+	// Replace is a [__lens.Lens] for the Replace field of [SearchAndReplaceArgs]
+	Replace __lens.Lens[SearchAndReplaceArgs, string]
+	// UseRegex is a [__lens.Lens] for the UseRegex field of [SearchAndReplaceArgs]
+	UseRegex __lens.Lens[SearchAndReplaceArgs, bool]
+	// IgnoreCase is a [__lens.Lens] for the IgnoreCase field of [SearchAndReplaceArgs]
+	IgnoreCase __lens.Lens[SearchAndReplaceArgs, bool]
+	// StartLine is a [__lens.Lens] for the StartLine field of [SearchAndReplaceArgs]
+	StartLine __lens.Lens[SearchAndReplaceArgs, int]
+	// EndLine is a [__lens.Lens] for the EndLine field of [SearchAndReplaceArgs]
+	EndLine __lens.Lens[SearchAndReplaceArgs, int]
+	// Pattern is a [__lens.Lens] for the Pattern field of [SearchAndReplaceArgs]
+	Pattern __lens.Lens[SearchAndReplaceArgs, *regexp.Regexp]
+	// Name is a [__lens.Lens] for the Name field of [SearchAndReplaceArgs]
+	Name __lens.Lens[SearchAndReplaceArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [SearchAndReplaceArgs]
+	Content __lens.Lens[SearchAndReplaceArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [SearchAndReplaceArgs]
+	CRLF __lens.Lens[SearchAndReplaceArgs, bool]
+	// Count is a [__lens.Lens] for the Count field of [SearchAndReplaceArgs]
+	Count __lens.Lens[SearchAndReplaceArgs, int]
+	// PathO is a [__lens_option.LensO] for the Path field of [SearchAndReplaceArgs], treating the zero value as absent
+	PathO __lens_option.LensO[SearchAndReplaceArgs, string]
+	// SearchO is a [__lens_option.LensO] for the Search field of [SearchAndReplaceArgs], treating the zero value as absent
+	SearchO __lens_option.LensO[SearchAndReplaceArgs, string]
+	// ReplaceO is a [__lens_option.LensO] for the Replace field of [SearchAndReplaceArgs], treating the zero value as absent
+	ReplaceO __lens_option.LensO[SearchAndReplaceArgs, string]
+	// UseRegexO is a [__lens_option.LensO] for the UseRegex field of [SearchAndReplaceArgs], treating the zero value as absent
+	UseRegexO __lens_option.LensO[SearchAndReplaceArgs, bool]
+	// IgnoreCaseO is a [__lens_option.LensO] for the IgnoreCase field of [SearchAndReplaceArgs], treating the zero value as absent
+	IgnoreCaseO __lens_option.LensO[SearchAndReplaceArgs, bool]
+	// StartLineO is a [__lens_option.LensO] for the StartLine field of [SearchAndReplaceArgs], treating the zero value as absent
+	StartLineO __lens_option.LensO[SearchAndReplaceArgs, int]
+	// EndLineO is a [__lens_option.LensO] for the EndLine field of [SearchAndReplaceArgs], treating the zero value as absent
+	EndLineO __lens_option.LensO[SearchAndReplaceArgs, int]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [SearchAndReplaceArgs], treating the zero value as absent
+	PatternO __lens_option.LensO[SearchAndReplaceArgs, *regexp.Regexp]
+	// NameO is a [__lens_option.LensO] for the Name field of [SearchAndReplaceArgs], treating the zero value as absent
+	NameO __lens_option.LensO[SearchAndReplaceArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [SearchAndReplaceArgs], treating the zero value as absent
+	ContentO __lens_option.LensO[SearchAndReplaceArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [SearchAndReplaceArgs], treating the zero value as absent
+	CRLFO __lens_option.LensO[SearchAndReplaceArgs, bool]
+	// CountO is a [__lens_option.LensO] for the Count field of [SearchAndReplaceArgs], treating the zero value as absent
+	CountO __lens_option.LensO[SearchAndReplaceArgs, int]
+}
+
+// SearchAndReplaceArgsRefLenses provides [lenses] for accessing fields of [SearchAndReplaceArgs] via a pointer to [SearchAndReplaceArgs]
+//
+// [lenses]: __lens.Lens
+type SearchAndReplaceArgsRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [SearchAndReplaceArgs] via a pointer receiver
+	Path __lens.Lens[*SearchAndReplaceArgs, string]
+	// Search is a [__lens.Lens] for the Search field of [SearchAndReplaceArgs] via a pointer receiver
+	Search __lens.Lens[*SearchAndReplaceArgs, string]
+	// Replace is a [__lens.Lens] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver
+	Replace __lens.Lens[*SearchAndReplaceArgs, string]
+	// UseRegex is a [__lens.Lens] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver
+	UseRegex __lens.Lens[*SearchAndReplaceArgs, bool]
+	// IgnoreCase is a [__lens.Lens] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver
+	IgnoreCase __lens.Lens[*SearchAndReplaceArgs, bool]
+	// StartLine is a [__lens.Lens] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver
+	StartLine __lens.Lens[*SearchAndReplaceArgs, int]
+	// EndLine is a [__lens.Lens] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver
+	EndLine __lens.Lens[*SearchAndReplaceArgs, int]
+	// Pattern is a [__lens.Lens] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver
+	Pattern __lens.Lens[*SearchAndReplaceArgs, *regexp.Regexp]
+	// Name is a [__lens.Lens] for the Name field of [SearchAndReplaceArgs] via a pointer receiver
+	Name __lens.Lens[*SearchAndReplaceArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [SearchAndReplaceArgs] via a pointer receiver
+	Content __lens.Lens[*SearchAndReplaceArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver
+	CRLF __lens.Lens[*SearchAndReplaceArgs, bool]
+	// Count is a [__lens.Lens] for the Count field of [SearchAndReplaceArgs] via a pointer receiver
+	Count __lens.Lens[*SearchAndReplaceArgs, int]
+	// PathO is a [__lens_option.LensO] for the Path field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*SearchAndReplaceArgs, string]
+	// SearchO is a [__lens_option.LensO] for the Search field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	SearchO __lens_option.LensO[*SearchAndReplaceArgs, string]
+	// ReplaceO is a [__lens_option.LensO] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	ReplaceO __lens_option.LensO[*SearchAndReplaceArgs, string]
+	// UseRegexO is a [__lens_option.LensO] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	UseRegexO __lens_option.LensO[*SearchAndReplaceArgs, bool]
+	// IgnoreCaseO is a [__lens_option.LensO] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	IgnoreCaseO __lens_option.LensO[*SearchAndReplaceArgs, bool]
+	// StartLineO is a [__lens_option.LensO] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	StartLineO __lens_option.LensO[*SearchAndReplaceArgs, int]
+	// EndLineO is a [__lens_option.LensO] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	EndLineO __lens_option.LensO[*SearchAndReplaceArgs, int]
+	// PatternO is a [__lens_option.LensO] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	PatternO __lens_option.LensO[*SearchAndReplaceArgs, *regexp.Regexp]
+	// NameO is a [__lens_option.LensO] for the Name field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*SearchAndReplaceArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	ContentO __lens_option.LensO[*SearchAndReplaceArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	CRLFO __lens_option.LensO[*SearchAndReplaceArgs, bool]
+	// CountO is a [__lens_option.LensO] for the Count field of [SearchAndReplaceArgs] via a pointer receiver, treating the zero value as absent
+	CountO __lens_option.LensO[*SearchAndReplaceArgs, int]
+}
+
+// SearchAndReplaceArgsPrisms provides [prisms] for accessing fields of [SearchAndReplaceArgs]
+//
+// [prisms]: __prism.Prism
+type SearchAndReplaceArgsPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [SearchAndReplaceArgs]
+	Path __prism.Prism[SearchAndReplaceArgs, string]
+	// Search is a [__prism.Prism] for the Search field of [SearchAndReplaceArgs]
+	Search __prism.Prism[SearchAndReplaceArgs, string]
+	// Replace is a [__prism.Prism] for the Replace field of [SearchAndReplaceArgs]
+	Replace __prism.Prism[SearchAndReplaceArgs, string]
+	// UseRegex is a [__prism.Prism] for the UseRegex field of [SearchAndReplaceArgs]
+	UseRegex __prism.Prism[SearchAndReplaceArgs, bool]
+	// IgnoreCase is a [__prism.Prism] for the IgnoreCase field of [SearchAndReplaceArgs]
+	IgnoreCase __prism.Prism[SearchAndReplaceArgs, bool]
+	// StartLine is a [__prism.Prism] for the StartLine field of [SearchAndReplaceArgs]
+	StartLine __prism.Prism[SearchAndReplaceArgs, int]
+	// EndLine is a [__prism.Prism] for the EndLine field of [SearchAndReplaceArgs]
+	EndLine __prism.Prism[SearchAndReplaceArgs, int]
+	// Pattern is a [__prism.Prism] for the Pattern field of [SearchAndReplaceArgs]
+	Pattern __prism.Prism[SearchAndReplaceArgs, *regexp.Regexp]
+	// Name is a [__prism.Prism] for the Name field of [SearchAndReplaceArgs]
+	Name __prism.Prism[SearchAndReplaceArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [SearchAndReplaceArgs]
+	Content __prism.Prism[SearchAndReplaceArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [SearchAndReplaceArgs]
+	CRLF __prism.Prism[SearchAndReplaceArgs, bool]
+	// Count is a [__prism.Prism] for the Count field of [SearchAndReplaceArgs]
+	Count __prism.Prism[SearchAndReplaceArgs, int]
+}
+
+// SearchAndReplaceArgsRefPrisms provides [prisms] for accessing fields of [SearchAndReplaceArgs] via a pointer to [SearchAndReplaceArgs]
+//
+// [prisms]: __prism.Prism
+type SearchAndReplaceArgsRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [SearchAndReplaceArgs] via a pointer receiver
+	Path __prism.Prism[*SearchAndReplaceArgs, string]
+	// Search is a [__prism.Prism] for the Search field of [SearchAndReplaceArgs] via a pointer receiver
+	Search __prism.Prism[*SearchAndReplaceArgs, string]
+	// Replace is a [__prism.Prism] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver
+	Replace __prism.Prism[*SearchAndReplaceArgs, string]
+	// UseRegex is a [__prism.Prism] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver
+	UseRegex __prism.Prism[*SearchAndReplaceArgs, bool]
+	// IgnoreCase is a [__prism.Prism] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver
+	IgnoreCase __prism.Prism[*SearchAndReplaceArgs, bool]
+	// StartLine is a [__prism.Prism] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver
+	StartLine __prism.Prism[*SearchAndReplaceArgs, int]
+	// EndLine is a [__prism.Prism] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver
+	EndLine __prism.Prism[*SearchAndReplaceArgs, int]
+	// Pattern is a [__prism.Prism] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver
+	Pattern __prism.Prism[*SearchAndReplaceArgs, *regexp.Regexp]
+	// Name is a [__prism.Prism] for the Name field of [SearchAndReplaceArgs] via a pointer receiver
+	Name __prism.Prism[*SearchAndReplaceArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [SearchAndReplaceArgs] via a pointer receiver
+	Content __prism.Prism[*SearchAndReplaceArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver
+	CRLF __prism.Prism[*SearchAndReplaceArgs, bool]
+	// Count is a [__prism.Prism] for the Count field of [SearchAndReplaceArgs] via a pointer receiver
+	Count __prism.Prism[*SearchAndReplaceArgs, int]
+}
+
+// MakeSearchAndReplaceArgsPathLens returns a [__lens.Lens] for the Path field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPathLens() __lens.Lens[SearchAndReplaceArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) string { return s.Path },
+		func(s SearchAndReplaceArgs, v string) SearchAndReplaceArgs { s.Path = v; return s },
+		"SearchAndReplaceArgs.Path",
+	)
+}
+
+// MakeSearchAndReplaceArgsPathLensO returns a [__lens_option.LensO] for the Path field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPathLensO() __lens_option.LensO[SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsPathLens())
+}
+
+// MakeSearchAndReplaceArgsPathRefLens returns a [__lens.Lens] for the Path field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPathRefLens() __lens.Lens[*SearchAndReplaceArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) string { return s.Path },
+		func(s *SearchAndReplaceArgs, v string) *SearchAndReplaceArgs { s.Path = v; return s },
+		"(*SearchAndReplaceArgs).Path",
+	)
+}
+
+// MakeSearchAndReplaceArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPathRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsPathRefLens())
+}
+
+// MakeSearchAndReplaceArgsPathPrism returns a [__prism.Prism] for the Path field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPathPrism() __prism.Prism[SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Path: v}
+		},
+		"SearchAndReplaceArgs.Path",
+	)
+}
+
+// MakeSearchAndReplaceArgsPathRefPrism returns a [__prism.Prism] for the Path field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPathRefPrism() __prism.Prism[*SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Path: v}
+		},
+		"SearchAndReplaceArgs.Path",
+	)
+}
+
+// MakeSearchAndReplaceArgsSearchLens returns a [__lens.Lens] for the Search field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsSearchLens() __lens.Lens[SearchAndReplaceArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) string { return s.Search },
+		func(s SearchAndReplaceArgs, v string) SearchAndReplaceArgs { s.Search = v; return s },
+		"SearchAndReplaceArgs.Search",
+	)
+}
+
+// MakeSearchAndReplaceArgsSearchLensO returns a [__lens_option.LensO] for the Search field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsSearchLensO() __lens_option.LensO[SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsSearchLens())
+}
+
+// MakeSearchAndReplaceArgsSearchRefLens returns a [__lens.Lens] for the Search field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsSearchRefLens() __lens.Lens[*SearchAndReplaceArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) string { return s.Search },
+		func(s *SearchAndReplaceArgs, v string) *SearchAndReplaceArgs { s.Search = v; return s },
+		"(*SearchAndReplaceArgs).Search",
+	)
+}
+
+// MakeSearchAndReplaceArgsSearchRefLensO returns a [__lens_option.LensO] for the Search field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsSearchRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsSearchRefLens())
+}
+
+// MakeSearchAndReplaceArgsSearchPrism returns a [__prism.Prism] for the Search field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsSearchPrism() __prism.Prism[SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Search) },
+		func(v string) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Search: v}
+		},
+		"SearchAndReplaceArgs.Search",
+	)
+}
+
+// MakeSearchAndReplaceArgsSearchRefPrism returns a [__prism.Prism] for the Search field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsSearchRefPrism() __prism.Prism[*SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Search) },
+		func(v string) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Search: v}
+		},
+		"SearchAndReplaceArgs.Search",
+	)
+}
+
+// MakeSearchAndReplaceArgsReplaceLens returns a [__lens.Lens] for the Replace field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsReplaceLens() __lens.Lens[SearchAndReplaceArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) string { return s.Replace },
+		func(s SearchAndReplaceArgs, v string) SearchAndReplaceArgs { s.Replace = v; return s },
+		"SearchAndReplaceArgs.Replace",
+	)
+}
+
+// MakeSearchAndReplaceArgsReplaceLensO returns a [__lens_option.LensO] for the Replace field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsReplaceLensO() __lens_option.LensO[SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsReplaceLens())
+}
+
+// MakeSearchAndReplaceArgsReplaceRefLens returns a [__lens.Lens] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsReplaceRefLens() __lens.Lens[*SearchAndReplaceArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) string { return s.Replace },
+		func(s *SearchAndReplaceArgs, v string) *SearchAndReplaceArgs { s.Replace = v; return s },
+		"(*SearchAndReplaceArgs).Replace",
+	)
+}
+
+// MakeSearchAndReplaceArgsReplaceRefLensO returns a [__lens_option.LensO] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsReplaceRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsReplaceRefLens())
+}
+
+// MakeSearchAndReplaceArgsReplacePrism returns a [__prism.Prism] for the Replace field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsReplacePrism() __prism.Prism[SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Replace) },
+		func(v string) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Replace: v}
+		},
+		"SearchAndReplaceArgs.Replace",
+	)
+}
+
+// MakeSearchAndReplaceArgsReplaceRefPrism returns a [__prism.Prism] for the Replace field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsReplaceRefPrism() __prism.Prism[*SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Replace) },
+		func(v string) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Replace: v}
+		},
+		"SearchAndReplaceArgs.Replace",
+	)
+}
+
+// MakeSearchAndReplaceArgsUseRegexLens returns a [__lens.Lens] for the UseRegex field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsUseRegexLens() __lens.Lens[SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) bool { return s.UseRegex },
+		func(s SearchAndReplaceArgs, v bool) SearchAndReplaceArgs { s.UseRegex = v; return s },
+		"SearchAndReplaceArgs.UseRegex",
+	)
+}
+
+// MakeSearchAndReplaceArgsUseRegexLensO returns a [__lens_option.LensO] for the UseRegex field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsUseRegexLensO() __lens_option.LensO[SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsUseRegexLens())
+}
+
+// MakeSearchAndReplaceArgsUseRegexRefLens returns a [__lens.Lens] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsUseRegexRefLens() __lens.Lens[*SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) bool { return s.UseRegex },
+		func(s *SearchAndReplaceArgs, v bool) *SearchAndReplaceArgs { s.UseRegex = v; return s },
+		"(*SearchAndReplaceArgs).UseRegex",
+	)
+}
+
+// MakeSearchAndReplaceArgsUseRegexRefLensO returns a [__lens_option.LensO] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsUseRegexRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsUseRegexRefLens())
+}
+
+// MakeSearchAndReplaceArgsUseRegexPrism returns a [__prism.Prism] for the UseRegex field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsUseRegexPrism() __prism.Prism[SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.UseRegex) },
+		func(v bool) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{UseRegex: v}
+		},
+		"SearchAndReplaceArgs.UseRegex",
+	)
+}
+
+// MakeSearchAndReplaceArgsUseRegexRefPrism returns a [__prism.Prism] for the UseRegex field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsUseRegexRefPrism() __prism.Prism[*SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.UseRegex) },
+		func(v bool) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{UseRegex: v}
+		},
+		"SearchAndReplaceArgs.UseRegex",
+	)
+}
+
+// MakeSearchAndReplaceArgsIgnoreCaseLens returns a [__lens.Lens] for the IgnoreCase field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsIgnoreCaseLens() __lens.Lens[SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) bool { return s.IgnoreCase },
+		func(s SearchAndReplaceArgs, v bool) SearchAndReplaceArgs { s.IgnoreCase = v; return s },
+		"SearchAndReplaceArgs.IgnoreCase",
+	)
+}
+
+// MakeSearchAndReplaceArgsIgnoreCaseLensO returns a [__lens_option.LensO] for the IgnoreCase field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsIgnoreCaseLensO() __lens_option.LensO[SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsIgnoreCaseLens())
+}
+
+// MakeSearchAndReplaceArgsIgnoreCaseRefLens returns a [__lens.Lens] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsIgnoreCaseRefLens() __lens.Lens[*SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) bool { return s.IgnoreCase },
+		func(s *SearchAndReplaceArgs, v bool) *SearchAndReplaceArgs { s.IgnoreCase = v; return s },
+		"(*SearchAndReplaceArgs).IgnoreCase",
+	)
+}
+
+// MakeSearchAndReplaceArgsIgnoreCaseRefLensO returns a [__lens_option.LensO] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsIgnoreCaseRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsIgnoreCaseRefLens())
+}
+
+// MakeSearchAndReplaceArgsIgnoreCasePrism returns a [__prism.Prism] for the IgnoreCase field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsIgnoreCasePrism() __prism.Prism[SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.IgnoreCase) },
+		func(v bool) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{IgnoreCase: v}
+		},
+		"SearchAndReplaceArgs.IgnoreCase",
+	)
+}
+
+// MakeSearchAndReplaceArgsIgnoreCaseRefPrism returns a [__prism.Prism] for the IgnoreCase field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsIgnoreCaseRefPrism() __prism.Prism[*SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.IgnoreCase) },
+		func(v bool) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{IgnoreCase: v}
+		},
+		"SearchAndReplaceArgs.IgnoreCase",
+	)
+}
+
+// MakeSearchAndReplaceArgsStartLineLens returns a [__lens.Lens] for the StartLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsStartLineLens() __lens.Lens[SearchAndReplaceArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) int { return s.StartLine },
+		func(s SearchAndReplaceArgs, v int) SearchAndReplaceArgs { s.StartLine = v; return s },
+		"SearchAndReplaceArgs.StartLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsStartLineLensO returns a [__lens_option.LensO] for the StartLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsStartLineLensO() __lens_option.LensO[SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsStartLineLens())
+}
+
+// MakeSearchAndReplaceArgsStartLineRefLens returns a [__lens.Lens] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsStartLineRefLens() __lens.Lens[*SearchAndReplaceArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) int { return s.StartLine },
+		func(s *SearchAndReplaceArgs, v int) *SearchAndReplaceArgs { s.StartLine = v; return s },
+		"(*SearchAndReplaceArgs).StartLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsStartLineRefLensO returns a [__lens_option.LensO] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsStartLineRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsStartLineRefLens())
+}
+
+// MakeSearchAndReplaceArgsStartLinePrism returns a [__prism.Prism] for the StartLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsStartLinePrism() __prism.Prism[SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.StartLine) },
+		func(v int) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{StartLine: v}
+		},
+		"SearchAndReplaceArgs.StartLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsStartLineRefPrism returns a [__prism.Prism] for the StartLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsStartLineRefPrism() __prism.Prism[*SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.StartLine) },
+		func(v int) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{StartLine: v}
+		},
+		"SearchAndReplaceArgs.StartLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsEndLineLens returns a [__lens.Lens] for the EndLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsEndLineLens() __lens.Lens[SearchAndReplaceArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) int { return s.EndLine },
+		func(s SearchAndReplaceArgs, v int) SearchAndReplaceArgs { s.EndLine = v; return s },
+		"SearchAndReplaceArgs.EndLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsEndLineLensO returns a [__lens_option.LensO] for the EndLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsEndLineLensO() __lens_option.LensO[SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsEndLineLens())
+}
+
+// MakeSearchAndReplaceArgsEndLineRefLens returns a [__lens.Lens] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsEndLineRefLens() __lens.Lens[*SearchAndReplaceArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) int { return s.EndLine },
+		func(s *SearchAndReplaceArgs, v int) *SearchAndReplaceArgs { s.EndLine = v; return s },
+		"(*SearchAndReplaceArgs).EndLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsEndLineRefLensO returns a [__lens_option.LensO] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsEndLineRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsEndLineRefLens())
+}
+
+// MakeSearchAndReplaceArgsEndLinePrism returns a [__prism.Prism] for the EndLine field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsEndLinePrism() __prism.Prism[SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.EndLine) },
+		func(v int) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{EndLine: v}
+		},
+		"SearchAndReplaceArgs.EndLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsEndLineRefPrism returns a [__prism.Prism] for the EndLine field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsEndLineRefPrism() __prism.Prism[*SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.EndLine) },
+		func(v int) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{EndLine: v}
+		},
+		"SearchAndReplaceArgs.EndLine",
+	)
+}
+
+// MakeSearchAndReplaceArgsPatternLens returns a [__lens.Lens] for the Pattern field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPatternLens() __lens.Lens[SearchAndReplaceArgs, *regexp.Regexp] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) *regexp.Regexp { return s.Pattern },
+		func(s SearchAndReplaceArgs, v *regexp.Regexp) SearchAndReplaceArgs { s.Pattern = v; return s },
+		"SearchAndReplaceArgs.Pattern",
+	)
+}
+
+// MakeSearchAndReplaceArgsPatternLensO returns a [__lens_option.LensO] for the Pattern field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPatternLensO() __lens_option.LensO[SearchAndReplaceArgs, *regexp.Regexp] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[*regexp.Regexp]())(MakeSearchAndReplaceArgsPatternLens())
+}
+
+// MakeSearchAndReplaceArgsPatternRefLens returns a [__lens.Lens] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPatternRefLens() __lens.Lens[*SearchAndReplaceArgs, *regexp.Regexp] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) *regexp.Regexp { return s.Pattern },
+		func(s *SearchAndReplaceArgs, v *regexp.Regexp) *SearchAndReplaceArgs { s.Pattern = v; return s },
+		"(*SearchAndReplaceArgs).Pattern",
+	)
+}
+
+// MakeSearchAndReplaceArgsPatternRefLensO returns a [__lens_option.LensO] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPatternRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, *regexp.Regexp] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[*regexp.Regexp]())(MakeSearchAndReplaceArgsPatternRefLens())
+}
+
+// MakeSearchAndReplaceArgsPatternPrism returns a [__prism.Prism] for the Pattern field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsPatternPrism() __prism.Prism[SearchAndReplaceArgs, *regexp.Regexp] {
+	_fromNonZero := __option.FromNonZero[*regexp.Regexp]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[*regexp.Regexp] { return _fromNonZero(s.Pattern) },
+		func(v *regexp.Regexp) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Pattern: v}
+		},
+		"SearchAndReplaceArgs.Pattern",
+	)
+}
+
+// MakeSearchAndReplaceArgsPatternRefPrism returns a [__prism.Prism] for the Pattern field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsPatternRefPrism() __prism.Prism[*SearchAndReplaceArgs, *regexp.Regexp] {
+	_fromNonZero := __option.FromNonZero[*regexp.Regexp]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[*regexp.Regexp] { return _fromNonZero(s.Pattern) },
+		func(v *regexp.Regexp) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Pattern: v}
+		},
+		"SearchAndReplaceArgs.Pattern",
+	)
+}
+
+// MakeSearchAndReplaceArgsNameLens returns a [__lens.Lens] for the Name field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsNameLens() __lens.Lens[SearchAndReplaceArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) string { return s.Name },
+		func(s SearchAndReplaceArgs, v string) SearchAndReplaceArgs { s.Name = v; return s },
+		"SearchAndReplaceArgs.Name",
+	)
+}
+
+// MakeSearchAndReplaceArgsNameLensO returns a [__lens_option.LensO] for the Name field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsNameLensO() __lens_option.LensO[SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsNameLens())
+}
+
+// MakeSearchAndReplaceArgsNameRefLens returns a [__lens.Lens] for the Name field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsNameRefLens() __lens.Lens[*SearchAndReplaceArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) string { return s.Name },
+		func(s *SearchAndReplaceArgs, v string) *SearchAndReplaceArgs { s.Name = v; return s },
+		"(*SearchAndReplaceArgs).Name",
+	)
+}
+
+// MakeSearchAndReplaceArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsNameRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsNameRefLens())
+}
+
+// MakeSearchAndReplaceArgsNamePrism returns a [__prism.Prism] for the Name field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsNamePrism() __prism.Prism[SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Name: v}
+		},
+		"SearchAndReplaceArgs.Name",
+	)
+}
+
+// MakeSearchAndReplaceArgsNameRefPrism returns a [__prism.Prism] for the Name field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsNameRefPrism() __prism.Prism[*SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Name: v}
+		},
+		"SearchAndReplaceArgs.Name",
+	)
+}
+
+// MakeSearchAndReplaceArgsContentLens returns a [__lens.Lens] for the Content field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsContentLens() __lens.Lens[SearchAndReplaceArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) string { return s.Content },
+		func(s SearchAndReplaceArgs, v string) SearchAndReplaceArgs { s.Content = v; return s },
+		"SearchAndReplaceArgs.Content",
+	)
+}
+
+// MakeSearchAndReplaceArgsContentLensO returns a [__lens_option.LensO] for the Content field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsContentLensO() __lens_option.LensO[SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsContentLens())
+}
+
+// MakeSearchAndReplaceArgsContentRefLens returns a [__lens.Lens] for the Content field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsContentRefLens() __lens.Lens[*SearchAndReplaceArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) string { return s.Content },
+		func(s *SearchAndReplaceArgs, v string) *SearchAndReplaceArgs { s.Content = v; return s },
+		"(*SearchAndReplaceArgs).Content",
+	)
+}
+
+// MakeSearchAndReplaceArgsContentRefLensO returns a [__lens_option.LensO] for the Content field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsContentRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, string] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[string]())(MakeSearchAndReplaceArgsContentRefLens())
+}
+
+// MakeSearchAndReplaceArgsContentPrism returns a [__prism.Prism] for the Content field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsContentPrism() __prism.Prism[SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Content: v}
+		},
+		"SearchAndReplaceArgs.Content",
+	)
+}
+
+// MakeSearchAndReplaceArgsContentRefPrism returns a [__prism.Prism] for the Content field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsContentRefPrism() __prism.Prism[*SearchAndReplaceArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Content: v}
+		},
+		"SearchAndReplaceArgs.Content",
+	)
+}
+
+// MakeSearchAndReplaceArgsCRLFLens returns a [__lens.Lens] for the CRLF field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCRLFLens() __lens.Lens[SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) bool { return s.CRLF },
+		func(s SearchAndReplaceArgs, v bool) SearchAndReplaceArgs { s.CRLF = v; return s },
+		"SearchAndReplaceArgs.CRLF",
+	)
+}
+
+// MakeSearchAndReplaceArgsCRLFLensO returns a [__lens_option.LensO] for the CRLF field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCRLFLensO() __lens_option.LensO[SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsCRLFLens())
+}
+
+// MakeSearchAndReplaceArgsCRLFRefLens returns a [__lens.Lens] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCRLFRefLens() __lens.Lens[*SearchAndReplaceArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) bool { return s.CRLF },
+		func(s *SearchAndReplaceArgs, v bool) *SearchAndReplaceArgs { s.CRLF = v; return s },
+		"(*SearchAndReplaceArgs).CRLF",
+	)
+}
+
+// MakeSearchAndReplaceArgsCRLFRefLensO returns a [__lens_option.LensO] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCRLFRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, bool] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[bool]())(MakeSearchAndReplaceArgsCRLFRefLens())
+}
+
+// MakeSearchAndReplaceArgsCRLFPrism returns a [__prism.Prism] for the CRLF field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCRLFPrism() __prism.Prism[SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{CRLF: v}
+		},
+		"SearchAndReplaceArgs.CRLF",
+	)
+}
+
+// MakeSearchAndReplaceArgsCRLFRefPrism returns a [__prism.Prism] for the CRLF field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCRLFRefPrism() __prism.Prism[*SearchAndReplaceArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{CRLF: v}
+		},
+		"SearchAndReplaceArgs.CRLF",
+	)
+}
+
+// MakeSearchAndReplaceArgsCountLens returns a [__lens.Lens] for the Count field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCountLens() __lens.Lens[SearchAndReplaceArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s SearchAndReplaceArgs) int { return s.Count },
+		func(s SearchAndReplaceArgs, v int) SearchAndReplaceArgs { s.Count = v; return s },
+		"SearchAndReplaceArgs.Count",
+	)
+}
+
+// MakeSearchAndReplaceArgsCountLensO returns a [__lens_option.LensO] for the Count field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCountLensO() __lens_option.LensO[SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsCountLens())
+}
+
+// MakeSearchAndReplaceArgsCountRefLens returns a [__lens.Lens] for the Count field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCountRefLens() __lens.Lens[*SearchAndReplaceArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SearchAndReplaceArgs) int { return s.Count },
+		func(s *SearchAndReplaceArgs, v int) *SearchAndReplaceArgs { s.Count = v; return s },
+		"(*SearchAndReplaceArgs).Count",
+	)
+}
+
+// MakeSearchAndReplaceArgsCountRefLensO returns a [__lens_option.LensO] for the Count field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCountRefLensO() __lens_option.LensO[*SearchAndReplaceArgs, int] {
+	return __lens_option.FromIso[*SearchAndReplaceArgs](__iso_option.FromZero[int]())(MakeSearchAndReplaceArgsCountRefLens())
+}
+
+// MakeSearchAndReplaceArgsCountPrism returns a [__prism.Prism] for the Count field of [SearchAndReplaceArgs]
+func MakeSearchAndReplaceArgsCountPrism() __prism.Prism[SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.Count) },
+		func(v int) SearchAndReplaceArgs {
+			return SearchAndReplaceArgs{Count: v}
+		},
+		"SearchAndReplaceArgs.Count",
+	)
+}
+
+// MakeSearchAndReplaceArgsCountRefPrism returns a [__prism.Prism] for the Count field of [SearchAndReplaceArgs] via a pointer receiver
+func MakeSearchAndReplaceArgsCountRefPrism() __prism.Prism[*SearchAndReplaceArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *SearchAndReplaceArgs) __option.Option[int] { return _fromNonZero(s.Count) },
+		func(v int) *SearchAndReplaceArgs {
+			return &SearchAndReplaceArgs{Count: v}
+		},
+		"SearchAndReplaceArgs.Count",
+	)
+}
+
+// MakeSearchAndReplaceArgsLenses creates a new [SearchAndReplaceArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeSearchAndReplaceArgsLenses() SearchAndReplaceArgsLenses {
+	return SearchAndReplaceArgsLenses{
+		// mandatory lenses
+		Path:       MakeSearchAndReplaceArgsPathLens(),
+		Search:     MakeSearchAndReplaceArgsSearchLens(),
+		Replace:    MakeSearchAndReplaceArgsReplaceLens(),
+		UseRegex:   MakeSearchAndReplaceArgsUseRegexLens(),
+		IgnoreCase: MakeSearchAndReplaceArgsIgnoreCaseLens(),
+		StartLine:  MakeSearchAndReplaceArgsStartLineLens(),
+		EndLine:    MakeSearchAndReplaceArgsEndLineLens(),
+		Pattern:    MakeSearchAndReplaceArgsPatternLens(),
+		Name:       MakeSearchAndReplaceArgsNameLens(),
+		Content:    MakeSearchAndReplaceArgsContentLens(),
+		CRLF:       MakeSearchAndReplaceArgsCRLFLens(),
+		Count:      MakeSearchAndReplaceArgsCountLens(),
+		// optional lenses
+		PathO:       MakeSearchAndReplaceArgsPathLensO(),
+		SearchO:     MakeSearchAndReplaceArgsSearchLensO(),
+		ReplaceO:    MakeSearchAndReplaceArgsReplaceLensO(),
+		UseRegexO:   MakeSearchAndReplaceArgsUseRegexLensO(),
+		IgnoreCaseO: MakeSearchAndReplaceArgsIgnoreCaseLensO(),
+		StartLineO:  MakeSearchAndReplaceArgsStartLineLensO(),
+		EndLineO:    MakeSearchAndReplaceArgsEndLineLensO(),
+		PatternO:    MakeSearchAndReplaceArgsPatternLensO(),
+		NameO:       MakeSearchAndReplaceArgsNameLensO(),
+		ContentO:    MakeSearchAndReplaceArgsContentLensO(),
+		CRLFO:       MakeSearchAndReplaceArgsCRLFLensO(),
+		CountO:      MakeSearchAndReplaceArgsCountLensO(),
+	}
+}
+
+// MakeSearchAndReplaceArgsRefLenses creates a new [SearchAndReplaceArgsRefLenses] with [lenses] for all fields via a pointer to [SearchAndReplaceArgs]
+//
+// [lenses]: __lens.Lens
+func MakeSearchAndReplaceArgsRefLenses() SearchAndReplaceArgsRefLenses {
+	return SearchAndReplaceArgsRefLenses{
+		// mandatory lenses
+		Path:       MakeSearchAndReplaceArgsPathRefLens(),
+		Search:     MakeSearchAndReplaceArgsSearchRefLens(),
+		Replace:    MakeSearchAndReplaceArgsReplaceRefLens(),
+		UseRegex:   MakeSearchAndReplaceArgsUseRegexRefLens(),
+		IgnoreCase: MakeSearchAndReplaceArgsIgnoreCaseRefLens(),
+		StartLine:  MakeSearchAndReplaceArgsStartLineRefLens(),
+		EndLine:    MakeSearchAndReplaceArgsEndLineRefLens(),
+		Pattern:    MakeSearchAndReplaceArgsPatternRefLens(),
+		Name:       MakeSearchAndReplaceArgsNameRefLens(),
+		Content:    MakeSearchAndReplaceArgsContentRefLens(),
+		CRLF:       MakeSearchAndReplaceArgsCRLFRefLens(),
+		Count:      MakeSearchAndReplaceArgsCountRefLens(),
+		// optional lenses
+		PathO:       MakeSearchAndReplaceArgsPathRefLensO(),
+		SearchO:     MakeSearchAndReplaceArgsSearchRefLensO(),
+		ReplaceO:    MakeSearchAndReplaceArgsReplaceRefLensO(),
+		UseRegexO:   MakeSearchAndReplaceArgsUseRegexRefLensO(),
+		IgnoreCaseO: MakeSearchAndReplaceArgsIgnoreCaseRefLensO(),
+		StartLineO:  MakeSearchAndReplaceArgsStartLineRefLensO(),
+		EndLineO:    MakeSearchAndReplaceArgsEndLineRefLensO(),
+		PatternO:    MakeSearchAndReplaceArgsPatternRefLensO(),
+		NameO:       MakeSearchAndReplaceArgsNameRefLensO(),
+		ContentO:    MakeSearchAndReplaceArgsContentRefLensO(),
+		CRLFO:       MakeSearchAndReplaceArgsCRLFRefLensO(),
+		CountO:      MakeSearchAndReplaceArgsCountRefLensO(),
+	}
+}
+
+// MakeSearchAndReplaceArgsPrisms creates a new [SearchAndReplaceArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeSearchAndReplaceArgsPrisms() SearchAndReplaceArgsPrisms {
+	return SearchAndReplaceArgsPrisms{
+		Path:       MakeSearchAndReplaceArgsPathPrism(),
+		Search:     MakeSearchAndReplaceArgsSearchPrism(),
+		Replace:    MakeSearchAndReplaceArgsReplacePrism(),
+		UseRegex:   MakeSearchAndReplaceArgsUseRegexPrism(),
+		IgnoreCase: MakeSearchAndReplaceArgsIgnoreCasePrism(),
+		StartLine:  MakeSearchAndReplaceArgsStartLinePrism(),
+		EndLine:    MakeSearchAndReplaceArgsEndLinePrism(),
+		Pattern:    MakeSearchAndReplaceArgsPatternPrism(),
+		Name:       MakeSearchAndReplaceArgsNamePrism(),
+		Content:    MakeSearchAndReplaceArgsContentPrism(),
+		CRLF:       MakeSearchAndReplaceArgsCRLFPrism(),
+		Count:      MakeSearchAndReplaceArgsCountPrism(),
+	}
+}
+
+// MakeSearchAndReplaceArgsRefPrisms creates a new [SearchAndReplaceArgsRefPrisms] with [prisms] for all fields via a pointer to [SearchAndReplaceArgs]
+//
+// [prisms]: __prism.Prism
+func MakeSearchAndReplaceArgsRefPrisms() SearchAndReplaceArgsRefPrisms {
+	return SearchAndReplaceArgsRefPrisms{
+		Path:       MakeSearchAndReplaceArgsPathRefPrism(),
+		Search:     MakeSearchAndReplaceArgsSearchRefPrism(),
+		Replace:    MakeSearchAndReplaceArgsReplaceRefPrism(),
+		UseRegex:   MakeSearchAndReplaceArgsUseRegexRefPrism(),
+		IgnoreCase: MakeSearchAndReplaceArgsIgnoreCaseRefPrism(),
+		StartLine:  MakeSearchAndReplaceArgsStartLineRefPrism(),
+		EndLine:    MakeSearchAndReplaceArgsEndLineRefPrism(),
+		Pattern:    MakeSearchAndReplaceArgsPatternRefPrism(),
+		Name:       MakeSearchAndReplaceArgsNameRefPrism(),
+		Content:    MakeSearchAndReplaceArgsContentRefPrism(),
+		CRLF:       MakeSearchAndReplaceArgsCRLFRefPrism(),
+		Count:      MakeSearchAndReplaceArgsCountRefPrism(),
+	}
+}
+
 // FileEntryLenses provides [lenses] for accessing fields of [FileEntry]
 //
 // [lenses]: __lens.Lens
