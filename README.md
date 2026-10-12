@@ -43,6 +43,11 @@ go run . "What is a Kleisli arrow?"
 ```
 
 Variables set in the process environment take precedence over `.env`.
+
+[example_test.go](example_test.go) runs the CLI use cases (a plain question, reading,
+listing, globbing and grepping files, running a command, a failing tool call) end to end
+against DeepSeek in a temporary workspace. They are skipped without `DEEPSEEK_API_KEY`;
+`go test -v -run TestExample .` prints what the CLI answers for each prompt.
 [.env.example](.env.example) lists all variables, including the optional ones for the
 replay tests.
 

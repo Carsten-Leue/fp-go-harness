@@ -16,6 +16,7 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
+	"github.com/IBM/fp-go/v2/io"
 	"github.com/IBM/fp-go/v2/ioresult"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
@@ -49,6 +50,15 @@ func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
 		A.Of(env.DotEnvFile),
 		env.MakeDotEnvEnvironmentDeps(),
 		ioresult.Map(newDeepSeekDeps),
+	)
+}
+
+// makeRegistry builds the registry of every tool for the workspace at root.
+// Background commands log to [logDir] inside it.
+func makeRegistry(root string) io.IO[tools.ToolRegistry] {
+	return F.Pipe1(
+		tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir)),
+		io.Map(tools.MakeTools()),
 	)
 }
 
@@ -152,7 +162,7 @@ func main() {
 	defer stop()
 
 	final, err := effect.RunSync(F.Pipe2(
-		answer(tools.MakeTools()(tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))()))(prompt),
+		answer(makeRegistry(root)())(prompt),
 		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
 		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)
