@@ -77,9 +77,9 @@ func rawBytes(raw json.RawMessage) []byte {
 	return raw
 }
 
-// completeTurn assembles a turn from the parts decoded out of one chunk of
-// records. A chunk whose response was never recorded belongs to an unfinished
-// turn and yields None.
+// completeTurn is a leaf and a constructor that [F.Curry3] lifts: it assembles
+// a turn from the parts decoded out of one chunk of records. A chunk whose
+// response was never recorded belongs to an unfinished turn and yields None.
 func completeTurn(request openai.ChatCompletionNewParams, response Option[ChatResponse], tools []ToolInvocation) Option[Turn] {
 	return F.Pipe1(
 		response,
@@ -87,7 +87,8 @@ func completeTurn(request openai.ChatCompletionNewParams, response Option[ChatRe
 	)
 }
 
-// indexWhen keeps the index of the elements that match pred.
+// indexWhen keeps the index of the elements that match pred. It is a generic
+// combinator and keeps its parameter: Go can't infer T through a nullary call.
 func indexWhen[T any](pred Predicate[T]) func(int, T) Option[int] {
 	return pair.Unpaired(F.Flow2(
 		option.FromPredicate(F.Flow2(pair.Tail[int, T], pred)),
@@ -107,7 +108,8 @@ func consecutiveRanges() reader.Reader[[]int, []Pair[int, int]] {
 // chunkBounds locates the boundaries of the chunks: the index of every element
 // that matches pred, terminated by the size of the slice so the last chunk has
 // an end. Indices and terminator read the same slice, so they are combined with
-// the reader applicative.
+// the reader applicative. It is a generic combinator and keeps its parameter:
+// Go can't infer T through a nullary call.
 func chunkBounds[T any](pred Predicate[T]) reader.Reader[[]T, []int] {
 	return F.Pipe1(
 		F.Flow2(A.Size[T], A.Push[int]),
@@ -121,7 +123,8 @@ func chunkBounds[T any](pred Predicate[T]) reader.Reader[[]T, []int] {
 //
 // The boundaries and the slicing both read the same slice, so the whole split
 // is a reader over it: the ranges are traversed with the reader traversal,
-// which hands each range the slice to cut from.
+// which hands each range the slice to cut from. It is a generic combinator and
+// keeps its parameter: Go can't infer T through a nullary call.
 func chunkAt[T any](pred Predicate[T]) reader.Reader[[]T, [][]T] {
 	return F.Pipe1(
 		chunkBounds(pred),
@@ -144,8 +147,10 @@ func startsTurn() Predicate[Record] {
 }
 
 // hasTaskID matches the records of one task.
-func hasTaskID(taskID string) Predicate[Record] {
-	return F.Flow2(MakeRecordTaskIDLens().Get, P.IsStrictEqual[string]()(taskID))
+func hasTaskID() reader.Reader[string, Predicate[Record]] {
+	taskIDLens := MakeRecordTaskIDLens()
+
+	return F.Flow2(P.IsStrictEqual[string](), reader.Local[bool](taskIDLens.Get))
 }
 
 // requestOf decodes the request body of the record that starts a chunk. Every
@@ -219,21 +224,49 @@ func turnsOf() ReaderResult[[]Record, []Turn] {
 	)
 }
 
+// taskError is a leaf: [ER.OnError] is variadic and needs the task identifier
+// as argument.
+func taskError(taskID string) Endomorphism[error] {
+	return ER.OnError("task %q", taskID)
+}
+
+// taskTurns decodes the turns of the records with a given task identifier.
+func taskTurns() reader.Reader[string, ReaderResult[[]Record, []Turn]] {
+	return F.Flow3(
+		hasTaskID(),
+		A.Filter[Record],
+		reader.Map[[]Record](turnsOf()),
+	)
+}
+
+// taskBuilt builds the task with a given identifier from the decoded turns of
+// its records. The identifier is read twice, to select the records and to
+// name the task, so both stages are combined with the reader applicative.
+func taskBuilt() reader.Reader[string, ReaderResult[[]Record, Task]] {
+	return F.Pipe2(
+		taskTurns(),
+		reader.Map[string](reader.Compose[Result[Task], []Record, Result[[]Turn]]),
+		reader.Ap[ReaderResult[[]Record, Task]](F.Flow2(F.Curry2(newTask), result.Map[[]Turn, Task])),
+	)
+}
+
 // taskOf builds the task with a given identifier from the records of a log.
-func taskOf(taskID string) ReaderResult[[]Record, Task] {
-	return F.Flow4(
-		A.Filter(hasTaskID(taskID)),
-		turnsOf(),
-		result.Map(F.Bind1st(newTask, taskID)),
-		result.MapLeft[Task](ER.OnError("task %q", taskID)),
+// An error names the task.
+func taskOf() reader.Reader[string, ReaderResult[[]Record, Task]] {
+	return F.Pipe2(
+		taskBuilt(),
+		reader.Map[string](reader.Compose[Result[Task], []Record, Result[Task]]),
+		reader.Ap[ReaderResult[[]Record, Task]](F.Flow2(taskError, result.MapLeft[Task, error])),
 	)
 }
 
 // taskIDs lists the task identifiers of a log in order of first appearance.
 // Records without a task identifier belong to no task and are skipped.
 func taskIDs() reader.Reader[[]Record, []string] {
+	taskIDLens := MakeRecordTaskIDLens()
+
 	return F.Flow3(
-		A.Map(MakeRecordTaskIDLens().Get),
+		A.Map(taskIDLens.Get),
 		A.Filter(P.Not(S.IsEmpty)),
 		A.Uniq(F.Identity[string]),
 	)
@@ -258,6 +291,6 @@ func taskIDs() reader.Reader[[]Record, []string] {
 func GroupTasks() result.Kleisli[[]Record, []Task] {
 	return F.Pipe1(
 		taskIDs(),
-		reader.Chain(readerresult.TraverseArray(taskOf)),
+		reader.Chain(readerresult.TraverseArray(taskOf())),
 	)
 }

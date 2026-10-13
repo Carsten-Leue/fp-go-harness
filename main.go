@@ -39,6 +39,8 @@ type deepSeekDeps struct {
 	env.EnvironmentDeps
 }
 
+// newDeepSeekDeps is wiring: it combines the default HTTP client and the
+// environment into [oai.DeepSeekDeps].
 func newDeepSeekDeps(e env.EnvironmentDeps) oai.DeepSeekDeps {
 	return &deepSeekDeps{http.MakeDefaultHttpDeps(), e}
 }
@@ -53,8 +55,8 @@ func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
 	)
 }
 
-// makeRegistry builds the registry of every tool for the workspace at root.
-// Background commands log to [logDir] inside it.
+// makeRegistry is wiring: it builds the registry of every tool for the
+// workspace at root. Background commands log to [logDir] inside it.
 func makeRegistry(root string) io.IO[tools.ToolRegistry] {
 	return F.Pipe1(
 		tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir)),
@@ -62,8 +64,8 @@ func makeRegistry(root string) io.IO[tools.ToolRegistry] {
 	)
 }
 
-// makeRequest builds the Ask mode request for a single user prompt, including
-// the tool definitions from the registry.
+// makeRequest is wiring: it builds the Ask mode request for a single user
+// prompt, including the tool definitions from the registry.
 func makeRequest(registry tools.ToolRegistry) func(string) openai.ChatCompletionNewParams {
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
@@ -82,7 +84,8 @@ func makeRequest(registry tools.ToolRegistry) func(string) openai.ChatCompletion
 	)
 }
 
-// answer runs the agent loop for a prompt against DeepSeek.
+// answer is wiring: it runs the agent loop for a prompt against DeepSeek, with
+// the registry the program built.
 //
 // session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
 // the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
@@ -105,10 +108,14 @@ func answer(registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string
 // finalContent extracts the content of the first choice of a completion, or
 // the empty string.
 func finalContent() func(*openai.ChatCompletion) string {
+	choicesLens := oai.MakeChatCompletionChoicesRefLens()
+	messageLens := oai.MakeChatCompletionChoiceMessageLens()
+	contentLens := oai.MakeChatCompletionMessageContentLens()
+
 	content := F.Pipe2(
-		oai.MakeChatCompletionChoicesRefLens(),
+		choicesLens,
 		L.ComposePrism[*openai.ChatCompletion](P.Head[openai.ChatCompletionChoice]()),
-		OL.Compose[*openai.ChatCompletion](oai.MakeChatCompletionChoiceMessageLens().Compose(oai.MakeChatCompletionMessageContentLens())),
+		OL.Compose[*openai.ChatCompletion](messageLens.Compose(contentLens)),
 	)
 
 	return F.Flow2(
@@ -120,17 +127,21 @@ func finalContent() func(*openai.ChatCompletion) string {
 // sessionStats renders the iteration count and accumulated token usage of a
 // session. It is a leaf: one formatter over several fields.
 func sessionStats(s session.Session) string {
-	usage := session.MakeSessionusageLens().Get(s)
+	usageLens := session.MakeSessionusageLens()
+	iterationsLens := session.MakeSessioniterationsLens()
+
+	usage := usageLens.Get(s)
 
 	return fmt.Sprintf(
 		"[iterations: %d, prompt tokens: %d, completion tokens: %d, total tokens: %d]",
-		session.MakeSessioniterationsLens().Get(s),
+		iterationsLens.Get(s),
 		usage.PromptTokens,
 		usage.CompletionTokens,
 		usage.TotalTokens,
 	)
 }
 
+// joinParagraphs is a leaf: one formatter over the statistics and the content.
 func joinParagraphs(stats, content string) string {
 	return content + "\n\n" + stats
 }

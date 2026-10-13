@@ -1,11 +1,11 @@
 ---
 name: fp-go
-description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the four rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, readers instead of closures over a pipeline's input (reader.Ap/Chain/TraverseArray), the combinator that matches the operation (ApS without a setter is Ap, Map+Flatten is Chain, Fold over Left/Right is FromPredicate, empty fallback is Alt), the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
+description: Use this skill whenever writing, generating, changing, refactoring or reviewing Go code in this repository, and always when a Go file imports github.com/IBM/fp-go/v2. It sets the five rules every code change follows - fp-go best practices, monadic over imperative style, point-free style, every function nullary (parameters moved into the returned Reader/Kleisli, inner functions hoisted), and the fp-go MCP server as the primary source of truth - with the workflow and the exceptions, readers instead of closures over a pipeline's input (reader.Ap/Chain/TraverseArray), the combinator that matches the operation (ApS without a setter is Ap, Map+Flatten is Chain, Fold over Left/Right is FromPredicate, empty fallback is Alt), the rules for composing Effect[C, A] (effect combinators Asks/Map/Ap/Chain/FromThunk, Local for reuse, Deps getter interfaces, effect.TailRec loops, Provide/RunSync at the boundary), and explains how to set up and start that MCP server.
 ---
 # fp-go — the rules for every code change, and the MCP server behind them
 
 This repository is written in functional Go on top of `github.com/IBM/fp-go/v2`. Every
-code change, generated or reviewed, small or large, follows the four rules below. They
+code change, generated or reviewed, small or large, follows the five rules below. They
 are not style preferences: a change that breaks one of them is not done, and a review
 reports it as a violation of a documented standard.
 
@@ -15,6 +15,7 @@ reports it as a violation of a documented standard.
 | 2 | **Follow fp-go best practices** | v2 imports, data-last, the simplest monad that fits, `Result` over `Either[error, A]`, lifting with `Eitherize`, lenses, `Tap*` for logging, no hidden mutation. |
 | 3 | **Monadic over imperative, wherever possible** | Model failure, absence, effects and iteration with `Result`, `Option`, `thunk` / `Effect`, `Chain`, `Traverse`, not with `if err != nil` chains, `nil` checks and `for` loops. |
 | 4 | **Point-free wherever possible** | Compose named functions, lens getters and combinators with `F.Flow` / `F.Pipe`. Lambdas only at the leaves. |
+| 5 | **Every function is nullary** | `func f() Reader[A, B]`, not `func f(a A) B`: parameters move into the returned `Reader` / `Kleisli`, inner steps are hoisted into named nullary functions. Only leaves, wiring and tests take parameters. |
 
 Repository conventions (aliases, header constants, doc comments, tests) are in
 [`go-conventions`](../go-conventions/SKILL.md). Load it together with this
@@ -103,7 +104,7 @@ first error lines (at most 10 per failure)." Build and test a single package inl
 
 1. `use_skill` with `fp-go`, `fp-go-pr-review`, `fp-go-pipe-flow` and the topic skills
    the diff touches.
-2. Judge the diff against the four rules.
+2. Judge the diff against the five rules.
 3. **Verify every suggested fix** with `get_example` / `go doc` before you write it into
    the review. A suggestion that doesn't compile costs the author more than no suggestion.
 4. A review needs the MCP server. If its tools are missing, the review fails; set the
@@ -231,6 +232,10 @@ works on. Aim for it at every level above the leaves.
 - **Configuration first, data last:** `func(Config) func(Data) B` so the inner function
   slots into `Flow`.
 - **`F.Flow2(lens.Get, kleisli)`** feeds one field of the state into the next step.
+- **Lenses in local variables:** bind every lens a function uses to a local variable at
+  the top of the function (`textLens := MakeInsertContentArgsTextLens()`) and use
+  `textLens.Get` / `textLens.Set` in the pipeline. Never inline `MakeXxxLens().Get`, even
+  when the lens is used only once.
 
 ```go
 // AVOID: a lambda that hides a predicate and an error constructor
@@ -343,9 +348,123 @@ What makes it work:
   // PREFER: the curried constructor is a Kleisli[[]string, string, IgnoreFile]
   reader.Chain(F.Flow2(file.Join(gitignoreFile), F.Curry2(makeIgnoreFile))),
   ```
+- **The converse: `reader.Chain(reader.Local(fa))` is `reader.Ap(fa)`.** Ask whether the
+  later read *needs the earlier result*. If it doesn't, the reads are independent and
+  `Ap` is both the right concept and the shortest form. "Monadic" is not automatically
+  simpler: `Chain(Local(fa))(fab)` reduces to `r ↦ fab(r)(fa(r))`, which is the
+  definition of `Ap(fa)`. [tools/insertcontent.go](../../../tools/insertcontent.go)
+  `writeInsertedWith` is the example. The path picks the writer and the bytes are what it
+  writes; neither read depends on the other:
+
+  ```go
+  // AVOID: Ap spelled out by hand
+  reader.Local[ioresult.Kleisli[[]byte, []byte]](pathLens.Get),
+  reader.Chain(reader.Local[ioresult.IOResult[[]byte]](F.Flow2(fileText(), S.ToBytes))),
+
+  // PREFER: two independent reads
+  reader.Local[ioresult.Kleisli[[]byte, []byte]](pathLens.Get),
+  reader.Ap[ioresult.IOResult[[]byte]](F.Flow2(fileText(), S.ToBytes)),
+  ```
+
+  `Chain` is right when a value is computed first and the later step needs it, as in
+  `insertedText`, where the index is computed from the call and then used to insert.
 
 Watch the empty case: `reader.TraverseArray` over an empty slice yields `nil` where
 `A.Map` yielded an empty slice, so tests comparing with `assert.Equal` expect `nil`.
+
+## Rule 5 — nullary functions, with the inner functions hoisted
+
+**Implement every function as a nullary function** that returns its pipeline: a
+`Reader`, a `Kleisli`, an `Operator`, a `Predicate` or an `Endomorphism`. This applies to
+new code and to every function a change touches. Parameters don't go away, they move
+into the returned value's type:
+
+- **The data a function works on** becomes the environment of the returned reader:
+  `insertedText(a Args) string` → `insertedText() Reader[Args, string]`.
+- **A configuration parameter** becomes the outer level of a curried reader:
+  `insertAt(index int) func(string) …` → `insertAt() Reader[int, Reader[string, …]]`.
+  Rule 4's "configuration first, data last" is this order.
+- **A function-typed parameter** (a writer, a callback) is a reader environment too:
+  `writeInsertedWith(write …)` → `writeInsertedWith() Reader[func(string) …, …]`.
+
+Call sites change from `f` to `f()`, tests included. A function that needs the same
+value twice is rewritten with the combinators below, not left parameterized.
+
+The only exceptions, each named as such in its doc comment:
+
+- **Leaves** in the sense of Rule 4: a multi-field formatter (`insertedAtLine(a)`), a
+  named predicate over several fields, a constructor that `F.CurryN` lifts
+  (`completeTurn`), a raw I/O sink.
+- **Wiring:** dependency constructors and casts (`MakeInsertContentDeps`,
+  `AsInsertContentDeps`), interface methods, and getters such as
+  `insertContentDefinition(root)` that build a plain value for a tool definition.
+- **A generic I/O leaf** whose type parameter is the dependency set, such as
+  `readBytes[R](path)`, because Go can't infer `R` through a nullary call.
+- **Tests and `main`.**
+
+How to get there:
+
+1. **A value derived from the input and used more than once is a `reader.Chain`.**
+   Compute it with its own reader and chain it into a hoisted `Kleisli` that receives it.
+2. **Hoist each inner step** into its own named, nullary, package-level function with a
+   doc comment, instead of nesting lambdas or local variables in one body.
+3. **Then make the hoisted `Kleisli` nullary too.** Its parameter disappears with the
+   combinators below.
+
+Worked example: [tools/insertcontent.go](../../../tools/insertcontent.go) `insertedText`.
+The index is computed from the call and used as both ends of `replaceLines`. The
+inserted lines and the file's lines are read from the same call:
+
+```go
+// AVOID: a leaf that reads the call three times and the index twice
+func insertedText(a InsertContentArgs) string {
+	index := insertIndex()(a)
+	return replaceLines(index, index, F.Constant1[string](insertedLines()(a)))(splitAfterLines()(terminated()(a.Text)))
+}
+
+// PREFER: monadic over the index, every step hoisted and nullary
+func insertAt() Reader[int, Reader[string, Reader[[]string, string]]] {
+	return F.Pipe2(
+		F.Curry3(replaceLines),
+		reader.Flatten,                                    // index ↦ replaceLines(index, index)
+		reader.Map[int](reader.Local[Reader[[]string, string]](F.Constant1[string, string])),
+	)
+}
+
+func insertedAt() reader.Kleisli[InsertContentArgs, int, string] {
+	return F.Flow3(
+		insertAt(),
+		reader.Local[Reader[[]string, string]](insertedLines()),
+		reader.Ap[string](fileLines()),
+	)
+}
+
+func insertedText() Reader[InsertContentArgs, string] {
+	return F.Pipe1(insertIndex(), reader.Chain(insertedAt()))
+}
+```
+
+How a parameter disappears:
+
+| Parameterized shape | Nullary form |
+|---|---|
+| `func h(x X) …` uses `x` twice: `g(x, x)` | `F.Pipe1(F.Curry2(g), reader.Flatten)`; with a third argument `F.Curry3(g)` + `reader.Flatten`, giving `Reader[X, func(C) D]` |
+| `func h(k func(A) B) …` returns `F.Flow2(getter, k)` | `reader.Local[B](getter)`: `k ↦ k ∘ getter` |
+| `func h(x X) …` returns `F.Flow2(f, k(x))` | `F.Flow2(k, reader.Local[…](f))` |
+| `func h(x X) …` returns `F.Pipe1(r(x), reader.Ap[B](fa))` | `F.Flow2(r, reader.Ap[B](fa))` |
+| `func h(x X) …` returns `F.Flow2(F.Constant1[A], g(x))` | `reader.Map[X](reader.Local[…](F.Constant1[A, A]))` after the reader that yields `g(x)` |
+
+`F.Curry2(g)` + `reader.Flatten` is the duplicating ("W") combinator: `Flatten` of a
+`Reader[X, Reader[X, A]]` passes the same `x` to both levels. It is not the `Map` +
+`Flatten` pair from *The combinator that matches the operation*. There is no `Map`
+before it, so there is no `Chain` to replace it with.
+
+**Type pitfall:** `reader.Kleisli[R, A, B]` is `func(A) Reader[R, B]`, so the *argument*
+comes second. A curried `func(int) func(string) X` is `Reader[int, Reader[string, X]]`,
+**not** `reader.Kleisli[int, string, X]`, which is `func(string) func(int) X`. The
+compiler error reads as if `Reader` and `Kleisli` were distinct defined types, but both
+are aliases: the argument order is what doesn't match. Spell nested curried functions as
+nested `Reader`s.
 
 ## Several readers over one environment
 
@@ -408,6 +527,7 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | `identity.Bind(pair.MapHead, f)` | the pair is read twice: once to compute the update, once to apply it | `F.Pipe1(f, reader.Chain(pair.MapHead[B, A, A]))` |
 | `reader.Map(f)` + `reader.Chain(reader.Sequence(g))` | two independent reads of one input | `F.Pipe1(g, reader.Ap[B](f))` |
 | `F.Flow2(…, k)` + `reader.Flatten` | `Map` then `Flatten` | `reader.Chain(k)` |
+| `reader.Chain(reader.Local[B](fa))` | two independent reads, with `Ap` spelled out by hand | `reader.Ap[B](fa)` |
 | `readerresult.Ap(…)` + `readerresult.ChainResultK(F.Identity[Result[A]])` | the applied function can fail, so it is a bind | `readerresult.Chain(k)`; `reader.Local[Result[B]](getter)` turns a `result.Kleisli[X, B]` into the `ReaderResult` that `Chain` needs |
 | `F.Flow2(lens.Get, result.Of[T])` as an argument of `readerresult.Ap` | lifting a reader that cannot fail | `readerresult.Asks(lens.Get)` (also `readeroption.Asks`, `effect.Asks`) |
 | `P.Fold(F.Constant1(fail), F.Constant1(result.Of))(pred)` + `reader.Ap(text)` | validation | `F.Flow2(result.FromPredicate(pred, F.Flow2(text, errors.New)), result.Map(text))` |
@@ -645,8 +765,13 @@ MCP servers or restart the session and the tools come up quickly.
       where a combinator exists; imperative code only at the boundary or a leaf, with a reason
 - [ ] Point-free (Rule 4): lambdas only at the leaves; combinators, lens getters and
       `F.FlowN` above them; pipelines returned from functions
+- [ ] Nullary (Rule 5): every function except leaves, wiring and tests is `func f() …`,
+      with its parameters in the returned `Reader` / `Kleisli` and its inner steps hoisted
+      into named functions; a value used twice goes through `reader.Chain` or
+      `reader.Flatten`; every lens is bound to a local variable
 - [ ] Each step uses the combinator that matches the operation: no `ApS`/`Bind`
-      without a lens setter, no `Map`+`Flatten`, no `Fold` choosing `Left`/`Right`, no
+      without a lens setter, no `Map`+`Flatten`, no `Chain(Local(fa))` for an
+      independent read (that is `Ap`), no `Fold` choosing `Left`/`Right`, no
       "empty fallback, then test for empty" (see *The combinator that matches the operation*)
 - [ ] Effects built with `effect`'s combinators (`Asks`/`Map`/`Ap`/`Chain`/`FromThunk`),
       reused under another environment with `Local`; dependencies as getter interfaces;

@@ -81,7 +81,7 @@ func TestIgnoreDomain(t *testing.T) {
 }
 
 func TestParseIgnore(t *testing.T) {
-	patterns := parseIgnore(nil)([]byte("# comment\r\n\r\n*.log\r\n!keep.log\n  \n"))
+	patterns := parseIgnore()(nil)([]byte("# comment\r\n\r\n*.log\r\n!keep.log\n  \n"))
 	require.Len(t, patterns, 2)
 
 	keep := notIgnored(nil, patterns)
@@ -141,13 +141,13 @@ func TestIgnoreFiles(t *testing.T) {
 		{Path: filepath.Join(root, "a", "b", ".gitignore"), Domain: []string{"a", "b"}},
 		{Path: filepath.Join(root, "a", "b", "c", ".gitignore"), Domain: []string{"a", "b", "c"}},
 		{Path: filepath.Join(root, "a", "b", "c", "d", ".gitignore"), Domain: []string{"a", "b", "c", "d"}},
-	}, ignoreFiles(root)(args))
+	}, ignoreFiles()(root)(args))
 
 	// at the workspace root
 	assert.Equal(t, []IgnoreFile{
 		{Path: filepath.Join(root, ".git", "info", "exclude")},
 		{Path: filepath.Join(root, ".gitignore"), Domain: nil},
-	}, ignoreFiles(root)(GrepArgs{Name: ".", Scope: GrepScope{Dir: root}}))
+	}, ignoreFiles()(root)(GrepArgs{Name: ".", Scope: GrepScope{Dir: root}}))
 }
 
 func TestCompilePattern_WordRegexp(t *testing.T) {
@@ -183,10 +183,10 @@ func TestGrepContent(t *testing.T) {
 
 	assert.Equal(t,
 		[]GrepLine{{File: "a.go", Number: 1, Text: "foo"}, {File: "a.go", Number: 3, Text: "a fo"}},
-		grepContent(match)("a.go")([]byte("foo\r\nbar\r\na fo\r\n")))
+		grepContent()(match)("a.go")([]byte("foo\r\nbar\r\na fo\r\n")))
 
 	// binary content has no matches
-	assert.Empty(t, grepContent(match)("a.bin")([]byte("foo\x00")))
+	assert.Empty(t, grepContent()(match)("a.bin")([]byte("foo\x00")))
 }
 
 func TestRenderMatches(t *testing.T) {
@@ -515,8 +515,8 @@ func TestIsGitignore(t *testing.T) {
 }
 
 func TestAbsoluteEntry(t *testing.T) {
-	assert.Equal(t, filepath.Join(fakeRoot, "a", "b.go"), absoluteEntry(fakeRoot)(FileEntry{Path: "a/b.go"}))
-	assert.Equal(t, filepath.Join(fakeRoot, "c.go"), absoluteEntry(fakeRoot)(FileEntry{Path: "c.go"}))
+	assert.Equal(t, filepath.Join(fakeRoot, "a", "b.go"), absoluteEntry()(fakeRoot)(FileEntry{Path: "a/b.go"}))
+	assert.Equal(t, filepath.Join(fakeRoot, "c.go"), absoluteEntry()(fakeRoot)(FileEntry{Path: "c.go"}))
 }
 
 func TestIsPatternLine(t *testing.T) {
@@ -574,7 +574,7 @@ func TestMakeIgnoreFile(t *testing.T) {
 }
 
 func TestExcludeFile(t *testing.T) {
-	assert.Equal(t, IgnoreFile{Path: filepath.Join(fakeRoot, ".git", "info", "exclude")}, excludeFile(fakeRoot))
+	assert.Equal(t, IgnoreFile{Path: filepath.Join(fakeRoot, ".git", "info", "exclude")}, excludeFile()(fakeRoot))
 }
 
 func TestInits(t *testing.T) {
@@ -715,14 +715,14 @@ func TestSearchScope(t *testing.T) {
 func TestKeepCandidate(t *testing.T) {
 	isGo := func(p string) bool { return strings.HasSuffix(p, ".go") }
 	patterns := []gitignore.Pattern{gitignore.ParsePattern("gen/", []string{"sub"})}
-	keep := keepCandidate(isGo)([]string{"sub"})(patterns)
+	keep := keepCandidate()(isGo)([]string{"sub"})(patterns)
 
 	assert.True(t, keep(FileEntry{Path: "a.go"}))
 	assert.False(t, keep(FileEntry{Path: "a.md"}))
 	assert.False(t, keep(FileEntry{Path: "x.go", IsDir: true}))
 	// the patterns are matched by the workspace path below the prefix
 	assert.False(t, keep(FileEntry{Path: "gen/b.go"}))
-	assert.True(t, keepCandidate(isGo)(nil)(patterns)(FileEntry{Path: "gen/b.go"}))
+	assert.True(t, keepCandidate()(isGo)(nil)(patterns)(FileEntry{Path: "gen/b.go"}))
 }
 
 func TestSelectCandidates(t *testing.T) {
@@ -737,8 +737,8 @@ func TestSelectCandidates(t *testing.T) {
 	}
 
 	// the newest first
-	assert.Equal(t, []string{"b.go", "a.go"}, entryPaths(selectCandidates(isGo)(nil)(patterns)(entries)))
-	assert.Empty(t, selectCandidates(isGo)(nil)(patterns)(nil))
+	assert.Equal(t, []string{"b.go", "a.go"}, entryPaths(selectCandidates()(isGo)(nil)(patterns)(entries)))
+	assert.Empty(t, selectCandidates()(isGo)(nil)(patterns)(nil))
 }
 
 func TestCandidates(t *testing.T) {
@@ -787,9 +787,9 @@ func TestGrepContent_Empty(t *testing.T) {
 	notX := P.Not(S.Includes("x"))
 
 	// empty content has no lines, so even invert_match finds nothing
-	assert.Empty(t, grepContent(notX)("a.go")(nil))
+	assert.Empty(t, grepContent()(notX)("a.go")(nil))
 	// a lone line break is one empty line
-	assert.Equal(t, []GrepLine{{File: "a.go", Number: 1, Text: ""}}, grepContent(notX)("a.go")([]byte("\n")))
+	assert.Equal(t, []GrepLine{{File: "a.go", Number: 1, Text: ""}}, grepContent()(notX)("a.go")([]byte("\n")))
 }
 
 // TestSlice_Reused guards against the fp-go bug fixed in v2.5.1: A.Slice and

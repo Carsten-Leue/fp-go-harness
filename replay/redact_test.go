@@ -57,7 +57,7 @@ func TestRedact(t *testing.T) {
 			`"messages":[{"content":"Bearer secret\ncarsten@corp.example.org"}],"n":12345678901234567890,"ok":true,"none":null}`),
 	}
 
-	got := Redact(RedactText())(rec)
+	got := Redact()(RedactText())(rec)
 
 	assert.Equal(t, result.Of(Record{
 		Module: "Gateway",
@@ -73,13 +73,13 @@ func TestRedactSensitiveNonString(t *testing.T) {
 
 	assert.Equal(t, result.Of(Record{
 		Data: json.RawMessage(`{"cookie":null,"headers":{"set-cookie":"<redacted>"},"password":"<redacted>","token":null}`),
-	}), Redact(RedactText())(rec))
+	}), Redact()(RedactText())(rec))
 }
 
 func TestRedactStringData(t *testing.T) {
 	rec := Record{Module: "Auth", Msg: "Auth state changed to", Data: json.RawMessage(`"expired"`)}
 
-	assert.Equal(t, result.Of(rec), Redact(RedactText())(rec))
+	assert.Equal(t, result.Of(rec), Redact()(RedactText())(rec))
 }
 
 func TestRedactAuthObject(t *testing.T) {
@@ -93,19 +93,19 @@ func TestRedactAuthObject(t *testing.T) {
 		Module: "Auth",
 		Msg:    "Token refresh failed",
 		Data:   json.RawMessage(`"<redacted>"`),
-	}), Redact(RedactText())(rec))
+	}), Redact()(RedactText())(rec))
 }
 
 func TestRedactNoData(t *testing.T) {
 	rec := Record{Module: "Extension", Msg: "Activating extension"}
 
-	assert.Equal(t, result.Of(rec), Redact(RedactText())(rec))
+	assert.Equal(t, result.Of(rec), Redact()(RedactText())(rec))
 }
 
 func TestRedactInvalidData(t *testing.T) {
 	rec := Record{Data: json.RawMessage(`{`)}
 
-	assert.True(t, result.IsLeft(Redact(RedactText())(rec)))
+	assert.True(t, result.IsLeft(Redact()(RedactText())(rec)))
 }
 
 // envRedactTerms holds the names of the people in the recordings, comma
@@ -154,7 +154,7 @@ func TestRedactRecordings(t *testing.T) {
 
 	terms := redactTerms(t)
 	leaks := leakPatterns(terms)
-	redact := Redact(F.Flow2(
+	redact := Redact()(F.Flow2(
 		RedactText(),
 		RedactTerms(terms...),
 	))

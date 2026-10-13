@@ -43,7 +43,7 @@ func (d *walkDeps) GetWalkDir() WalkDir {
 	return d.walkDir
 }
 
-// MakeWalkDeps builds [WalkDeps] that list directories with walkDir.
+// MakeWalkDeps is wiring: it builds [WalkDeps] that list directories with walkDir.
 func MakeWalkDeps(walkDir WalkDir) WalkDeps {
 	return &walkDeps{walkDir}
 }
@@ -53,6 +53,8 @@ func MakeDefaultWalkDeps() WalkDeps {
 	return MakeWalkDeps(WalkFS(os.DirFS))
 }
 
+// AsWalkDeps is wiring: it narrows any wider dependencies to [WalkDeps], for
+// use with [reader.Local] and [effect.Local].
 func AsWalkDeps[R WalkDeps](r R) WalkDeps {
 	return r
 }
@@ -69,10 +71,14 @@ type directoryDeps struct {
 	WalkDeps
 }
 
+// MakeDirectoryDeps is wiring: it combines a workspace and a directory walker
+// into [DirectoryDeps].
 func MakeDirectoryDeps(ws WorkspaceDeps, w WalkDeps) DirectoryDeps {
 	return &directoryDeps{ws, w}
 }
 
+// AsDirectoryDeps is wiring: it narrows any wider dependencies to
+// [DirectoryDeps], for use with [reader.Local] and [effect.Local].
 func AsDirectoryDeps[R DirectoryDeps](r R) DirectoryDeps {
 	return r
 }
@@ -108,7 +114,7 @@ func walkEntries(recursive bool) func(fs.FS) ([]FileEntry, error) {
 	}
 }
 
-// WalkFS builds a [WalkDir] that walks the file system dirFS opens for a
+// WalkFS is wiring: it builds a [WalkDir] that walks the file system dirFS opens for a
 // directory, e.g. [os.DirFS]. The error of a failed walk names the directory,
 // because the file system reports the root as ".".
 func WalkFS(dirFS func(string) fs.FS) WalkDir {
@@ -124,7 +130,9 @@ func WalkFS(dirFS func(string) fs.FS) WalkDir {
 	}
 }
 
-// walkDir lists the absolute directory dir through the [WalkDeps] of R.
+// walkDir lists the absolute directory dir through the [WalkDeps] of R. It is
+// a generic I/O leaf and keeps its parameter: Go can't infer R through a
+// nullary call.
 func walkDir[R WalkDeps](recursive bool) effect.Kleisli[R, string, []FileEntry] {
 	return func(dir string) Effect[R, []FileEntry] {
 		return F.Pipe1(

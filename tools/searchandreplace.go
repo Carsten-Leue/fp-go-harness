@@ -17,6 +17,7 @@ import (
 	J "github.com/IBM/fp-go/v2/json"
 	"github.com/IBM/fp-go/v2/lazy"
 	N "github.com/IBM/fp-go/v2/number"
+	L "github.com/IBM/fp-go/v2/optics/lens"
 	"github.com/IBM/fp-go/v2/option"
 	P "github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
@@ -44,10 +45,14 @@ type searchAndReplaceDeps struct {
 	FileWriteDeps
 }
 
+// MakeSearchAndReplaceDeps is wiring: it combines a workspace, read access and
+// write access to the file system into [SearchAndReplaceDeps].
 func MakeSearchAndReplaceDeps(w WorkspaceDeps, r FileDeps, f FileWriteDeps) SearchAndReplaceDeps {
 	return &searchAndReplaceDeps{w, r, f}
 }
 
+// AsSearchAndReplaceDeps is wiring: it narrows any wider dependencies to
+// [SearchAndReplaceDeps], for use with [reader.Local] and [effect.Local].
 func AsSearchAndReplaceDeps[R SearchAndReplaceDeps](r R) SearchAndReplaceDeps {
 	return r
 }
@@ -92,13 +97,25 @@ func hasCRLF() P.Predicate[string] {
 	return F.Bind2nd(strings.Contains, "\r\n")
 }
 
+// withLineEndings is the text of the arguments of an editing call, read by
+// the text lens, with the line endings of the file: CRLF when the crlf lens
+// is set, else LF.
+//
+// It is a generic combinator over the two lenses of the arguments and keeps
+// its parameters: Go can't infer T through a nullary call.
+func withLineEndings[T any](text L.Lens[T, string], crlf L.Lens[T, bool]) Reader[T, string] {
+	return P.Fold(text.Get, F.Flow2(text.Get, toCRLF))(crlf.Get)
+}
+
 // nonNegativeLines tests whether both line numbers of a call are 0 or more.
 func nonNegativeLines() P.Predicate[SearchAndReplaceArgs] {
+	startLineLens := MakeSearchAndReplaceArgsStartLineLens()
+	endLineLens := MakeSearchAndReplaceArgsEndLineLens()
 	nonNegative := P.Not(N.LessThan(0))
 
 	return F.Pipe1(
-		F.Flow2(MakeSearchAndReplaceArgsStartLineLens().Get, nonNegative),
-		P.And(F.Flow2(MakeSearchAndReplaceArgsEndLineLens().Get, nonNegative)),
+		F.Flow2(startLineLens.Get, nonNegative),
+		P.And(F.Flow2(endLineLens.Get, nonNegative)),
 	)
 }
 
@@ -110,8 +127,10 @@ func isOrderedLines(a SearchAndReplaceArgs) bool {
 
 // checkArgs fails for an empty search and for an invalid line range.
 func checkArgs() result.Kleisli[SearchAndReplaceArgs, SearchAndReplaceArgs] {
+	searchLens := MakeSearchAndReplaceArgsSearchLens()
+
 	return F.Flow3(
-		result.FromPredicate(F.Flow2(MakeSearchAndReplaceArgsSearchLens().Get, S.IsNonEmpty), F.Constant1[SearchAndReplaceArgs](errEmptySearch)),
+		result.FromPredicate(F.Flow2(searchLens.Get, S.IsNonEmpty), F.Constant1[SearchAndReplaceArgs](errEmptySearch)),
 		result.Chain(result.FromPredicate(nonNegativeLines(), F.Constant1[SearchAndReplaceArgs](errNegativeLine))),
 		result.Chain(result.FromPredicate(isOrderedLines, F.Constant1[SearchAndReplaceArgs](errLineOrder))),
 	)
@@ -122,13 +141,15 @@ func checkArgs() result.Kleisli[SearchAndReplaceArgs, SearchAndReplaceArgs] {
 // ignore_case is set.
 func patternSource() Reader[SearchAndReplaceArgs, string] {
 	searchLens := MakeSearchAndReplaceArgsSearchLens()
+	ignoreCaseLens := MakeSearchAndReplaceArgsIgnoreCaseLens()
+	useRegexLens := MakeSearchAndReplaceArgsUseRegexLens()
 
 	return F.Pipe1(
-		F.Flow2(MakeSearchAndReplaceArgsIgnoreCaseLens().Get, whenSet(S.Prepend("(?i)"))),
+		F.Flow2(ignoreCaseLens.Get, whenSet(S.Prepend("(?i)"))),
 		reader.Ap[string](P.Fold(
 			F.Flow2(searchLens.Get, regexp.QuoteMeta),
 			searchLens.Get,
-		)(MakeSearchAndReplaceArgsUseRegexLens().Get)),
+		)(useRegexLens.Get)),
 	)
 }
 
@@ -144,8 +165,10 @@ func compileSearch() result.Kleisli[SearchAndReplaceArgs, *regexp.Regexp] {
 // firstIndex is the index of the first line of the range; an open start is
 // the first line of the file.
 func firstIndex() Reader[SearchAndReplaceArgs, int] {
+	startLineLens := MakeSearchAndReplaceArgsStartLineLens()
+
 	return F.Flow4(
-		MakeSearchAndReplaceArgsStartLineLens().Get,
+		startLineLens.Get,
 		option.FromPredicate(N.MoreThan(0)),
 		option.GetOrElse(lazy.Of(1)),
 		N.Add(-1),
@@ -155,8 +178,10 @@ func firstIndex() Reader[SearchAndReplaceArgs, int] {
 // endIndex is the index after the last line of the range; an open end is the
 // end of the file.
 func endIndex() Reader[SearchAndReplaceArgs, int] {
+	endLineLens := MakeSearchAndReplaceArgsEndLineLens()
+
 	return F.Flow3(
-		MakeSearchAndReplaceArgsEndLineLens().Get,
+		endLineLens.Get,
 		option.FromPredicate(N.MoreThan(0)),
 		option.GetOrElse(lazy.Of(math.MaxInt)),
 	)
@@ -164,20 +189,26 @@ func endIndex() Reader[SearchAndReplaceArgs, int] {
 
 // joinLineRange joins the lines low to high (exclusive) of a text split after its
 // line breaks. Indices beyond the end of the text select no lines.
-func joinLineRange(low, high int) Reader[[]string, string] {
-	return F.Flow2(A.Slice[string](low, high), S.Join(""))
+func joinLineRange() Reader[int, Reader[int, Reader[[]string, string]]] {
+	return F.Flow2(
+		F.Curry2(A.Slice[string]),
+		reader.Map[int](reader.Map[[]string](S.Join(""))),
+	)
 }
 
-// replaceLines applies f to the lines low to high (exclusive) of a text split
-// after its line breaks and keeps the lines before and after them.
+// replaceLines is a constructor that [F.Curry3] lifts: it applies f to the
+// lines low to high (exclusive) of a text split after its line breaks and
+// keeps the lines before and after them.
 func replaceLines(low, high int, f Endomorphism[string]) Reader[[]string, string] {
+	join := joinLineRange()
+
 	rest := F.Pipe1(
-		F.Flow3(joinLineRange(low, high), f, S.Prepend),
-		reader.Ap[string](joinLineRange(high, math.MaxInt)),
+		F.Flow3(join(low)(high), f, S.Prepend),
+		reader.Ap[string](join(high)(math.MaxInt)),
 	)
 
 	return F.Pipe1(
-		F.Flow2(joinLineRange(0, low), S.Prepend),
+		F.Flow2(join(0)(low), S.Prepend),
 		reader.Ap[string](rest),
 	)
 }
@@ -202,20 +233,55 @@ func expandingReplace(a SearchAndReplaceArgs) Endomorphism[string] {
 
 // replaceAll replaces every match of the pattern of a call in a text.
 func replaceAll() Reader[SearchAndReplaceArgs, Endomorphism[string]] {
-	return P.Fold(literalReplace, expandingReplace)(MakeSearchAndReplaceArgsUseRegexLens().Get)
+	useRegexLens := MakeSearchAndReplaceArgsUseRegexLens()
+
+	return P.Fold(literalReplace, expandingReplace)(useRegexLens.Get)
 }
 
-// matchCount is a leaf: it counts the matches of the pattern within the line
-// range of the content, reading three fields of the call.
-func matchCount(a SearchAndReplaceArgs) int {
-	region := joinLineRange(firstIndex()(a), endIndex()(a))(splitAfterLines()(a.Content))
-	return len(a.Pattern.FindAllStringIndex(region, -1))
+// contentSplit is the content of a call split after its line breaks.
+func contentSplit() Reader[SearchAndReplaceArgs, []string] {
+	contentLens := MakeSearchAndReplaceArgsContentLens()
+
+	return F.Flow2(contentLens.Get, splitAfterLines())
 }
 
-// editedContent is a leaf: it replaces the matches within the line range of
-// the content, reading four fields of the call.
-func editedContent(a SearchAndReplaceArgs) string {
-	return replaceLines(firstIndex()(a), endIndex()(a), replaceAll()(a))(splitAfterLines()(a.Content))
+// rangeRegion is the text of the lines within the line range of a call.
+func rangeRegion() Reader[SearchAndReplaceArgs, string] {
+	return F.Pipe2(
+		F.Flow2(firstIndex(), joinLineRange()),
+		reader.Ap[Reader[[]string, string]](endIndex()),
+		reader.Ap[string](contentSplit()),
+	)
+}
+
+// countMatches counts the matches of a regular expression in a text.
+func countMatches() Reader[*regexp.Regexp, Reader[string, int]] {
+	return F.Flow2(
+		F.Curry2(F.Bind3of3((*regexp.Regexp).FindAllStringIndex)(-1)),
+		reader.Map[string](A.Size[[]int]),
+	)
+}
+
+// matchCount counts the matches of the pattern of a call within its line
+// range of the content.
+func matchCount() Reader[SearchAndReplaceArgs, int] {
+	patternLens := MakeSearchAndReplaceArgsPatternLens()
+
+	return F.Pipe1(
+		F.Flow2(patternLens.Get, countMatches()),
+		reader.Ap[int](rangeRegion()),
+	)
+}
+
+// editedContent replaces the matches of a call within its line range of the
+// content.
+func editedContent() Reader[SearchAndReplaceArgs, string] {
+	return F.Pipe3(
+		F.Flow2(firstIndex(), F.Curry3(replaceLines)),
+		reader.Ap[func(Endomorphism[string]) Reader[[]string, string]](endIndex()),
+		reader.Ap[Reader[[]string, string]](replaceAll()),
+		reader.Ap[string](contentSplit()),
+	)
 }
 
 // noMatchError is a leaf: one formatter over several fields.
@@ -227,26 +293,30 @@ func noMatchError(a SearchAndReplaceArgs) error {
 // them in the content.
 func edit() result.Kleisli[SearchAndReplaceArgs, SearchAndReplaceArgs] {
 	countLens := MakeSearchAndReplaceArgsCountLens()
+	contentLens := MakeSearchAndReplaceArgsContentLens()
 
 	return F.Flow3(
-		F.Flow2(result.Of[SearchAndReplaceArgs], result.Let(countLens.Set, matchCount)),
+		F.Flow2(result.Of[SearchAndReplaceArgs], result.Let(countLens.Set, matchCount())),
 		result.Chain(result.FromPredicate(F.Flow2(countLens.Get, N.MoreThan(0)), noMatchError)),
-		result.Map(F.Pipe1(editedContent, reader.Chain(MakeSearchAndReplaceArgsContentLens().Set))),
+		result.Map(F.Pipe1(editedContent(), reader.Chain(contentLens.Set))),
 	)
 }
 
 // editedText is the content of a call with the line endings of the file.
 func editedText() Reader[SearchAndReplaceArgs, string] {
 	contentLens := MakeSearchAndReplaceArgsContentLens()
+	crlfLens := MakeSearchAndReplaceArgsCRLFLens()
 
-	return P.Fold(contentLens.Get, F.Flow2(contentLens.Get, toCRLF))(MakeSearchAndReplaceArgsCRLFLens().Get)
+	return withLineEndings(contentLens, crlfLens)
 }
 
 // writeEditedWith applies a file writer to the path and the edited content of
 // a call.
-func writeEditedWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reader[SearchAndReplaceArgs, ioresult.IOResult[[]byte]] {
-	return F.Pipe1(
-		F.Flow2(MakeSearchAndReplaceArgsPathLens().Get, write),
+func writeEditedWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Reader[SearchAndReplaceArgs, ioresult.IOResult[[]byte]]] {
+	pathLens := MakeSearchAndReplaceArgsPathLens()
+
+	return F.Flow2(
+		reader.Local[ioresult.Kleisli[[]byte, []byte]](pathLens.Get),
 		reader.Ap[ioresult.IOResult[[]byte]](F.Flow2(editedText(), S.ToBytes)),
 	)
 }
@@ -255,7 +325,7 @@ func writeEditedWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reader
 // through the [FileWriteDeps] of the call.
 func writeEdited() effect.Kleisli[SearchAndReplaceDeps, SearchAndReplaceArgs, []byte] {
 	return F.Flow2(
-		F.Flip(F.Flow2(SearchAndReplaceDeps.GetWriteFile, writeEditedWith)),
+		F.Flip(F.Flow2(SearchAndReplaceDeps.GetWriteFile, writeEditedWith())),
 		reader.Map[SearchAndReplaceDeps](thunk.FromIOResult[[]byte]),
 	)
 }
@@ -280,19 +350,21 @@ func SearchAndReplace() effect.Kleisli[SearchAndReplaceDeps, string, string] {
 	pathLens := MakeSearchAndReplaceArgsPathLens()
 	nameLens := MakeSearchAndReplaceArgsNameLens()
 	contentLens := MakeSearchAndReplaceArgsContentLens()
+	patternLens := MakeSearchAndReplaceArgsPatternLens()
+	crlfLens := MakeSearchAndReplaceArgsCRLFLens()
 
 	return F.Flow8(
 		F.Flow5(
 			S.ToBytes,
 			J.Unmarshal[SearchAndReplaceArgs],
 			result.Chain(checkArgs()),
-			result.Bind(MakeSearchAndReplaceArgsPatternLens().Set, compileSearch()),
+			result.Bind(patternLens.Set, compileSearch()),
 			effect.FromResult[SearchAndReplaceDeps, SearchAndReplaceArgs],
 		),
 		effect.Bind(pathLens.Set, F.Flow2(pathLens.Get, resolveIn[SearchAndReplaceDeps]())),
 		effect.Bind(nameLens.Set, F.Flow2(pathLens.Get, relativeIn[SearchAndReplaceDeps]())),
 		effect.Bind(contentLens.Set, F.Flow3(pathLens.Get, readBytes[SearchAndReplaceDeps], effect.Map[SearchAndReplaceDeps](B.ToString))),
-		effect.Let[SearchAndReplaceDeps](MakeSearchAndReplaceArgsCRLFLens().Set, F.Flow2(contentLens.Get, hasCRLF())),
+		effect.Let[SearchAndReplaceDeps](crlfLens.Set, F.Flow2(contentLens.Get, hasCRLF())),
 		effect.ChainResultK[SearchAndReplaceDeps](F.Flow2(contentLens.Modify(toLF), edit())),
 		effect.ChainFirst(writeEdited()),
 		effect.Map[SearchAndReplaceDeps](replacedText),
@@ -300,6 +372,8 @@ func SearchAndReplace() effect.Kleisli[SearchAndReplaceDeps, string, string] {
 }
 
 // searchAndReplaceDefinition describes search_and_replace to the model.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func searchAndReplaceDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        SearchAndReplaceName,

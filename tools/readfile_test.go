@@ -73,8 +73,8 @@ func TestCutRange(t *testing.T) {
 }
 
 func TestNumberLines(t *testing.T) {
-	assert.Equal(t, "1 | a\n2 | b\n3 |", numberLines(1)([]string{"a", "b", ""}))
-	assert.Equal(t, "10 | x", numberLines(10)([]string{"x"}))
+	assert.Equal(t, "1 | a\n2 | b\n3 |", numberLines()(1)([]string{"a", "b", ""}))
+	assert.Equal(t, "10 | x", numberLines()(10)([]string{"x"}))
 }
 
 func TestSplitLines_DropsCarriageReturns(t *testing.T) {

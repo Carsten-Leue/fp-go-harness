@@ -28,6 +28,8 @@ type (
 
 var keyRequestOptions = requestOptions{}
 
+// AsChatCompletionDeps is wiring: it narrows any wider dependencies to
+// [ChatCompletionDeps], for use with [reader.Local] and [effect.Local].
 func AsChatCompletionDeps[R ChatCompletionDeps](r R) ChatCompletionDeps {
 	return r
 }
@@ -51,6 +53,8 @@ func (c *chatCompletionDeps) GetRequestOptions() Thunk[[]opt.RequestOption] {
 	return thunk.FromLazy(A.Empty[opt.RequestOption])
 }
 
+// MakeChatCompletionDeps is wiring: it combines an OpenAI client into
+// [ChatCompletionDeps].
 func MakeChatCompletionDeps(client *openai.Client) ChatCompletionDeps {
 	return &chatCompletionDeps{client}
 }

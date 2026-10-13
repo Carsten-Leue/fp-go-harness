@@ -28,11 +28,13 @@ func (d *workspaceDeps) GetWorkspaceRoot() string {
 	return d.root
 }
 
-// MakeWorkspaceDeps builds [WorkspaceDeps] for the absolute directory root.
+// MakeWorkspaceDeps is wiring: it builds [WorkspaceDeps] for the absolute directory root.
 func MakeWorkspaceDeps(root string) WorkspaceDeps {
 	return &workspaceDeps{filepath.Clean(root)}
 }
 
+// AsWorkspaceDeps is wiring: it narrows any wider dependencies to
+// [WorkspaceDeps], for use with [reader.Local] and [effect.Local].
 func AsWorkspaceDeps[R WorkspaceDeps](r R) WorkspaceDeps {
 	return r
 }

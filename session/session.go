@@ -45,6 +45,8 @@ type sessionDeps struct {
 	LoopDeps
 }
 
+// MakeSessionDeps is wiring: it combines the chat completions, the tools and
+// the loop limit into [SessionDeps].
 func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps) SessionDeps {
 	return &sessionDeps{c, t, l}
 }
@@ -53,6 +55,7 @@ type FinalResult = Pair[Session, *openai.ChatCompletion]
 
 type NextStep = Trampoline[Session, FinalResult]
 
+// MakeSession is a leaf: the constructor of a [Session] that starts from req.
 func MakeSession(req openai.ChatCompletionNewParams) Session {
 	return Session{current: req}
 }

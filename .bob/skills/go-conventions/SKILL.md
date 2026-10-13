@@ -1,15 +1,15 @@
 ---
 name: go-conventions
-description: Use this skill whenever writing, generating, changing, reviewing or testing Go code in this repository. It holds the project's Go conventions with examples - the four mandatory rules (fp-go best practices, monadic over imperative, point-free, the fp-go MCP server as source of truth), pure functions and dependency injection, value semantics, Go doc comment style, HTTP header and MIME constants, lens generation with go generate, testing Result / Validation / Effect values, and the anti-patterns to avoid. Load it before the first line of Go, always together with the fp-go skill.
+description: Use this skill whenever writing, generating, changing, reviewing or testing Go code in this repository. It holds the project's Go conventions with examples - the five mandatory rules (fp-go best practices, monadic over imperative, point-free, the fp-go MCP server as source of truth, every function nullary), pure functions and dependency injection, value semantics, Go doc comment style, HTTP header and MIME constants, lens generation with go generate, testing Result / Validation / Effect values, and the anti-patterns to avoid. Load it before the first line of Go, always together with the fp-go skill.
 ---
 # Go conventions for this repository
 
 The short rules are in [`AGENTS.md`](../../../AGENTS.md). This skill has the
 reasoning and the examples for the repository's conventions. Load it **together with the
-[`fp-go`](../fp-go/SKILL.md) skill** for every Go change: that skill holds the four
+[`fp-go`](../fp-go/SKILL.md) skill** for every Go change: that skill holds the five
 mandatory rules and the workflow with the fp-go MCP server.
 
-## The four rules for every code change
+## The five rules for every code change
 
 Every Go change, whether you write it, generate it or review it, must:
 
@@ -26,6 +26,10 @@ Every Go change, whether you write it, generate it or review it, must:
 4. **Use the fp-go MCP server as the primary source of truth**: `use_skill`,
    `get_example` and `search_examples` before writing or judging an fp-go call; `go doc`
    on the pinned module as the fallback; never memory.
+5. **Implement every function as a nullary function**: `func f() Reader[A, B]`, not
+   `func f(a A) B`. Parameters move into the returned `Reader` / `Kleisli` and inner steps
+   are hoisted into named nullary functions; only leaves, wiring and tests take parameters
+   ([`fp-go`, Rule 5](../fp-go/SKILL.md#rule-5--nullary-functions-with-the-inner-functions-hoisted)).
 
 The details, the replacement table for imperative shapes, the accepted exceptions and the
 examples are in [`fp-go`](../fp-go/SKILL.md#rule-3--monadic-over-imperative-wherever-possible).

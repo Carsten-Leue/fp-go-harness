@@ -54,10 +54,14 @@ type executeCommandDeps struct {
 	ProcessDeps
 }
 
+// MakeExecuteCommandDeps is wiring: it combines a workspace and the processes
+// into [ExecuteCommandDeps].
 func MakeExecuteCommandDeps(ws WorkspaceDeps, p ProcessDeps) ExecuteCommandDeps {
 	return &executeCommandDeps{ws, p}
 }
 
+// AsExecuteCommandDeps is wiring: it narrows any wider dependencies to
+// [ExecuteCommandDeps], for use with [reader.Local] and [effect.Local].
 func AsExecuteCommandDeps[T ExecuteCommandDeps](r T) ExecuteCommandDeps {
 	return r
 }
@@ -185,13 +189,22 @@ func isSuccess(o ProcessOutput) bool {
 	return o.ExitCode == 0
 }
 
-// section renders an output stream under its label, without its trailing
-// line breaks. An empty stream has no section.
-func section(label string) func(string) Option[string] {
-	return F.Flow3(
+// trimmedStream is an output stream without its trailing line breaks, none
+// when that leaves it empty.
+func trimmedStream() Reader[string, Option[string]] {
+	return F.Flow2(
 		F.Bind2nd(strings.TrimRight, "\r\n"),
 		option.FromPredicate(S.IsNonEmpty),
-		option.Map(S.Prepend(label)),
+	)
+}
+
+// section renders an output stream under its label, without its trailing
+// line breaks. An empty stream has no section.
+func section() Reader[string, func(string) Option[string]] {
+	return F.Flow3(
+		S.Prepend,
+		option.Map[string, string],
+		reader.Local[Option[string]](trimmedStream()),
 	)
 }
 
@@ -214,7 +227,7 @@ func stdoutSection() Reader[ProcessOutput, Option[string]] {
 	label := P.Fold(F.Constant1[ProcessOutput]("Stdout:\n"), F.Constant1[ProcessOutput](""))(isSuccess)
 
 	return F.Pipe1(
-		F.Flow2(label, section),
+		F.Flow2(label, section()),
 		reader.Ap[Option[string]](stdoutLens.Get),
 	)
 }
@@ -223,7 +236,7 @@ func stdoutSection() Reader[ProcessOutput, Option[string]] {
 func stderrSection() Reader[ProcessOutput, Option[string]] {
 	stderrLens := MakeProcessOutputStderrLens()
 
-	return F.Flow2(stderrLens.Get, section("Stderr:\n"))
+	return F.Flow2(stderrLens.Get, section()("Stderr:\n"))
 }
 
 // outputText renders the exit code, if it is not 0, standard output and
@@ -310,6 +323,8 @@ func ExecuteCommand() effect.Kleisli[ExecuteCommandDeps, string, string] {
 
 // executeCommandDefinition describes execute_command to the model, following
 // the recorded definition.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func executeCommandDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        ExecuteCommandName,

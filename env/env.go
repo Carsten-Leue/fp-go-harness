@@ -30,6 +30,8 @@ type environmentDeps struct {
 	lookup ReaderIOResult[string, string]
 }
 
+// AsEnvironmentDeps is wiring: it narrows any wider dependencies to
+// [EnvironmentDeps], for use with [reader.Local] and [effect.Local].
 func AsEnvironmentDeps[R EnvironmentDeps](r R) EnvironmentDeps {
 	return r
 }
@@ -38,6 +40,7 @@ func (d *environmentDeps) GetLookupEnv() ReaderIOResult[string, string] {
 	return d.lookup
 }
 
+// newEnvironmentDeps is wiring: it combines a lookup into [EnvironmentDeps].
 func newEnvironmentDeps(lookup ReaderIOResult[string, string]) EnvironmentDeps {
 	return &environmentDeps{lookup}
 }
@@ -47,9 +50,10 @@ func notSetError(key string) func() error {
 	return ER.OnNone("environment variable %q is not set", key)
 }
 
-// makeLookup looks a key up in the process environment first and in vars
-// second, the precedence of [godotenv.Load], which never overrides a variable
-// that is already set.
+// makeLookup is wiring: it builds the lookup of [EnvironmentDeps], which looks
+// a key up in the process environment first and in vars second, the
+// precedence of [godotenv.Load], which never overrides a variable that is
+// already set.
 func makeLookup(vars Vars) ReaderIOResult[string, string] {
 	lookupVars := F.Flow2(
 		F.Bind1st(R.MonadLookup[string, string], vars),
@@ -84,6 +88,7 @@ func readDotEnvFile(path string) (Vars, error) {
 	return godotenv.Read(path)
 }
 
+// isNotExist is a leaf: the predicate of a missing file.
 func isNotExist(err error) bool {
 	return errors.Is(err, fs.ErrNotExist)
 }
@@ -126,12 +131,19 @@ func MakeDotEnvEnvironmentDeps() ioresult.Kleisli[[]string, EnvironmentDeps] {
 	)
 }
 
-func LookupEnvThunk(key string) Effect[EnvironmentDeps, string] {
-	return F.Pipe1(
-		effect.Asks(EnvironmentDeps.GetLookupEnv),
-		effect.ChainThunkK[EnvironmentDeps](F.Flow2(
-			reader.Read[IOResult[string]](key),
-			thunk.FromIOResult,
-		)),
+// lookupThunk runs a lookup for a key, lifted into a thunk.
+func lookupThunk() reader.Reader[string, thunk.Kleisli[ReaderIOResult[string, string], string]] {
+	return F.Flow2(
+		reader.Read[IOResult[string], string],
+		reader.Map[ReaderIOResult[string, string]](thunk.FromIOResult[string]),
+	)
+}
+
+// LookupEnvThunk looks the variable key up through the [EnvironmentDeps].
+func LookupEnvThunk() effect.Kleisli[EnvironmentDeps, string, string] {
+	return F.Flow3(
+		lookupThunk(),
+		effect.ChainThunkK[EnvironmentDeps, ReaderIOResult[string, string], string],
+		reader.Read[Effect[EnvironmentDeps, string]](effect.Asks(EnvironmentDeps.GetLookupEnv)),
 	)
 }

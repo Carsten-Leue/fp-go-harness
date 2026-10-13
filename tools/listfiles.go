@@ -105,6 +105,8 @@ func ListFiles() effect.Kleisli[DirectoryDeps, string, string] {
 
 // listFilesDefinition describes list_files to the model, following the
 // recorded definition.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func listFilesDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        ListFilesName,

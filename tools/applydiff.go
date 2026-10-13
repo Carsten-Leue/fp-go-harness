@@ -19,7 +19,6 @@ import (
 	"github.com/IBM/fp-go/v2/lazy"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/ord"
-	P "github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
@@ -43,10 +42,14 @@ type applyDiffDeps struct {
 	FileWriteDeps
 }
 
+// MakeApplyDiffDeps is wiring: it combines a workspace, read access and write
+// access to the file system into [ApplyDiffDeps].
 func MakeApplyDiffDeps(w WorkspaceDeps, r FileDeps, f FileWriteDeps) ApplyDiffDeps {
 	return &applyDiffDeps{w, r, f}
 }
 
+// AsApplyDiffDeps is wiring: it narrows any wider dependencies to
+// [ApplyDiffDeps], for use with [reader.Local] and [effect.Local].
 func AsApplyDiffDeps[R ApplyDiffDeps](r R) ApplyDiffDeps {
 	return r
 }
@@ -90,6 +93,9 @@ func parseStartLine() result.Kleisli[string, int] {
 
 // andThenSet takes the builder of a [DiffBlock] built so far and the value of
 // one more field, and chains the setter of that field after the builder.
+//
+// It is a generic combinator over the setter and keeps its parameter: Go
+// can't infer T through a nullary call.
 func andThenSet[T any](set func(T) Endomorphism[DiffBlock]) func(Endomorphism[DiffBlock]) func(T) Endomorphism[DiffBlock] {
 	return F.Flip(F.Flow2(set, endomorphism.Chain[DiffBlock]))
 }
@@ -121,12 +127,14 @@ func blockOf(m []string) Result[DiffBlock] {
 // parseBlocks parses the SEARCH/REPLACE blocks of a diff. It fails for a diff
 // without blocks and for a block with an empty search.
 func parseBlocks() result.Kleisli[string, []DiffBlock] {
+	searchLens := MakeDiffBlockSearchLens()
+
 	return F.Flow4(
 		toLF,
 		F.Bind2nd(diffBlockRegex.FindAllStringSubmatch, -1),
 		result.TraverseArray(F.Flow2(
 			blockOf,
-			result.Filter(F.Flow2(MakeDiffBlockSearchLens().Get, S.IsNonEmpty), errEmptyBlock),
+			result.Filter(F.Flow2(searchLens.Get, S.IsNonEmpty), errEmptyBlock),
 		)),
 		result.Filter(A.IsNonEmpty[DiffBlock], errNoBlocks),
 	)
@@ -139,23 +147,36 @@ func lineDistance(start int, content string, loc []int) int {
 	return max(line-start, start-line)
 }
 
-// matchesOf finds the locations of every occurrence of a literal text.
-func matchesOf(search string) Reader[string, [][]int] {
-	return F.Bind2nd(regexp.MustCompile(regexp.QuoteMeta(search)).FindAllStringIndex, -1)
+// matchesOf finds the locations of every occurrence of a literal text in a
+// content.
+func matchesOf() Reader[string, Reader[string, [][]int]] {
+	return F.Flow3(
+		regexp.QuoteMeta,
+		regexp.MustCompile,
+		F.Curry2(F.Bind3of3((*regexp.Regexp).FindAllStringIndex)(-1)),
+	)
+}
+
+// byDistanceFrom sorts the locations of matches in a content by the distance
+// of their lines from a start line; the sort is stable.
+func byDistanceFrom() Reader[int, Reader[string, Endomorphism[[][]int]]] {
+	byDistance := F.Curry2(A.SortByKey[int, []int])(ord.FromStrictCompare[int]())
+
+	return F.Flow2(F.Curry3(lineDistance), reader.Map[string](byDistance))
 }
 
 // nearestMatch is the location of the occurrence of the search of a block
 // that begins nearest its start line; without a start line it is the first
 // occurrence. Of two occurrences equally near, the first wins.
-func nearestMatch(b DiffBlock) Reader[string, Option[[]int]] {
-	byDistance := F.Curry2(A.SortByKey[int, []int])(ord.FromStrictCompare[int]())
+func nearestMatch() Reader[DiffBlock, Reader[string, Option[[]int]]] {
+	startLineLens := MakeDiffBlockStartLineLens()
+	searchLens := MakeDiffBlockSearchLens()
 
-	return F.Flow2(
-		F.Pipe1(
-			F.Flow2(F.Curry3(lineDistance)(b.StartLine), byDistance),
-			reader.Ap[[][]int](matchesOf(b.Search)),
-		),
-		A.Head[[]int],
+	return F.Pipe3(
+		F.Flow2(startLineLens.Get, byDistanceFrom()),
+		reader.Map[DiffBlock](F.Flip(reader.Ap[[][]int, string, [][]int])),
+		reader.Ap[Reader[string, [][]int]](F.Flow2(searchLens.Get, matchesOf())),
+		reader.Map[DiffBlock](reader.Map[string](A.Head[[]int])),
 	)
 }
 
@@ -164,17 +185,20 @@ func splice(replace, content string, loc []int) string {
 	return content[:loc[0]] + replace + content[loc[1]:]
 }
 
-// noMatch is the error of the block with index i that matches nothing.
+// noMatch is a leaf: the error of the block with index i that matches
+// nothing.
 func noMatch(i int) func() error {
 	return ER.OnNone("block %d of the diff does not match: its SEARCH section was not found. Read the file again: the search must match its current content exactly, including whitespace and indentation", i+1)
 }
 
-// applyBlock replaces the occurrence of the search of the block with index i
-// nearest its start line and fails when there is none.
+// applyBlock is a leaf: it replaces the occurrence of the search of the block
+// with index i nearest its start line and fails when there is none. It reads
+// the block twice and the index once, inside a reader over the content; the
+// nullary form would need a lifted applicative per read.
 func applyBlock(i int, b DiffBlock) result.Kleisli[string, string] {
 	return F.Pipe1(
 		F.Flow2(F.Curry3(splice)(b.Replace), result.Map[[]int, string]),
-		reader.Ap[Result[string]](F.Flow2(nearestMatch(b), result.FromOption[[]int](noMatch(i)))),
+		reader.Ap[Result[string]](F.Flow2(nearestMatch()(b), result.FromOption[[]int](noMatch(i)))),
 	)
 }
 
@@ -192,24 +216,30 @@ func applyBlocks() func([]DiffBlock) result.Kleisli[string, string] {
 
 // patchedContent applies the blocks of a call to its content.
 func patchedContent() result.Kleisli[ApplyDiffArgs, string] {
+	blocksLens := MakeApplyDiffArgsBlocksLens()
+	contentLens := MakeApplyDiffArgsContentLens()
+
 	return F.Pipe1(
-		F.Flow2(MakeApplyDiffArgsBlocksLens().Get, applyBlocks()),
-		reader.Ap[Result[string]](MakeApplyDiffArgsContentLens().Get),
+		F.Flow2(blocksLens.Get, applyBlocks()),
+		reader.Ap[Result[string]](contentLens.Get),
 	)
 }
 
 // patchedText is the content of a call with the line endings of the file.
 func patchedText() Reader[ApplyDiffArgs, string] {
 	contentLens := MakeApplyDiffArgsContentLens()
+	crlfLens := MakeApplyDiffArgsCRLFLens()
 
-	return P.Fold(contentLens.Get, F.Flow2(contentLens.Get, toCRLF))(MakeApplyDiffArgsCRLFLens().Get)
+	return withLineEndings(contentLens, crlfLens)
 }
 
 // writePatchedWith applies a file writer to the path and the patched content
 // of a call.
-func writePatchedWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reader[ApplyDiffArgs, ioresult.IOResult[[]byte]] {
-	return F.Pipe1(
-		F.Flow2(MakeApplyDiffArgsPathLens().Get, write),
+func writePatchedWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Reader[ApplyDiffArgs, ioresult.IOResult[[]byte]]] {
+	pathLens := MakeApplyDiffArgsPathLens()
+
+	return F.Flow2(
+		reader.Local[ioresult.Kleisli[[]byte, []byte]](pathLens.Get),
 		reader.Ap[ioresult.IOResult[[]byte]](F.Flow2(patchedText(), S.ToBytes)),
 	)
 }
@@ -218,7 +248,7 @@ func writePatchedWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reade
 // through the [FileWriteDeps] of the call.
 func writePatched() effect.Kleisli[ApplyDiffDeps, ApplyDiffArgs, []byte] {
 	return F.Flow2(
-		F.Flip(F.Flow2(ApplyDiffDeps.GetWriteFile, writePatchedWith)),
+		F.Flip(F.Flow2(ApplyDiffDeps.GetWriteFile, writePatchedWith())),
 		reader.Map[ApplyDiffDeps](thunk.FromIOResult[[]byte]),
 	)
 }
@@ -270,6 +300,8 @@ func ApplyDiff() effect.Kleisli[ApplyDiffDeps, string, string] {
 }
 
 // applyDiffDefinition describes apply_diff to the model.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func applyDiffDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        ApplyDiffName,

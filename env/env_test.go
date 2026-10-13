@@ -95,8 +95,8 @@ func TestLookupEnvThunk(t *testing.T) {
 	t.Setenv(set, "v")
 	deps := MakeEnvironmentDeps()
 
-	assert.Equal(t, result.Of("v"), LookupEnvThunk(set)(deps)(t.Context())())
+	assert.Equal(t, result.Of("v"), LookupEnvThunk()(set)(deps)(t.Context())())
 
-	_, err := result.Unwrap(LookupEnvThunk(unset)(deps)(t.Context())())
+	_, err := result.Unwrap(LookupEnvThunk()(unset)(deps)(t.Context())())
 	assert.EqualError(t, err, `environment variable "`+unset+`" is not set`)
 }

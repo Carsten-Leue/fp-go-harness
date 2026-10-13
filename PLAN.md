@@ -141,7 +141,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
   Each block replaces one literal occurrence: the one nearest its optional `:start_line:`, else the first.
   The file is edited with LF line endings and keeps CRLF if it has them. The definition and the result text
   were written without comparing them to the recordings. Registered in the CLI without approval until I1.
-- [ ] **C10 `insert_content`.** Insert lines at a given line, or append when the line is 0.
+- [x] **C10 `insert_content`.** Insert lines at a given line, or append when the line is 0.
+  The content always ends with a line break, and a file without a final line break gets one, so the
+  inserted lines never join a neighbour. A line beyond the end of the file appends. The file is edited
+  with LF line endings and keeps CRLF if it has them. The result text was written without comparing it
+  to the recordings. Registered in the CLI without approval until I1.
 - [ ] **C11 Output limits.** Add a monoid-free wrapper `tools.Truncate(n)` that shortens oversized tool output (the recordings
   contain 37 KB results) and adds a note that the output was truncated. Apply it to every tool as a
   `ToolCall` → `ToolCall` endomorphism.
