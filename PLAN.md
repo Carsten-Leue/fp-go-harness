@@ -130,8 +130,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
   Content with fewer lines than `line_count` fails as truncated; more lines pass, because models miscount the last line.
   The definition and the result text were written without comparing them to the recordings. Registered in the CLI
   without approval until I1.
-- [ ] **C8 `search_and_replace`.** Replace literal text or a regex, optionally within a line range. Implement it as a pure
+- [x] **C8 `search_and_replace`.** Replace literal text or a regex, optionally within a line range. Implement it as a pure
   `Endomorphism[string]` with I/O only around it.
+  A search without a match fails, so the model learns that its search text is stale. The file is edited with LF line
+  endings and keeps CRLF if it has them, so multi-line searches match what `read_file` shows. The definition and the
+  result text were written without comparing them to the recordings. Registered in the CLI without approval until I1.
 - [ ] **C9 `apply_diff`.** Parse `SEARCH`/`REPLACE` blocks. Applying them is a pure `func(string) Result[string]`
   (fold over the blocks, fail on the first block that doesn't match).
 - [ ] **C10 `insert_content`.** Insert lines at a given line, or append when the line is 0.
