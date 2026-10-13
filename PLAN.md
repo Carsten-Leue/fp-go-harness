@@ -98,7 +98,8 @@ These come before the real tools so that every later step can be tested against 
 - [x] **B3 Task grouping.** Group the records by `taskId` into `[]Turn` (request, response, invoked tools).
 - [x] **B4 Replay `ChatCompletionDeps`.** Make a fake that answers with the recorded responses in order.
   Then `session.Run` replays a recorded task end to end without a network.
-- [ ] **B5 Copy the fixtures.** Copy 2–3 redacted tasks into `testdata/` (no tokens or internal URLs).
+- [ ] ~~**B5 Copy the fixtures.**~~ *Skipped:* the recordings in `H:\backup\bob-conversations` are not
+  available. Copy 2–3 redacted tasks into `testdata/` (no tokens or internal URLs).
   Remove secrets with an endomorphism over the parsed records.
 
 ### Phase C: Core tools (in order of recorded use)
@@ -135,8 +136,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
   A search without a match fails, so the model learns that its search text is stale. The file is edited with LF line
   endings and keeps CRLF if it has them, so multi-line searches match what `read_file` shows. The definition and the
   result text were written without comparing them to the recordings. Registered in the CLI without approval until I1.
-- [ ] **C9 `apply_diff`.** Parse `SEARCH`/`REPLACE` blocks. Applying them is a pure `func(string) Result[string]`
+- [x] **C9 `apply_diff`.** Parse `SEARCH`/`REPLACE` blocks. Applying them is a pure `func(string) Result[string]`
   (fold over the blocks, fail on the first block that doesn't match).
+  Each block replaces one literal occurrence: the one nearest its optional `:start_line:`, else the first.
+  The file is edited with LF line endings and keeps CRLF if it has them. The definition and the result text
+  were written without comparing them to the recordings. Registered in the CLI without approval until I1.
 - [ ] **C10 `insert_content`.** Insert lines at a given line, or append when the line is 0.
 - [ ] **C11 Output limits.** Add a monoid-free wrapper `tools.Truncate(n)` that shortens oversized tool output (the recordings
   contain 37 KB results) and adds a note that the output was truncated. Apply it to every tool as a
