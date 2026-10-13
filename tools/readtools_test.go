@@ -45,7 +45,7 @@ func TestMakeTools(t *testing.T) {
 	registry := MakeTools()(deps)
 
 	assert.ElementsMatch(t,
-		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, SearchAndReplaceName, ExecuteCommandName},
+		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, SearchAndReplaceName, ApplyDiffName, ExecuteCommandName},
 		R.Keys(registry))
 
 	caller := ToToolCaller()(registry)
@@ -62,6 +62,10 @@ func TestMakeTools(t *testing.T) {
 	// search_and_replace edits what write_file wrote
 	assert.Equal(t, "Replaced 1 occurrence(s) in x.txt.", run(SearchAndReplaceName, `{"path":"x.txt","search":"hello","replace":"bye"}`))
 	assert.Equal(t, "Contents of file x.txt:\n\n1 | bye\n2 |", run(ReadFileName, `{"path":"x.txt"}`))
+
+	// apply_diff edits what search_and_replace left
+	assert.Equal(t, "Applied 1 block(s) to x.txt.", run(ApplyDiffName, `{"path":"x.txt","diff":"<<<<<<< SEARCH\nbye\n=======\nhi\n>>>>>>> REPLACE"}`))
+	assert.Equal(t, "Contents of file x.txt:\n\n1 | hi\n2 |", run(ReadFileName, `{"path":"x.txt"}`))
 
 	assert.Equal(t, deps, AsToolsDeps(deps))
 }

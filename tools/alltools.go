@@ -8,8 +8,8 @@ import (
 )
 
 // ToolsDeps are the dependencies of every tool: those of the read-only tools,
-// write access to the file system for write_file and search_and_replace, and
-// the processes of execute_command.
+// write access to the file system for write_file, search_and_replace and
+// apply_diff, and the processes of execute_command.
 type ToolsDeps interface {
 	ReadToolsDeps
 	FileWriteDeps
@@ -44,7 +44,7 @@ func MakeDefaultToolsDeps(root, logDir string) IO[ToolsDeps] {
 }
 
 // MakeTools builds the registry of every tool: the read-only ones,
-// write_file, search_and_replace and execute_command. Each tool reads its own dependencies from
+// write_file, search_and_replace, apply_diff and execute_command. Each tool reads its own dependencies from
 // [ToolsDeps] through [reader.Local].
 func MakeTools() Reader[ToolsDeps, ToolRegistry] {
 	return F.Pipe2(
@@ -52,6 +52,7 @@ func MakeTools() Reader[ToolsDeps, ToolRegistry] {
 		A.Concat(A.From(
 			reader.Local[Tool](AsWriteFileDeps[ToolsDeps])(MakeWriteFileTool()),
 			reader.Local[Tool](AsSearchAndReplaceDeps[ToolsDeps])(MakeSearchAndReplaceTool()),
+			reader.Local[Tool](AsApplyDiffDeps[ToolsDeps])(MakeApplyDiffTool()),
 			reader.Local[Tool](AsExecuteCommandDeps[ToolsDeps])(MakeExecuteCommandTool()),
 		)),
 		toRegistry[ToolsDeps](),

@@ -14,6 +14,738 @@ import (
 	time "time"
 )
 
+// DiffBlockLenses provides [lenses] for accessing fields of [DiffBlock]
+//
+// [lenses]: __lens.Lens
+type DiffBlockLenses struct {
+	// StartLine is a [__lens.Lens] for the StartLine field of [DiffBlock]
+	StartLine __lens.Lens[DiffBlock, int]
+	// Search is a [__lens.Lens] for the Search field of [DiffBlock]
+	Search __lens.Lens[DiffBlock, string]
+	// Replace is a [__lens.Lens] for the Replace field of [DiffBlock]
+	Replace __lens.Lens[DiffBlock, string]
+	// StartLineO is a [__lens_option.LensO] for the StartLine field of [DiffBlock], treating the zero value as absent
+	StartLineO __lens_option.LensO[DiffBlock, int]
+	// SearchO is a [__lens_option.LensO] for the Search field of [DiffBlock], treating the zero value as absent
+	SearchO __lens_option.LensO[DiffBlock, string]
+	// ReplaceO is a [__lens_option.LensO] for the Replace field of [DiffBlock], treating the zero value as absent
+	ReplaceO __lens_option.LensO[DiffBlock, string]
+}
+
+// DiffBlockRefLenses provides [lenses] for accessing fields of [DiffBlock] via a pointer to [DiffBlock]
+//
+// [lenses]: __lens.Lens
+type DiffBlockRefLenses struct {
+	// StartLine is a [__lens.Lens] for the StartLine field of [DiffBlock] via a pointer receiver
+	StartLine __lens.Lens[*DiffBlock, int]
+	// Search is a [__lens.Lens] for the Search field of [DiffBlock] via a pointer receiver
+	Search __lens.Lens[*DiffBlock, string]
+	// Replace is a [__lens.Lens] for the Replace field of [DiffBlock] via a pointer receiver
+	Replace __lens.Lens[*DiffBlock, string]
+	// StartLineO is a [__lens_option.LensO] for the StartLine field of [DiffBlock] via a pointer receiver, treating the zero value as absent
+	StartLineO __lens_option.LensO[*DiffBlock, int]
+	// SearchO is a [__lens_option.LensO] for the Search field of [DiffBlock] via a pointer receiver, treating the zero value as absent
+	SearchO __lens_option.LensO[*DiffBlock, string]
+	// ReplaceO is a [__lens_option.LensO] for the Replace field of [DiffBlock] via a pointer receiver, treating the zero value as absent
+	ReplaceO __lens_option.LensO[*DiffBlock, string]
+}
+
+// DiffBlockPrisms provides [prisms] for accessing fields of [DiffBlock]
+//
+// [prisms]: __prism.Prism
+type DiffBlockPrisms struct {
+	// StartLine is a [__prism.Prism] for the StartLine field of [DiffBlock]
+	StartLine __prism.Prism[DiffBlock, int]
+	// Search is a [__prism.Prism] for the Search field of [DiffBlock]
+	Search __prism.Prism[DiffBlock, string]
+	// Replace is a [__prism.Prism] for the Replace field of [DiffBlock]
+	Replace __prism.Prism[DiffBlock, string]
+}
+
+// DiffBlockRefPrisms provides [prisms] for accessing fields of [DiffBlock] via a pointer to [DiffBlock]
+//
+// [prisms]: __prism.Prism
+type DiffBlockRefPrisms struct {
+	// StartLine is a [__prism.Prism] for the StartLine field of [DiffBlock] via a pointer receiver
+	StartLine __prism.Prism[*DiffBlock, int]
+	// Search is a [__prism.Prism] for the Search field of [DiffBlock] via a pointer receiver
+	Search __prism.Prism[*DiffBlock, string]
+	// Replace is a [__prism.Prism] for the Replace field of [DiffBlock] via a pointer receiver
+	Replace __prism.Prism[*DiffBlock, string]
+}
+
+// MakeDiffBlockStartLineLens returns a [__lens.Lens] for the StartLine field of [DiffBlock]
+func MakeDiffBlockStartLineLens() __lens.Lens[DiffBlock, int] {
+	return __lens.MakeLensWithName(
+		func(s DiffBlock) int { return s.StartLine },
+		func(s DiffBlock, v int) DiffBlock { s.StartLine = v; return s },
+		"DiffBlock.StartLine",
+	)
+}
+
+// MakeDiffBlockStartLineLensO returns a [__lens_option.LensO] for the StartLine field of [DiffBlock]
+func MakeDiffBlockStartLineLensO() __lens_option.LensO[DiffBlock, int] {
+	return __lens_option.FromIso[DiffBlock](__iso_option.FromZero[int]())(MakeDiffBlockStartLineLens())
+}
+
+// MakeDiffBlockStartLineRefLens returns a [__lens.Lens] for the StartLine field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockStartLineRefLens() __lens.Lens[*DiffBlock, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *DiffBlock) int { return s.StartLine },
+		func(s *DiffBlock, v int) *DiffBlock { s.StartLine = v; return s },
+		"(*DiffBlock).StartLine",
+	)
+}
+
+// MakeDiffBlockStartLineRefLensO returns a [__lens_option.LensO] for the StartLine field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockStartLineRefLensO() __lens_option.LensO[*DiffBlock, int] {
+	return __lens_option.FromIso[*DiffBlock](__iso_option.FromZero[int]())(MakeDiffBlockStartLineRefLens())
+}
+
+// MakeDiffBlockStartLinePrism returns a [__prism.Prism] for the StartLine field of [DiffBlock]
+func MakeDiffBlockStartLinePrism() __prism.Prism[DiffBlock, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s DiffBlock) __option.Option[int] { return _fromNonZero(s.StartLine) },
+		func(v int) DiffBlock {
+			return DiffBlock{StartLine: v}
+		},
+		"DiffBlock.StartLine",
+	)
+}
+
+// MakeDiffBlockStartLineRefPrism returns a [__prism.Prism] for the StartLine field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockStartLineRefPrism() __prism.Prism[*DiffBlock, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *DiffBlock) __option.Option[int] { return _fromNonZero(s.StartLine) },
+		func(v int) *DiffBlock {
+			return &DiffBlock{StartLine: v}
+		},
+		"DiffBlock.StartLine",
+	)
+}
+
+// MakeDiffBlockSearchLens returns a [__lens.Lens] for the Search field of [DiffBlock]
+func MakeDiffBlockSearchLens() __lens.Lens[DiffBlock, string] {
+	return __lens.MakeLensWithName(
+		func(s DiffBlock) string { return s.Search },
+		func(s DiffBlock, v string) DiffBlock { s.Search = v; return s },
+		"DiffBlock.Search",
+	)
+}
+
+// MakeDiffBlockSearchLensO returns a [__lens_option.LensO] for the Search field of [DiffBlock]
+func MakeDiffBlockSearchLensO() __lens_option.LensO[DiffBlock, string] {
+	return __lens_option.FromIso[DiffBlock](__iso_option.FromZero[string]())(MakeDiffBlockSearchLens())
+}
+
+// MakeDiffBlockSearchRefLens returns a [__lens.Lens] for the Search field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockSearchRefLens() __lens.Lens[*DiffBlock, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *DiffBlock) string { return s.Search },
+		func(s *DiffBlock, v string) *DiffBlock { s.Search = v; return s },
+		"(*DiffBlock).Search",
+	)
+}
+
+// MakeDiffBlockSearchRefLensO returns a [__lens_option.LensO] for the Search field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockSearchRefLensO() __lens_option.LensO[*DiffBlock, string] {
+	return __lens_option.FromIso[*DiffBlock](__iso_option.FromZero[string]())(MakeDiffBlockSearchRefLens())
+}
+
+// MakeDiffBlockSearchPrism returns a [__prism.Prism] for the Search field of [DiffBlock]
+func MakeDiffBlockSearchPrism() __prism.Prism[DiffBlock, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s DiffBlock) __option.Option[string] { return _fromNonZero(s.Search) },
+		func(v string) DiffBlock {
+			return DiffBlock{Search: v}
+		},
+		"DiffBlock.Search",
+	)
+}
+
+// MakeDiffBlockSearchRefPrism returns a [__prism.Prism] for the Search field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockSearchRefPrism() __prism.Prism[*DiffBlock, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *DiffBlock) __option.Option[string] { return _fromNonZero(s.Search) },
+		func(v string) *DiffBlock {
+			return &DiffBlock{Search: v}
+		},
+		"DiffBlock.Search",
+	)
+}
+
+// MakeDiffBlockReplaceLens returns a [__lens.Lens] for the Replace field of [DiffBlock]
+func MakeDiffBlockReplaceLens() __lens.Lens[DiffBlock, string] {
+	return __lens.MakeLensWithName(
+		func(s DiffBlock) string { return s.Replace },
+		func(s DiffBlock, v string) DiffBlock { s.Replace = v; return s },
+		"DiffBlock.Replace",
+	)
+}
+
+// MakeDiffBlockReplaceLensO returns a [__lens_option.LensO] for the Replace field of [DiffBlock]
+func MakeDiffBlockReplaceLensO() __lens_option.LensO[DiffBlock, string] {
+	return __lens_option.FromIso[DiffBlock](__iso_option.FromZero[string]())(MakeDiffBlockReplaceLens())
+}
+
+// MakeDiffBlockReplaceRefLens returns a [__lens.Lens] for the Replace field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockReplaceRefLens() __lens.Lens[*DiffBlock, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *DiffBlock) string { return s.Replace },
+		func(s *DiffBlock, v string) *DiffBlock { s.Replace = v; return s },
+		"(*DiffBlock).Replace",
+	)
+}
+
+// MakeDiffBlockReplaceRefLensO returns a [__lens_option.LensO] for the Replace field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockReplaceRefLensO() __lens_option.LensO[*DiffBlock, string] {
+	return __lens_option.FromIso[*DiffBlock](__iso_option.FromZero[string]())(MakeDiffBlockReplaceRefLens())
+}
+
+// MakeDiffBlockReplacePrism returns a [__prism.Prism] for the Replace field of [DiffBlock]
+func MakeDiffBlockReplacePrism() __prism.Prism[DiffBlock, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s DiffBlock) __option.Option[string] { return _fromNonZero(s.Replace) },
+		func(v string) DiffBlock {
+			return DiffBlock{Replace: v}
+		},
+		"DiffBlock.Replace",
+	)
+}
+
+// MakeDiffBlockReplaceRefPrism returns a [__prism.Prism] for the Replace field of [DiffBlock] via a pointer receiver
+func MakeDiffBlockReplaceRefPrism() __prism.Prism[*DiffBlock, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *DiffBlock) __option.Option[string] { return _fromNonZero(s.Replace) },
+		func(v string) *DiffBlock {
+			return &DiffBlock{Replace: v}
+		},
+		"DiffBlock.Replace",
+	)
+}
+
+// MakeDiffBlockLenses creates a new [DiffBlockLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeDiffBlockLenses() DiffBlockLenses {
+	return DiffBlockLenses{
+		// mandatory lenses
+		StartLine: MakeDiffBlockStartLineLens(),
+		Search:    MakeDiffBlockSearchLens(),
+		Replace:   MakeDiffBlockReplaceLens(),
+		// optional lenses
+		StartLineO: MakeDiffBlockStartLineLensO(),
+		SearchO:    MakeDiffBlockSearchLensO(),
+		ReplaceO:   MakeDiffBlockReplaceLensO(),
+	}
+}
+
+// MakeDiffBlockRefLenses creates a new [DiffBlockRefLenses] with [lenses] for all fields via a pointer to [DiffBlock]
+//
+// [lenses]: __lens.Lens
+func MakeDiffBlockRefLenses() DiffBlockRefLenses {
+	return DiffBlockRefLenses{
+		// mandatory lenses
+		StartLine: MakeDiffBlockStartLineRefLens(),
+		Search:    MakeDiffBlockSearchRefLens(),
+		Replace:   MakeDiffBlockReplaceRefLens(),
+		// optional lenses
+		StartLineO: MakeDiffBlockStartLineRefLensO(),
+		SearchO:    MakeDiffBlockSearchRefLensO(),
+		ReplaceO:   MakeDiffBlockReplaceRefLensO(),
+	}
+}
+
+// MakeDiffBlockPrisms creates a new [DiffBlockPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeDiffBlockPrisms() DiffBlockPrisms {
+	return DiffBlockPrisms{
+		StartLine: MakeDiffBlockStartLinePrism(),
+		Search:    MakeDiffBlockSearchPrism(),
+		Replace:   MakeDiffBlockReplacePrism(),
+	}
+}
+
+// MakeDiffBlockRefPrisms creates a new [DiffBlockRefPrisms] with [prisms] for all fields via a pointer to [DiffBlock]
+//
+// [prisms]: __prism.Prism
+func MakeDiffBlockRefPrisms() DiffBlockRefPrisms {
+	return DiffBlockRefPrisms{
+		StartLine: MakeDiffBlockStartLineRefPrism(),
+		Search:    MakeDiffBlockSearchRefPrism(),
+		Replace:   MakeDiffBlockReplaceRefPrism(),
+	}
+}
+
+// ApplyDiffArgsLenses provides [lenses] for accessing fields of [ApplyDiffArgs]
+//
+// [lenses]: __lens.Lens
+type ApplyDiffArgsLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [ApplyDiffArgs]
+	Path __lens.Lens[ApplyDiffArgs, string]
+	// Diff is a [__lens.Lens] for the Diff field of [ApplyDiffArgs]
+	Diff __lens.Lens[ApplyDiffArgs, string]
+	// Blocks is a [__lens.Lens] for the Blocks field of [ApplyDiffArgs]
+	Blocks __lens.Lens[ApplyDiffArgs, []DiffBlock]
+	// Name is a [__lens.Lens] for the Name field of [ApplyDiffArgs]
+	Name __lens.Lens[ApplyDiffArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [ApplyDiffArgs]
+	Content __lens.Lens[ApplyDiffArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [ApplyDiffArgs]
+	CRLF __lens.Lens[ApplyDiffArgs, bool]
+	// PathO is a [__lens_option.LensO] for the Path field of [ApplyDiffArgs], treating the zero value as absent
+	PathO __lens_option.LensO[ApplyDiffArgs, string]
+	// DiffO is a [__lens_option.LensO] for the Diff field of [ApplyDiffArgs], treating the zero value as absent
+	DiffO __lens_option.LensO[ApplyDiffArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [ApplyDiffArgs], treating the zero value as absent
+	NameO __lens_option.LensO[ApplyDiffArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [ApplyDiffArgs], treating the zero value as absent
+	ContentO __lens_option.LensO[ApplyDiffArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [ApplyDiffArgs], treating the zero value as absent
+	CRLFO __lens_option.LensO[ApplyDiffArgs, bool]
+}
+
+// ApplyDiffArgsRefLenses provides [lenses] for accessing fields of [ApplyDiffArgs] via a pointer to [ApplyDiffArgs]
+//
+// [lenses]: __lens.Lens
+type ApplyDiffArgsRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [ApplyDiffArgs] via a pointer receiver
+	Path __lens.Lens[*ApplyDiffArgs, string]
+	// Diff is a [__lens.Lens] for the Diff field of [ApplyDiffArgs] via a pointer receiver
+	Diff __lens.Lens[*ApplyDiffArgs, string]
+	// Blocks is a [__lens.Lens] for the Blocks field of [ApplyDiffArgs] via a pointer receiver
+	Blocks __lens.Lens[*ApplyDiffArgs, []DiffBlock]
+	// Name is a [__lens.Lens] for the Name field of [ApplyDiffArgs] via a pointer receiver
+	Name __lens.Lens[*ApplyDiffArgs, string]
+	// Content is a [__lens.Lens] for the Content field of [ApplyDiffArgs] via a pointer receiver
+	Content __lens.Lens[*ApplyDiffArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [ApplyDiffArgs] via a pointer receiver
+	CRLF __lens.Lens[*ApplyDiffArgs, bool]
+	// PathO is a [__lens_option.LensO] for the Path field of [ApplyDiffArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*ApplyDiffArgs, string]
+	// DiffO is a [__lens_option.LensO] for the Diff field of [ApplyDiffArgs] via a pointer receiver, treating the zero value as absent
+	DiffO __lens_option.LensO[*ApplyDiffArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [ApplyDiffArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*ApplyDiffArgs, string]
+	// ContentO is a [__lens_option.LensO] for the Content field of [ApplyDiffArgs] via a pointer receiver, treating the zero value as absent
+	ContentO __lens_option.LensO[*ApplyDiffArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [ApplyDiffArgs] via a pointer receiver, treating the zero value as absent
+	CRLFO __lens_option.LensO[*ApplyDiffArgs, bool]
+}
+
+// ApplyDiffArgsPrisms provides [prisms] for accessing fields of [ApplyDiffArgs]
+//
+// [prisms]: __prism.Prism
+type ApplyDiffArgsPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [ApplyDiffArgs]
+	Path __prism.Prism[ApplyDiffArgs, string]
+	// Diff is a [__prism.Prism] for the Diff field of [ApplyDiffArgs]
+	Diff __prism.Prism[ApplyDiffArgs, string]
+	// Blocks is a [__prism.Prism] for the Blocks field of [ApplyDiffArgs]
+	Blocks __prism.Prism[ApplyDiffArgs, []DiffBlock]
+	// Name is a [__prism.Prism] for the Name field of [ApplyDiffArgs]
+	Name __prism.Prism[ApplyDiffArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [ApplyDiffArgs]
+	Content __prism.Prism[ApplyDiffArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [ApplyDiffArgs]
+	CRLF __prism.Prism[ApplyDiffArgs, bool]
+}
+
+// ApplyDiffArgsRefPrisms provides [prisms] for accessing fields of [ApplyDiffArgs] via a pointer to [ApplyDiffArgs]
+//
+// [prisms]: __prism.Prism
+type ApplyDiffArgsRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [ApplyDiffArgs] via a pointer receiver
+	Path __prism.Prism[*ApplyDiffArgs, string]
+	// Diff is a [__prism.Prism] for the Diff field of [ApplyDiffArgs] via a pointer receiver
+	Diff __prism.Prism[*ApplyDiffArgs, string]
+	// Blocks is a [__prism.Prism] for the Blocks field of [ApplyDiffArgs] via a pointer receiver
+	Blocks __prism.Prism[*ApplyDiffArgs, []DiffBlock]
+	// Name is a [__prism.Prism] for the Name field of [ApplyDiffArgs] via a pointer receiver
+	Name __prism.Prism[*ApplyDiffArgs, string]
+	// Content is a [__prism.Prism] for the Content field of [ApplyDiffArgs] via a pointer receiver
+	Content __prism.Prism[*ApplyDiffArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [ApplyDiffArgs] via a pointer receiver
+	CRLF __prism.Prism[*ApplyDiffArgs, bool]
+}
+
+// MakeApplyDiffArgsPathLens returns a [__lens.Lens] for the Path field of [ApplyDiffArgs]
+func MakeApplyDiffArgsPathLens() __lens.Lens[ApplyDiffArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) string { return s.Path },
+		func(s ApplyDiffArgs, v string) ApplyDiffArgs { s.Path = v; return s },
+		"ApplyDiffArgs.Path",
+	)
+}
+
+// MakeApplyDiffArgsPathLensO returns a [__lens_option.LensO] for the Path field of [ApplyDiffArgs]
+func MakeApplyDiffArgsPathLensO() __lens_option.LensO[ApplyDiffArgs, string] {
+	return __lens_option.FromIso[ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsPathLens())
+}
+
+// MakeApplyDiffArgsPathRefLens returns a [__lens.Lens] for the Path field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsPathRefLens() __lens.Lens[*ApplyDiffArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ApplyDiffArgs) string { return s.Path },
+		func(s *ApplyDiffArgs, v string) *ApplyDiffArgs { s.Path = v; return s },
+		"(*ApplyDiffArgs).Path",
+	)
+}
+
+// MakeApplyDiffArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsPathRefLensO() __lens_option.LensO[*ApplyDiffArgs, string] {
+	return __lens_option.FromIso[*ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsPathRefLens())
+}
+
+// MakeApplyDiffArgsPathPrism returns a [__prism.Prism] for the Path field of [ApplyDiffArgs]
+func MakeApplyDiffArgsPathPrism() __prism.Prism[ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) ApplyDiffArgs {
+			return ApplyDiffArgs{Path: v}
+		},
+		"ApplyDiffArgs.Path",
+	)
+}
+
+// MakeApplyDiffArgsPathRefPrism returns a [__prism.Prism] for the Path field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsPathRefPrism() __prism.Prism[*ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *ApplyDiffArgs {
+			return &ApplyDiffArgs{Path: v}
+		},
+		"ApplyDiffArgs.Path",
+	)
+}
+
+// MakeApplyDiffArgsDiffLens returns a [__lens.Lens] for the Diff field of [ApplyDiffArgs]
+func MakeApplyDiffArgsDiffLens() __lens.Lens[ApplyDiffArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) string { return s.Diff },
+		func(s ApplyDiffArgs, v string) ApplyDiffArgs { s.Diff = v; return s },
+		"ApplyDiffArgs.Diff",
+	)
+}
+
+// MakeApplyDiffArgsDiffLensO returns a [__lens_option.LensO] for the Diff field of [ApplyDiffArgs]
+func MakeApplyDiffArgsDiffLensO() __lens_option.LensO[ApplyDiffArgs, string] {
+	return __lens_option.FromIso[ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsDiffLens())
+}
+
+// MakeApplyDiffArgsDiffRefLens returns a [__lens.Lens] for the Diff field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsDiffRefLens() __lens.Lens[*ApplyDiffArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ApplyDiffArgs) string { return s.Diff },
+		func(s *ApplyDiffArgs, v string) *ApplyDiffArgs { s.Diff = v; return s },
+		"(*ApplyDiffArgs).Diff",
+	)
+}
+
+// MakeApplyDiffArgsDiffRefLensO returns a [__lens_option.LensO] for the Diff field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsDiffRefLensO() __lens_option.LensO[*ApplyDiffArgs, string] {
+	return __lens_option.FromIso[*ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsDiffRefLens())
+}
+
+// MakeApplyDiffArgsDiffPrism returns a [__prism.Prism] for the Diff field of [ApplyDiffArgs]
+func MakeApplyDiffArgsDiffPrism() __prism.Prism[ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Diff) },
+		func(v string) ApplyDiffArgs {
+			return ApplyDiffArgs{Diff: v}
+		},
+		"ApplyDiffArgs.Diff",
+	)
+}
+
+// MakeApplyDiffArgsDiffRefPrism returns a [__prism.Prism] for the Diff field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsDiffRefPrism() __prism.Prism[*ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Diff) },
+		func(v string) *ApplyDiffArgs {
+			return &ApplyDiffArgs{Diff: v}
+		},
+		"ApplyDiffArgs.Diff",
+	)
+}
+
+// MakeApplyDiffArgsBlocksLens returns a [__lens.Lens] for the Blocks field of [ApplyDiffArgs]
+func MakeApplyDiffArgsBlocksLens() __lens.Lens[ApplyDiffArgs, []DiffBlock] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) []DiffBlock { return s.Blocks },
+		func(s ApplyDiffArgs, v []DiffBlock) ApplyDiffArgs { s.Blocks = v; return s },
+		"ApplyDiffArgs.Blocks",
+	)
+}
+
+// MakeApplyDiffArgsBlocksRefLens returns a [__lens.Lens] for the Blocks field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsBlocksRefLens() __lens.Lens[*ApplyDiffArgs, []DiffBlock] {
+	return __lens.MakeLensRefWithName(
+		func(s *ApplyDiffArgs) []DiffBlock { return s.Blocks },
+		func(s *ApplyDiffArgs, v []DiffBlock) *ApplyDiffArgs { s.Blocks = v; return s },
+		"(*ApplyDiffArgs).Blocks",
+	)
+}
+
+// MakeApplyDiffArgsBlocksPrism returns a [__prism.Prism] for the Blocks field of [ApplyDiffArgs]
+func MakeApplyDiffArgsBlocksPrism() __prism.Prism[ApplyDiffArgs, []DiffBlock] {
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[[]DiffBlock] { return __option.Some(s.Blocks) },
+		func(v []DiffBlock) ApplyDiffArgs {
+			return ApplyDiffArgs{Blocks: v}
+		},
+		"ApplyDiffArgs.Blocks",
+	)
+}
+
+// MakeApplyDiffArgsBlocksRefPrism returns a [__prism.Prism] for the Blocks field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsBlocksRefPrism() __prism.Prism[*ApplyDiffArgs, []DiffBlock] {
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[[]DiffBlock] { return __option.Some(s.Blocks) },
+		func(v []DiffBlock) *ApplyDiffArgs {
+			return &ApplyDiffArgs{Blocks: v}
+		},
+		"ApplyDiffArgs.Blocks",
+	)
+}
+
+// MakeApplyDiffArgsNameLens returns a [__lens.Lens] for the Name field of [ApplyDiffArgs]
+func MakeApplyDiffArgsNameLens() __lens.Lens[ApplyDiffArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) string { return s.Name },
+		func(s ApplyDiffArgs, v string) ApplyDiffArgs { s.Name = v; return s },
+		"ApplyDiffArgs.Name",
+	)
+}
+
+// MakeApplyDiffArgsNameLensO returns a [__lens_option.LensO] for the Name field of [ApplyDiffArgs]
+func MakeApplyDiffArgsNameLensO() __lens_option.LensO[ApplyDiffArgs, string] {
+	return __lens_option.FromIso[ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsNameLens())
+}
+
+// MakeApplyDiffArgsNameRefLens returns a [__lens.Lens] for the Name field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsNameRefLens() __lens.Lens[*ApplyDiffArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ApplyDiffArgs) string { return s.Name },
+		func(s *ApplyDiffArgs, v string) *ApplyDiffArgs { s.Name = v; return s },
+		"(*ApplyDiffArgs).Name",
+	)
+}
+
+// MakeApplyDiffArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsNameRefLensO() __lens_option.LensO[*ApplyDiffArgs, string] {
+	return __lens_option.FromIso[*ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsNameRefLens())
+}
+
+// MakeApplyDiffArgsNamePrism returns a [__prism.Prism] for the Name field of [ApplyDiffArgs]
+func MakeApplyDiffArgsNamePrism() __prism.Prism[ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) ApplyDiffArgs {
+			return ApplyDiffArgs{Name: v}
+		},
+		"ApplyDiffArgs.Name",
+	)
+}
+
+// MakeApplyDiffArgsNameRefPrism returns a [__prism.Prism] for the Name field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsNameRefPrism() __prism.Prism[*ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *ApplyDiffArgs {
+			return &ApplyDiffArgs{Name: v}
+		},
+		"ApplyDiffArgs.Name",
+	)
+}
+
+// MakeApplyDiffArgsContentLens returns a [__lens.Lens] for the Content field of [ApplyDiffArgs]
+func MakeApplyDiffArgsContentLens() __lens.Lens[ApplyDiffArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) string { return s.Content },
+		func(s ApplyDiffArgs, v string) ApplyDiffArgs { s.Content = v; return s },
+		"ApplyDiffArgs.Content",
+	)
+}
+
+// MakeApplyDiffArgsContentLensO returns a [__lens_option.LensO] for the Content field of [ApplyDiffArgs]
+func MakeApplyDiffArgsContentLensO() __lens_option.LensO[ApplyDiffArgs, string] {
+	return __lens_option.FromIso[ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsContentLens())
+}
+
+// MakeApplyDiffArgsContentRefLens returns a [__lens.Lens] for the Content field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsContentRefLens() __lens.Lens[*ApplyDiffArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ApplyDiffArgs) string { return s.Content },
+		func(s *ApplyDiffArgs, v string) *ApplyDiffArgs { s.Content = v; return s },
+		"(*ApplyDiffArgs).Content",
+	)
+}
+
+// MakeApplyDiffArgsContentRefLensO returns a [__lens_option.LensO] for the Content field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsContentRefLensO() __lens_option.LensO[*ApplyDiffArgs, string] {
+	return __lens_option.FromIso[*ApplyDiffArgs](__iso_option.FromZero[string]())(MakeApplyDiffArgsContentRefLens())
+}
+
+// MakeApplyDiffArgsContentPrism returns a [__prism.Prism] for the Content field of [ApplyDiffArgs]
+func MakeApplyDiffArgsContentPrism() __prism.Prism[ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) ApplyDiffArgs {
+			return ApplyDiffArgs{Content: v}
+		},
+		"ApplyDiffArgs.Content",
+	)
+}
+
+// MakeApplyDiffArgsContentRefPrism returns a [__prism.Prism] for the Content field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsContentRefPrism() __prism.Prism[*ApplyDiffArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) *ApplyDiffArgs {
+			return &ApplyDiffArgs{Content: v}
+		},
+		"ApplyDiffArgs.Content",
+	)
+}
+
+// MakeApplyDiffArgsCRLFLens returns a [__lens.Lens] for the CRLF field of [ApplyDiffArgs]
+func MakeApplyDiffArgsCRLFLens() __lens.Lens[ApplyDiffArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s ApplyDiffArgs) bool { return s.CRLF },
+		func(s ApplyDiffArgs, v bool) ApplyDiffArgs { s.CRLF = v; return s },
+		"ApplyDiffArgs.CRLF",
+	)
+}
+
+// MakeApplyDiffArgsCRLFLensO returns a [__lens_option.LensO] for the CRLF field of [ApplyDiffArgs]
+func MakeApplyDiffArgsCRLFLensO() __lens_option.LensO[ApplyDiffArgs, bool] {
+	return __lens_option.FromIso[ApplyDiffArgs](__iso_option.FromZero[bool]())(MakeApplyDiffArgsCRLFLens())
+}
+
+// MakeApplyDiffArgsCRLFRefLens returns a [__lens.Lens] for the CRLF field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsCRLFRefLens() __lens.Lens[*ApplyDiffArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *ApplyDiffArgs) bool { return s.CRLF },
+		func(s *ApplyDiffArgs, v bool) *ApplyDiffArgs { s.CRLF = v; return s },
+		"(*ApplyDiffArgs).CRLF",
+	)
+}
+
+// MakeApplyDiffArgsCRLFRefLensO returns a [__lens_option.LensO] for the CRLF field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsCRLFRefLensO() __lens_option.LensO[*ApplyDiffArgs, bool] {
+	return __lens_option.FromIso[*ApplyDiffArgs](__iso_option.FromZero[bool]())(MakeApplyDiffArgsCRLFRefLens())
+}
+
+// MakeApplyDiffArgsCRLFPrism returns a [__prism.Prism] for the CRLF field of [ApplyDiffArgs]
+func MakeApplyDiffArgsCRLFPrism() __prism.Prism[ApplyDiffArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s ApplyDiffArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) ApplyDiffArgs {
+			return ApplyDiffArgs{CRLF: v}
+		},
+		"ApplyDiffArgs.CRLF",
+	)
+}
+
+// MakeApplyDiffArgsCRLFRefPrism returns a [__prism.Prism] for the CRLF field of [ApplyDiffArgs] via a pointer receiver
+func MakeApplyDiffArgsCRLFRefPrism() __prism.Prism[*ApplyDiffArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *ApplyDiffArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) *ApplyDiffArgs {
+			return &ApplyDiffArgs{CRLF: v}
+		},
+		"ApplyDiffArgs.CRLF",
+	)
+}
+
+// MakeApplyDiffArgsLenses creates a new [ApplyDiffArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeApplyDiffArgsLenses() ApplyDiffArgsLenses {
+	return ApplyDiffArgsLenses{
+		// mandatory lenses
+		Path:    MakeApplyDiffArgsPathLens(),
+		Diff:    MakeApplyDiffArgsDiffLens(),
+		Blocks:  MakeApplyDiffArgsBlocksLens(),
+		Name:    MakeApplyDiffArgsNameLens(),
+		Content: MakeApplyDiffArgsContentLens(),
+		CRLF:    MakeApplyDiffArgsCRLFLens(),
+		// optional lenses
+		PathO:    MakeApplyDiffArgsPathLensO(),
+		DiffO:    MakeApplyDiffArgsDiffLensO(),
+		NameO:    MakeApplyDiffArgsNameLensO(),
+		ContentO: MakeApplyDiffArgsContentLensO(),
+		CRLFO:    MakeApplyDiffArgsCRLFLensO(),
+	}
+}
+
+// MakeApplyDiffArgsRefLenses creates a new [ApplyDiffArgsRefLenses] with [lenses] for all fields via a pointer to [ApplyDiffArgs]
+//
+// [lenses]: __lens.Lens
+func MakeApplyDiffArgsRefLenses() ApplyDiffArgsRefLenses {
+	return ApplyDiffArgsRefLenses{
+		// mandatory lenses
+		Path:    MakeApplyDiffArgsPathRefLens(),
+		Diff:    MakeApplyDiffArgsDiffRefLens(),
+		Blocks:  MakeApplyDiffArgsBlocksRefLens(),
+		Name:    MakeApplyDiffArgsNameRefLens(),
+		Content: MakeApplyDiffArgsContentRefLens(),
+		CRLF:    MakeApplyDiffArgsCRLFRefLens(),
+		// optional lenses
+		PathO:    MakeApplyDiffArgsPathRefLensO(),
+		DiffO:    MakeApplyDiffArgsDiffRefLensO(),
+		NameO:    MakeApplyDiffArgsNameRefLensO(),
+		ContentO: MakeApplyDiffArgsContentRefLensO(),
+		CRLFO:    MakeApplyDiffArgsCRLFRefLensO(),
+	}
+}
+
+// MakeApplyDiffArgsPrisms creates a new [ApplyDiffArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeApplyDiffArgsPrisms() ApplyDiffArgsPrisms {
+	return ApplyDiffArgsPrisms{
+		Path:    MakeApplyDiffArgsPathPrism(),
+		Diff:    MakeApplyDiffArgsDiffPrism(),
+		Blocks:  MakeApplyDiffArgsBlocksPrism(),
+		Name:    MakeApplyDiffArgsNamePrism(),
+		Content: MakeApplyDiffArgsContentPrism(),
+		CRLF:    MakeApplyDiffArgsCRLFPrism(),
+	}
+}
+
+// MakeApplyDiffArgsRefPrisms creates a new [ApplyDiffArgsRefPrisms] with [prisms] for all fields via a pointer to [ApplyDiffArgs]
+//
+// [prisms]: __prism.Prism
+func MakeApplyDiffArgsRefPrisms() ApplyDiffArgsRefPrisms {
+	return ApplyDiffArgsRefPrisms{
+		Path:    MakeApplyDiffArgsPathRefPrism(),
+		Diff:    MakeApplyDiffArgsDiffRefPrism(),
+		Blocks:  MakeApplyDiffArgsBlocksRefPrism(),
+		Name:    MakeApplyDiffArgsNameRefPrism(),
+		Content: MakeApplyDiffArgsContentRefPrism(),
+		CRLF:    MakeApplyDiffArgsCRLFRefPrism(),
+	}
+}
+
 // ExecuteCommandArgsLenses provides [lenses] for accessing fields of [ExecuteCommandArgs]
 //
 // [lenses]: __lens.Lens
