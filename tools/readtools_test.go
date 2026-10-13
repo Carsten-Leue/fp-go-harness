@@ -45,7 +45,7 @@ func TestMakeTools(t *testing.T) {
 	registry := MakeTools()(deps)
 
 	assert.ElementsMatch(t,
-		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, SearchAndReplaceName, ApplyDiffName, ExecuteCommandName},
+		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, SearchAndReplaceName, ApplyDiffName, InsertContentName, ExecuteCommandName},
 		R.Keys(registry))
 
 	caller := ToToolCaller()(registry)
@@ -66,6 +66,10 @@ func TestMakeTools(t *testing.T) {
 	// apply_diff edits what search_and_replace left
 	assert.Equal(t, "Applied 1 block(s) to x.txt.", run(ApplyDiffName, `{"path":"x.txt","diff":"<<<<<<< SEARCH\nbye\n=======\nhi\n>>>>>>> REPLACE"}`))
 	assert.Equal(t, "Contents of file x.txt:\n\n1 | hi\n2 |", run(ReadFileName, `{"path":"x.txt"}`))
+
+	// insert_content adds a line before what apply_diff left
+	assert.Equal(t, "Inserted 1 line(s) into x.txt before line 1.", run(InsertContentName, `{"path":"x.txt","line":1,"content":"first"}`))
+	assert.Equal(t, "Contents of file x.txt:\n\n1 | first\n2 | hi\n3 |", run(ReadFileName, `{"path":"x.txt"}`))
 
 	assert.Equal(t, deps, AsToolsDeps(deps))
 }

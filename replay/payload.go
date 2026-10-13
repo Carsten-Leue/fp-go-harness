@@ -10,6 +10,7 @@ import (
 	J "github.com/IBM/fp-go/v2/json"
 	"github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
+	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	openai "github.com/openai/openai-go/v3"
@@ -86,7 +87,8 @@ type ChatResponse struct {
 }
 
 // prefixPrism focuses on the rest of a string after prefix. Strings without
-// the prefix don't match.
+// the prefix don't match. It is a leaf: a constructor that reads the prefix
+// for the getter, the setter and the name.
 func prefixPrism(prefix string) Prism[string, string] {
 	return prism.MakePrismWithName(
 		F.Bind2nd(option.Optionize2(strings.CutPrefix), prefix),
@@ -97,32 +99,34 @@ func prefixPrism(prefix string) Prism[string, string] {
 
 // payloadPrism focuses on the payload text of the records whose message
 // starts with prefix.
-func payloadPrism(prefix string) Prism[Record, string] {
-	return F.Pipe1(
-		MakeRecordMsgPrism(),
-		prism.Compose[Record](prefixPrism(prefix)),
+func payloadPrism() reader.Reader[string, Prism[Record, string]] {
+	return F.Flow3(
+		prefixPrism,
+		prism.Compose[Record, string, string],
+		reader.Read[Prism[Record, string]](MakeRecordMsgPrism()),
 	)
 }
 
 // RequestPrism focuses on the JSON body of a recorded /chat/completions request.
 func RequestPrism() Prism[Record, string] {
-	return payloadPrism(RequestPrefix)
+	return payloadPrism()(RequestPrefix)
 }
 
 // ResponsePrism focuses on the JSON of a recorded assembled chat response.
 func ResponsePrism() Prism[Record, string] {
-	return payloadPrism(ResponsePrefix)
+	return payloadPrism()(ResponsePrefix)
 }
 
 // extract keeps the records p matches and decodes their payloads. Records that
 // don't match are skipped, a payload that doesn't decode becomes an error
-// element.
-func extract[A any](p Prism[Record, string], decode result.Kleisli[[]byte, A]) iterresult.Operator[Record, A] {
+// element. It is a generic combinator and keeps its parameters: Go can't infer
+// T through a nullary call.
+func extract[T any](p Prism[Record, string], decode result.Kleisli[[]byte, T]) iterresult.Operator[Record, T] {
 	return iterresult.Chain(F.Flow2(
 		p.GetOption,
 		option.Fold(
-			iter.Empty[Result[A]],
-			F.Flow3(S.ToBytes, decode, iterresult.FromEither[A]),
+			iter.Empty[Result[T]],
+			F.Flow3(S.ToBytes, decode, iterresult.FromEither[T]),
 		),
 	))
 }

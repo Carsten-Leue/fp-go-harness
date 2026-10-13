@@ -11,7 +11,7 @@ import (
 // glob.
 type ReadToolsDeps = GrepDeps
 
-// MakeDefaultReadToolsDeps builds [ReadToolsDeps] over the operating system's
+// MakeDefaultReadToolsDeps is wiring: it builds [ReadToolsDeps] over the operating system's
 // file system, for the workspace at root.
 func MakeDefaultReadToolsDeps(root string) ReadToolsDeps {
 	return MakeGrepDeps(MakeWorkspaceDeps(root), MakeDefaultWalkDeps(), MakeDefaultFileDeps())

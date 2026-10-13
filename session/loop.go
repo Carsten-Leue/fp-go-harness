@@ -25,10 +25,13 @@ func (d *loopDeps) GetMaxIterations() int {
 	return d.maxIterations
 }
 
+// MakeLoopDeps is wiring: it combines the iteration limit into [LoopDeps].
 func MakeLoopDeps(maxIterations int) LoopDeps {
 	return &loopDeps{maxIterations}
 }
 
+// AsLoopDeps is wiring: it narrows any wider dependencies to [LoopDeps], for
+// use with [reader.Local] and [effect.Local].
 func AsLoopDeps[R LoopDeps](r R) LoopDeps {
 	return r
 }
@@ -43,19 +46,33 @@ func (e *MaxIterationsError) Error() string {
 	return fmt.Sprintf("agent loop stopped after reaching the maximum of %d iterations", e.MaxIterations)
 }
 
+// makeMaxIterationsError is a leaf: the constructor of a [MaxIterationsError].
 func makeMaxIterationsError(maxIterations int) error {
 	return &MaxIterationsError{maxIterations}
 }
 
-// limitIterations passes a session through unchanged while it has used fewer
-// than maxIterations iterations, and fails with a [MaxIterationsError]
-// otherwise.
-func limitIterations(maxIterations int) result.Kleisli[Session, Session] {
+// belowIterations matches the sessions that have used fewer iterations than
+// the limit.
+func belowIterations() reader.Reader[int, Predicate[Session]] {
 	iterLens := MakeSessioniterationsLens()
 
-	return result.FromPredicate(
-		F.Flow2(iterLens.Get, N.LessThan(maxIterations)),
-		F.Constant1[Session](makeMaxIterationsError(maxIterations)),
+	return F.Flow2(N.LessThan[int], reader.Local[bool](iterLens.Get))
+}
+
+// iterationsError fails every session with the [MaxIterationsError] of the
+// limit.
+func iterationsError() reader.Reader[int, func(Session) error] {
+	return F.Flow2(makeMaxIterationsError, F.Constant1[Session, error])
+}
+
+// limitIterations passes a session through unchanged while it has used fewer
+// iterations than the limit, and fails with a [MaxIterationsError]
+// otherwise. The limit is read by the predicate and by the error, so both are
+// combined with the reader applicative.
+func limitIterations() reader.Reader[int, result.Kleisli[Session, Session]] {
+	return F.Pipe1(
+		F.Flow2(belowIterations(), F.Curry2(result.FromPredicate[Session])),
+		reader.Ap[result.Kleisli[Session, Session]](iterationsError()),
 	)
 }
 
@@ -70,7 +87,7 @@ func Run() effect.Kleisli[SessionDeps, Session, FinalResult] {
 	guard := F.Flow2(
 		reader.Sequence(F.Flow2(
 			SessionDeps.GetMaxIterations,
-			limitIterations,
+			limitIterations(),
 		)),
 		effect.FromReaderResult[SessionDeps, Session],
 	)

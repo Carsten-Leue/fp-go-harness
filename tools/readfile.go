@@ -42,7 +42,7 @@ func (d *fileDeps) GetReadFile() ioresult.Kleisli[string, []byte] {
 	return d.readFile
 }
 
-// MakeFileDeps builds [FileDeps] that read files with readFile.
+// MakeFileDeps is wiring: it builds [FileDeps] that read files with readFile.
 func MakeFileDeps(readFile ioresult.Kleisli[string, []byte]) FileDeps {
 	return &fileDeps{readFile}
 }
@@ -52,6 +52,8 @@ func MakeDefaultFileDeps() FileDeps {
 	return MakeFileDeps(file.ReadFile)
 }
 
+// AsFileDeps is wiring: it narrows any wider dependencies to [FileDeps], for
+// use with [reader.Local] and [effect.Local].
 func AsFileDeps[R FileDeps](r R) FileDeps {
 	return r
 }
@@ -68,10 +70,14 @@ type readFileDeps struct {
 	FileDeps
 }
 
+// MakeReadFileDeps is wiring: it combines a workspace and read access to the
+// file system into [ReadFileDeps].
 func MakeReadFileDeps(w WorkspaceDeps, f FileDeps) ReadFileDeps {
 	return &readFileDeps{w, f}
 }
 
+// AsReadFileDeps is wiring: it narrows any wider dependencies to
+// [ReadFileDeps], for use with [reader.Local] and [effect.Local].
 func AsReadFileDeps[R ReadFileDeps](r R) ReadFileDeps {
 	return r
 }
@@ -118,6 +124,7 @@ func lineRange() result.Kleisli[Pair[string, string], Pair[int, int]] {
 	)
 }
 
+// isOrdered is a leaf: a predicate over both ends of a range.
 func isOrdered(p Pair[int, int]) bool {
 	return pair.Head(p) <= pair.Tail(p)
 }
@@ -138,14 +145,14 @@ func numberedLine(first int) func(int, string) string {
 	}
 }
 
-// numberLines prefixes each line with its number, counting from first, and
-// joins them. As in the recordings, an empty line renders as "N | ", except
-// the last one: trailing blanks of the result are dropped, so it is "N |".
-func numberLines(first int) func([]string) string {
-	return F.Flow3(
-		A.MapWithIndex(numberedLine(first)),
-		S.Join("\n"),
-		F.Bind2nd(strings.TrimRight, " "),
+// numberLines prefixes each line with its number, counting from the first
+// number, and joins them. As in the recordings, an empty line renders as
+// "N | ", except the last one: trailing blanks of the result are dropped, so
+// it is "N |".
+func numberLines() Reader[int, func([]string) string] {
+	return F.Flow2(
+		F.Flow2(numberedLine, A.MapWithIndex[string, string]),
+		reader.Map[[]string](F.Flow2(S.Join("\n"), F.Bind2nd(strings.TrimRight, " "))),
 	)
 }
 
@@ -156,15 +163,15 @@ func pastEndError(start int) func([]string) error {
 	}
 }
 
-// numberRange numbers the lines start to end (1-based, inclusive). A range
-// whose end lies beyond the end of the file is cut off; a range that starts
-// beyond it fails.
+// numberRange is a constructor that [pair.Paired] lifts: it numbers the lines
+// start to end (1-based, inclusive). A range whose end lies beyond the end of
+// the file is cut off; a range that starts beyond it fails.
 func numberRange(start, end int) result.Kleisli[[]string, string] {
 	return F.Flow2(
 		result.FromPredicate(F.Flow2(A.Size[string], N.MoreThan(start-1)), pastEndError(start)),
 		result.Map(F.Flow2(
 			A.Slice[string](start-1, end),
-			numberLines(start),
+			numberLines()(start),
 		)),
 	)
 }
@@ -174,7 +181,7 @@ func numberRange(start, end int) result.Kleisli[[]string, string] {
 func lineSelector() result.Kleisli[string, result.Kleisli[[]string, string]] {
 	return P.Fold(
 		F.Flow2(parseRange(), result.Map(pair.Paired(numberRange))),
-		F.Constant1[string](result.Of(F.Flow2(numberLines(1), result.Of[string]))),
+		F.Constant1[string](result.Of(F.Flow2(numberLines()(1), result.Of[string]))),
 	)(S.IsEmpty)
 }
 
@@ -208,6 +215,8 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 }
 
 // readBytes reads the file at an absolute path through the [FileDeps] of R.
+// It is a generic I/O leaf and keeps its parameter: Go can't infer R through
+// a nullary call.
 func readBytes[R FileDeps](path string) Effect[R, []byte] {
 	return F.Pipe1(
 		effect.Asks(F.Flow2(AsFileDeps[R], FileDeps.GetReadFile)),
@@ -240,6 +249,8 @@ func ReadFile() effect.Kleisli[ReadFileDeps, string, string] {
 
 // readFileDefinition describes read_file to the model, following the
 // recorded definition.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func readFileDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        ReadFileName,

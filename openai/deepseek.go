@@ -45,6 +45,8 @@ func (d *deepSeekChatCompletionDeps) GetRequestOptions() Thunk[[]opt.RequestOpti
 	return thunk.Of(A.Of(opt.WithAPIKey(d.apiKey)))
 }
 
+// newDeepSeekChatCompletionDeps is wiring: it combines the API key and an
+// OpenAI client into [ChatCompletionDeps].
 func newDeepSeekChatCompletionDeps(apiKey string, client *openai.Client) ChatCompletionDeps {
 	return &deepSeekChatCompletionDeps{
 		client: client,
@@ -52,6 +54,8 @@ func newDeepSeekChatCompletionDeps(apiKey string, client *openai.Client) ChatCom
 	}
 }
 
+// asHTTPClient is wiring: it narrows an [HTTP.Client] to the [opt.HTTPClient]
+// the SDK takes.
 func asHTTPClient(c *HTTP.Client) opt.HTTPClient {
 	return c
 }
@@ -66,7 +70,7 @@ func MakeDeepSeekChatCompletionDeps() Effect[DeepSeekDeps, ChatCompletionDeps] {
 
 	apiKey := F.Pipe2(
 		deepSeekAPIKeyEnvVar,
-		env.LookupEnvThunk,
+		env.LookupEnvThunk(),
 		effect.Local[string, DeepSeekDeps](env.AsEnvironmentDeps),
 	)
 

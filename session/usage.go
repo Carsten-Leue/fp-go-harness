@@ -5,6 +5,8 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
+// addUsage is a leaf: it adds the fields of two usages, the
+// semigroup of [MakeUsageMonoid].
 func addUsage(a, b openai.CompletionUsage) openai.CompletionUsage {
 	return openai.CompletionUsage{
 		CompletionTokens: a.CompletionTokens + b.CompletionTokens,

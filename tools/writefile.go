@@ -52,7 +52,7 @@ func (d *fileWriteDeps) GetWriteFile() func(string) ioresult.Kleisli[[]byte, []b
 	return d.writeFile
 }
 
-// MakeFileWriteDeps builds [FileWriteDeps] that create directories with
+// MakeFileWriteDeps is wiring: it builds [FileWriteDeps] that create directories with
 // makeDirs and write files with writeFile.
 func MakeFileWriteDeps(makeDirs ioresult.Kleisli[string, string], writeFile func(string) ioresult.Kleisli[[]byte, []byte]) FileWriteDeps {
 	return &fileWriteDeps{makeDirs, writeFile}
@@ -67,6 +67,8 @@ func MakeDefaultFileWriteDeps() FileWriteDeps {
 	)
 }
 
+// AsFileWriteDeps is wiring: it narrows any wider dependencies to
+// [FileWriteDeps], for use with [reader.Local] and [effect.Local].
 func AsFileWriteDeps[R FileWriteDeps](r R) FileWriteDeps {
 	return r
 }
@@ -83,10 +85,14 @@ type writeFileDeps struct {
 	FileWriteDeps
 }
 
+// MakeWriteFileDeps is wiring: it combines a workspace and write access to
+// the file system into [WriteFileDeps].
 func MakeWriteFileDeps(w WorkspaceDeps, f FileWriteDeps) WriteFileDeps {
 	return &writeFileDeps{w, f}
 }
 
+// AsWriteFileDeps is wiring: it narrows any wider dependencies to
+// [WriteFileDeps], for use with [reader.Local] and [effect.Local].
 func AsWriteFileDeps[R WriteFileDeps](r R) WriteFileDeps {
 	return r
 }
@@ -114,14 +120,18 @@ func countLines() func(string) int {
 
 // contentLines counts the lines of the content of a call.
 func contentLines() Reader[WriteFileArgs, int] {
-	return F.Flow2(MakeWriteFileArgsContentLens().Get, countLines())
+	contentLens := MakeWriteFileArgsContentLens()
+
+	return F.Flow2(contentLens.Get, countLines())
 }
 
 // isComplete tests whether the content has at least the announced number of
 // lines. More lines than announced pass: models often miscount the last line.
 func isComplete() P.Predicate[WriteFileArgs] {
+	lineCountLens := MakeWriteFileArgsLineCountLens()
+
 	return F.Pipe1(
-		F.Flow3(MakeWriteFileArgsLineCountLens().Get, N.LessThan[int], P.Not[int]),
+		F.Flow3(lineCountLens.Get, N.LessThan[int], P.Not[int]),
 		reader.Ap[bool](contentLines()),
 	)
 }
@@ -150,10 +160,13 @@ func makeParentDirs() effect.Kleisli[WriteFileDeps, string, string] {
 }
 
 // writeWith applies a file writer to the path and the content of a call.
-func writeWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reader[WriteFileArgs, ioresult.IOResult[[]byte]] {
-	return F.Pipe1(
-		F.Flow2(MakeWriteFileArgsPathLens().Get, write),
-		reader.Ap[ioresult.IOResult[[]byte]](F.Flow2(MakeWriteFileArgsContentLens().Get, S.ToBytes)),
+func writeWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Reader[WriteFileArgs, ioresult.IOResult[[]byte]]] {
+	pathLens := MakeWriteFileArgsPathLens()
+	contentLens := MakeWriteFileArgsContentLens()
+
+	return F.Flow2(
+		reader.Local[ioresult.Kleisli[[]byte, []byte]](pathLens.Get),
+		reader.Ap[ioresult.IOResult[[]byte]](F.Flow2(contentLens.Get, S.ToBytes)),
 	)
 }
 
@@ -161,7 +174,7 @@ func writeWith(write func(string) ioresult.Kleisli[[]byte, []byte]) Reader[Write
 // [FileWriteDeps] of the call.
 func writeContent() effect.Kleisli[WriteFileDeps, WriteFileArgs, []byte] {
 	return F.Flow2(
-		F.Flip(F.Flow2(WriteFileDeps.GetWriteFile, writeWith)),
+		F.Flip(F.Flow2(WriteFileDeps.GetWriteFile, writeWith())),
 		reader.Map[WriteFileDeps](thunk.FromIOResult[[]byte]),
 	)
 }
@@ -194,6 +207,8 @@ func WriteFile() effect.Kleisli[WriteFileDeps, string, string] {
 }
 
 // writeFileDefinition describes write_file to the model.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func writeFileDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        WriteFileName,

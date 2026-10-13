@@ -67,15 +67,18 @@ func newToolCall(id, name, arguments string) openai.ChatCompletionMessageToolCal
 	}
 }
 
-// toolCallOf converts a recorded tool-call part into an OpenAI tool call.
-func toolCallOf(lenses ContentPartLenses) func(ContentPart) openai.ChatCompletionMessageToolCallUnion {
+// toolCallOf converts a recorded tool-call part into an OpenAI tool call. The
+// returned function is a leaf: one constructor over several fields of the part.
+func toolCallOf() func(ContentPart) openai.ChatCompletionMessageToolCallUnion {
+	lenses := MakeContentPartLenses()
+
 	return func(p ContentPart) openai.ChatCompletionMessageToolCallUnion {
 		return newToolCall(lenses.ToolCallID.Get(p), lenses.ToolName.Get(p), argumentsOf()(lenses.Input.Get(p)))
 	}
 }
 
-// usageOf converts recorded token usage into OpenAI usage. Cache-read tokens
-// become cached prompt tokens.
+// usageOf is a leaf, one constructor over several fields: it converts recorded
+// token usage into OpenAI usage. Cache-read tokens become cached prompt tokens.
 func usageOf(u ResponseUsage) openai.CompletionUsage {
 	lenses := MakeResponseUsageLenses()
 	input := MakeInputTokenDetailsLenses()
@@ -96,7 +99,8 @@ func usageOf(u ResponseUsage) openai.CompletionUsage {
 
 // ToChatCompletion converts a recorded assembled response into the OpenAI
 // completion it stands for: one choice whose message carries the text and the
-// tool calls of the response.
+// tool calls of the response. It is a leaf, one constructor over several
+// fields of the response.
 func ToChatCompletion(r ChatResponse) openai.ChatCompletion {
 	lenses := MakeChatResponseLenses()
 
@@ -109,7 +113,7 @@ func ToChatCompletion(r ChatResponse) openai.ChatCompletion {
 			Message: openai.ChatCompletionMessage{
 				Role:      assistantRole,
 				Content:   lenses.Text.Get(r),
-				ToolCalls: A.Map(toolCallOf(MakeContentPartLenses()))(lenses.ToolCalls.Get(r)),
+				ToolCalls: A.Map(toolCallOf())(lenses.ToolCalls.Get(r)),
 			},
 		}),
 		Usage: usageOf(lenses.Usage.Get(r)),
@@ -143,9 +147,9 @@ func jsonResponse(req *http.Request) func([]byte) *http.Response {
 	}
 }
 
-// replayMiddleware answers every request with the next completion of the
-// queue, without calling the next handler. Once the queue is empty, requests
-// fail with [ErrReplayExhausted].
+// replayMiddleware is wiring: it answers every request with the next
+// completion of the queue, without calling the next handler. Once the queue
+// is empty, requests fail with [ErrReplayExhausted].
 //
 // The SDK fixes the shape of a middleware, so this is the edge where the
 // queue's IO runs and the result is unwrapped.
@@ -198,8 +202,10 @@ func MakeReplayChatCompletionDeps() IO.Kleisli[[]ChatResponse, oai.ChatCompletio
 
 // TaskResponses lists the recorded responses of a task in order.
 func TaskResponses() reader.Reader[Task, []ChatResponse] {
+	turnsLens := MakeTaskTurnsLens()
+
 	return F.Flow2(
-		MakeTaskTurnsLens().Get,
+		turnsLens.Get,
 		A.Map(turnResponse),
 	)
 }
@@ -207,8 +213,10 @@ func TaskResponses() reader.Reader[Task, []ChatResponse] {
 // TaskRequest returns the first recorded request of a task, the one a replay
 // starts from. A task without turns yields None.
 func TaskRequest() option.Kleisli[Task, openai.ChatCompletionNewParams] {
+	turnsLens := MakeTaskTurnsLens()
+
 	return F.Flow3(
-		MakeTaskTurnsLens().Get,
+		turnsLens.Get,
 		A.Head[Turn],
 		option.Map(turnRequest),
 	)

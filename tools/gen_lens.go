@@ -3020,6 +3020,486 @@ func MakeGrepArgsRefPrisms() GrepArgsRefPrisms {
 	}
 }
 
+// InsertContentArgsLenses provides [lenses] for accessing fields of [InsertContentArgs]
+//
+// [lenses]: __lens.Lens
+type InsertContentArgsLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [InsertContentArgs]
+	Path __lens.Lens[InsertContentArgs, string]
+	// Line is a [__lens.Lens] for the Line field of [InsertContentArgs]
+	Line __lens.Lens[InsertContentArgs, int]
+	// Content is a [__lens.Lens] for the Content field of [InsertContentArgs]
+	Content __lens.Lens[InsertContentArgs, string]
+	// Name is a [__lens.Lens] for the Name field of [InsertContentArgs]
+	Name __lens.Lens[InsertContentArgs, string]
+	// Text is a [__lens.Lens] for the Text field of [InsertContentArgs]
+	Text __lens.Lens[InsertContentArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [InsertContentArgs]
+	CRLF __lens.Lens[InsertContentArgs, bool]
+	// PathO is a [__lens_option.LensO] for the Path field of [InsertContentArgs], treating the zero value as absent
+	PathO __lens_option.LensO[InsertContentArgs, string]
+	// LineO is a [__lens_option.LensO] for the Line field of [InsertContentArgs], treating the zero value as absent
+	LineO __lens_option.LensO[InsertContentArgs, int]
+	// ContentO is a [__lens_option.LensO] for the Content field of [InsertContentArgs], treating the zero value as absent
+	ContentO __lens_option.LensO[InsertContentArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [InsertContentArgs], treating the zero value as absent
+	NameO __lens_option.LensO[InsertContentArgs, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [InsertContentArgs], treating the zero value as absent
+	TextO __lens_option.LensO[InsertContentArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [InsertContentArgs], treating the zero value as absent
+	CRLFO __lens_option.LensO[InsertContentArgs, bool]
+}
+
+// InsertContentArgsRefLenses provides [lenses] for accessing fields of [InsertContentArgs] via a pointer to [InsertContentArgs]
+//
+// [lenses]: __lens.Lens
+type InsertContentArgsRefLenses struct {
+	// Path is a [__lens.Lens] for the Path field of [InsertContentArgs] via a pointer receiver
+	Path __lens.Lens[*InsertContentArgs, string]
+	// Line is a [__lens.Lens] for the Line field of [InsertContentArgs] via a pointer receiver
+	Line __lens.Lens[*InsertContentArgs, int]
+	// Content is a [__lens.Lens] for the Content field of [InsertContentArgs] via a pointer receiver
+	Content __lens.Lens[*InsertContentArgs, string]
+	// Name is a [__lens.Lens] for the Name field of [InsertContentArgs] via a pointer receiver
+	Name __lens.Lens[*InsertContentArgs, string]
+	// Text is a [__lens.Lens] for the Text field of [InsertContentArgs] via a pointer receiver
+	Text __lens.Lens[*InsertContentArgs, string]
+	// CRLF is a [__lens.Lens] for the CRLF field of [InsertContentArgs] via a pointer receiver
+	CRLF __lens.Lens[*InsertContentArgs, bool]
+	// PathO is a [__lens_option.LensO] for the Path field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	PathO __lens_option.LensO[*InsertContentArgs, string]
+	// LineO is a [__lens_option.LensO] for the Line field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	LineO __lens_option.LensO[*InsertContentArgs, int]
+	// ContentO is a [__lens_option.LensO] for the Content field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	ContentO __lens_option.LensO[*InsertContentArgs, string]
+	// NameO is a [__lens_option.LensO] for the Name field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	NameO __lens_option.LensO[*InsertContentArgs, string]
+	// TextO is a [__lens_option.LensO] for the Text field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	TextO __lens_option.LensO[*InsertContentArgs, string]
+	// CRLFO is a [__lens_option.LensO] for the CRLF field of [InsertContentArgs] via a pointer receiver, treating the zero value as absent
+	CRLFO __lens_option.LensO[*InsertContentArgs, bool]
+}
+
+// InsertContentArgsPrisms provides [prisms] for accessing fields of [InsertContentArgs]
+//
+// [prisms]: __prism.Prism
+type InsertContentArgsPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [InsertContentArgs]
+	Path __prism.Prism[InsertContentArgs, string]
+	// Line is a [__prism.Prism] for the Line field of [InsertContentArgs]
+	Line __prism.Prism[InsertContentArgs, int]
+	// Content is a [__prism.Prism] for the Content field of [InsertContentArgs]
+	Content __prism.Prism[InsertContentArgs, string]
+	// Name is a [__prism.Prism] for the Name field of [InsertContentArgs]
+	Name __prism.Prism[InsertContentArgs, string]
+	// Text is a [__prism.Prism] for the Text field of [InsertContentArgs]
+	Text __prism.Prism[InsertContentArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [InsertContentArgs]
+	CRLF __prism.Prism[InsertContentArgs, bool]
+}
+
+// InsertContentArgsRefPrisms provides [prisms] for accessing fields of [InsertContentArgs] via a pointer to [InsertContentArgs]
+//
+// [prisms]: __prism.Prism
+type InsertContentArgsRefPrisms struct {
+	// Path is a [__prism.Prism] for the Path field of [InsertContentArgs] via a pointer receiver
+	Path __prism.Prism[*InsertContentArgs, string]
+	// Line is a [__prism.Prism] for the Line field of [InsertContentArgs] via a pointer receiver
+	Line __prism.Prism[*InsertContentArgs, int]
+	// Content is a [__prism.Prism] for the Content field of [InsertContentArgs] via a pointer receiver
+	Content __prism.Prism[*InsertContentArgs, string]
+	// Name is a [__prism.Prism] for the Name field of [InsertContentArgs] via a pointer receiver
+	Name __prism.Prism[*InsertContentArgs, string]
+	// Text is a [__prism.Prism] for the Text field of [InsertContentArgs] via a pointer receiver
+	Text __prism.Prism[*InsertContentArgs, string]
+	// CRLF is a [__prism.Prism] for the CRLF field of [InsertContentArgs] via a pointer receiver
+	CRLF __prism.Prism[*InsertContentArgs, bool]
+}
+
+// MakeInsertContentArgsPathLens returns a [__lens.Lens] for the Path field of [InsertContentArgs]
+func MakeInsertContentArgsPathLens() __lens.Lens[InsertContentArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) string { return s.Path },
+		func(s InsertContentArgs, v string) InsertContentArgs { s.Path = v; return s },
+		"InsertContentArgs.Path",
+	)
+}
+
+// MakeInsertContentArgsPathLensO returns a [__lens_option.LensO] for the Path field of [InsertContentArgs]
+func MakeInsertContentArgsPathLensO() __lens_option.LensO[InsertContentArgs, string] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsPathLens())
+}
+
+// MakeInsertContentArgsPathRefLens returns a [__lens.Lens] for the Path field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsPathRefLens() __lens.Lens[*InsertContentArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) string { return s.Path },
+		func(s *InsertContentArgs, v string) *InsertContentArgs { s.Path = v; return s },
+		"(*InsertContentArgs).Path",
+	)
+}
+
+// MakeInsertContentArgsPathRefLensO returns a [__lens_option.LensO] for the Path field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsPathRefLensO() __lens_option.LensO[*InsertContentArgs, string] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsPathRefLens())
+}
+
+// MakeInsertContentArgsPathPrism returns a [__prism.Prism] for the Path field of [InsertContentArgs]
+func MakeInsertContentArgsPathPrism() __prism.Prism[InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) InsertContentArgs {
+			return InsertContentArgs{Path: v}
+		},
+		"InsertContentArgs.Path",
+	)
+}
+
+// MakeInsertContentArgsPathRefPrism returns a [__prism.Prism] for the Path field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsPathRefPrism() __prism.Prism[*InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Path) },
+		func(v string) *InsertContentArgs {
+			return &InsertContentArgs{Path: v}
+		},
+		"InsertContentArgs.Path",
+	)
+}
+
+// MakeInsertContentArgsLineLens returns a [__lens.Lens] for the Line field of [InsertContentArgs]
+func MakeInsertContentArgsLineLens() __lens.Lens[InsertContentArgs, int] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) int { return s.Line },
+		func(s InsertContentArgs, v int) InsertContentArgs { s.Line = v; return s },
+		"InsertContentArgs.Line",
+	)
+}
+
+// MakeInsertContentArgsLineLensO returns a [__lens_option.LensO] for the Line field of [InsertContentArgs]
+func MakeInsertContentArgsLineLensO() __lens_option.LensO[InsertContentArgs, int] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[int]())(MakeInsertContentArgsLineLens())
+}
+
+// MakeInsertContentArgsLineRefLens returns a [__lens.Lens] for the Line field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsLineRefLens() __lens.Lens[*InsertContentArgs, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) int { return s.Line },
+		func(s *InsertContentArgs, v int) *InsertContentArgs { s.Line = v; return s },
+		"(*InsertContentArgs).Line",
+	)
+}
+
+// MakeInsertContentArgsLineRefLensO returns a [__lens_option.LensO] for the Line field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsLineRefLensO() __lens_option.LensO[*InsertContentArgs, int] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[int]())(MakeInsertContentArgsLineRefLens())
+}
+
+// MakeInsertContentArgsLinePrism returns a [__prism.Prism] for the Line field of [InsertContentArgs]
+func MakeInsertContentArgsLinePrism() __prism.Prism[InsertContentArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[int] { return _fromNonZero(s.Line) },
+		func(v int) InsertContentArgs {
+			return InsertContentArgs{Line: v}
+		},
+		"InsertContentArgs.Line",
+	)
+}
+
+// MakeInsertContentArgsLineRefPrism returns a [__prism.Prism] for the Line field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsLineRefPrism() __prism.Prism[*InsertContentArgs, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[int] { return _fromNonZero(s.Line) },
+		func(v int) *InsertContentArgs {
+			return &InsertContentArgs{Line: v}
+		},
+		"InsertContentArgs.Line",
+	)
+}
+
+// MakeInsertContentArgsContentLens returns a [__lens.Lens] for the Content field of [InsertContentArgs]
+func MakeInsertContentArgsContentLens() __lens.Lens[InsertContentArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) string { return s.Content },
+		func(s InsertContentArgs, v string) InsertContentArgs { s.Content = v; return s },
+		"InsertContentArgs.Content",
+	)
+}
+
+// MakeInsertContentArgsContentLensO returns a [__lens_option.LensO] for the Content field of [InsertContentArgs]
+func MakeInsertContentArgsContentLensO() __lens_option.LensO[InsertContentArgs, string] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsContentLens())
+}
+
+// MakeInsertContentArgsContentRefLens returns a [__lens.Lens] for the Content field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsContentRefLens() __lens.Lens[*InsertContentArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) string { return s.Content },
+		func(s *InsertContentArgs, v string) *InsertContentArgs { s.Content = v; return s },
+		"(*InsertContentArgs).Content",
+	)
+}
+
+// MakeInsertContentArgsContentRefLensO returns a [__lens_option.LensO] for the Content field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsContentRefLensO() __lens_option.LensO[*InsertContentArgs, string] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsContentRefLens())
+}
+
+// MakeInsertContentArgsContentPrism returns a [__prism.Prism] for the Content field of [InsertContentArgs]
+func MakeInsertContentArgsContentPrism() __prism.Prism[InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) InsertContentArgs {
+			return InsertContentArgs{Content: v}
+		},
+		"InsertContentArgs.Content",
+	)
+}
+
+// MakeInsertContentArgsContentRefPrism returns a [__prism.Prism] for the Content field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsContentRefPrism() __prism.Prism[*InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Content) },
+		func(v string) *InsertContentArgs {
+			return &InsertContentArgs{Content: v}
+		},
+		"InsertContentArgs.Content",
+	)
+}
+
+// MakeInsertContentArgsNameLens returns a [__lens.Lens] for the Name field of [InsertContentArgs]
+func MakeInsertContentArgsNameLens() __lens.Lens[InsertContentArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) string { return s.Name },
+		func(s InsertContentArgs, v string) InsertContentArgs { s.Name = v; return s },
+		"InsertContentArgs.Name",
+	)
+}
+
+// MakeInsertContentArgsNameLensO returns a [__lens_option.LensO] for the Name field of [InsertContentArgs]
+func MakeInsertContentArgsNameLensO() __lens_option.LensO[InsertContentArgs, string] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsNameLens())
+}
+
+// MakeInsertContentArgsNameRefLens returns a [__lens.Lens] for the Name field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsNameRefLens() __lens.Lens[*InsertContentArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) string { return s.Name },
+		func(s *InsertContentArgs, v string) *InsertContentArgs { s.Name = v; return s },
+		"(*InsertContentArgs).Name",
+	)
+}
+
+// MakeInsertContentArgsNameRefLensO returns a [__lens_option.LensO] for the Name field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsNameRefLensO() __lens_option.LensO[*InsertContentArgs, string] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsNameRefLens())
+}
+
+// MakeInsertContentArgsNamePrism returns a [__prism.Prism] for the Name field of [InsertContentArgs]
+func MakeInsertContentArgsNamePrism() __prism.Prism[InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) InsertContentArgs {
+			return InsertContentArgs{Name: v}
+		},
+		"InsertContentArgs.Name",
+	)
+}
+
+// MakeInsertContentArgsNameRefPrism returns a [__prism.Prism] for the Name field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsNameRefPrism() __prism.Prism[*InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Name) },
+		func(v string) *InsertContentArgs {
+			return &InsertContentArgs{Name: v}
+		},
+		"InsertContentArgs.Name",
+	)
+}
+
+// MakeInsertContentArgsTextLens returns a [__lens.Lens] for the Text field of [InsertContentArgs]
+func MakeInsertContentArgsTextLens() __lens.Lens[InsertContentArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) string { return s.Text },
+		func(s InsertContentArgs, v string) InsertContentArgs { s.Text = v; return s },
+		"InsertContentArgs.Text",
+	)
+}
+
+// MakeInsertContentArgsTextLensO returns a [__lens_option.LensO] for the Text field of [InsertContentArgs]
+func MakeInsertContentArgsTextLensO() __lens_option.LensO[InsertContentArgs, string] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsTextLens())
+}
+
+// MakeInsertContentArgsTextRefLens returns a [__lens.Lens] for the Text field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsTextRefLens() __lens.Lens[*InsertContentArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) string { return s.Text },
+		func(s *InsertContentArgs, v string) *InsertContentArgs { s.Text = v; return s },
+		"(*InsertContentArgs).Text",
+	)
+}
+
+// MakeInsertContentArgsTextRefLensO returns a [__lens_option.LensO] for the Text field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsTextRefLensO() __lens_option.LensO[*InsertContentArgs, string] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[string]())(MakeInsertContentArgsTextRefLens())
+}
+
+// MakeInsertContentArgsTextPrism returns a [__prism.Prism] for the Text field of [InsertContentArgs]
+func MakeInsertContentArgsTextPrism() __prism.Prism[InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) InsertContentArgs {
+			return InsertContentArgs{Text: v}
+		},
+		"InsertContentArgs.Text",
+	)
+}
+
+// MakeInsertContentArgsTextRefPrism returns a [__prism.Prism] for the Text field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsTextRefPrism() __prism.Prism[*InsertContentArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[string] { return _fromNonZero(s.Text) },
+		func(v string) *InsertContentArgs {
+			return &InsertContentArgs{Text: v}
+		},
+		"InsertContentArgs.Text",
+	)
+}
+
+// MakeInsertContentArgsCRLFLens returns a [__lens.Lens] for the CRLF field of [InsertContentArgs]
+func MakeInsertContentArgsCRLFLens() __lens.Lens[InsertContentArgs, bool] {
+	return __lens.MakeLensWithName(
+		func(s InsertContentArgs) bool { return s.CRLF },
+		func(s InsertContentArgs, v bool) InsertContentArgs { s.CRLF = v; return s },
+		"InsertContentArgs.CRLF",
+	)
+}
+
+// MakeInsertContentArgsCRLFLensO returns a [__lens_option.LensO] for the CRLF field of [InsertContentArgs]
+func MakeInsertContentArgsCRLFLensO() __lens_option.LensO[InsertContentArgs, bool] {
+	return __lens_option.FromIso[InsertContentArgs](__iso_option.FromZero[bool]())(MakeInsertContentArgsCRLFLens())
+}
+
+// MakeInsertContentArgsCRLFRefLens returns a [__lens.Lens] for the CRLF field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsCRLFRefLens() __lens.Lens[*InsertContentArgs, bool] {
+	return __lens.MakeLensStrictWithName(
+		func(s *InsertContentArgs) bool { return s.CRLF },
+		func(s *InsertContentArgs, v bool) *InsertContentArgs { s.CRLF = v; return s },
+		"(*InsertContentArgs).CRLF",
+	)
+}
+
+// MakeInsertContentArgsCRLFRefLensO returns a [__lens_option.LensO] for the CRLF field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsCRLFRefLensO() __lens_option.LensO[*InsertContentArgs, bool] {
+	return __lens_option.FromIso[*InsertContentArgs](__iso_option.FromZero[bool]())(MakeInsertContentArgsCRLFRefLens())
+}
+
+// MakeInsertContentArgsCRLFPrism returns a [__prism.Prism] for the CRLF field of [InsertContentArgs]
+func MakeInsertContentArgsCRLFPrism() __prism.Prism[InsertContentArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s InsertContentArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) InsertContentArgs {
+			return InsertContentArgs{CRLF: v}
+		},
+		"InsertContentArgs.CRLF",
+	)
+}
+
+// MakeInsertContentArgsCRLFRefPrism returns a [__prism.Prism] for the CRLF field of [InsertContentArgs] via a pointer receiver
+func MakeInsertContentArgsCRLFRefPrism() __prism.Prism[*InsertContentArgs, bool] {
+	_fromNonZero := __option.FromNonZero[bool]()
+	return __prism.MakePrismWithName(
+		func(s *InsertContentArgs) __option.Option[bool] { return _fromNonZero(s.CRLF) },
+		func(v bool) *InsertContentArgs {
+			return &InsertContentArgs{CRLF: v}
+		},
+		"InsertContentArgs.CRLF",
+	)
+}
+
+// MakeInsertContentArgsLenses creates a new [InsertContentArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeInsertContentArgsLenses() InsertContentArgsLenses {
+	return InsertContentArgsLenses{
+		// mandatory lenses
+		Path:    MakeInsertContentArgsPathLens(),
+		Line:    MakeInsertContentArgsLineLens(),
+		Content: MakeInsertContentArgsContentLens(),
+		Name:    MakeInsertContentArgsNameLens(),
+		Text:    MakeInsertContentArgsTextLens(),
+		CRLF:    MakeInsertContentArgsCRLFLens(),
+		// optional lenses
+		PathO:    MakeInsertContentArgsPathLensO(),
+		LineO:    MakeInsertContentArgsLineLensO(),
+		ContentO: MakeInsertContentArgsContentLensO(),
+		NameO:    MakeInsertContentArgsNameLensO(),
+		TextO:    MakeInsertContentArgsTextLensO(),
+		CRLFO:    MakeInsertContentArgsCRLFLensO(),
+	}
+}
+
+// MakeInsertContentArgsRefLenses creates a new [InsertContentArgsRefLenses] with [lenses] for all fields via a pointer to [InsertContentArgs]
+//
+// [lenses]: __lens.Lens
+func MakeInsertContentArgsRefLenses() InsertContentArgsRefLenses {
+	return InsertContentArgsRefLenses{
+		// mandatory lenses
+		Path:    MakeInsertContentArgsPathRefLens(),
+		Line:    MakeInsertContentArgsLineRefLens(),
+		Content: MakeInsertContentArgsContentRefLens(),
+		Name:    MakeInsertContentArgsNameRefLens(),
+		Text:    MakeInsertContentArgsTextRefLens(),
+		CRLF:    MakeInsertContentArgsCRLFRefLens(),
+		// optional lenses
+		PathO:    MakeInsertContentArgsPathRefLensO(),
+		LineO:    MakeInsertContentArgsLineRefLensO(),
+		ContentO: MakeInsertContentArgsContentRefLensO(),
+		NameO:    MakeInsertContentArgsNameRefLensO(),
+		TextO:    MakeInsertContentArgsTextRefLensO(),
+		CRLFO:    MakeInsertContentArgsCRLFRefLensO(),
+	}
+}
+
+// MakeInsertContentArgsPrisms creates a new [InsertContentArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeInsertContentArgsPrisms() InsertContentArgsPrisms {
+	return InsertContentArgsPrisms{
+		Path:    MakeInsertContentArgsPathPrism(),
+		Line:    MakeInsertContentArgsLinePrism(),
+		Content: MakeInsertContentArgsContentPrism(),
+		Name:    MakeInsertContentArgsNamePrism(),
+		Text:    MakeInsertContentArgsTextPrism(),
+		CRLF:    MakeInsertContentArgsCRLFPrism(),
+	}
+}
+
+// MakeInsertContentArgsRefPrisms creates a new [InsertContentArgsRefPrisms] with [prisms] for all fields via a pointer to [InsertContentArgs]
+//
+// [prisms]: __prism.Prism
+func MakeInsertContentArgsRefPrisms() InsertContentArgsRefPrisms {
+	return InsertContentArgsRefPrisms{
+		Path:    MakeInsertContentArgsPathRefPrism(),
+		Line:    MakeInsertContentArgsLineRefPrism(),
+		Content: MakeInsertContentArgsContentRefPrism(),
+		Name:    MakeInsertContentArgsNameRefPrism(),
+		Text:    MakeInsertContentArgsTextRefPrism(),
+		CRLF:    MakeInsertContentArgsCRLFRefPrism(),
+	}
+}
+
 // ListFilesArgsLenses provides [lenses] for accessing fields of [ListFilesArgs]
 //
 // [lenses]: __lens.Lens

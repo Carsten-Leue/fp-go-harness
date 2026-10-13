@@ -153,6 +153,8 @@ func Glob() effect.Kleisli[DirectoryDeps, string, string] {
 
 // globDefinition describes glob to the model, following the recorded
 // definition.
+//
+// It is wiring: a getter that builds the plain definition value for root.
 func globDefinition(root string) openai.FunctionDefinitionParam {
 	return openai.FunctionDefinitionParam{
 		Name:        GlobName,

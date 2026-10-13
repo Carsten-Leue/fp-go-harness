@@ -21,6 +21,8 @@ type Tool struct {
 // ToolRegistry maps tool names to their [Tool].
 type ToolRegistry = map[string]Tool
 
+// MakeTool is a leaf: the constructor of a [Tool] from its definition and
+// its call.
 func MakeTool(definition openai.FunctionDefinitionParam, call ToolCall) Tool {
 	return Tool{Definition: definition, Call: call}
 }
@@ -31,6 +33,7 @@ func toolDefinition(t Tool) openai.FunctionDefinitionParam {
 	return t.Definition
 }
 
+// toolCall is a leaf accessor, see [toolDefinition].
 func toolCall(t Tool) ToolCall {
 	return t.Call
 }
@@ -51,7 +54,7 @@ func ToToolRegistry() func([]Tool) ToolRegistry {
 	return R.FromArrayMap[Tool, string](Mg.Second[Tool]())(toolEntry())
 }
 
-// MakeToolRegistry is the variadic form of [ToToolRegistry].
+// MakeToolRegistry is wiring: the variadic form of [ToToolRegistry].
 func MakeToolRegistry(tools ...Tool) ToolRegistry {
 	return ToToolRegistry()(tools)
 }

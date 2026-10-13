@@ -34,10 +34,13 @@ func (d *toolDeps) GetToolCaller() ToolCaller {
 	return d.toolCaller
 }
 
+// MakeToolDeps is wiring: it combines a [ToolCaller] into [ToolDeps].
 func MakeToolDeps(tc ToolCaller) ToolDeps {
 	return &toolDeps{tc}
 }
 
+// AsToolDeps is wiring: it narrows any wider dependencies to [ToolDeps], for
+// use with [reader.Local] and [effect.Local].
 func AsToolDeps[R ToolDeps](r R) ToolDeps {
 	return r
 }
@@ -47,6 +50,7 @@ type errorResult struct {
 	Message string `json:"message"`
 }
 
+// makeErrorResult is a leaf: the constructor of an error result.
 func makeErrorResult(message string) errorResult {
 	return errorResult{Error: true, Message: message}
 }

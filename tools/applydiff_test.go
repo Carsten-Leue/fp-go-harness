@@ -339,11 +339,11 @@ func TestLineDistance(t *testing.T) {
 }
 
 func TestMatchesOf(t *testing.T) {
-	assert.Equal(t, [][]int{{0, 2}, {3, 5}}, matchesOf("a.")("a.ba."))
+	assert.Equal(t, [][]int{{0, 2}, {3, 5}}, matchesOf()("a.")("a.ba."))
 	// the search is literal: the dot matches only a dot
-	assert.Empty(t, matchesOf("a.")("ab"))
+	assert.Empty(t, matchesOf()("a.")("ab"))
 	// occurrences don't overlap
-	assert.Equal(t, [][]int{{0, 2}}, matchesOf("aa")("aaa"))
+	assert.Equal(t, [][]int{{0, 2}}, matchesOf()("aa")("aaa"))
 }
 
 func TestNearestMatch(t *testing.T) {
@@ -360,7 +360,7 @@ func TestNearestMatch(t *testing.T) {
 		"none":                            {DiffBlock{Search: "z"}, option.None[[]int]()},
 	} {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.want, nearestMatch(tc.block)(content))
+			assert.Equal(t, tc.want, nearestMatch()(tc.block)(content))
 		})
 	}
 }
@@ -430,7 +430,7 @@ func TestWritePatchedWith(t *testing.T) {
 
 	assert.Equal(t,
 		result.Of([]byte("a\r\n")),
-		writePatchedWith(fs.writeFile)(ApplyDiffArgs{Path: "p", Content: "a\n", CRLF: true})())
+		writePatchedWith()(fs.writeFile)(ApplyDiffArgs{Path: "p", Content: "a\n", CRLF: true})())
 	assert.Equal(t, map[string]string{"p": "a\r\n"}, fs.files)
 }
 

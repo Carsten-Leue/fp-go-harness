@@ -57,6 +57,8 @@ type BackgroundProcess struct {
 // process id.
 type ProcessTable = map[int]BackgroundProcess
 
+// MakeProcess is a leaf: the constructor of a [Process] that runs command in
+// the directory dir.
 func MakeProcess(command, dir string) Process {
 	return Process{Command: command, Dir: dir}
 }
@@ -98,16 +100,16 @@ func (d *processDeps) GetProcessTable() IORef[ProcessTable] {
 	return d.table
 }
 
-// MakeProcessDeps builds [ProcessDeps] that run commands with runProcess and
+// MakeProcessDeps is wiring: it builds [ProcessDeps] that run commands with runProcess and
 // start them with startProcess. table is the one startProcess registers its
 // processes in.
 func MakeProcessDeps(runProcess RunProcess, startProcess StartProcess, table IORef[ProcessTable]) ProcessDeps {
 	return &processDeps{runProcess, startProcess, table}
 }
 
-// processDepsIn builds [ProcessDeps] for a shell whose background processes
-// write their logs to logDir: the table is read twice, by the starter that
-// registers processes in it and by the getter.
+// processDepsIn is wiring: it builds [ProcessDeps] for a shell whose
+// background processes write their logs to logDir. The table is read twice,
+// by the starter that registers processes in it and by the getter.
 func processDepsIn(shell []string, logDir string) Reader[IORef[ProcessTable], ProcessDeps] {
 	return F.Pipe1(
 		F.Flow2(StartShell(shell, logDir), F.Curry3(MakeProcessDeps)(RunShell()(shell))),
@@ -115,7 +117,7 @@ func processDepsIn(shell []string, logDir string) Reader[IORef[ProcessTable], Pr
 	)
 }
 
-// MakeDefaultProcessDeps builds [ProcessDeps] that run commands in the shell
+// MakeDefaultProcessDeps is wiring: it builds [ProcessDeps] that run commands in the shell
 // of the operating system, see [DefaultShell]. Background processes write
 // their output to a new file in logDir, which is created when needed. The
 // model reads these files with read_file, so logDir should lie inside the
@@ -130,6 +132,8 @@ func MakeDefaultProcessDeps(logDir string) IO[ProcessDeps] {
 	)
 }
 
+// AsProcessDeps is wiring: it narrows any wider dependencies to [ProcessDeps],
+// for use with [reader.Local] and [effect.Local].
 func AsProcessDeps[T ProcessDeps](r T) ProcessDeps {
 	return r
 }
@@ -154,15 +158,15 @@ func DefaultShell() []string {
 	)
 }
 
-// isExit tests for the errors of a command that ran to its end: a non-zero
+// isExit is a leaf: it tests for the errors of a command that ran to its end: a non-zero
 // exit code, or output pipes still held open by a child process.
 func isExit(err error) bool {
 	var exit *exec.ExitError
 	return errors.As(err, &exit) || errors.Is(err, exec.ErrWaitDelay)
 }
 
-// shellArgs are the arguments that hand a command line to shell: the leading
-// arguments of the shell followed by the command line.
+// shellArgs is a leaf: one formatter over the shell and the command line. It
+// is the leading arguments of the shell followed by the command line.
 func shellArgs(shell []string, command string) []string {
 	return append(append([]string(nil), shell[1:]...), command)
 }
@@ -206,7 +210,7 @@ func createLog(dir string) (*os.File, error) {
 	return os.CreateTemp(dir, logPattern)
 }
 
-// discardLog closes and removes the log of a process that did not start.
+// discardLog is a leaf, a raw I/O sink: it closes and removes the log of a process that did not start.
 func discardLog(log *os.File) {
 	_ = log.Close()
 	_ = os.Remove(log.Name())
@@ -250,10 +254,10 @@ func startIn(shell []string, logDir string, table IORef[ProcessTable]) func(cont
 	}
 }
 
-// StartShell builds a [StartProcess] that hands the command line to a shell,
-// a program followed by its leading arguments, e.g. ["sh", "-c"], writes the
-// output of each process to a new file in logDir and keeps the running
-// processes in the table it reads.
+// StartShell is wiring: it builds the [StartProcess] dependency, which hands
+// the command line to a shell, a program followed by its leading arguments,
+// e.g. ["sh", "-c"], writes the output of each process to a new file in
+// logDir and keeps the running processes in the table it reads.
 func StartShell(shell []string, logDir string) Reader[IORef[ProcessTable], StartProcess] {
 	return F.Flow2(
 		F.Bind12of3(startIn)(shell, logDir),

@@ -171,9 +171,9 @@ func TestIsSuccess(t *testing.T) {
 }
 
 func TestSection(t *testing.T) {
-	assert.Equal(t, option.Some("L:\na\nb"), section("L:\n")("a\nb\r\n\r\n"))
-	assert.Equal(t, option.None[string](), section("L:\n")("\r\n"))
-	assert.Equal(t, option.None[string](), section("L:\n")(""))
+	assert.Equal(t, option.Some("L:\na\nb"), section()("L:\n")("a\nb\r\n\r\n"))
+	assert.Equal(t, option.None[string](), section()("L:\n")("\r\n"))
+	assert.Equal(t, option.None[string](), section()("L:\n")(""))
 }
 
 func TestOutputSections(t *testing.T) {

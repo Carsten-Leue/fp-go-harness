@@ -23,13 +23,14 @@ recorded agent sessions.
   ask-mode system prompt. The model works in the current directory with all tools,
   without approval yet (PLAN.md I1). The CLI prints the answer and the token usage.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
-  `apply_diff` and `execute_command`, each with its definition for the model, confined to the workspace
+  `apply_diff`, `insert_content` and `execute_command`, each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
   content that is shorter than its announced `line_count`. `search_and_replace` replaces
   literal text or a regular expression, optionally within a line range, and fails when
   nothing matches. `apply_diff` applies `SEARCH`/`REPLACE` blocks in order, each to the
   occurrence nearest its `:start_line:`, and leaves the file unchanged when a block doesn't
-  match. `execute_command` waits
+  match. `insert_content` inserts lines before a given line, or appends them for line 0.
+  `execute_command` waits
   for a command, or starts it in the background and returns its process id and log file
   under `.fp-go-harness/logs` in the workspace.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
@@ -75,7 +76,7 @@ replay tests.
 |---|---|---|
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
-| C | Core tools | 🚧 C1–C9 done, C10–C11 open |
+| C | Core tools | 🚧 C1–C10 done, C11 open |
 | D | Prompt assembly | ⏳ open |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
