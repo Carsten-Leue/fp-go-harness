@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// envRecordingsDir names the directory with the recorded Bob logs PLAN.md was
+// envRecordingsDir names the directory with the recorded logs PLAN.md was
 // derived from. They are not part of the repository; tests that need them are
 // skipped when it is not set.
 const envRecordingsDir = "REPLAY_RECORDINGS_DIR"
@@ -45,6 +45,19 @@ func recordingsDir(t *testing.T) string {
 		t.Skip(err)
 	}
 	return dir
+}
+
+// recordingFile finds the one recorded log whose name ends in suffix, or skips
+// the test when it is not available.
+func recordingFile(t *testing.T, suffix string) string {
+	t.Helper()
+
+	files, err := filepath.Glob(filepath.Join(recordingsDir(t), "*"+suffix))
+	require.NoError(t, err)
+	if len(files) != 1 {
+		t.Skipf("recording *%s not available", suffix)
+	}
+	return files[0]
 }
 
 const sampleLog = `{"ts":"2026-09-24T13:23:12.408Z","level":"info","module":"Extension","msg":"Activating extension"}
@@ -163,10 +176,7 @@ func TestReadLogFileMissing(t *testing.T) {
 }
 
 func TestReadRecordedLog(t *testing.T) {
-	path := filepath.Join(recordingsDir(t), "bob-bob4z-shell-proxy-p98004-20260924T152312.log")
-	if _, err := os.Stat(path); err != nil {
-		t.Skipf("recording not available: %v", err)
-	}
+	path := recordingFile(t, "-p98004-20260924T152312.log")
 
 	records, err := result.Unwrap(F.Pipe2(path, ReadLogFile(), collect))
 	require.NoError(t, err)

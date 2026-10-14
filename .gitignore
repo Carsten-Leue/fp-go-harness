@@ -27,7 +27,7 @@ go.work.sum
 .vscode/
 .idea/
 
-# Bob scratch files
+# Agent scratch files
 .bob/tmp/
 
 # Logs of background commands started by the harness

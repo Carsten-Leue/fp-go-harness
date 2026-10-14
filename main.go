@@ -31,7 +31,7 @@ import (
 const maxIterations = 25
 
 // maxToolOutput bounds the bytes of a single tool result sent to the model.
-// The recorded Bob sessions contain results of up to 37 KB.
+// The recorded sessions contain results of up to 37 KB.
 const maxToolOutput = 50_000
 
 // logDir is where background commands write their output, relative to the

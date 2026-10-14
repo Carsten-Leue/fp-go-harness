@@ -2,7 +2,6 @@ package replay
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -152,10 +151,7 @@ func TestPayloadRecordings(t *testing.T) {
 }
 
 func TestPayloadRecordingResponsesHaveTasks(t *testing.T) {
-	path := filepath.Join(recordingsDir(t), "bob-bob4z-shell-proxy-p7204-20261006T082140.1.log")
-	if _, err := os.Stat(path); err != nil {
-		t.Skipf("recording not available: %v", err)
-	}
+	path := recordingFile(t, "-p7204-20261006T082140.1.log")
 
 	responses, err := result.Unwrap(iterresult.Collect(Responses()(ReadLogFile()(path)))())
 	require.NoError(t, err)
