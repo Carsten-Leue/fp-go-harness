@@ -161,8 +161,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
   In the `prompt` package, `RenderSections` is `A.FoldMap` over `RenderSection` with
   `S.IntersperseMonoid("\n\n")`: a blank line between sections, and an empty rendering adds no
   separator. Not wired into the CLI yet (D2–D5).
-- [ ] **D2 Static sections.** Embed (`//go:embed`) role_definition, base_rules, tool_use and markdown_rules as files
+- [x] **D2 Static sections.** Embed (`//go:embed`) role_definition, base_rules, tool_use and markdown_rules as files
   under `prompts/`, as `ask.txt` is today.
+  `prompt.StaticSections()` returns them in the recorded order (role_definition, tool_use, markdown_rules,
+  base_rules) from `prompt/prompts/*.txt`, with LF line endings and no trailing line break. The texts were
+  written without comparing them to the recordings. Not wired into the CLI yet (D5).
 - [ ] **D3 `environment_info`.** Build it as an `Effect[EnvInfoDeps, Section]` from OS, shell, workspace root and date.
 - [ ] **D4 `project_rules`.** Read `AGENTS.md` (and `.bob/rules*`) from the workspace and wrap it as `<agents_md><rule>…`.
   A missing file gives `option.None`, which yields no section.

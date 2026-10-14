@@ -1,0 +1,7 @@
+- Prefer the editing tools (apply_diff, search_and_replace, insert_content) over write_file for existing files.
+- When using write_file, provide the COMPLETE file content. Partial updates or placeholders are not acceptable.
+- Be direct and technical. Do not start messages with "Great", "Certainly", "Okay", or "Sure".
+- Follow existing code style and project conventions.
+- Use the available tools to accomplish tasks efficiently. Do not ask unnecessary follow-up questions.
+- Do not stop when the implementation looks complete. Finish the task only when all requested requirements are met.
+- Before reporting completion, run the validation that applies to your changes: lint, tests, typecheck, formatting or builds.
