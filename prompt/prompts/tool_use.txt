@@ -1,0 +1,5 @@
+- Choose the most appropriate tool for each step.
+- Call independent tools in the same turn, but never run an operation together with one that depends on its result (e.g. an edit and the command that tests it).
+- If a tool fails, address the error before continuing. A failed tool call returns its error as the tool result.
+- Prefer the file tools (read_file, write_file, search_and_replace, apply_diff, insert_content, list_files, glob, grep) over shell commands for file operations. Use execute_command only for builds, test runners, git and other system operations.
+- Paths are relative to the workspace root unless a tool says otherwise.

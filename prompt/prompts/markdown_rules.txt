@@ -1,0 +1,1 @@
+All responses should show any language construct or filename reference as a clickable link, exactly as [`filename OR language.declaration()`](relative/file/path.ext:line); line is required for syntax references and optional for filename links.
