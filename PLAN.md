@@ -172,8 +172,13 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `MakeDefaultEnvInfoDeps` uses `runtime.GOOS`/`GOARCH` and `io.Now`. The body follows the recorded
   `### Workspace Info` / `### Command Execution Environment` headings; the OS release is not included.
   Not wired into the CLI yet (D5).
-- [ ] **D4 `project_rules`.** Read `AGENTS.md` (and `.bob/rules*`) from the workspace and wrap it as `<agents_md><rule>…`.
+- [x] **D4 `project_rules`.** Read `AGENTS.md` (and `.bob/rules*`) from the workspace and wrap it as `<agents_md><rule>…`.
   A missing file gives `option.None`, which yields no section.
+  `prompt.ProjectRules()` is an `Effect[ProjectRulesDeps, Option[Section]]` (workspace, `tools.FileDeps`,
+  `tools.WalkDeps`). `AGENTS.md` becomes `<agents_md><rule>…</rule></agents_md>`, followed by one `<rule>` per
+  file directly in `.bob/rules/`, in lexical order. Missing or empty files and a missing directory are left
+  out; other read errors fail. Mode-specific `.bob/rules-<mode>/` directories wait for D5. Not wired into the
+  CLI yet (D5).
 - [ ] **D5 Mode definitions.** Generalise [openai/modes.go](openai/modes.go) to a `Mode{ID, Name, Prompt, AllowedTools}`
   table (Agent, Plan, Ask). The system prompt and tool list for a mode are
   `Effect[ModeDeps, ChatCompletionNewParams]`.
