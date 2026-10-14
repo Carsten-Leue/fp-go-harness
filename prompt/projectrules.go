@@ -6,7 +6,6 @@ import (
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/file"
 	F "github.com/IBM/fp-go/v2/function"
@@ -93,17 +92,22 @@ func inWorkspace(name string) Effect[ProjectRulesDeps, string] {
 	))
 }
 
-// readRule reads the rule in the file at the absolute path. A missing or
-// empty file gives None; the text has LF line endings and no trailing line
-// breaks. It is an I/O leaf and keeps its parameter, as tools' walkDir does.
-func readRule(path string) Effect[ProjectRulesDeps, Option[string]] {
-	return F.Pipe2(
-		effect.Asks(ProjectRulesDeps.GetReadFile),
-		effect.ChainThunkK[ProjectRulesDeps](F.Flow3(
-			reader.Read[ioresult.IOResult[[]byte]](path),
-			missingAsNone[[]byte](),
-			thunk.FromIOResult[Option[[]byte]],
-		)),
+// readOptional lifts a file system access behind a getter, a function of the
+// path, into an effect that gives None for a missing path. Flipping the getter
+// turns the path into the reader of the dependencies.
+func readOptional[T any](get Reader[ProjectRulesDeps, ioresult.Kleisli[string, T]]) effect.Kleisli[ProjectRulesDeps, string, Option[T]] {
+	return F.Flow3(
+		F.Flip(get),
+		effect.Asks[ProjectRulesDeps, ioresult.IOResult[T]],
+		effect.ChainIOResultK[ProjectRulesDeps](missingAsNone[T]()),
+	)
+}
+
+// readRule reads the rule in the file at an absolute path. A missing or empty
+// file gives None; the text has LF line endings and no trailing line breaks.
+func readRule() effect.Kleisli[ProjectRulesDeps, string, Option[string]] {
+	return F.Flow2(
+		readOptional(ProjectRulesDeps.GetReadFile),
 		effect.Map[ProjectRulesDeps](option.Chain(F.Flow3(
 			bytesToString,
 			normalizeBody(),
@@ -112,25 +116,46 @@ func readRule(path string) Effect[ProjectRulesDeps, Option[string]] {
 	)
 }
 
-// ruleFiles lists the absolute paths of the files directly in dir, in the
-// order of the walker (lexical for [tools.WalkFS]). A missing directory has
-// no files. It is an I/O leaf and keeps its parameter, as tools' walkDir does.
-func ruleFiles(dir string) Effect[ProjectRulesDeps, []string] {
-	lenses := tools.MakeFileEntryLenses()
+// The non-recursive walker, and the absolute paths of the files of a listing.
+type (
+	walkFiles   = ioresult.Kleisli[string, []tools.FileEntry]
+	listedFiles = func([]tools.FileEntry) []string
+)
 
-	return F.Pipe2(
-		effect.Asks(ProjectRulesDeps.GetWalkDir),
-		effect.ChainThunkK[ProjectRulesDeps](F.Flow4(
-			reader.Read[ioresult.Kleisli[string, []tools.FileEntry]](false),
-			reader.Read[ioresult.IOResult[[]tools.FileEntry]](dir),
-			missingAsNone[[]tools.FileEntry](),
-			thunk.FromIOResult[Option[[]tools.FileEntry]],
+// listFiles lists the files directly in an absolute directory, relative to
+// it. A missing directory has no files, subdirectories are skipped.
+func listFiles() effect.Kleisli[ProjectRulesDeps, string, []tools.FileEntry] {
+	return F.Flow2(
+		readOptional(F.Flow2(
+			ProjectRulesDeps.GetWalkDir,
+			reader.Read[walkFiles](false),
 		)),
-		effect.Map[ProjectRulesDeps](F.Flow3(
+		effect.Map[ProjectRulesDeps](F.Flow2(
 			option.GetOrElse(A.Empty[tools.FileEntry]),
-			A.Filter(P.Not(lenses.IsDir.Get)),
-			A.Map(F.Flow2(lenses.Path.Get, F.Flip(file.Join)(dir))),
+			A.Filter(P.Not(tools.MakeFileEntryIsDirLens().Get)),
 		)),
+	)
+}
+
+// filesOf reads the directory and joins it to the paths of its listing.
+func filesOf() Reader[string, listedFiles] {
+	return F.Pipe1(
+		F.Flip(file.Join),
+		reader.Map[string](F.Flow2(
+			reader.Local[string](tools.MakeFileEntryPathLens().Get),
+			A.Map[tools.FileEntry, string],
+		)),
+	)
+}
+
+// ruleFiles lists the absolute paths of the files directly in a directory, in
+// the order of the walker (lexical for [tools.WalkFS]). A missing directory
+// has no files. The directory is read twice, by [listFiles] and by [filesOf].
+func ruleFiles() effect.Kleisli[ProjectRulesDeps, string, []string] {
+	return F.Pipe2(
+		filesOf(),
+		reader.Map[string](effect.Map[ProjectRulesDeps, []tools.FileEntry, []string]),
+		reader.Ap[Effect[ProjectRulesDeps, []string]](listFiles()),
 	)
 }
 
@@ -153,7 +178,7 @@ func agentsMdSection() func(string) Section {
 func agentsMd() Effect[ProjectRulesDeps, []Section] {
 	return F.Pipe2(
 		inWorkspace(AgentsMdFile),
-		effect.Chain(readRule),
+		effect.Chain(readRule()),
 		effect.Map[ProjectRulesDeps](option.Fold(
 			A.Empty[Section],
 			F.Flow2(agentsMdSection(), A.Of[Section]),
@@ -166,8 +191,8 @@ func agentsMd() Effect[ProjectRulesDeps, []Section] {
 func rulesDirSections() Effect[ProjectRulesDeps, []Section] {
 	return F.Pipe3(
 		inWorkspace(RulesDir),
-		effect.Chain(ruleFiles),
-		effect.Chain(effect.TraverseArray(readRule)),
+		effect.Chain(ruleFiles()),
+		effect.Chain(effect.TraverseArray(readRule())),
 		effect.Map[ProjectRulesDeps](F.Flow2(
 			option.CompactArray[string],
 			A.Map(ruleSection()),
