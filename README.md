@@ -38,6 +38,9 @@ recorded agent sessions.
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
   `ChatCompletionDeps` answer each request with the next recorded response.
+- **Prompt sections**: `prompt.RenderSections` renders tagged sections as
+  `<tag>\nbody\n</tag>` and joins them with a blank line through a string monoid. It is
+  the base of the system prompt assembly in Phase D and is not wired into the CLI yet.
 
 ## 🚀 Quick start
 
@@ -65,6 +68,7 @@ replay tests.
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
+| [`prompt`](prompt/) | Tagged system prompt sections and their monoid |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
 | [`env`](env/) | Environment variables from the process and `.env` |
 | [`http`](http/) | HTTP client dependency |
@@ -78,7 +82,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ open |
+| D | Prompt assembly | ⏳ D1 done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |

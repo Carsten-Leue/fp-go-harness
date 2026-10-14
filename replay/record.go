@@ -15,7 +15,7 @@ import (
 	N "github.com/IBM/fp-go/v2/number"
 )
 
-// Record is one line of a recorded Bob log.
+// Record is one line of a recorded log.
 //
 // Data is kept undecoded because its shape depends on Module and Msg.
 //

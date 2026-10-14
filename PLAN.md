@@ -1,6 +1,6 @@
-# PLAN: from `fp-go-harness` to a Bob-style agent harness
+# PLAN: from `fp-go-harness` to a complete coding-agent harness
 
-This plan was worked out from the recorded Bob sessions in `H:\backup\bob-conversations`
+This plan was worked out from the recorded agent sessions
 (7 JSON-lines logs, 2026-09-24 … 2026-10-06). Each phase is a list of small steps, and each
 step is meant to fit in one PR with its own test.
 
@@ -8,7 +8,7 @@ step is meant to fit in one PR with its own test.
 
 ## 0. What the recordings show
 
-What a Bob session does, taken from the `HarnessProvider.payload`, `ChatManager` and `Gateway` log records:
+What a recorded session does, taken from the `HarnessProvider.payload`, `ChatManager` and `Gateway` log records:
 
 | Aspect | What the recordings show |
 |---|---|
@@ -98,7 +98,7 @@ These come before the real tools so that every later step can be tested against 
 - [x] **B3 Task grouping.** Group the records by `taskId` into `[]Turn` (request, response, invoked tools).
 - [x] **B4 Replay `ChatCompletionDeps`.** Make a fake that answers with the recorded responses in order.
   Then `session.Run` replays a recorded task end to end without a network.
-- [ ] ~~**B5 Copy the fixtures.**~~ *Skipped:* the recordings in `H:\backup\bob-conversations` are not
+- [ ] ~~**B5 Copy the fixtures.**~~ *Skipped:* the recordings are not
   available. Copy 2–3 redacted tasks into `testdata/` (no tokens or internal URLs).
   Remove secrets with an endomorphism over the parsed records.
 
@@ -156,8 +156,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
 
 ### Phase D: Prompt assembly
 
-- [ ] **D1 `PromptSection` monoid.** Define `type Section = Pair[tag, body]`, render it as `<tag>\nbody\n</tag>` and
+- [x] **D1 `PromptSection` monoid.** Define `type Section = Pair[tag, body]`, render it as `<tag>\nbody\n</tag>` and
   concatenate sections with `A.Fold` and a string monoid.
+  In the `prompt` package, `RenderSections` is `A.FoldMap` over `RenderSection` with
+  `S.IntersperseMonoid("\n\n")`: a blank line between sections, and an empty rendering adds no
+  separator. Not wired into the CLI yet (D2–D5).
 - [ ] **D2 Static sections.** Embed (`//go:embed`) role_definition, base_rules, tool_use and markdown_rules as files
   under `prompts/`, as `ask.txt` is today.
 - [ ] **D3 `environment_info`.** Build it as an `Effect[EnvInfoDeps, Section]` from OS, shell, workspace root and date.
@@ -238,10 +241,10 @@ and a text result. Validation errors (such as "path must be absolute") come back
 | Milestone | Steps | Result |
 |---|---|---|
 | M1 "Hello agent" | A1–A5 | A CLI that answers questions with tools, without hanging |
-| M2 "Replayable" | B1–B5 | Recorded Bob tasks replay offline in `go test` |
-| M3 "Can code" | C1–C11, D1–D7 | Reads, searches, edits files and runs commands with a Bob-like prompt |
+| M2 "Replayable" | B1–B5 | Recorded tasks replay offline in `go test` |
+| M3 "Can code" | C1–C11, D1–D7 | Reads, searches, edits files and runs commands with a tagged system prompt |
 | M4 "Conversational" | E1–E5, F1–F4 | Streaming REPL with multiple turns, steering and persistence |
-| M5 "Bob parity" | F5, G1–G5, H1–H6, I1–I3 | MCP, skills, modes, subagents and approvals. Can run a session like the recorded PR-review task |
+| M5 "Feature parity" | F5, G1–G5, H1–H6, I1–I3 | MCP, skills, modes, subagents and approvals. Can run a session like the recorded PR-review task |
 
 ## 4. Definition of done (every step)
 

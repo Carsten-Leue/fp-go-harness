@@ -20,7 +20,7 @@ import (
 // GlobName is the name under which the model calls the glob tool.
 const GlobName = "glob"
 
-// maxGlobResults caps the number of files a glob call returns, as Bob does.
+// maxGlobResults caps the number of files a glob call returns, as in the recordings.
 const maxGlobResults = 100
 
 // globTruncated is appended to a glob result that hit [maxGlobResults].

@@ -736,7 +736,7 @@ Translate the MCP examples to these aliases when you copy a pattern.
 The server runs as a `go tool` of this module (`github.com/IBM/fp-go/gen/v2`, listed in the
 `tool` block of `go.mod`). Check the MCP configuration of the client you are running in:
 
-- Bob: [`.bob/mcp.json`](../../mcp.json)
+- [`.bob/mcp.json`](../../mcp.json)
 - Claude Code: [`.mcp.json`](../../../.mcp.json) in the repository root
 
 If the `fp-go` entry is missing, add it (merge into `mcpServers`, keep the other servers):
@@ -756,7 +756,7 @@ If the `fp-go` entry is missing, add it (merge into `mcpServers`, keep the other
 }
 ```
 
-`cwd`, `alwaysAllow` and `disabled` are Bob settings; for `.mcp.json` leave them out. If
+`cwd`, `alwaysAllow` and `disabled` are settings of the client that reads `.bob/mcp.json`; for `.mcp.json` leave them out. If
 the entry exists but has `"disabled": true`, set it to `false`.
 
 Then do the warm-up below and ask the user to **restart the session** (or reload the

@@ -49,7 +49,7 @@ func joinLines() func([]string) string {
 }
 
 // listingOf reads the name of the directory and renders its entries in the
-// format of Bob: "Directory listing for <dir>:\n\n<path>\n...". The joined
+// format of the recordings: "Directory listing for <dir>:\n\n<path>\n...". The joined
 // names and the header are two independent readers over the name, composed
 // in the order they run.
 func listingOf() Reader[string, func([]FileEntry) string] {

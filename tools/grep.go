@@ -34,7 +34,7 @@ import (
 const GrepName = "grep"
 
 // maxGrepResults caps the number of matches, or of files with
-// files_with_matches, that a grep call shows, as Bob does.
+// files_with_matches, that a grep call shows, as in the recordings.
 const maxGrepResults = 100
 
 // gitignoreFile is the name of the files whose patterns grep skips.

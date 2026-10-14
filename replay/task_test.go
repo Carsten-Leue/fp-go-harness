@@ -2,8 +2,6 @@ package replay
 
 import (
 	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	F "github.com/IBM/fp-go/v2/function"
@@ -187,10 +185,7 @@ func TestGroupTasksInvalidToolInvocationIsSkipped(t *testing.T) {
 // checks the expected task/turn counts. It is skipped when the recordings
 // directory is not configured.
 func TestGroupTasksRecording(t *testing.T) {
-	path := filepath.Join(recordingsDir(t), "bob-bob4z-shell-proxy-p7204-20261006T082140.1.log")
-	if _, err := os.Stat(path); err != nil {
-		t.Skipf("recording not available: %v", err)
-	}
+	path := recordingFile(t, "-p7204-20261006T082140.1.log")
 
 	tasks, err := result.Unwrap(F.Pipe2(path, LoadLogFile(), ioresult.ChainResultK(GroupTasks()))())
 	require.NoError(t, err)

@@ -28,10 +28,10 @@ func TestRedactText(t *testing.T) {
 		{"embedded json token", `{"refresh_token":"r-123","x":1}`, `{"refresh_token":"<redacted>","x":1}`},
 		{"embedded json cookie and api key", `{"cookie":"sid=abc","x-api-key":"k-1"}`, `{"cookie":"<redacted>","x-api-key":"<redacted>"}`},
 		{"email", `mail jane.doe@corp.example.org now`, `mail user@example.com now`},
-		{"ibm host keeps path", `GET https://api.us-east.bob.ibm.com/admin/v1/profile`, `GET https://redacted.example.com/admin/v1/profile`},
+		{"ibm host keeps path", `GET https://api.us-east.example.ibm.com/admin/v1/profile`, `GET https://redacted.example.com/admin/v1/profile`},
 		{"instana", `https://prod-x.instana.io/api`, `https://redacted.example.com/api`},
 		{"private ip", `http://192.168.178.201:8080/app`, `http://192.0.2.1:8080/app`},
-		{"windows home", `C:\Users\JaneDoe\.bob\logs`, `C:\Users\user\.bob\logs`},
+		{"windows home", `C:\Users\JaneDoe\.agent\logs`, `C:\Users\user\.agent\logs`},
 		{"windows url home", `file:///c:/Users/JaneDoe/AppData`, `file:///c:/Users/user/AppData`},
 		{"unix home", `/home/jane/src`, `/home/user/src`},
 		{"public host unchanged", `https://json-schema.org/draft`, `https://json-schema.org/draft`},
@@ -53,7 +53,7 @@ func TestRedact(t *testing.T) {
 	rec := Record{
 		Module: "Gateway",
 		Msg:    "HTTP request for jane@corp.example.org",
-		Data: json.RawMessage(`{"url":"https://api.dev.bob.ibm.com/v1/chat/completions?x=<a>","headers":{"Authorization":"Bearer secret","Accept":"*/*"},` +
+		Data: json.RawMessage(`{"url":"https://api.dev.example.ibm.com/v1/chat/completions?x=<a>","headers":{"Authorization":"Bearer secret","Accept":"*/*"},` +
 			`"messages":[{"content":"Bearer secret\ncarsten@corp.example.org"}],"n":12345678901234567890,"ok":true,"none":null}`),
 	}
 
