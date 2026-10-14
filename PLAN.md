@@ -166,7 +166,12 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `prompt.StaticSections()` returns them in the recorded order (role_definition, tool_use, markdown_rules,
   base_rules) from `prompt/prompts/*.txt`, with LF line endings and no trailing line break. The texts were
   written without comparing them to the recordings. Not wired into the CLI yet (D5).
-- [ ] **D3 `environment_info`.** Build it as an `Effect[EnvInfoDeps, Section]` from OS, shell, workspace root and date.
+- [x] **D3 `environment_info`.** Build it as an `Effect[EnvInfoDeps, Section]` from OS, shell, workspace root and date.
+  `prompt.EnvironmentInfo()` reads the OS, architecture, shell and workspace root as a `Reader` over
+  `EnvInfoDeps` (which embeds `tools.WorkspaceDeps`) and the clock as an `IO` getter, so tests fix the date.
+  `MakeDefaultEnvInfoDeps` uses `runtime.GOOS`/`GOARCH` and `io.Now`. The body follows the recorded
+  `### Workspace Info` / `### Command Execution Environment` headings; the OS release is not included.
+  Not wired into the CLI yet (D5).
 - [ ] **D4 `project_rules`.** Read `AGENTS.md` (and `.bob/rules*`) from the workspace and wrap it as `<agents_md><rule>…`.
   A missing file gives `option.None`, which yields no section.
 - [ ] **D5 Mode definitions.** Generalise [openai/modes.go](openai/modes.go) to a `Mode{ID, Name, Prompt, AllowedTools}`

@@ -41,8 +41,10 @@ recorded agent sessions.
 - **Prompt sections**: `prompt.RenderSections` renders tagged sections as
   `<tag>\nbody\n</tag>` and joins them with a blank line through a string monoid.
   `prompt.StaticSections` holds the embedded `role_definition`, `tool_use`,
-  `markdown_rules` and `base_rules` sections. They are the base of the system prompt
-  assembly in Phase D and are not wired into the CLI yet.
+  `markdown_rules` and `base_rules` sections, and `prompt.EnvironmentInfo` builds the
+  `environment_info` section (workspace root, OS, architecture, shell, date) as an
+  `Effect` over `EnvInfoDeps`. They are the base of the system prompt assembly in
+  Phase D and are not wired into the CLI yet.
 
 ## 🚀 Quick start
 
@@ -70,7 +72,7 @@ replay tests.
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
-| [`prompt`](prompt/) | Tagged system prompt sections, their monoid and the embedded static sections |
+| [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections and `environment_info` |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
 | [`env`](env/) | Environment variables from the process and `.env` |
 | [`http`](http/) | HTTP client dependency |
@@ -84,7 +86,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ D1–D2 done |
+| D | Prompt assembly | ⏳ D1–D3 done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
