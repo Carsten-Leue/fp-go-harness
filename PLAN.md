@@ -156,8 +156,11 @@ and a text result. Validation errors (such as "path must be absolute") come back
 
 ### Phase D: Prompt assembly
 
-- [ ] **D1 `PromptSection` monoid.** Define `type Section = Pair[tag, body]`, render it as `<tag>\nbody\n</tag>` and
+- [x] **D1 `PromptSection` monoid.** Define `type Section = Pair[tag, body]`, render it as `<tag>\nbody\n</tag>` and
   concatenate sections with `A.Fold` and a string monoid.
+  In the `prompt` package, `RenderSections` is `A.FoldMap` over `RenderSection` with
+  `S.IntersperseMonoid("\n\n")`: a blank line between sections, and an empty rendering adds no
+  separator. Not wired into the CLI yet (D2–D5).
 - [ ] **D2 Static sections.** Embed (`//go:embed`) role_definition, base_rules, tool_use and markdown_rules as files
   under `prompts/`, as `ask.txt` is today.
 - [ ] **D3 `environment_info`.** Build it as an `Effect[EnvInfoDeps, Section]` from OS, shell, workspace root and date.
