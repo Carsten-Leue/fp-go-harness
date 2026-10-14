@@ -32,7 +32,8 @@ recorded agent sessions.
   match. `insert_content` inserts lines before a given line, or appends them for line 0.
   `execute_command` waits
   for a command, or starts it in the background and returns its process id and log file
-  under `.fp-go-harness/logs` in the workspace.
+  under `.fp-go-harness/logs` in the workspace. The CLI cuts every tool result, including
+  error text, to 50,000 bytes and adds a note that the output was truncated.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -76,7 +77,7 @@ replay tests.
 |---|---|---|
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
-| C | Core tools | 🚧 C1–C10 done, C11 open |
+| C | Core tools | ✅ done |
 | D | Prompt assembly | ⏳ open |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |

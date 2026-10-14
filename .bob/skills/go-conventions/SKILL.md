@@ -236,7 +236,11 @@ pair.MapHead[Tool](F.Flow2(toolDefinition, nameLens.Get))
 - **Function-typed fields can't be lensed.** For a field such as `Call ToolCall` (a
   `Kleisli` alias) the generator emits `LensO`s that need `comparable`, or lenses over
   `any`. Don't annotate such a struct; write minimal leaf accessors and say why in a
-  comment (see `tools.Tool`).
+  comment (see `tools.Tool`). When a field is changed, not only read, build its lens by
+  hand from those leaves: `L.MakeLens(getter, F.Uncurry2(F.Flow2(otherGetter,
+  F.Curry2(Make))))`, named `Make<Type><Field>Lens` like a generated one
+  (`tools.MakeToolCallLens`). Its `Modify` replaces the rebuild
+  `t ↦ Make(get1(t), f(get2(t)))`.
 - After regenerating, check `git diff` of the generated files and run `go build ./...`.
 
 ## HTTP header names and MIME types

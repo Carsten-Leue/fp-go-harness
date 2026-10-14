@@ -132,6 +132,13 @@ Don't swap the stages to make `reader.Map[…]` fit instead; it reads backwards.
 first stage also post-composes with `reader.Map[[]FileEntry](joinLines())`.
 [tools/glob.go](tools/glob.go) `globListing` shows `reader.Local` for pre-composition.
 
+**When both stages are endomorphisms** (`Reader[E, Endomorphism[T]]`), their composition
+is a monoid: `reader.ApplicativeMonoid[E](endomorphism.Monoid[T]()).Concat(second, first)`
+replaces the `Map` / `Compose` / `Ap` triple. `Concat` runs right to left, so the stage
+that runs first is the *last* argument; comment it when the order matters.
+[tools/truncate.go](tools/truncate.go) `truncateThunk` and [tools/grep.go](tools/grep.go)
+`compilePattern` are the examples.
+
 ### Combinators that don't exist, and what to use instead
 
 Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
@@ -145,6 +152,10 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | pair each element with its successor | `A.Pairwise` | `A.Zip` over the slice and `A.SliceRight(1)` of it |
 | add context to a `Result`'s error | | `result.MapLeft[A](ER.OnError("task %q", id))`, which wraps with `%w` |
 | `Option[A]` to `Result[A]` | | `result.FromOption[A](ER.OnNone("..."))` |
+| map value and error of a `ReaderIOResult` at once | `BiMap` in `context/readerioresult` (its package doc lists it) | `thunk.Map` and `thunk.MapLeft`, composed as endomorphisms (see *Composition as a value*) |
+| `if p(x) { return f(x) }; return x` | `F.Ternary` is deprecated | `P.Fold(F.Identity[T], f)(p)` |
+| the first `n` bytes of a string | a slicing combinator in `string` | a leaf (`prefix` in `tools/truncate.go`), then `F.Bind2nd(strings.ToValidUTF8, "")` |
+| `liftA2` over two readers of one environment | `reader.LiftA2` | `reader.Map[R](F.Curry2(g))` + `reader.Ap[C](fb)`; it is applicative, not `Chain` |
 | lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainThunkK(F.Flow2(reader.Read(x), thunk.FromIOResult))`, as in `tools/walk.go` `walkDir` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones

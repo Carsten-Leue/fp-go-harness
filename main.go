@@ -30,6 +30,10 @@ import (
 // maxIterations bounds the number of chat completion requests per prompt.
 const maxIterations = 25
 
+// maxToolOutput bounds the bytes of a single tool result sent to the model.
+// The recorded Bob sessions contain results of up to 37 KB.
+const maxToolOutput = 50_000
+
 // logDir is where background commands write their output, relative to the
 // workspace: read_file only reads inside the workspace.
 var logDir = filepath.Join(".fp-go-harness", "logs")
@@ -56,11 +60,12 @@ func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
 }
 
 // makeRegistry is wiring: it builds the registry of every tool for the
-// workspace at root. Background commands log to [logDir] inside it.
+// workspace at root, with the output of each tool limited to [maxToolOutput].
+// Background commands log to [logDir] inside it.
 func makeRegistry(root string) io.IO[tools.ToolRegistry] {
 	return F.Pipe1(
 		tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir)),
-		io.Map(tools.MakeTools()),
+		io.Map(F.Flow2(tools.MakeTools(), tools.TruncateTools()(maxToolOutput))),
 	)
 }
 
