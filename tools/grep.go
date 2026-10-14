@@ -11,6 +11,7 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	ER "github.com/IBM/fp-go/v2/errors"
 	"github.com/IBM/fp-go/v2/file"
 	F "github.com/IBM/fp-go/v2/function"
@@ -146,10 +147,12 @@ func compilePattern() ReaderResult[GrepArgs, *regexp.Regexp] {
 	ignoreCaseLens := MakeGrepArgsIgnoreCaseLens()
 	wordRegexpLens := MakeGrepArgsWordRegexpLens()
 
-	return F.Pipe4(
-		F.Flow2(wordRegexpLens.Get, whenSet(wordBoundaries())),
-		reader.Map[GrepArgs](reader.Compose[string, string, string]),
-		reader.Ap[Endomorphism[string]](F.Flow2(ignoreCaseLens.Get, whenSet(S.Prepend("(?i)")))),
+	// Concat runs right to left: word boundaries first, then the (?i) prefix
+	return F.Pipe2(
+		reader.ApplicativeMonoid[GrepArgs](endomorphism.Monoid[string]()).Concat(
+			F.Flow2(ignoreCaseLens.Get, whenSet(S.Prepend("(?i)"))),
+			F.Flow2(wordRegexpLens.Get, whenSet(wordBoundaries())),
+		),
 		reader.Ap[string](patternLens.Get),
 		reader.Map[GrepArgs](F.Flow2(
 			result.Eitherize1(regexp.Compile),

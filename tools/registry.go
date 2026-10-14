@@ -5,6 +5,7 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	F "github.com/IBM/fp-go/v2/function"
 	Mg "github.com/IBM/fp-go/v2/magma"
+	L "github.com/IBM/fp-go/v2/optics/lens"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/readeroption"
 	R "github.com/IBM/fp-go/v2/record"
@@ -38,6 +39,13 @@ func toolCall(t Tool) ToolCall {
 	return t.Call
 }
 
+// MakeToolCallLens focuses on the call of a [Tool]. It is built by hand from
+// [toolCall] and [MakeTool], because the generator cannot derive it, see
+// [toolDefinition]. The setter keeps the definition.
+func MakeToolCallLens() L.Lens[Tool, ToolCall] {
+	return L.MakeLens(toolCall, F.Uncurry2(F.Flow2(toolDefinition, F.Curry2(MakeTool))))
+}
+
 // toolEntry keys a tool by the name of its definition.
 func toolEntry() func(Tool) pair.Pair[string, Tool] {
 	nameLens := MakeFunctionDefinitionParamNameLens()
@@ -61,9 +69,11 @@ func MakeToolRegistry(tools ...Tool) ToolRegistry {
 
 // ToToolCaller derives the [ToolCaller] lookup from a registry.
 func ToToolCaller() func(ToolRegistry) ToolCaller {
+	callLens := MakeToolCallLens()
+
 	return F.Flow2(
 		F.Flip(R.Lookup[Tool, string]),
-		readeroption.Map[string](toolCall),
+		readeroption.Map[string](callLens.Get),
 	)
 }
 

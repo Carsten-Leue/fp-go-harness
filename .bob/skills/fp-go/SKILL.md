@@ -368,6 +368,14 @@ What makes it work:
 
   `Chain` is right when a value is computed first and the later step needs it, as in
   `insertedText`, where the index is computed from the call and then used to insert.
+- **`reader.Map(g)` + `reader.Ap(fb)` is `liftA2(g)(fa, fb)`, not a hidden `Chain`.** Two
+  readers of the same environment combined by a binary function are applicative. `reader`
+  has no `LiftA2` (fp-go v2, checked with `go doc`), and `SequenceT2` + `Map(Tupled…)` is
+  longer, so `F.Pipe2(fa, reader.Map[R](F.Curry2(g)), reader.Ap[C](fb))` is the form.
+  [tools/truncate.go](../../../tools/truncate.go) `truncateError` is the example: the
+  shortened error and the length test are both read from the limit, then `P.Fold`ed.
+  When `g` is composition of two endomorphisms, use the monoid instead (see
+  *The combinator that matches the operation*).
 
 Watch the empty case: `reader.TraverseArray` over an empty slice yields `nil` where
 `A.Map` yielded an empty slice, so tests comparing with `assert.Equal` expect `nil`.
@@ -407,7 +415,9 @@ How to get there:
 1. **A value derived from the input and used more than once is a `reader.Chain`.**
    Compute it with its own reader and chain it into a hoisted `Kleisli` that receives it.
 2. **Hoist each inner step** into its own named, nullary, package-level function with a
-   doc comment, instead of nesting lambdas or local variables in one body.
+   doc comment, instead of nesting lambdas or local variables in one body. Hoisted names
+   share the package namespace: `go build` the package before you pick a name such as
+   `truncatedError`, which `writefile.go` already uses.
 3. **Then make the hoisted `Kleisli` nullary too.** Its parameter disappears with the
    combinators below.
 
@@ -453,6 +463,10 @@ How a parameter disappears:
 | `func h(x X) …` returns `F.Flow2(f, k(x))` | `F.Flow2(k, reader.Local[…](f))` |
 | `func h(x X) …` returns `F.Pipe1(r(x), reader.Ap[B](fa))` | `F.Flow2(r, reader.Ap[B](fa))` |
 | `func h(x X) …` returns `F.Flow2(F.Constant1[A], g(x))` | `reader.Map[X](reader.Local[…](F.Constant1[A, A]))` after the reader that yields `g(x)` |
+| `func h(n N, s S) …` returns `leaf(g(n, s), s)`: `s` read again by a two-argument leaf | `F.Flow2(gReader, reader.Chain(F.Curry2(leaf)))` with `gReader: Reader[N, Reader[S, A]]`; `F.Curry2(leaf)` is already a `reader.Kleisli[S, A, B]` |
+| `func h(n N) …` returns `F.Ternary(p(n), f(n), F.Identity)` / `if p(s) { return f(s) }; return s` | `F.Pipe2(fReader, reader.Map[N](orKeep[T]()), reader.Ap[Endomorphism[T]](pReader))` with `orKeep[T]() = F.Curry2(P.Fold[T, T])(F.Identity[T])`. `F.Ternary` is deprecated in favour of `P.Fold` |
+| `func h(f Endomorphism[B]) Endomorphism[S]` returns `t ↦ Make(get1(t), f(get2(t)))` | a lens `Modify` in disguise: `fieldLens.Modify`. Without a generated lens, build one with `L.MakeLens` (see [`go-conventions`](../go-conventions/SKILL.md#generator-rules-and-pitfalls-go-tool-gen-lens-fp-go-v240), `tools.MakeToolCallLens`, used in `TruncateTools`) |
+| `func h(n N) Endomorphism[T]` returns `F.Flow2(f(n), g(n))`: two endomorphisms of the same `n`, composed | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(g, f)`. `Concat(g, f)` applies `f` first (right to left); when the order matters, say so in a comment |
 
 `F.Curry2(g)` + `reader.Flatten` is the duplicating ("W") combinator: `Flatten` of a
 `Reader[X, Reader[X, A]]` passes the same `x` to both levels. It is not the `Map` +
@@ -533,6 +547,7 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | `P.Fold(F.Constant1(fail), F.Constant1(result.Of))(pred)` + `reader.Ap(text)` | validation | `F.Flow2(result.FromPredicate(pred, F.Flow2(text, errors.New)), result.Map(text))` |
 | `effect.Alt(empty)` + `Filter` + `Chain(P.Fold(…)(A.IsNonEmpty))` | "try this, otherwise that" | an effect that fails when the first case doesn't apply (`A.FindFirst` + `result.FromOption`), then `effect.Alt(lazy.Of(second))` |
 | `reader.Local(f)(g)` over two known functions | composition | `F.Flow2(f, g)` |
+| `reader.Map[N](reader.Compose[…])` + `reader.Ap(second)` where both stages are `Reader[N, Endomorphism[T]]` | composing endomorphisms, pointwise over the reader: a monoid | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(second, first)` (right to left) |
 
 Worked examples:
 
@@ -550,6 +565,13 @@ Worked examples:
   falling back to `dirScope`.
 - [replay/task.go](../../../replay/task.go) `GroupTasks`: `reader.Chain` instead of
   `reader.Flatten`.
+- [tools/truncate.go](../../../tools/truncate.go) `truncateThunk`: `thunk.Map` and
+  `thunk.MapLeft`, both read from the limit, composed with `reader.ApplicativeMonoid`
+  over `endomorphism.Monoid` instead of `reader.Compose` + `reader.Ap`. Also
+  [tools/grep.go](../../../tools/grep.go) `compilePattern` (order matters, so it is
+  commented) and [tools/executecommand.go](../../../tools/executecommand.go).
+- [tools/truncate.go](../../../tools/truncate.go) `TruncateTools`: rebuilding a `Tool`
+  around a changed call was `MakeToolCallLens().Modify`.
 - [openai/deepseek.go](../../../openai/deepseek.go) `MakeDeepSeekChatCompletionDeps`:
   the client options are a plain `F.Flow6`.
 

@@ -146,9 +146,13 @@ and a text result. Validation errors (such as "path must be absolute") come back
   inserted lines never join a neighbour. A line beyond the end of the file appends. The file is edited
   with LF line endings and keeps CRLF if it has them. The result text was written without comparing it
   to the recordings. Registered in the CLI without approval until I1.
-- [ ] **C11 Output limits.** Add a monoid-free wrapper `tools.Truncate(n)` that shortens oversized tool output (the recordings
+- [x] **C11 Output limits.** Add a monoid-free wrapper `tools.Truncate(n)` that shortens oversized tool output (the recordings
   contain 37 KB results) and adds a note that the output was truncated. Apply it to every tool as a
   `ToolCall` → `ToolCall` endomorphism.
+  `tools.TruncateTools()(n)` applies it to a whole registry; the CLI limits every tool to 50,000 bytes.
+  The limit counts bytes and never splits a UTF-8 sequence. Error text is cut too, because it is
+  the tool message; shorter errors are kept as they are. The note was written without comparing it
+  to the recordings.
 
 ### Phase D: Prompt assembly
 
