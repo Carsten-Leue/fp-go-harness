@@ -667,6 +667,58 @@ handleToolCalls := F.Flow2(
   threaded through by hand: see `LoopDeps.GetMaxIterations`. Read it inside the pipeline
   with `reader.Sequence` / `effect.FromReaderResult`.
 
+### Everything is read-only: `Ap` runs concurrently
+
+`Ap` of the IO-based monads is **parallel by default**. `io.MonadAp` dispatches to
+`io.MonadApPar`, which runs the argument on a second goroutine (`go func() { c <- ma() }()`)
+while the calling goroutine runs the function side. `ioresult`, `ioeither`,
+`context/readerioresult` and `effect` all go through it, and so does every combinator
+built on `Ap`:
+
+| Runs its parts concurrently | Runs its parts in order |
+|---|---|
+| `Ap`, `ApS`, `ApplicativeMonoid(…).Concat`, `TraverseArray`, and every other `Traverse*` / `Sequence*` built on `Ap` | `Chain`, `Bind`, `Tap*`, `TailRec`, `ApSeq` and the other `…Seq` variants |
+
+So two parts of one effect can run at the same time, and **everything they touch is
+read-only**:
+
+- **Dependencies.** A `Deps` struct is built once by `Make…Deps` and never changed. Its
+  getters return the same value or function every time. Nothing behind a getter keeps
+  state: no cache, counter, `append` to a captured slice or map write. The OS-backed
+  dependencies (`file.ReadFile`, `WalkFS`, HTTP clients) are safe to call concurrently;
+  keep it that way for every new one.
+- **Captured values and closures.** A `Kleisli`, `Reader` or leaf never writes a
+  variable it closes over.
+- **Values in the pipeline.** Inputs are never changed in place; build new values
+  (`A.Map`, `A.Filter`, a lens setter that assigns a freshly built slice).
+- **Test fakes.** See *Mocking Effect and Thunk* in
+  [`go-conventions`](../go-conventions/SKILL.md#fakes-are-read-only).
+
+The order of the *results* stays fixed: `Concat(a, b)` gives `a`'s result before `b`'s,
+and `TraverseArray` keeps the order of its input. Only the order of the *side effects*
+is not fixed.
+
+A data race under `Ap` is always a bug in shared mutable state. Make the state
+read-only; never switch to `ApSeq` or `Chain` to hide the race. CI runs `go test -race`;
+it can't run locally on Windows without cgo, so check these rules before you push.
+
+```go
+// BAD: the fake appends to a captured slice; Concat reads AGENTS.md and the
+// rules concurrently, and the race detector fails the test
+var read []string
+tools.MakeFileDeps(func(path string) ioresult.IOResult[[]byte] {
+	return func() result.Result[[]byte] {
+		read = append(read, path)
+		return result.Of([]byte("text"))
+	}
+})
+
+// GOOD: a read-only fake, and the test asserts on the effect's output
+tools.MakeFileDeps(func(path string) ioresult.IOResult[[]byte] {
+	return ioresult.Of([]byte("text of " + filepath.Base(path)))
+})
+```
+
 ### Loops: `effect.TailRec`, never recursion
 
 A loop of effectful steps is a step function `Kleisli[C, S, Trampoline[S, B]]` that returns
@@ -800,5 +852,8 @@ MCP servers or restart the session and the tools come up quickly.
 - [ ] Effects built with `effect`'s combinators (`Asks`/`Map`/`Ap`/`Chain`/`FromThunk`),
       reused under another environment with `Local`; dependencies as getter interfaces;
       loops with `effect.TailRec`; run only at the boundary with `Provide` + `RunSync`
+- [ ] Everything is read-only (`Ap`, `Concat`, `TraverseArray` run concurrently):
+      dependencies, getters, captured variables, pipeline values and test fakes keep no
+      mutable state; a recording fake uses a `sync.Mutex` and `assert.ElementsMatch`
 - [ ] Repository aliases and conventions from [`go-conventions`](../go-conventions/SKILL.md)
 - [ ] `go build ./...`, `go vet ./...`, `go test ./...` clean

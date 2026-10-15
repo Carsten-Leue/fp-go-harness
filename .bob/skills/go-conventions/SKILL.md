@@ -405,6 +405,41 @@ in the wrong position. Check the expansion with
 `go doc github.com/IBM/fp-go/v2/effect Thunk` and
 `go doc github.com/IBM/fp-go/v2/context/readerioresult ReaderIOResult`.
 
+### Fakes are read-only
+
+`Ap`, `ApplicativeMonoid(…).Concat` and `TraverseArray` of `io`, `ioresult`,
+`context/readerioresult` and `effect` run their parts **on separate goroutines**
+([`fp-go`, *Everything is read-only*](../fp-go/SKILL.md#everything-is-read-only-ap-runs-concurrently)).
+A fake is called from those goroutines just like the real dependency, so it must be safe
+to call concurrently:
+
+- Answer from fixed data: a constant, a `map` that is only read, `filepath.Base(path)`.
+  `mockReadFile` above is the shape.
+- Assert on the effect's **output**, not on how the fake was called. The output keeps a
+  fixed order; the calls don't.
+- If a test must record calls, guard the record with a `sync.Mutex` and compare it with
+  `assert.ElementsMatch`:
+
+```go
+var (
+	mu   sync.Mutex
+	read []string
+)
+tools.MakeFileDeps(func(path string) ioresult.IOResult[[]byte] {
+	return func() result.Result[[]byte] {
+		mu.Lock()
+		defer mu.Unlock()
+		read = append(read, path)
+		return result.Of([]byte("text of " + filepath.Base(path)))
+	}
+})
+// …
+assert.ElementsMatch(t, []string{agentsPath, rulePath}, read)
+```
+
+CI runs `go test -race`, which this Windows laptop can't (no cgo). An unguarded fake
+passes locally and fails only in CI.
+
 ## Checklist
 
 - [ ] fp-go MCP server used as the source of truth: topic skills loaded, every fp-go call checked with `get_example` / `search_examples` / `go doc`
@@ -412,6 +447,7 @@ in the wrong position. Check the expansion with
 - [ ] Pure where possible; I/O at the boundaries; environment read once at startup
 - [ ] Dependencies separated from parameters; minimal interfaces; no hidden dependencies
 - [ ] Value semantics; pointers only where needed; stateless and thread-safe
+- [ ] Everything read-only, because `Ap` / `Concat` / `TraverseArray` run concurrently: dependencies, getters, captured variables and test fakes keep no mutable state; a recording fake uses a `sync.Mutex`
 - [ ] Total functions; the simplest effect type that fits (Option → Result → IOResult → ReaderIOResult → Effect)
 - [ ] No mutation inside `Map` / `Chain` / lens setters
 - [ ] Lenses regenerated with `go generate`, not hand-edited
