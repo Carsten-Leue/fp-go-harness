@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
@@ -125,11 +126,18 @@ func TestProjectRulesListErrorFails(t *testing.T) {
 }
 
 func TestProjectRulesReadsWorkspacePaths(t *testing.T) {
-	var read []string
+	// The reads run concurrently: effect.Ap, under Concat and TraverseArray,
+	// evaluates its argument on a second goroutine.
+	var (
+		mu   sync.Mutex
+		read []string
+	)
 	deps := MakeProjectRulesDeps(
 		tools.MakeWorkspaceDeps(testRoot),
 		tools.MakeFileDeps(func(path string) ioresult.IOResult[[]byte] {
 			return func() result.Result[[]byte] {
+				mu.Lock()
+				defer mu.Unlock()
 				read = append(read, path)
 				return result.Of([]byte("text of " + filepath.Base(path)))
 			}
