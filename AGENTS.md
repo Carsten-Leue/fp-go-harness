@@ -67,6 +67,33 @@ and `Local` to reuse an existing `Effect` / `Kleisli` under a different environm
 and examples are in the [`fp-go` skill, section *Composing `Effect[C, A]`*](.bob/skills/fp-go/SKILL.md#composing-effectc-a);
 [openai/request.go](openai/request.go) `ChatCompletion` is the worked example.
 
+### Everything is read-only: `Ap` runs concurrently
+
+**`Ap` of the IO-based monads runs its two sides on two goroutines.** `io`, `ioresult`,
+`context/readerioresult` and `effect` all dispatch `Ap` to `io.MonadApPar`, and so does
+everything built on `Ap`: `ApS`, `ApplicativeMonoid(…).Concat`, `TraverseArray` and the
+other `Traverse*` / `Sequence*`. Only `Chain`, `Bind`, `Tap*` and the `…Seq` variants run
+in order. So any code that runs
+inside an effect may run concurrently with another part of the same effect, and it must
+not share mutable state:
+
+- **Dependencies, getters and captured values are read-only.** A `Deps` struct is built
+  once by its `Make…Deps` wiring and never changed. A getter returns the same value or
+  function every time. No caches, counters, `append` to a captured slice, or map writes
+  behind a getter, a `Kleisli` or a closure.
+- **Values passing through a pipeline are immutable.** Build a new value (`A.Map`, a lens
+  setter that assigns) instead of changing an input slice, map or struct in place.
+- **Test fakes are read-only too.** A fake answers from fixed data (a `map` lookup, a
+  constant) and the test asserts on the effect's *output*. If a test really has to record
+  calls, guard the record with a `sync.Mutex` and compare it with `assert.ElementsMatch`,
+  because the order is not fixed. [prompt/projectrules_test.go](prompt/projectrules_test.go)
+  `TestProjectRulesReadsWorkspacePaths` is the example.
+- **A data race is a bug in the shared state, not in `Ap`.** Never switch to `ApSeq` or
+  `Chain` to silence the race detector; make the state read-only.
+
+CI runs `go test -race`. It can't run on this laptop (no cgo), so a race only shows up in
+CI: check every fake and dependency against these rules before you push.
+
 ### Closures over a pipeline's input
 
 A pipeline that reads its input in more than one place is a `reader.Reader[R, A]`, not a
@@ -156,7 +183,7 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | `if p(x) { return f(x) }; return x` | `F.Ternary` is deprecated | `P.Fold(F.Identity[T], f)(p)` |
 | the first `n` bytes of a string | a slicing combinator in `string` | a leaf (`prefix` in `tools/truncate.go`), then `F.Bind2nd(strings.ToValidUTF8, "")` |
 | `liftA2` over two readers of one environment | `reader.LiftA2` | `reader.Map[R](F.Curry2(g))` + `reader.Ap[C](fb)`; it is applicative, not `Chain` |
-| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))`, as in `tools/walk.go` `walkDir` |
+| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))`, as in `tools/walk.go` `walkDir`; as a Kleisli over `x`, `F.Flow3(F.Flip(getter), effect.Asks[C, IOResult[A]], effect.ChainIOResultK[C](f))` with `f` the operation on the `IOResult`, as in `prompt/projectrules.go` `readOptional` |
 | run an `IOResult` inside `Effect` (`ChainIOResultK`, `TapIOResultK`, `FromIOResult`) | before fp-go v2.6.0 | `effect.ChainIOResultK(f)` instead of `effect.ChainThunkK(F.Flow2(f, thunk.FromIOResult))` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones
