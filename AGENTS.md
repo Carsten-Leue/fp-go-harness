@@ -156,7 +156,8 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | `if p(x) { return f(x) }; return x` | `F.Ternary` is deprecated | `P.Fold(F.Identity[T], f)(p)` |
 | the first `n` bytes of a string | a slicing combinator in `string` | a leaf (`prefix` in `tools/truncate.go`), then `F.Bind2nd(strings.ToValidUTF8, "")` |
 | `liftA2` over two readers of one environment | `reader.LiftA2` | `reader.Map[R](F.Curry2(g))` + `reader.Ap[C](fb)`; it is applicative, not `Chain` |
-| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainThunkK(F.Flow2(reader.Read(x), thunk.FromIOResult))`, as in `tools/walk.go` `walkDir` |
+| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))`, as in `tools/walk.go` `walkDir` |
+| run an `IOResult` inside `Effect` (`ChainIOResultK`, `TapIOResultK`, `FromIOResult`) | before fp-go v2.6.0 | `effect.ChainIOResultK(f)` instead of `effect.ChainThunkK(F.Flow2(f, thunk.FromIOResult))` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones
 that return an `Operator` sit in an indented block that `grep "^func"` skips.
