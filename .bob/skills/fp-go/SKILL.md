@@ -588,10 +588,11 @@ How to spot them:
 
 Not a finding:
 
-- `effect.Asks(getter)` + `effect.ChainThunkK(F.Flow2(reader.Read(x),
-  thunk.FromIOResult))` lifts a getter that returns a `ReaderIOResult` (`walkDir`,
-  `readBytes`, `env.LookupEnvThunk`). `effect` has no `FromReaderIOResult` (fp-go
-  v2.5.1), so this is already the right form.
+- `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))` lifts a getter that
+  returns a `ReaderIOResult` (`walkDir`, `readBytes`, `env.LookupEnvThunk`). `effect`
+  has no `FromReaderIOResult` (fp-go v2.6.0), so this is already the right form.
+  `effect.ChainThunkK(F.Flow2(…, thunk.FromIOResult))` *is* a finding since v2.6.0:
+  it is `effect.ChainIOResultK`.
 - A function over its input that reads the input three or more times, where the reader
   form needs a helper per read (`grep.go` `fileScope`). Keep it, and say why in its doc
   comment (Rule 4).
@@ -610,8 +611,8 @@ package before you move on.
 
 When a `Kleisli[C, In, Out]` combines several values taken from `C` (a service from the
 dependencies, plus options or config also from the dependencies), use `effect`'s
-combinators: `Asks`, `Map`, `Ap`, `Chain`, `FromThunk`, `ChainThunkK`, `Local`,
-`FromReaderResult`, `TailRec`. Don't reach into `reader` / `context/readerioresult` to
+combinators: `Asks`, `Map`, `Ap`, `Chain`, `FromThunk`, `ChainThunkK`,
+`ChainIOResultK`, `Local`, `FromReaderResult`, `TailRec`. Don't reach into `reader` / `context/readerioresult` to
 rebuild `Effect`'s double-`Reader` shape by hand. That type-checks, but it depends on
 `Effect`'s internal representation rather than its public API, so it is hard to read and
 easy to get subtly wrong.
@@ -625,6 +626,7 @@ call":
 | apply a function that doesn't depend on `C` | `effect.Map` |
 | apply a second value from `C`, independently of the first (applicative) | `effect.Ap` |
 | flatten a resulting `Thunk` / `ReaderIOResult` into `Effect[C, _]` | `effect.Chain(effect.FromThunk[C, _])`, or `effect.ChainThunkK` |
+| flatten a resulting `IOResult` into `Effect[C, _]` | `effect.ChainIOResultK` (fp-go ≥ v2.6.0), not `ChainThunkK` + `thunk.FromIOResult` |
 | lift a `ReaderResult[C, A]` (pure, can fail, reads `C`) | `effect.FromReaderResult` |
 
 [`openai/request.go`](../../../openai/request.go) `ChatCompletion` is the worked example;

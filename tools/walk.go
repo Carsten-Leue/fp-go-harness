@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
@@ -137,10 +136,9 @@ func walkDir[R WalkDeps](recursive bool) effect.Kleisli[R, string, []FileEntry] 
 	return func(dir string) Effect[R, []FileEntry] {
 		return F.Pipe1(
 			effect.Asks(F.Flow2(AsWalkDeps[R], WalkDeps.GetWalkDir)),
-			effect.ChainThunkK[R](F.Flow3(
+			effect.ChainIOResultK[R](F.Flow2(
 				reader.Read[ioresult.Kleisli[string, []FileEntry]](recursive),
 				reader.Read[ioresult.IOResult[[]FileEntry]](dir),
-				thunk.FromIOResult[[]FileEntry],
 			)),
 		)
 	}

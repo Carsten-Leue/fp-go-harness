@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
@@ -131,19 +130,11 @@ func MakeDotEnvEnvironmentDeps() ioresult.Kleisli[[]string, EnvironmentDeps] {
 	)
 }
 
-// lookupThunk runs a lookup for a key, lifted into a thunk.
-func lookupThunk() reader.Reader[string, thunk.Kleisli[ReaderIOResult[string, string], string]] {
-	return F.Flow2(
-		reader.Read[IOResult[string], string],
-		reader.Map[ReaderIOResult[string, string]](thunk.FromIOResult[string]),
-	)
-}
-
 // LookupEnvThunk looks the variable key up through the [EnvironmentDeps].
 func LookupEnvThunk() effect.Kleisli[EnvironmentDeps, string, string] {
 	return F.Flow3(
-		lookupThunk(),
-		effect.ChainThunkK[EnvironmentDeps, ReaderIOResult[string, string], string],
+		reader.Read[IOResult[string], string],
+		effect.ChainIOResultK[EnvironmentDeps, ReaderIOResult[string, string], string],
 		reader.Read[Effect[EnvironmentDeps, string]](effect.Asks(EnvironmentDeps.GetLookupEnv)),
 	)
 }

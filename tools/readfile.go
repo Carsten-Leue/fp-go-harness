@@ -8,7 +8,6 @@ import (
 
 	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
@@ -220,10 +219,7 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 func readBytes[R FileDeps](path string) Effect[R, []byte] {
 	return F.Pipe1(
 		effect.Asks(F.Flow2(AsFileDeps[R], FileDeps.GetReadFile)),
-		effect.ChainThunkK[R](F.Flow2(
-			reader.Read[ioresult.IOResult[[]byte]](path),
-			thunk.FromIOResult[[]byte],
-		)),
+		effect.ChainIOResultK[R](reader.Read[ioresult.IOResult[[]byte]](path)),
 	)
 }
 
