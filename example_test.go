@@ -59,15 +59,18 @@ func makeWorkspace(t *testing.T, files map[string]string) string {
 	return root
 }
 
-// runCLI answers prompt as `go run . <prompt>` does in the workspace at root.
+// runCLI answers prompt as `go run . -mode agent <prompt>` does in the
+// workspace at root: the examples run commands, so they need every tool.
 // It logs what the CLI prints and returns it.
 func runCLI(t *testing.T, root, prompt string) string {
 	t.Helper()
 
 	deps := requireDeepSeekDeps(t)
+	m, err := result.Unwrap(lookupMode()(agentMode))
+	require.NoError(t, err)
 
 	final, err := effect.RunSync(F.Pipe1(
-		answer(makeRegistry(root)())(prompt),
+		answer(m.request, makeRegistry(root, m.tools)())(prompt),
 		effect.Provide[session.FinalResult](deps),
 	))(t.Context())
 	require.NoError(t, err)
