@@ -81,6 +81,14 @@ func MakeEnvironmentDeps() EnvironmentDeps {
 	)
 }
 
+// MakeVarsEnvironmentDeps builds [EnvironmentDeps] over the process
+// environment and vars, which fill in the variables the process environment
+// doesn't set. Use it when the variables were already read, for example
+// merged from several sources.
+func MakeVarsEnvironmentDeps() func(Vars) EnvironmentDeps {
+	return F.Flow2(makeLookup, newEnvironmentDeps)
+}
+
 // readDotEnvFile is a leaf: [godotenv.Read] is variadic. It parses the file
 // and, unlike [godotenv.Load], leaves the process environment untouched.
 func readDotEnvFile(path string) (Vars, error) {
@@ -126,7 +134,7 @@ func ReadDotEnvs() ioresult.Kleisli[[]string, Vars] {
 func MakeDotEnvEnvironmentDeps() ioresult.Kleisli[[]string, EnvironmentDeps] {
 	return F.Flow2(
 		ReadDotEnvs(),
-		ioresult.Map(F.Flow2(makeLookup, newEnvironmentDeps)),
+		ioresult.Map(MakeVarsEnvironmentDeps()),
 	)
 }
 

@@ -1,11 +1,13 @@
-package main
+package cli
 
 import (
 	"fmt"
 
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
+	A "github.com/IBM/fp-go/v2/array"
 	F "github.com/IBM/fp-go/v2/function"
+	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
 	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
@@ -31,17 +33,17 @@ type mode struct {
 
 // modes are the CLI modes by name. Ask mode gets only the read-only tools,
 // read from the read-only part of the deps.
-func modes() map[string]mode {
-	return map[string]mode{
-		askMode: {
+func modes() Record[string, mode] {
+	return R.FromEntries(A.From(
+		pair.MakePair(askMode, mode{
 			request: oai.ForAskMode(),
 			tools:   reader.Local[tools.ToolRegistry](tools.AsGrepDeps[tools.ToolsDeps])(tools.MakeReadTools()),
-		},
-		agentMode: {
+		}),
+		pair.MakePair(agentMode, mode{
 			request: oai.ForAgentMode(),
 			tools:   tools.MakeTools(),
-		},
-	}
+		}),
+	))
 }
 
 // unknownModeError is a leaf: one formatter over the mode name.

@@ -183,7 +183,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
   table (Agent, Plan, Ask). The system prompt and tool list for a mode are
   `Effect[ModeDeps, ChatCompletionNewParams]`.
   Started: `openai.ForAgentMode` (prompt `prompts/agent.txt`) next to `ForAskMode`, and a `mode` table in the CLI
-  ([modes.go](modes.go)) that gives Ask the read-only tools and Agent all of them. Still open: the general `Mode`
+  ([cli/modes.go](cli/modes.go)) that gives Ask the read-only tools and Agent all of them. Still open: the general `Mode`
   table, Plan mode and `ModeDeps`.
 - [ ] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.

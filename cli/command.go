@@ -1,0 +1,60 @@
+package cli
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/IBM/fp-go/v2/result"
+	C "github.com/urfave/cli/v3"
+)
+
+// configFlags are the flags of the [Config], one per variable. They carry no
+// default: a flag that isn't set leaves the variable of a lower source, or
+// the default of [GetConfigCodec], intact.
+func configFlags() []C.Flag {
+	name := flagName()
+
+	return []C.Flag{
+		&C.StringFlag{
+			Name:  name(KeyMode),
+			Usage: fmt.Sprintf("%q (read-only tools) or %q (all tools, changes the workspace), defaults to %q. Environment variable [%s].", askMode, agentMode, askMode, KeyMode),
+		},
+		&C.StringFlag{
+			Name:      name(KeyWorkspace),
+			Usage:     fmt.Sprintf("the directory the tools work in, defaults to the working directory. Environment variable [%s].", KeyWorkspace),
+			TakesFile: true,
+		},
+		&C.IntFlag{
+			Name:        name(KeyMaxIterations),
+			HideDefault: true,
+			Usage:       fmt.Sprintf("the maximum number of chat completion requests per prompt, defaults to %d. Environment variable [%s].", defaultMaxIterations, KeyMaxIterations),
+		},
+		&C.IntFlag{
+			Name:        name(KeyMaxToolOutput),
+			HideDefault: true,
+			Usage:       fmt.Sprintf("the maximum number of bytes of a tool result sent to the model, defaults to %d. Environment variable [%s].", defaultMaxToolOutput, KeyMaxToolOutput),
+		},
+	}
+}
+
+// MakePromptCommand creates the command that answers a prompt with DeepSeek
+// and the tools of a mode, and prints the answer and the session statistics.
+//
+// Example:
+//
+//	fp-go-harness --mode agent --max-iterations 10 "add a test for grep"
+func MakePromptCommand() *C.Command {
+	return &C.Command{
+		Name:      "fp-go-harness",
+		Usage:     "answers a prompt with DeepSeek and the tools of a mode",
+		ArgsUsage: "<prompt>",
+		Flags:     configFlags(),
+		// Errors are returned to main. The default handler exits the process
+		// on an error that carries several errors, as a failed decoding does.
+		ExitErrHandler: func(context.Context, *C.Command, error) {},
+		Action: func(ctx context.Context, cmd *C.Command) error {
+			_, err := result.Unwrap(printResult()(cmd)(ctx)())
+			return err
+		},
+	}
+}
