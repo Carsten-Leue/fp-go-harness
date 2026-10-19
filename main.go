@@ -11,13 +11,13 @@ import (
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
 	"github.com/Carsten-Leue/fp-go-harness/http"
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
-	"github.com/IBM/fp-go/v2/io"
 	"github.com/IBM/fp-go/v2/ioresult"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
@@ -61,54 +61,62 @@ func makeDeepSeekDeps() ioresult.IOResult[oai.DeepSeekDeps] {
 	)
 }
 
-// makeRegistry is wiring: it builds the registry of a mode's tools for the
-// workspace at root, with the output of each tool limited to [maxToolOutput].
-// Background commands log to [logDir] inside it.
-func makeRegistry(root string, modeTools reader.Reader[tools.ToolsDeps, tools.ToolRegistry]) io.IO[tools.ToolRegistry] {
-	return F.Pipe1(
-		tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir)),
-		io.Map(F.Flow2(modeTools, tools.TruncateTools()(maxToolOutput))),
+// makeRegistry is wiring: it builds the registry of the tools of a mode,
+// with the output of each tool limited to [maxToolOutput].
+func makeRegistry(m mode.Mode) reader.Reader[tools.ToolsDeps, tools.ToolRegistry] {
+	return F.Flow2(
+		mode.Tools()(m),
+		tools.TruncateTools()(maxToolOutput),
 	)
 }
 
-// makeRequest builds the request of a mode for a single user prompt,
-// including the tool definitions from the registry.
-func makeRequest(request openai.ChatCompletionNewParams, registry tools.ToolRegistry) func(string) openai.ChatCompletionNewParams {
+// withPrompt adds the user's prompt to the request of a mode and sets the
+// model.
+func withPrompt() func(string) mode.Endomorphism[openai.ChatCompletionNewParams] {
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
-
-	base := F.Pipe2(
-		request,
-		modelLens.Set(oai.DeepSeekModelFlash),
-		tools.WithTools()(registry),
-	)
 
 	return F.Flow4(
 		openai.UserMessage[string],
 		A.Push[openai.ChatCompletionMessageParamUnion],
 		messagesLens.Modify,
-		reader.Read[openai.ChatCompletionNewParams](base),
+		reader.Map[openai.ChatCompletionNewParams](modelLens.Set(oai.DeepSeekModelFlash)),
 	)
 }
 
-// answer is wiring: it runs the agent loop for a prompt against DeepSeek, with
-// the registry the program built.
+// answer is wiring: it runs the agent loop for a request against DeepSeek,
+// with the registry the program built.
 //
 // session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
 // the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
 // from DeepSeekDeps with the effectful [oai.MakeDeepSeekChatCompletionDeps].
-func answer(request openai.ChatCompletionNewParams, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+func answer(registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, openai.ChatCompletionNewParams, session.FinalResult] {
 	toSessionDeps := F.Bind23of3(session.MakeSessionDeps)(
 		tools.MakeRegistryToolDeps()(registry),
 		session.MakeLoopDeps(maxIterations),
 	)
 
-	return F.Flow5(
-		makeRequest(request, registry),
+	return F.Flow4(
 		session.MakeSession,
 		session.Run(),
 		effect.Local[session.FinalResult](toSessionDeps),
 		effect.LocalEffectK[session.FinalResult](F.Constant1[oai.DeepSeekDeps](oai.MakeDeepSeekChatCompletionDeps())),
+	)
+}
+
+// ask is wiring: it answers a prompt in a mode, in the workspace of the tools.
+// The request of the mode reads its system prompt from that workspace.
+func ask(m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+	request := F.Pipe1(
+		mode.Request()(m),
+		effect.Local[openai.ChatCompletionNewParams](F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))),
+	)
+
+	return F.Flow4(
+		withPrompt(),
+		effect.Map[oai.DeepSeekDeps, openai.ChatCompletionNewParams, openai.ChatCompletionNewParams],
+		reader.Read[effect.Effect[oai.DeepSeekDeps, openai.ChatCompletionNewParams]](request),
+		effect.Chain(answer(makeRegistry(m)(deps))),
 	)
 }
 
@@ -163,9 +171,9 @@ func formatResult() func(session.FinalResult) string {
 }
 
 func main() {
-	modeName := flag.String("mode", askMode, "ask (read-only tools) or agent (all tools, changes the workspace)")
+	modeID := flag.String("mode", mode.AskID, "agent (all tools, changes the workspace), plan or ask (read-only tools)")
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, "usage: fp-go-harness [-mode ask|agent] <prompt>")
+		fmt.Fprintf(os.Stderr, "usage: fp-go-harness [-mode %s] <prompt>\n", strings.Join(mode.IDs(), "|"))
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -176,7 +184,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	m, err := result.Unwrap(lookupMode()(*modeName))
+	m, err := result.Unwrap(mode.Lookup()(*modeID))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
@@ -193,7 +201,7 @@ func main() {
 	defer stop()
 
 	final, err := effect.RunSync(F.Pipe2(
-		answer(m.request, makeRegistry(root, m.tools)())(prompt),
+		ask(m, tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))())(prompt),
 		effect.LocalIOResultK[session.FinalResult](F.Constant1[F.Void](makeDeepSeekDeps())),
 		effect.Provide[session.FinalResult](F.VOID),
 	))(ctx)

@@ -17,9 +17,6 @@ const (
 	BaseRulesTag      = "base_rules"
 )
 
-//go:embed prompts/role_definition.txt
-var roleDefinition string
-
 //go:embed prompts/tool_use.txt
 var toolUse string
 
@@ -39,13 +36,22 @@ func normalizeBody() func(string) string {
 	)
 }
 
-// StaticSections returns the sections that don't depend on the environment,
-// in the order of the recorded system prompts: role_definition, tool_use,
+// RoleDefinition builds the role_definition section from the role of a mode.
+// It comes first in the system prompt, before the [StaticSections]. Its body
+// is normalized like theirs.
+func RoleDefinition() func(string) Section {
+	return F.Flow2(
+		normalizeBody(),
+		F.Bind1st(MakeSection, RoleDefinitionTag),
+	)
+}
+
+// StaticSections returns the sections that depend neither on the mode nor on
+// the environment, in the order of the recorded system prompts: tool_use,
 // markdown_rules and base_rules. Their bodies are embedded from prompts/.
 func StaticSections() []Section {
 	return F.Pipe1(
 		A.From(
-			MakeSection(RoleDefinitionTag, roleDefinition),
 			MakeSection(ToolUseTag, toolUse),
 			MakeSection(MarkdownRulesTag, markdownRules),
 			MakeSection(BaseRulesTag, baseRules),

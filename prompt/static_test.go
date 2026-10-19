@@ -17,7 +17,7 @@ func TestNormalizeBody(t *testing.T) {
 
 func TestStaticSectionsTags(t *testing.T) {
 	assert.Equal(t,
-		A.From(RoleDefinitionTag, ToolUseTag, MarkdownRulesTag, BaseRulesTag),
+		A.From(ToolUseTag, MarkdownRulesTag, BaseRulesTag),
 		A.Map(pair.Head[string, string])(StaticSections()),
 	)
 }
@@ -34,7 +34,14 @@ func TestStaticSectionsBodies(t *testing.T) {
 func TestStaticSectionsRender(t *testing.T) {
 	rendered := RenderSections()(StaticSections())
 
-	assert.Regexp(t, `^<role_definition>\nYou are `, rendered)
+	assert.Regexp(t, `^<tool_use>\n- `, rendered)
 	assert.Regexp(t, `\S\n</base_rules>$`, rendered)
 	assert.NotContains(t, rendered, "\n\n</")
+}
+
+func TestRoleDefinition(t *testing.T) {
+	assert.Equal(t,
+		MakeSection(RoleDefinitionTag, "You are an agent.\n\nGuidelines"),
+		RoleDefinition()("You are an agent.\r\n\r\nGuidelines\r\n"),
+	)
 }

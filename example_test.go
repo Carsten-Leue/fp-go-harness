@@ -6,8 +6,10 @@ import (
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
+	"github.com/Carsten-Leue/fp-go-harness/tools"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/result"
@@ -66,11 +68,11 @@ func runCLI(t *testing.T, root, prompt string) string {
 	t.Helper()
 
 	deps := requireDeepSeekDeps(t)
-	m, err := result.Unwrap(lookupMode()(agentMode))
+	m, err := result.Unwrap(mode.Lookup()(mode.AgentID))
 	require.NoError(t, err)
 
 	final, err := effect.RunSync(F.Pipe1(
-		answer(m.request, makeRegistry(root, m.tools)())(prompt),
+		ask(m, tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))())(prompt),
 		effect.Provide[session.FinalResult](deps),
 	))(t.Context())
 	require.NoError(t, err)
