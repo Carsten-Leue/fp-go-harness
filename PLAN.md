@@ -193,7 +193,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
   project_rules and environment_info, plus the definitions of the tools the mode allows (`tools.SelectTools`).
   `prompt.ProjectRules()` now takes the mode's ID and adds the rules in `.bob/rules-<id>/` after those in
   `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt
-  reads the workspace the tools work in. The CLI (`-mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
+  reads the workspace the tools work in. The CLI (`--mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
   The `available_modes` section waits for H5.
 - [ ] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.

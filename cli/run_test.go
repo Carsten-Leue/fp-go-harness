@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"path/filepath"
@@ -21,13 +21,22 @@ func makeTestToolsDeps(t *testing.T) tools.ToolsDeps {
 	return tools.MakeDefaultToolsDeps(root, filepath.Join(root, "logs"))()
 }
 
+// defaultConfig decodes the configuration without any variables.
+func defaultConfig(t *testing.T) Config {
+	t.Helper()
+
+	cfg, err := result.Unwrap(decodeConfig()(R.Empty[string, string]()))
+	require.NoError(t, err)
+	return cfg
+}
+
 func TestMakeRegistry_ToolsOfTheMode(t *testing.T) {
 	m, err := result.Unwrap(mode.Lookup()(mode.AskID))
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t,
 		[]string{tools.ReadFileName, tools.ListFilesName, tools.GlobName, tools.GrepName},
-		R.Keys(makeRegistry(m)(makeTestToolsDeps(t))))
+		R.Keys(makeRegistry(defaultConfig(t), m)(makeTestToolsDeps(t))))
 }
 
 func TestWithPrompt(t *testing.T) {

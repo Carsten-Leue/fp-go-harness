@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"os"
@@ -9,16 +9,19 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
-	"github.com/Carsten-Leue/fp-go-harness/tools"
+	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
+	"github.com/IBM/fp-go/v2/ioresult"
+	"github.com/IBM/fp-go/v2/pair"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // The examples run the use cases of the CLI end to end against the real
-// DeepSeek API, with the deps of main (the process environment and the .env
+// DeepSeek API, with the deps of the CLI (the process environment and the .env
 // file), all tools in a temporary workspace, the agent loop and the rendering
 // of the result. They are skipped when DEEPSEEK_API_KEY is set neither in the
 // environment nor in .env.
@@ -27,19 +30,26 @@ import (
 // checks only what does not vary: a fact the model can learn only through a
 // tool, or a file that a tool wrote.
 //
-//	go test -v -run TestExample .
+//	go test -v -run TestExample ./cli
 //
 // prints what the CLI prints for each prompt.
 
 // deepSeekAPIKeyEnvVar is the variable the DeepSeek deps read the API key from.
 const deepSeekAPIKeyEnvVar = "DEEPSEEK_API_KEY"
 
+// dotEnvPath is the .env file in the repository root.
+const dotEnvPath = "../" + env.DotEnvFile
+
 // requireDeepSeekDeps builds the deps of the CLI, or skips the test when the
 // API key is not set.
 func requireDeepSeekDeps(t *testing.T) oai.DeepSeekDeps {
 	t.Helper()
 
-	deps, err := result.Unwrap(makeDeepSeekDeps()())
+	deps, err := result.Unwrap(F.Pipe2(
+		A.Of(dotEnvPath),
+		env.MakeDotEnvEnvironmentDeps(),
+		ioresult.Map(newDeepSeekDeps),
+	)())
 	require.NoError(t, err)
 	if result.IsLeft(deps.GetLookupEnv()(deepSeekAPIKeyEnvVar)()) {
 		t.Skipf("%s not set in the environment or in %s", deepSeekAPIKeyEnvVar, env.DotEnvFile)
@@ -49,7 +59,7 @@ func requireDeepSeekDeps(t *testing.T) oai.DeepSeekDeps {
 
 // makeWorkspace creates a temporary workspace with files, relative path to
 // content.
-func makeWorkspace(t *testing.T, files map[string]string) string {
+func makeWorkspace(t *testing.T, files Record[string, string]) string {
 	t.Helper()
 
 	root := t.TempDir()
@@ -61,18 +71,23 @@ func makeWorkspace(t *testing.T, files map[string]string) string {
 	return root
 }
 
-// runCLI answers prompt as `go run . -mode agent <prompt>` does in the
-// workspace at root: the examples run commands, so they need every tool.
+// runCLI answers prompt as `go run . --mode agent --workspace <root> <prompt>`
+// does: the examples run commands, so they need every tool.
 // It logs what the CLI prints and returns it.
 func runCLI(t *testing.T, root, prompt string) string {
 	t.Helper()
 
 	deps := requireDeepSeekDeps(t)
-	m, err := result.Unwrap(mode.Lookup()(mode.AgentID))
+	cfg, err := result.Unwrap(decodeConfig()(R.FromEntries(A.From(
+		pair.MakePair(KeyMode, mode.AgentID),
+		pair.MakePair(KeyWorkspace, root),
+	))))
+	require.NoError(t, err)
+	run, err := result.Unwrap(makeAnswer(cfg)())
 	require.NoError(t, err)
 
 	final, err := effect.RunSync(F.Pipe1(
-		ask(m, tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))())(prompt),
+		run(prompt),
 		effect.Provide[session.FinalResult](deps),
 	))(t.Context())
 	require.NoError(t, err)
@@ -87,7 +102,7 @@ func runCLI(t *testing.T, root, prompt string) string {
 func TestExampleAsk(t *testing.T) {
 	t.Parallel()
 
-	out := runCLI(t, makeWorkspace(t, nil), "What is a Kleisli arrow? Answer in one sentence.")
+	out := runCLI(t, makeWorkspace(t, R.Empty[string, string]()), "What is a Kleisli arrow? Answer in one sentence.")
 
 	assert.Contains(t, out, "Kleisli")
 }
@@ -96,9 +111,9 @@ func TestExampleAsk(t *testing.T) {
 func TestExampleReadFile(t *testing.T) {
 	t.Parallel()
 
-	root := makeWorkspace(t, map[string]string{
-		"notes.txt": "Shopping list\nThe code word is PERIWINKLE-42.\n",
-	})
+	root := makeWorkspace(t, R.Singleton(
+		"notes.txt", "Shopping list\nThe code word is PERIWINKLE-42.\n",
+	))
 
 	out := runCLI(t, root, "What is the code word in notes.txt?")
 
@@ -109,11 +124,11 @@ func TestExampleReadFile(t *testing.T) {
 func TestExampleGlob(t *testing.T) {
 	t.Parallel()
 
-	root := makeWorkspace(t, map[string]string{
-		"cmd/server/server.go": "package server\n",
-		"internal/zebra.go":    "package internal\n",
-		"docs/zebra.md":        "# Zebra\n",
-	})
+	root := makeWorkspace(t, R.FromEntries(A.From(
+		pair.MakePair("cmd/server/server.go", "package server\n"),
+		pair.MakePair("internal/zebra.go", "package internal\n"),
+		pair.MakePair("docs/zebra.md", "# Zebra\n"),
+	)))
 
 	out := runCLI(t, root, "List the paths of all Go files in this project.")
 
@@ -125,10 +140,10 @@ func TestExampleGlob(t *testing.T) {
 func TestExampleListFiles(t *testing.T) {
 	t.Parallel()
 
-	root := makeWorkspace(t, map[string]string{
-		"assets/aubergine.png": "",
-		"assets/quokka.svg":    "",
-	})
+	root := makeWorkspace(t, R.FromEntries(A.From(
+		pair.MakePair("assets/aubergine.png", ""),
+		pair.MakePair("assets/quokka.svg", ""),
+	)))
 
 	out := runCLI(t, root, "Which files are in the assets directory?")
 
@@ -140,11 +155,11 @@ func TestExampleListFiles(t *testing.T) {
 func TestExampleGrep(t *testing.T) {
 	t.Parallel()
 
-	root := makeWorkspace(t, map[string]string{
-		"billing/invoice.go": "package billing\n\n// TODO(walrus): round the totals\nfunc Total() {}\n",
-		"billing/tax.go":     "package billing\n\nfunc Tax() {}\n",
-		"README.md":          "# Shop\n",
-	})
+	root := makeWorkspace(t, R.FromEntries(A.From(
+		pair.MakePair("billing/invoice.go", "package billing\n\n// TODO(walrus): round the totals\nfunc Total() {}\n"),
+		pair.MakePair("billing/tax.go", "package billing\n\nfunc Tax() {}\n"),
+		pair.MakePair("README.md", "# Shop\n"),
+	)))
 
 	out := runCLI(t, root, "Which file has a TODO about rounding? Answer with its path.")
 
@@ -155,7 +170,7 @@ func TestExampleGrep(t *testing.T) {
 func TestExampleExecuteCommand(t *testing.T) {
 	t.Parallel()
 
-	out := runCLI(t, makeWorkspace(t, nil), "Run the shell command `echo harness-ok-7319` and tell me exactly what it printed.")
+	out := runCLI(t, makeWorkspace(t, R.Empty[string, string]()), "Run the shell command `echo harness-ok-7319` and tell me exactly what it printed.")
 
 	assert.Contains(t, out, "harness-ok-7319")
 }
@@ -165,7 +180,7 @@ func TestExampleExecuteCommand(t *testing.T) {
 func TestExampleToolError(t *testing.T) {
 	t.Parallel()
 
-	out := runCLI(t, makeWorkspace(t, nil), "Run the shell command `exit 42` and tell me its exit code.")
+	out := runCLI(t, makeWorkspace(t, R.Empty[string, string]()), "Run the shell command `exit 42` and tell me its exit code.")
 
 	assert.Contains(t, out, "42")
 }
