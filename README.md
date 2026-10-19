@@ -27,7 +27,9 @@ recorded agent sessions.
     `list_files`, `glob`, `grep`) and answers with a plan.
   - **ask** (the default) answers questions with the read-only tools.
 - **Modes and system prompt**: `mode.Modes` is the table of modes, each with its role and
-  the tools it allows. `mode.Request` assembles the first request of a mode: the system
+  the tools it allows. A mode is a Markdown file in [mode/modes/](mode/modes/): id, name,
+  description, order and tools in its YAML front matter, the role prompt as its body. A new
+  file adds a mode; unknown keys and unknown tools are errors. `mode.Request` assembles the first request of a mode: the system
   prompt with the mode's `role_definition`, the static sections, `project_rules` and
   `environment_info`, and the definitions of the mode's tools.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
@@ -82,7 +84,7 @@ replay tests.
 | [`main`](main.go) | CLI: reads the mode and the prompt from the arguments, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
-| [`mode`](mode/) | The modes (Agent, Plan, Ask) with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
+| [`mode`](mode/) | The modes (Agent, Plan, Ask), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info` and `project_rules` |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |

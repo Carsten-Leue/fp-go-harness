@@ -1,6 +1,6 @@
 ---
 name: go-conventions
-description: Use this skill whenever writing, generating, changing, reviewing or testing Go code in this repository. It holds the project's Go conventions with examples - the five mandatory rules (fp-go best practices, monadic over imperative, point-free, the fp-go MCP server as source of truth, every function nullary), pure functions and dependency injection, value semantics, Go doc comment style, HTTP header and MIME constants, lens generation with go generate, testing Result / Validation / Effect values, and the anti-patterns to avoid. Load it before the first line of Go, always together with the fp-go skill.
+description: Use this skill whenever writing, generating, changing, reviewing or testing Go code in this repository. It holds the project's Go conventions with examples - the five mandatory rules (fp-go best practices, monadic over imperative, point-free, the fp-go MCP server as source of truth, every function nullary), pure functions and dependency injection, value semantics, Go doc comment style, HTTP header and MIME constants, lens generation with go generate, data files as Markdown with YAML front matter, testing Result / Validation / Effect values, and the anti-patterns to avoid. Load it before the first line of Go, always together with the fp-go skill.
 ---
 # Go conventions for this repository
 
@@ -173,6 +173,28 @@ func(u User, t []string) User { u.Tags = append(u.Tags, t...); return u }
 // instead, assign a freshly built value:
 func(u User, t []string) User { u.Tags = t; return u }
 ```
+
+## Data files: Markdown with YAML front matter
+
+Configuration that comes with a text, such as a mode with its role prompt, is a Markdown
+file: the YAML front matter holds every field, the body is the text.
+[mode/modes/](../../../mode/modes/) is the example; a new mode is a new file there.
+
+- **Split, then decode.** [`mode.SplitFrontMatter`](../../../mode/frontmatter.go) splits the
+  file at its `---` lines (CRLF is fine) into a `Pair` of front matter and body. Decode the
+  head with `go.yaml.in/yaml/v3` (not `gopkg.in/yaml.v3`, not a front matter library) through
+  a `yaml.Decoder` with `KnownFields(true)`, so a misspelt key is an error. An empty front
+  matter is `io.EOF`; recover with `result.CatchIs(io.EOF, …)`.
+- **Tag the struct, skip the body:** `yaml:"id"` on each field, `yaml:"-"` on the field the
+  body goes into, set with its lens (`promptLens.Set`).
+- **Validate after decoding** with `result.FromPredicate`: required fields, and names that
+  must exist elsewhere (the tools of a mode).
+- **Read a directory from an `fs.FS`** (`ReadModes`: `fs.Glob` + `fs.ReadFile`, lifted with
+  `ioresult.Eitherize2`, with the file name added to the error by `ER.OnError`), so the same
+  code reads embedded files, a workspace directory (`os.DirFS`) and `fstest.MapFS` in tests.
+- **Embedded files are read once** into a package variable through a `must…` leaf that
+  panics, like `regexp.MustCompile`. They are part of the binary, so a broken one fails every
+  test of the package. Files read at runtime return the `Result` instead.
 
 ## Lens code generation
 
@@ -451,6 +473,7 @@ passes locally and fails only in CI.
 - [ ] Total functions; the simplest effect type that fits (Option → Result → IOResult → ReaderIOResult → Effect)
 - [ ] No mutation inside `Map` / `Chain` / lens setters
 - [ ] Lenses regenerated with `go generate`, not hand-edited
+- [ ] Data files are Markdown with YAML front matter, split with `SplitFrontMatter` and decoded strictly (`KnownFields(true)`)
 - [ ] Header names and MIME types from fp-go where defined; our own header constants lowercase with the RFC note
 - [ ] Go doc comments, no Markdown
 - [ ] `go build ./...`, `go vet ./...`, `go test ./...` clean

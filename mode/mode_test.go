@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
@@ -12,6 +13,7 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/io"
+	"github.com/IBM/fp-go/v2/pair"
 	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
@@ -161,4 +163,81 @@ func TestRequestAsk(t *testing.T) {
 	assert.Regexp(t, `^<role_definition>\nYou are a coding assistant running in Ask mode\.`,
 		request.Messages[0].OfSystem.Content.OfString.Value)
 	assert.ElementsMatch(t, readOnlyToolNames, toolNames(request))
+}
+
+func TestModesFromFrontMatter(t *testing.T) {
+	assert.Equal(t, []string{"Agent", "Plan", "Ask"}, A.Map(func(m Mode) string { return m.Name })(Modes()))
+	assert.Equal(t, "Answers questions with the read-only tools.", lookup(t, AskID).Description)
+	assert.Regexp(t, `^You are a coding assistant running in Ask mode\.\r?\n`, lookup(t, AskID).Prompt)
+}
+
+func TestParseMode(t *testing.T) {
+	file := "---\r\nid: review\r\nname: Review\r\ndescription: Reviews changes.\r\norder: 4\r\ntools: [read_file, grep]\r\n---\r\n\r\nYou review.\r\n"
+
+	assert.Equal(t, result.Of(Mode{
+		ID:           "review",
+		Name:         "Review",
+		Description:  "Reviews changes.",
+		Order:        4,
+		AllowedTools: []string{tools.ReadFileName, tools.GrepName},
+		Prompt:       "You review.",
+	}), ParseMode()([]byte(file)))
+}
+
+func TestParseModeErrors(t *testing.T) {
+	for name, file := range map[string]string{
+		"no front matter": "You review.\n",
+		"unknown key":     "---\nid: review\ntool: [grep]\n---\nYou review.\n",
+		"no id":           "---\nname: Review\n---\nYou review.\n",
+		"unclosed":        "---\nid: review\nYou review.\n",
+		"empty":           "---\n---\nYou review.\n",
+		"not yaml":        "---\nid: [review\n---\nYou review.\n",
+	} {
+		_, err := result.Unwrap(ParseMode()([]byte(file)))
+		assert.Error(t, err, name)
+	}
+
+	_, err := result.Unwrap(ParseMode()([]byte("---\nid: review\ntools: [grep, rm, curl]\n---\nYou review.\n")))
+	assert.EqualError(t, err, `mode "review" allows unknown tools rm, curl`)
+}
+
+func TestReadModes(t *testing.T) {
+	fsys := fstest.MapFS{
+		"b.md":      {Data: []byte("---\nid: b\norder: 1\n---\nB\n")},
+		"a.md":      {Data: []byte("---\nid: a\norder: 2\n---\nA\n")},
+		"c.md":      {Data: []byte("---\nid: c\norder: 1\n---\nC\n")},
+		"notes.txt": {Data: []byte("not a mode")},
+	}
+
+	modes, err := result.Unwrap(ReadModes()(fsys)())
+	require.NoError(t, err)
+	assert.Equal(t, []string{"b", "c", "a"}, A.Map(func(m Mode) string { return m.ID })(modes))
+
+	fsys["bad.md"] = &fstest.MapFile{Data: []byte("---\nid: bad\ntools: [rm]\n---\n")}
+	_, err = result.Unwrap(ReadModes()(fsys)())
+	assert.EqualError(t, err, `mode file "bad.md", Caused By: mode "bad" allows unknown tools rm`)
+}
+
+func TestSplitFrontMatter(t *testing.T) {
+	for name, tc := range map[string]struct{ file, head, body string }{
+		"lf":                 {"---\nid: a\n---\nBody\n", "id: a\n", "Body\n"},
+		"crlf":               {"---\r\nid: a\r\n---\r\n\r\nBody\r\n", "id: a\r\n", "\r\nBody\r\n"},
+		"empty front matter": {"---\n---\nBody", "", "Body"},
+		"no body":            {"---\nid: a\n---", "id: a\n", ""},
+		"delimiter in body":  {"---\nid: a\n---\nBody\n---\nMore\n", "id: a\n", "Body\n---\nMore\n"},
+		"spaces":             {"--- \nid: a\n  ---\nBody", "id: a\n", "Body"},
+	} {
+		assert.Equal(t, result.Of(pair.MakePair(tc.head, tc.body)), SplitFrontMatter()(tc.file), name)
+	}
+
+	for name, file := range map[string]string{
+		"empty":           "",
+		"no front matter": "Body\n---\n",
+		"unclosed":        "---\nid: a\nBody\n",
+		"only opening":    "---",
+		"not first line":  "\n---\nid: a\n---\n",
+	} {
+		_, err := result.Unwrap(SplitFrontMatter()(file))
+		assert.Error(t, err, name)
+	}
 }

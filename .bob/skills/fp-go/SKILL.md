@@ -549,6 +549,8 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | `reader.Local(f)(g)` over two known functions | composition | `F.Flow2(f, g)` |
 | `reader.Map[N](reader.Compose[…])` + `reader.Ap(second)` where both stages are `Reader[N, Endomorphism[T]]` | composing endomorphisms, pointwise over the reader: a monoid | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(second, first)` (right to left) |
 | `ChainLeft` / `OrElse` / `MapLeft` of a `P.Fold` over a hand-written `errors.Is` predicate | recovering from, or renaming, one kind of error | `CatchIs(target, f)` of the monad at hand (`effect`, `thunk` since fp-go v2.8.0; `result`, `ioresult`, `readerresult`, `readerioresult` since v2.9.0); by type `CatchAs`, `MapErrorAs`, `TapErrorAs` |
+| a leaf that builds the same pipeline twice: `MakePair(join()(xs), join()(ys))` | a constructor and a transformation of each field, mixed | the leaf only constructs, `pair.BiMap(join, join)` after it, with `join := joinLines()` bound once at the top of the enclosing function |
+| a value computed from the input, then used on the same input again: find an index, then split there | `Chain` over a reader | `readerresult.ChainReaderK(F.Curry2(leaf))` after the `ReaderResult` that computes the value; the curried leaf is a `reader.Kleisli[R, A, B]` |
 
 Worked examples:
 
@@ -580,6 +582,13 @@ Worked examples:
   [tools/executecommand.go](../../../tools/executecommand.go) `timeoutError` renames the
   deadline error with `thunk.CatchIs`; [env/env.go](../../../env/env.go) `ReadDotEnv` gives
   a missing file no variables with `ioresult.CatchIs`.
+- [mode/frontmatter.go](../../../mode/frontmatter.go) `splitAtClosing`: the index of the
+  closing `---` is found with `A.FindFirstMapWithIndex`, the lines are split there with
+  `readerresult.ChainReaderK(F.Curry2(splitAt))`, and both halves are joined with
+  `pair.BiMap(join, join)`. [mode/mode.go](../../../mode/mode.go) `modeOf` decodes the head
+  of the split file and sets its tail as the prompt with `reader.Map` + `reader.Ap`;
+  `decodeYAML` turns the `io.EOF` of an empty document into the empty value with
+  `result.CatchIs`.
 
 How to spot them:
 
