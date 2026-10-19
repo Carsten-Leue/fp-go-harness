@@ -3,7 +3,7 @@ module github.com/Carsten-Leue/fp-go-harness
 go 1.27.0
 
 require (
-	github.com/IBM/fp-go/v2 v2.8.0
+	github.com/IBM/fp-go/v2 v2.9.0
 	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1

@@ -12,7 +12,6 @@ import (
 	M "github.com/IBM/fp-go/v2/monoid"
 	"github.com/IBM/fp-go/v2/reader"
 	R "github.com/IBM/fp-go/v2/record"
-	"github.com/IBM/fp-go/v2/result"
 	"github.com/joho/godotenv"
 )
 
@@ -91,11 +90,7 @@ func readDotEnvFile(path string) (Vars, error) {
 func ReadDotEnv() ioresult.Kleisli[string, Vars] {
 	return F.Flow2(
 		ioresult.Eitherize1(readDotEnvFile),
-		ioresult.ChainLeft(F.Flow3(
-			result.ErrorIs(fs.ErrNotExist),
-			result.Map(F.Constant1[error](R.Empty[string, string]())),
-			ioresult.FromResult[Vars],
-		)),
+		ioresult.CatchIs(fs.ErrNotExist, F.Constant1[error](ioresult.Of(R.Empty[string, string]()))),
 	)
 }
 
