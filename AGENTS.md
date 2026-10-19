@@ -185,6 +185,7 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | `liftA2` over two readers of one environment | `reader.LiftA2` | `reader.Map[R](F.Curry2(g))` + `reader.Ap[C](fb)`; it is applicative, not `Chain` |
 | lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))`, as in `tools/walk.go` `walkDir`; as a Kleisli over `x`, `F.Flow3(F.Flip(getter), effect.Asks[C, IOResult[A]], effect.ChainIOResultK[C](f))` with `f` the operation on the `IOResult`, as in `prompt/projectrules.go` `readOptional` |
 | run an `IOResult` inside `Effect` (`ChainIOResultK`, `TapIOResultK`, `FromIOResult`) | before fp-go v2.6.0 | `effect.ChainIOResultK(f)` instead of `effect.ChainThunkK(F.Flow2(f, thunk.FromIOResult))` |
+| recover from, or rename, one kind of error only (`errors.Is` / `errors.As`) | before fp-go v2.8.0; `CatchIs` in `ioresult` | `effect.CatchIs(target, f)` and `thunk.CatchIs`, by type `CatchAs` / `MapErrorAs` / `TapErrorAs`, as in `prompt/projectrules.go` `readOptional` and `tools/executecommand.go` `timeoutError`; in `ioresult`, `ioresult.ChainLeft(F.Flow3(result.ErrorIs(target), result.Map(…), ioresult.FromResult[A]))`, as in `env.ReadDotEnv`. Never a hand-written `errors.Is` predicate in a `P.Fold` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones
 that return an `Operator` sit in an indented block that `grep "^func"` skips.

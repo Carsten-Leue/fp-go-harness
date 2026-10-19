@@ -1,7 +1,6 @@
 package env
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 
@@ -11,9 +10,9 @@ import (
 	"github.com/IBM/fp-go/v2/iooption"
 	"github.com/IBM/fp-go/v2/ioresult"
 	M "github.com/IBM/fp-go/v2/monoid"
-	P "github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	R "github.com/IBM/fp-go/v2/record"
+	"github.com/IBM/fp-go/v2/result"
 	"github.com/joho/godotenv"
 )
 
@@ -87,23 +86,16 @@ func readDotEnvFile(path string) (Vars, error) {
 	return godotenv.Read(path)
 }
 
-// isNotExist is a leaf: the predicate of a missing file.
-func isNotExist(err error) bool {
-	return errors.Is(err, fs.ErrNotExist)
-}
-
 // ReadDotEnv parses the dotenv file at path. A missing file has no variables,
 // any other read or parse error fails.
 func ReadDotEnv() ioresult.Kleisli[string, Vars] {
 	return F.Flow2(
 		ioresult.Eitherize1(readDotEnvFile),
-		ioresult.ChainLeft(P.Fold(
-			ioresult.Left[Vars],
-			F.Flow2(
-				F.Constant1[error](R.Empty[string, string]()),
-				ioresult.Of[Vars],
-			),
-		)(isNotExist)),
+		ioresult.ChainLeft(F.Flow3(
+			result.ErrorIs(fs.ErrNotExist),
+			result.Map(F.Constant1[error](R.Empty[string, string]())),
+			ioresult.FromResult[Vars],
+		)),
 	)
 }
 

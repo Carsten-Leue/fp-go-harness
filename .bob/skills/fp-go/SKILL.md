@@ -548,6 +548,7 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | `effect.Alt(empty)` + `Filter` + `Chain(P.Fold(…)(A.IsNonEmpty))` | "try this, otherwise that" | an effect that fails when the first case doesn't apply (`A.FindFirst` + `result.FromOption`), then `effect.Alt(lazy.Of(second))` |
 | `reader.Local(f)(g)` over two known functions | composition | `F.Flow2(f, g)` |
 | `reader.Map[N](reader.Compose[…])` + `reader.Ap(second)` where both stages are `Reader[N, Endomorphism[T]]` | composing endomorphisms, pointwise over the reader: a monoid | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(second, first)` (right to left) |
+| `ChainLeft` / `OrElse` / `MapLeft` of a `P.Fold` over a hand-written `errors.Is` predicate | recovering from, or renaming, one kind of error | `effect.CatchIs(target, f)` / `thunk.CatchIs` (fp-go ≥ v2.8.0); by type `CatchAs`, `MapErrorAs`, `TapErrorAs`. Where the monad has none (`ioresult`), `ChainLeft(F.Flow3(result.ErrorIs(target), result.Map(…), ioresult.FromResult[A]))` |
 
 Worked examples:
 
@@ -574,6 +575,11 @@ Worked examples:
   around a changed call was `MakeToolCallLens().Modify`.
 - [openai/deepseek.go](../../../openai/deepseek.go) `MakeDeepSeekChatCompletionDeps`:
   the client options are a plain `F.Flow6`.
+- [prompt/projectrules.go](../../../prompt/projectrules.go) `readOptional`: a missing file
+  is `None` through `effect.CatchIs(fs.ErrNotExist, …)`;
+  [tools/executecommand.go](../../../tools/executecommand.go) `timeoutError` renames the
+  deadline error with `thunk.CatchIs`; [env/env.go](../../../env/env.go) `ReadDotEnv` uses
+  `result.ErrorIs`, because `ioresult` has no `CatchIs`.
 
 How to spot them:
 
