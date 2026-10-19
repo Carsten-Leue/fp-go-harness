@@ -17,6 +17,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
 	L "github.com/IBM/fp-go/v2/optics/lens"
@@ -72,7 +73,7 @@ func makeRegistry(m mode.Mode) reader.Reader[tools.ToolsDeps, tools.ToolRegistry
 
 // withPrompt adds the user's prompt to the request of a mode and sets the
 // model.
-func withPrompt() func(string) mode.Endomorphism[openai.ChatCompletionNewParams] {
+func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNewParams] {
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
 

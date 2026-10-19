@@ -2,6 +2,7 @@ package prompt
 
 import (
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	"github.com/IBM/fp-go/v2/io"
 	"github.com/IBM/fp-go/v2/monoid"
 	"github.com/IBM/fp-go/v2/option"
@@ -10,12 +11,13 @@ import (
 )
 
 type (
-	Effect[C, A any] = effect.Effect[C, A]
-	IO[A any]        = io.IO[A]
-	Monoid[A any]    = monoid.Monoid[A]
-	Option[A any]    = option.Option[A]
-	Pair[A, B any]   = pair.Pair[A, B]
-	Reader[R, A any] = reader.Reader[R, A]
+	Effect[C, A any]    = effect.Effect[C, A]
+	Endomorphism[A any] = endomorphism.Endomorphism[A]
+	IO[A any]           = io.IO[A]
+	Monoid[A any]       = monoid.Monoid[A]
+	Option[A any]       = option.Option[A]
+	Pair[A, B any]      = pair.Pair[A, B]
+	Reader[R, A any]    = reader.Reader[R, A]
 
 	// Section is a prompt section: its tag in the head, its body in the tail.
 	Section = Pair[string, string]

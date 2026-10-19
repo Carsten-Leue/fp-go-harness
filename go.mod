@@ -3,12 +3,13 @@ module github.com/Carsten-Leue/fp-go-harness
 go 1.27.0
 
 require (
-	github.com/IBM/fp-go/v2 v2.8.0
+	github.com/IBM/fp-go/v2 v2.9.0
 	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v3 v3.52.0
 	github.com/stretchr/testify v1.12.1
+	go.yaml.in/yaml/v3 v3.0.5
 )
 
 require (
@@ -34,7 +35,6 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/urfave/cli/v3 v3.14.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect

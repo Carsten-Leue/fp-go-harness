@@ -19,14 +19,22 @@ type ModeLenses struct {
 	ID __lens.Lens[Mode, string]
 	// Name is a [__lens.Lens] for the Name field of [Mode]
 	Name __lens.Lens[Mode, string]
-	// Prompt is a [__lens.Lens] for the Prompt field of [Mode]
-	Prompt __lens.Lens[Mode, string]
+	// Description is a [__lens.Lens] for the Description field of [Mode]
+	Description __lens.Lens[Mode, string]
+	// Order is a [__lens.Lens] for the Order field of [Mode]
+	Order __lens.Lens[Mode, int]
 	// AllowedTools is a [__lens.Lens] for the AllowedTools field of [Mode]
 	AllowedTools __lens.Lens[Mode, []string]
+	// Prompt is a [__lens.Lens] for the Prompt field of [Mode]
+	Prompt __lens.Lens[Mode, string]
 	// IDO is a [__lens_option.LensO] for the ID field of [Mode], treating the zero value as absent
 	IDO __lens_option.LensO[Mode, string]
 	// NameO is a [__lens_option.LensO] for the Name field of [Mode], treating the zero value as absent
 	NameO __lens_option.LensO[Mode, string]
+	// DescriptionO is a [__lens_option.LensO] for the Description field of [Mode], treating the zero value as absent
+	DescriptionO __lens_option.LensO[Mode, string]
+	// OrderO is a [__lens_option.LensO] for the Order field of [Mode], treating the zero value as absent
+	OrderO __lens_option.LensO[Mode, int]
 	// PromptO is a [__lens_option.LensO] for the Prompt field of [Mode], treating the zero value as absent
 	PromptO __lens_option.LensO[Mode, string]
 }
@@ -39,14 +47,22 @@ type ModeRefLenses struct {
 	ID __lens.Lens[*Mode, string]
 	// Name is a [__lens.Lens] for the Name field of [Mode] via a pointer receiver
 	Name __lens.Lens[*Mode, string]
-	// Prompt is a [__lens.Lens] for the Prompt field of [Mode] via a pointer receiver
-	Prompt __lens.Lens[*Mode, string]
+	// Description is a [__lens.Lens] for the Description field of [Mode] via a pointer receiver
+	Description __lens.Lens[*Mode, string]
+	// Order is a [__lens.Lens] for the Order field of [Mode] via a pointer receiver
+	Order __lens.Lens[*Mode, int]
 	// AllowedTools is a [__lens.Lens] for the AllowedTools field of [Mode] via a pointer receiver
 	AllowedTools __lens.Lens[*Mode, []string]
+	// Prompt is a [__lens.Lens] for the Prompt field of [Mode] via a pointer receiver
+	Prompt __lens.Lens[*Mode, string]
 	// IDO is a [__lens_option.LensO] for the ID field of [Mode] via a pointer receiver, treating the zero value as absent
 	IDO __lens_option.LensO[*Mode, string]
 	// NameO is a [__lens_option.LensO] for the Name field of [Mode] via a pointer receiver, treating the zero value as absent
 	NameO __lens_option.LensO[*Mode, string]
+	// DescriptionO is a [__lens_option.LensO] for the Description field of [Mode] via a pointer receiver, treating the zero value as absent
+	DescriptionO __lens_option.LensO[*Mode, string]
+	// OrderO is a [__lens_option.LensO] for the Order field of [Mode] via a pointer receiver, treating the zero value as absent
+	OrderO __lens_option.LensO[*Mode, int]
 	// PromptO is a [__lens_option.LensO] for the Prompt field of [Mode] via a pointer receiver, treating the zero value as absent
 	PromptO __lens_option.LensO[*Mode, string]
 }
@@ -59,10 +75,14 @@ type ModePrisms struct {
 	ID __prism.Prism[Mode, string]
 	// Name is a [__prism.Prism] for the Name field of [Mode]
 	Name __prism.Prism[Mode, string]
-	// Prompt is a [__prism.Prism] for the Prompt field of [Mode]
-	Prompt __prism.Prism[Mode, string]
+	// Description is a [__prism.Prism] for the Description field of [Mode]
+	Description __prism.Prism[Mode, string]
+	// Order is a [__prism.Prism] for the Order field of [Mode]
+	Order __prism.Prism[Mode, int]
 	// AllowedTools is a [__prism.Prism] for the AllowedTools field of [Mode]
 	AllowedTools __prism.Prism[Mode, []string]
+	// Prompt is a [__prism.Prism] for the Prompt field of [Mode]
+	Prompt __prism.Prism[Mode, string]
 }
 
 // ModeRefPrisms provides [prisms] for accessing fields of [Mode] via a pointer to [Mode]
@@ -73,10 +93,14 @@ type ModeRefPrisms struct {
 	ID __prism.Prism[*Mode, string]
 	// Name is a [__prism.Prism] for the Name field of [Mode] via a pointer receiver
 	Name __prism.Prism[*Mode, string]
-	// Prompt is a [__prism.Prism] for the Prompt field of [Mode] via a pointer receiver
-	Prompt __prism.Prism[*Mode, string]
+	// Description is a [__prism.Prism] for the Description field of [Mode] via a pointer receiver
+	Description __prism.Prism[*Mode, string]
+	// Order is a [__prism.Prism] for the Order field of [Mode] via a pointer receiver
+	Order __prism.Prism[*Mode, int]
 	// AllowedTools is a [__prism.Prism] for the AllowedTools field of [Mode] via a pointer receiver
 	AllowedTools __prism.Prism[*Mode, []string]
+	// Prompt is a [__prism.Prism] for the Prompt field of [Mode] via a pointer receiver
+	Prompt __prism.Prism[*Mode, string]
 }
 
 // MakeModeIDLens returns a [__lens.Lens] for the ID field of [Mode]
@@ -183,6 +207,150 @@ func MakeModeNameRefPrism() __prism.Prism[*Mode, string] {
 	)
 }
 
+// MakeModeDescriptionLens returns a [__lens.Lens] for the Description field of [Mode]
+func MakeModeDescriptionLens() __lens.Lens[Mode, string] {
+	return __lens.MakeLensWithName(
+		func(s Mode) string { return s.Description },
+		func(s Mode, v string) Mode { s.Description = v; return s },
+		"Mode.Description",
+	)
+}
+
+// MakeModeDescriptionLensO returns a [__lens_option.LensO] for the Description field of [Mode]
+func MakeModeDescriptionLensO() __lens_option.LensO[Mode, string] {
+	return __lens_option.FromIso[Mode](__iso_option.FromZero[string]())(MakeModeDescriptionLens())
+}
+
+// MakeModeDescriptionRefLens returns a [__lens.Lens] for the Description field of [Mode] via a pointer receiver
+func MakeModeDescriptionRefLens() __lens.Lens[*Mode, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Mode) string { return s.Description },
+		func(s *Mode, v string) *Mode { s.Description = v; return s },
+		"(*Mode).Description",
+	)
+}
+
+// MakeModeDescriptionRefLensO returns a [__lens_option.LensO] for the Description field of [Mode] via a pointer receiver
+func MakeModeDescriptionRefLensO() __lens_option.LensO[*Mode, string] {
+	return __lens_option.FromIso[*Mode](__iso_option.FromZero[string]())(MakeModeDescriptionRefLens())
+}
+
+// MakeModeDescriptionPrism returns a [__prism.Prism] for the Description field of [Mode]
+func MakeModeDescriptionPrism() __prism.Prism[Mode, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s Mode) __option.Option[string] { return _fromNonZero(s.Description) },
+		func(v string) Mode {
+			return Mode{Description: v}
+		},
+		"Mode.Description",
+	)
+}
+
+// MakeModeDescriptionRefPrism returns a [__prism.Prism] for the Description field of [Mode] via a pointer receiver
+func MakeModeDescriptionRefPrism() __prism.Prism[*Mode, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *Mode) __option.Option[string] { return _fromNonZero(s.Description) },
+		func(v string) *Mode {
+			return &Mode{Description: v}
+		},
+		"Mode.Description",
+	)
+}
+
+// MakeModeOrderLens returns a [__lens.Lens] for the Order field of [Mode]
+func MakeModeOrderLens() __lens.Lens[Mode, int] {
+	return __lens.MakeLensWithName(
+		func(s Mode) int { return s.Order },
+		func(s Mode, v int) Mode { s.Order = v; return s },
+		"Mode.Order",
+	)
+}
+
+// MakeModeOrderLensO returns a [__lens_option.LensO] for the Order field of [Mode]
+func MakeModeOrderLensO() __lens_option.LensO[Mode, int] {
+	return __lens_option.FromIso[Mode](__iso_option.FromZero[int]())(MakeModeOrderLens())
+}
+
+// MakeModeOrderRefLens returns a [__lens.Lens] for the Order field of [Mode] via a pointer receiver
+func MakeModeOrderRefLens() __lens.Lens[*Mode, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Mode) int { return s.Order },
+		func(s *Mode, v int) *Mode { s.Order = v; return s },
+		"(*Mode).Order",
+	)
+}
+
+// MakeModeOrderRefLensO returns a [__lens_option.LensO] for the Order field of [Mode] via a pointer receiver
+func MakeModeOrderRefLensO() __lens_option.LensO[*Mode, int] {
+	return __lens_option.FromIso[*Mode](__iso_option.FromZero[int]())(MakeModeOrderRefLens())
+}
+
+// MakeModeOrderPrism returns a [__prism.Prism] for the Order field of [Mode]
+func MakeModeOrderPrism() __prism.Prism[Mode, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s Mode) __option.Option[int] { return _fromNonZero(s.Order) },
+		func(v int) Mode {
+			return Mode{Order: v}
+		},
+		"Mode.Order",
+	)
+}
+
+// MakeModeOrderRefPrism returns a [__prism.Prism] for the Order field of [Mode] via a pointer receiver
+func MakeModeOrderRefPrism() __prism.Prism[*Mode, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *Mode) __option.Option[int] { return _fromNonZero(s.Order) },
+		func(v int) *Mode {
+			return &Mode{Order: v}
+		},
+		"Mode.Order",
+	)
+}
+
+// MakeModeAllowedToolsLens returns a [__lens.Lens] for the AllowedTools field of [Mode]
+func MakeModeAllowedToolsLens() __lens.Lens[Mode, []string] {
+	return __lens.MakeLensWithName(
+		func(s Mode) []string { return s.AllowedTools },
+		func(s Mode, v []string) Mode { s.AllowedTools = v; return s },
+		"Mode.AllowedTools",
+	)
+}
+
+// MakeModeAllowedToolsRefLens returns a [__lens.Lens] for the AllowedTools field of [Mode] via a pointer receiver
+func MakeModeAllowedToolsRefLens() __lens.Lens[*Mode, []string] {
+	return __lens.MakeLensRefWithName(
+		func(s *Mode) []string { return s.AllowedTools },
+		func(s *Mode, v []string) *Mode { s.AllowedTools = v; return s },
+		"(*Mode).AllowedTools",
+	)
+}
+
+// MakeModeAllowedToolsPrism returns a [__prism.Prism] for the AllowedTools field of [Mode]
+func MakeModeAllowedToolsPrism() __prism.Prism[Mode, []string] {
+	return __prism.MakePrismWithName(
+		func(s Mode) __option.Option[[]string] { return __option.Some(s.AllowedTools) },
+		func(v []string) Mode {
+			return Mode{AllowedTools: v}
+		},
+		"Mode.AllowedTools",
+	)
+}
+
+// MakeModeAllowedToolsRefPrism returns a [__prism.Prism] for the AllowedTools field of [Mode] via a pointer receiver
+func MakeModeAllowedToolsRefPrism() __prism.Prism[*Mode, []string] {
+	return __prism.MakePrismWithName(
+		func(s *Mode) __option.Option[[]string] { return __option.Some(s.AllowedTools) },
+		func(v []string) *Mode {
+			return &Mode{AllowedTools: v}
+		},
+		"Mode.AllowedTools",
+	)
+}
+
 // MakeModePromptLens returns a [__lens.Lens] for the Prompt field of [Mode]
 func MakeModePromptLens() __lens.Lens[Mode, string] {
 	return __lens.MakeLensWithName(
@@ -235,46 +403,6 @@ func MakeModePromptRefPrism() __prism.Prism[*Mode, string] {
 	)
 }
 
-// MakeModeAllowedToolsLens returns a [__lens.Lens] for the AllowedTools field of [Mode]
-func MakeModeAllowedToolsLens() __lens.Lens[Mode, []string] {
-	return __lens.MakeLensWithName(
-		func(s Mode) []string { return s.AllowedTools },
-		func(s Mode, v []string) Mode { s.AllowedTools = v; return s },
-		"Mode.AllowedTools",
-	)
-}
-
-// MakeModeAllowedToolsRefLens returns a [__lens.Lens] for the AllowedTools field of [Mode] via a pointer receiver
-func MakeModeAllowedToolsRefLens() __lens.Lens[*Mode, []string] {
-	return __lens.MakeLensRefWithName(
-		func(s *Mode) []string { return s.AllowedTools },
-		func(s *Mode, v []string) *Mode { s.AllowedTools = v; return s },
-		"(*Mode).AllowedTools",
-	)
-}
-
-// MakeModeAllowedToolsPrism returns a [__prism.Prism] for the AllowedTools field of [Mode]
-func MakeModeAllowedToolsPrism() __prism.Prism[Mode, []string] {
-	return __prism.MakePrismWithName(
-		func(s Mode) __option.Option[[]string] { return __option.Some(s.AllowedTools) },
-		func(v []string) Mode {
-			return Mode{AllowedTools: v}
-		},
-		"Mode.AllowedTools",
-	)
-}
-
-// MakeModeAllowedToolsRefPrism returns a [__prism.Prism] for the AllowedTools field of [Mode] via a pointer receiver
-func MakeModeAllowedToolsRefPrism() __prism.Prism[*Mode, []string] {
-	return __prism.MakePrismWithName(
-		func(s *Mode) __option.Option[[]string] { return __option.Some(s.AllowedTools) },
-		func(v []string) *Mode {
-			return &Mode{AllowedTools: v}
-		},
-		"Mode.AllowedTools",
-	)
-}
-
 // MakeModeLenses creates a new [ModeLenses] with [lenses] for all fields
 //
 // [lenses]: __lens.Lens
@@ -283,12 +411,16 @@ func MakeModeLenses() ModeLenses {
 		// mandatory lenses
 		ID:           MakeModeIDLens(),
 		Name:         MakeModeNameLens(),
-		Prompt:       MakeModePromptLens(),
+		Description:  MakeModeDescriptionLens(),
+		Order:        MakeModeOrderLens(),
 		AllowedTools: MakeModeAllowedToolsLens(),
+		Prompt:       MakeModePromptLens(),
 		// optional lenses
-		IDO:     MakeModeIDLensO(),
-		NameO:   MakeModeNameLensO(),
-		PromptO: MakeModePromptLensO(),
+		IDO:          MakeModeIDLensO(),
+		NameO:        MakeModeNameLensO(),
+		DescriptionO: MakeModeDescriptionLensO(),
+		OrderO:       MakeModeOrderLensO(),
+		PromptO:      MakeModePromptLensO(),
 	}
 }
 
@@ -300,12 +432,16 @@ func MakeModeRefLenses() ModeRefLenses {
 		// mandatory lenses
 		ID:           MakeModeIDRefLens(),
 		Name:         MakeModeNameRefLens(),
-		Prompt:       MakeModePromptRefLens(),
+		Description:  MakeModeDescriptionRefLens(),
+		Order:        MakeModeOrderRefLens(),
 		AllowedTools: MakeModeAllowedToolsRefLens(),
+		Prompt:       MakeModePromptRefLens(),
 		// optional lenses
-		IDO:     MakeModeIDRefLensO(),
-		NameO:   MakeModeNameRefLensO(),
-		PromptO: MakeModePromptRefLensO(),
+		IDO:          MakeModeIDRefLensO(),
+		NameO:        MakeModeNameRefLensO(),
+		DescriptionO: MakeModeDescriptionRefLensO(),
+		OrderO:       MakeModeOrderRefLensO(),
+		PromptO:      MakeModePromptRefLensO(),
 	}
 }
 
@@ -316,8 +452,10 @@ func MakeModePrisms() ModePrisms {
 	return ModePrisms{
 		ID:           MakeModeIDPrism(),
 		Name:         MakeModeNamePrism(),
-		Prompt:       MakeModePromptPrism(),
+		Description:  MakeModeDescriptionPrism(),
+		Order:        MakeModeOrderPrism(),
 		AllowedTools: MakeModeAllowedToolsPrism(),
+		Prompt:       MakeModePromptPrism(),
 	}
 }
 
@@ -328,7 +466,9 @@ func MakeModeRefPrisms() ModeRefPrisms {
 	return ModeRefPrisms{
 		ID:           MakeModeIDRefPrism(),
 		Name:         MakeModeNameRefPrism(),
-		Prompt:       MakeModePromptRefPrism(),
+		Description:  MakeModeDescriptionRefPrism(),
+		Order:        MakeModeOrderRefPrism(),
 		AllowedTools: MakeModeAllowedToolsRefPrism(),
+		Prompt:       MakeModePromptRefPrism(),
 	}
 }
