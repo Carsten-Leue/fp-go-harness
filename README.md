@@ -17,10 +17,15 @@ recorded agent sessions.
 ## ✅ What works today
 
 - **Agent loop**: `session.Run` drives the conversation until the model stops calling
-  tools, or until the iteration limit (25 in the CLI) is reached. It accumulates token usage
+  tools, or until the iteration limit (25 by default in the CLI) is reached. It accumulates token usage
   with a monoid. Tool failures go back to the model as tool messages and never stop the loop.
-- **CLI (ask and agent mode)**: `go run . [-mode ask|agent] "<prompt>"` runs one prompt
-  with DeepSeek in the current directory and prints the answer and the token usage.
+- **CLI (ask and agent mode)**: `go run . [--mode ask|agent] "<prompt>"` runs one prompt
+  with DeepSeek in the workspace (the current directory unless `--workspace` says
+  otherwise) and prints the answer and the token usage. The command is built on
+  [urfave/cli](https://github.com/urfave/cli) (`go run . --help`). Its configuration
+  (`MODE`, `WORKSPACE`, `MAX_ITERATIONS`, `MAX_TOOL_OUTPUT`) is decoded by an fp-go codec
+  from `.env`, the process environment and the flags, the later source winning; each
+  variable has a flag of the same name in kebab case (`--max-iterations`).
   - **ask** (the default) answers questions with the read-only tools (`read_file`,
     `list_files`, `glob`, `grep`).
   - **agent** carries out a task with every tool, including `write_file` and
@@ -36,7 +41,7 @@ recorded agent sessions.
   `execute_command` waits
   for a command, or starts it in the background and returns its process id and log file
   under `.fp-go-harness/logs` in the workspace. The CLI cuts every tool result, including
-  error text, to 50,000 bytes and adds a note that the output was truncated.
+  error text, to 50,000 bytes (`MAX_TOOL_OUTPUT`) and adds a note that the output was truncated.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -58,15 +63,16 @@ Requires Go 1.27 or later and a DeepSeek API key.
 ```sh
 cp .env.example .env        # then set DEEPSEEK_API_KEY
 go run . "What is a Kleisli arrow?"
-go run . -mode agent "Add a doc comment to every exported function in env/env.go"
+go run . --mode agent "Add a doc comment to every exported function in env/env.go"
 ```
 
-Variables set in the process environment take precedence over `.env`.
+Variables set in the process environment take precedence over `.env`, and flags over
+both.
 
-[example_test.go](example_test.go) runs the CLI use cases (a plain question, reading,
+[cli/example_test.go](cli/example_test.go) runs the CLI use cases (a plain question, reading,
 listing, globbing and grepping files, running a command, a failing tool call) end to end
 against DeepSeek in a temporary workspace. They are skipped without `DEEPSEEK_API_KEY`;
-`go test -v -run TestExample .` prints what the CLI answers for each prompt.
+`go test -v -run TestExample ./cli` prints what the CLI answers for each prompt.
 [.env.example](.env.example) lists all variables, including the optional ones for the
 replay tests.
 
@@ -74,7 +80,8 @@ replay tests.
 
 | Package | What it does |
 |---|---|
-| [`main`](main.go) | CLI: reads the mode and the prompt from the arguments, picks the mode's system prompt and tools, wires the DeepSeek dependencies, runs the loop |
+| [`main`](main.go) | Runs the CLI command until Ctrl-C |
+| [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, picks the mode's system prompt and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |

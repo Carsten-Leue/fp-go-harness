@@ -5,6 +5,7 @@ import (
 	"github.com/IBM/fp-go/v2/iooption"
 	"github.com/IBM/fp-go/v2/ioresult"
 	"github.com/IBM/fp-go/v2/readerioresult"
+	"github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 )
 
@@ -16,5 +17,5 @@ type (
 	Result[A any]            = result.Result[A]
 
 	// Vars maps variable names to values.
-	Vars = map[string]string
+	Vars = record.Record[string, string]
 )

@@ -141,10 +141,9 @@ func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionCh
 	messageLens := oai.MakeChatCompletionChoiceMessageLens()
 	toolCallsLens := oai.MakeChatCompletionMessageToolCallsLens()
 
-	toolCallsFromChoiceOptional := F.Pipe1(
-		messageLens.Compose(toolCallsLens),
-		L.ComposePrism[openai.ChatCompletionChoice](P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion])),
-	)
+	toolCallsFromChoiceOptional := messageLens.
+		Compose(toolCallsLens).
+		ComposePrism(P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion]))
 
 	makeToolCalls := MakeToolCalls()
 

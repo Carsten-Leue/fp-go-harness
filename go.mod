@@ -9,6 +9,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v3 v3.82.0
 	github.com/stretchr/testify v1.12.1
+	github.com/urfave/cli/v3 v3.14.0
 )
 
 require (
@@ -33,7 +34,6 @@ require (
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.2 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/urfave/cli/v3 v3.14.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.42.0 // indirect

@@ -7,8 +7,6 @@ import (
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
-	L "github.com/IBM/fp-go/v2/optics/lens"
-	OL "github.com/IBM/fp-go/v2/optics/optional/lens"
 	P "github.com/IBM/fp-go/v2/optics/prism"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
@@ -94,11 +92,9 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 	choicesLens := oai.MakeChatCompletionChoicesRefLens()
 	finishReasonLens := oai.MakeChatCompletionChoiceFinishReasonLens()
 
-	firstFinishReason := F.Pipe2(
-		choicesLens,
-		L.ComposePrism[*openai.ChatCompletion](P.Head[openai.ChatCompletionChoice]()),
-		OL.Compose[*openai.ChatCompletion](finishReasonLens),
-	)
+	firstFinishReason := choicesLens.
+		ComposePrism(P.Head[openai.ChatCompletionChoice]()).
+		ComposeLens(finishReasonLens)
 
 	handleToolCalls := F.Flow2(
 		tools.HandleToolCalls(),
