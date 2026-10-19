@@ -52,34 +52,13 @@ var planPrompt string
 //go:embed prompts/ask.txt
 var askPrompt string
 
-// readOnlyTools are the names of the tools that read the workspace without
-// changing it.
-func readOnlyTools() []string {
-	return A.From(tools.ReadFileName, tools.ListFilesName, tools.GlobName, tools.GrepName)
-}
-
-// allTools are the names of every tool: the read-only ones, those that write
-// files and execute_command.
-func allTools() []string {
-	return F.Pipe1(
-		readOnlyTools(),
-		A.Concat(A.From(
-			tools.WriteFileName,
-			tools.SearchAndReplaceName,
-			tools.ApplyDiffName,
-			tools.InsertContentName,
-			tools.ExecuteCommandName,
-		)),
-	)
-}
-
 // Modes is the table of the built-in modes, in the order they are offered:
 // Agent with every tool, Plan and Ask with the read-only tools.
 func Modes() []Mode {
 	return A.From(
-		Mode{ID: AgentID, Name: "Agent", Prompt: agentPrompt, AllowedTools: allTools()},
-		Mode{ID: PlanID, Name: "Plan", Prompt: planPrompt, AllowedTools: readOnlyTools()},
-		Mode{ID: AskID, Name: "Ask", Prompt: askPrompt, AllowedTools: readOnlyTools()},
+		Mode{ID: AgentID, Name: "Agent", Prompt: agentPrompt, AllowedTools: tools.ToolNames()},
+		Mode{ID: PlanID, Name: "Plan", Prompt: planPrompt, AllowedTools: tools.ReadToolNames()},
+		Mode{ID: AskID, Name: "Ask", Prompt: askPrompt, AllowedTools: tools.ReadToolNames()},
 	)
 }
 

@@ -49,7 +49,7 @@ recorded agent sessions.
 - **Prompt sections**: `prompt.RenderSections` renders tagged sections as
   `<tag>\nbody\n</tag>` and joins them with a blank line through a string monoid.
   `prompt.StaticSections` holds the embedded `tool_use`, `markdown_rules` and `base_rules`
-  sections, `prompt.RoleDefinition` wraps the role of a mode, and `prompt.EnvironmentInfo`
+  sections, without the rules that name a tool the mode doesn't allow, `prompt.RoleDefinition` wraps the role of a mode, and `prompt.EnvironmentInfo`
   builds the `environment_info` section (workspace root, OS, architecture, shell, date) as
   an `Effect` over `EnvInfoDeps`. `prompt.ProjectRules` reads `AGENTS.md`, the files in
   `.bob/rules/` and those in the mode's `.bob/rules-<mode>/` from the workspace into the

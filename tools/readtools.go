@@ -17,6 +17,12 @@ func MakeDefaultReadToolsDeps(root string) ReadToolsDeps {
 	return MakeGrepDeps(MakeWorkspaceDeps(root), MakeDefaultWalkDeps(), MakeDefaultFileDeps())
 }
 
+// ReadToolNames are the names of the tools of [MakeReadTools], e.g. for the
+// tools a read-only mode allows.
+func ReadToolNames() []string {
+	return A.From(ReadFileName, ListFilesName, GlobName, GrepName)
+}
+
 // readTools are the tools that read the workspace without changing it:
 // read_file, list_files, glob and grep. Each tool reads its own dependencies
 // from R through [reader.Local].

@@ -186,7 +186,8 @@ and a text result. Validation errors (such as "path must be absolute") come back
   Agent (every tool), Plan and Ask (the read-only tools); their role prompts are `mode/prompts/*.txt`, and Plan's
   was written without comparing it to the recordings. `mode.Request()` is an
   `effect.Kleisli[ModeDeps, Mode, ChatCompletionNewParams]`: the system prompt as the only message, rendered from
-  role_definition (the mode's prompt, which replaces the static `role_definition.txt`), the static sections,
+  role_definition (the mode's prompt, which replaces the static `role_definition.txt`), the static sections
+  (without the rules that name a tool the mode doesn't allow, so Plan and Ask aren't told to write files),
   project_rules and environment_info, plus the definitions of the tools the mode allows (`tools.SelectTools`).
   `prompt.ProjectRules()` now takes the mode's ID and adds the rules in `.bob/rules-<id>/` after those in
   `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt

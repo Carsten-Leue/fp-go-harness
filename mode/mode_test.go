@@ -29,6 +29,12 @@ var allToolNames = []string{
 	tools.ExecuteCommandName,
 }
 
+// writeToolNames are the tools of Agent mode only.
+var writeToolNames = []string{
+	tools.WriteFileName, tools.SearchAndReplaceName, tools.ApplyDiffName, tools.InsertContentName,
+	tools.ExecuteCommandName,
+}
+
 // makeTestDeps builds [ModeDeps] over a temporary workspace with the files,
 // relative path to content, on a fixed machine and date.
 func makeTestDeps(t *testing.T, files map[string]string) (string, ModeDeps) {
@@ -124,6 +130,9 @@ func TestRequestPlan(t *testing.T) {
 	assert.Contains(t, system, "The currently active workspace folder is "+root+"\n")
 	assert.Regexp(t, `Current date: 2026-10-19\n</environment_info>$`, system)
 	assert.NotContains(t, system, "\r")
+	for _, name := range writeToolNames {
+		assert.NotContains(t, system, name)
+	}
 
 	assert.ElementsMatch(t, readOnlyToolNames, toolNames(request))
 }
@@ -138,6 +147,8 @@ func TestRequestAgentWithoutRules(t *testing.T) {
 		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "environment_info"},
 		tagsOf(system))
 	assert.Regexp(t, `^<role_definition>\nYou are a coding agent running in Agent mode\.`, system)
+	assert.Contains(t, system, "over write_file for existing files.\n")
+	assert.Contains(t, system, "run the validation that applies to your changes with execute_command")
 
 	assert.ElementsMatch(t, allToolNames, toolNames(request))
 }

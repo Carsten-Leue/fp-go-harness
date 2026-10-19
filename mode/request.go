@@ -24,9 +24,16 @@ func roleDefinition() effect.Kleisli[ModeDeps, Mode, []Section] {
 	)
 }
 
-// staticSections are the sections that are the same in every mode.
+// staticSections are the static sections of a mode, without the rules that
+// name a tool the mode doesn't allow.
 func staticSections() effect.Kleisli[ModeDeps, Mode, []Section] {
-	return F.Constant1[Mode](effect.Of[ModeDeps](prompt.StaticSections()))
+	allowedToolsLens := MakeModeAllowedToolsLens()
+
+	return F.Flow3(
+		allowedToolsLens.Get,
+		prompt.StaticSections(),
+		effect.Of[ModeDeps, []Section],
+	)
 }
 
 // projectRules is the project_rules section of a mode, read with its ID; no
@@ -76,7 +83,7 @@ func SystemPrompt() effect.Kleisli[ModeDeps, Mode, string] {
 
 // Tools builds the registry of the tools a mode allows, see
 // [tools.SelectTools].
-func Tools() func(Mode) Reader[tools.ToolsDeps, tools.ToolRegistry] {
+func Tools() reader.Kleisli[tools.ToolsDeps, Mode, tools.ToolRegistry] {
 	allowedToolsLens := MakeModeAllowedToolsLens()
 
 	return F.Flow4(

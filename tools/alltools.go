@@ -47,6 +47,21 @@ func MakeDefaultToolsDeps(root, logDir string) IO[ToolsDeps] {
 	)
 }
 
+// ToolNames are the names of the tools of [MakeTools]: the [ReadToolNames],
+// followed by those that change the workspace.
+func ToolNames() []string {
+	return F.Pipe1(
+		ReadToolNames(),
+		A.Concat(A.From(
+			WriteFileName,
+			SearchAndReplaceName,
+			ApplyDiffName,
+			InsertContentName,
+			ExecuteCommandName,
+		)),
+	)
+}
+
 // MakeTools builds the registry of every tool: the read-only ones,
 // write_file, search_and_replace, apply_diff, insert_content and execute_command. Each tool reads its own dependencies from
 // [ToolsDeps] through [reader.Local].
