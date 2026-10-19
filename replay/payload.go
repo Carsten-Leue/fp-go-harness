@@ -100,10 +100,9 @@ func prefixPrism(prefix string) Prism[string, string] {
 // payloadPrism focuses on the payload text of the records whose message
 // starts with prefix.
 func payloadPrism() reader.Reader[string, Prism[Record, string]] {
-	return F.Flow3(
+	return F.Flow2(
 		prefixPrism,
-		prism.Compose[Record, string, string],
-		reader.Read[Prism[Record, string]](MakeRecordMsgPrism()),
+		MakeRecordMsgPrism().Compose[string],
 	)
 }
 
