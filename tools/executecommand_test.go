@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -115,12 +116,22 @@ func TestTimeoutOf(t *testing.T) {
 }
 
 func TestTimeoutError(t *testing.T) {
-	other := errors.New("other")
-	assert.Equal(t, other, timeoutError()(time.Second)(other))
+	failWith := func(err error) error {
+		_, got := result.Unwrap(timeoutError()(time.Second)(thunk.Left[ProcessOutput](err))(t.Context())())
+		return got
+	}
 
-	err := timeoutError()(time.Second)(context.DeadlineExceeded)
-	assert.ErrorContains(t, err, "command did not finish within 1s")
-	assert.ErrorIs(t, err, context.DeadlineExceeded)
+	other := errors.New("other")
+	assert.Equal(t, other, failWith(other))
+
+	for _, deadline := range []error{context.DeadlineExceeded, fmt.Errorf("wrapped: %w", context.DeadlineExceeded)} {
+		err := failWith(deadline)
+		assert.ErrorContains(t, err, "command did not finish within 1s")
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+	}
+
+	out := ProcessOutput{ExitCode: 1}
+	assert.Equal(t, result.Of(out), timeoutError()(time.Second)(thunk.Of(out))(t.Context())())
 }
 
 func TestExecuteCommand_Fake(t *testing.T) {

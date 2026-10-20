@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/pair"
 	R "github.com/IBM/fp-go/v2/record"
@@ -23,7 +24,7 @@ func TestDecodeConfig_Defaults(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, Config{
-		Mode:          askMode,
+		Mode:          mode.AskID,
 		Workspace:     wd,
 		MaxIterations: 25,
 		MaxToolOutput: 50_000,
@@ -34,7 +35,7 @@ func TestDecodeConfig_Values(t *testing.T) {
 	root := t.TempDir()
 
 	cfg, err := result.Unwrap(decodeConfig()(R.FromEntries(A.From(
-		pair.MakePair(KeyMode, agentMode),
+		pair.MakePair(KeyMode, mode.AgentID),
 		pair.MakePair(KeyWorkspace, root),
 		pair.MakePair(KeyMaxIterations, "3"),
 		pair.MakePair(KeyMaxToolOutput, "100"),
@@ -43,7 +44,7 @@ func TestDecodeConfig_Values(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, Config{
-		Mode:          agentMode,
+		Mode:          mode.AgentID,
 		Workspace:     root,
 		MaxIterations: 3,
 		MaxToolOutput: 100,
@@ -73,10 +74,10 @@ func TestDecodeConfig_Invalid(t *testing.T) {
 }
 
 func TestConfigCodec_Encode(t *testing.T) {
-	cfg := Config{Mode: agentMode, Workspace: "/work", MaxIterations: 3, MaxToolOutput: 100}
+	cfg := Config{Mode: mode.AgentID, Workspace: "/work", MaxIterations: 3, MaxToolOutput: 100}
 
 	assert.Equal(t, R.FromEntries(A.From(
-		pair.MakePair(KeyMode, agentMode),
+		pair.MakePair(KeyMode, mode.AgentID),
 		pair.MakePair(KeyWorkspace, "/work"),
 		pair.MakePair(KeyMaxIterations, "3"),
 		pair.MakePair(KeyMaxToolOutput, "100"),
@@ -108,9 +109,9 @@ func readFlags(t *testing.T, args ...string) Record[string, string] {
 
 func TestEnvFromCommand_OnlySetFlags(t *testing.T) {
 	assert.Equal(t, R.FromEntries(A.From(
-		pair.MakePair(KeyMode, agentMode),
+		pair.MakePair(KeyMode, mode.AgentID),
 		pair.MakePair(KeyMaxIterations, "7"),
-	)), readFlags(t, "--mode", agentMode, "--max-iterations", "7", "prompt"))
+	)), readFlags(t, "--mode", mode.AgentID, "--max-iterations", "7", "prompt"))
 }
 
 func TestEnvFromCommand_NoFlags(t *testing.T) {

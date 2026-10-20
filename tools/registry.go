@@ -7,6 +7,7 @@ import (
 	Mg "github.com/IBM/fp-go/v2/magma"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	"github.com/IBM/fp-go/v2/pair"
+	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
 	R "github.com/IBM/fp-go/v2/record"
 	S "github.com/IBM/fp-go/v2/string"
@@ -65,6 +66,22 @@ func ToToolRegistry() func([]Tool) ToolRegistry {
 // MakeToolRegistry is wiring: the variadic form of [ToToolRegistry].
 func MakeToolRegistry(tools ...Tool) ToolRegistry {
 	return ToToolRegistry()(tools)
+}
+
+// selectFrom picks the tools of a registry by name, in a registry of their
+// own. A name without a tool is skipped.
+func selectFrom() Reader[ToolRegistry, Reader[[]string, ToolRegistry]] {
+	return F.Flow3(
+		F.Flip(R.Lookup[Tool, string]),
+		A.FilterMap[string, Tool],
+		reader.Map[[]string](ToToolRegistry()),
+	)
+}
+
+// SelectTools keeps the tools of a registry whose names are listed, e.g. the
+// tools a mode allows. A listed name without a tool is skipped.
+func SelectTools() Reader[[]string, Endomorphism[ToolRegistry]] {
+	return F.Flip(selectFrom())
 }
 
 // ToToolCaller derives the [ToolCaller] lookup from a registry.

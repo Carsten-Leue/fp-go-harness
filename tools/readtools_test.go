@@ -18,6 +18,7 @@ func TestMakeReadTools(t *testing.T) {
 	registry := MakeReadTools()(MakeDefaultReadToolsDeps(root))
 
 	assert.ElementsMatch(t, []string{ReadFileName, ListFilesName, GlobName, GrepName}, R.Keys(registry))
+	assert.ElementsMatch(t, ReadToolNames(), R.Keys(registry))
 
 	caller := ToToolCaller()(registry)
 	run := func(name, arguments string) string {
@@ -47,6 +48,7 @@ func TestMakeTools(t *testing.T) {
 	assert.ElementsMatch(t,
 		[]string{ReadFileName, ListFilesName, GlobName, GrepName, WriteFileName, SearchAndReplaceName, ApplyDiffName, InsertContentName, ExecuteCommandName},
 		R.Keys(registry))
+	assert.ElementsMatch(t, ToolNames(), R.Keys(registry))
 
 	caller := ToToolCaller()(registry)
 	run := func(name, arguments string) string {

@@ -159,12 +159,6 @@ func TestRunShell_ExitCode(t *testing.T) {
 	assert.Equal(t, result.Of(ProcessOutput{ExitCode: 3}), run(MakeProcess("exit 3", t.TempDir()))(t.Context())())
 }
 
-func TestIsDeadlineExceeded(t *testing.T) {
-	assert.True(t, isDeadlineExceeded()(context.DeadlineExceeded))
-	assert.True(t, isDeadlineExceeded()(fmt.Errorf("wrapped: %w", context.DeadlineExceeded)))
-	assert.False(t, isDeadlineExceeded()(context.Canceled))
-}
-
 func TestIsSuccess(t *testing.T) {
 	assert.True(t, isSuccess(ProcessOutput{Stderr: "warning"}))
 	assert.False(t, isSuccess(ProcessOutput{ExitCode: 1}))

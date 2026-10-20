@@ -19,17 +19,24 @@ recorded agent sessions.
 - **Agent loop**: `session.Run` drives the conversation until the model stops calling
   tools, or until the iteration limit (25 by default in the CLI) is reached. It accumulates token usage
   with a monoid. Tool failures go back to the model as tool messages and never stop the loop.
-- **CLI (ask and agent mode)**: `go run . [--mode ask|agent] "<prompt>"` runs one prompt
-  with DeepSeek in the workspace (the current directory unless `--workspace` says
+- **CLI (agent, plan and ask mode)**: `go run . [--mode agent|plan|ask] "<prompt>"` runs one
+  prompt with DeepSeek in the workspace (the current directory unless `--workspace` says
   otherwise) and prints the answer and the token usage. The command is built on
   [urfave/cli](https://github.com/urfave/cli) (`go run . --help`). Its configuration
   (`MODE`, `WORKSPACE`, `MAX_ITERATIONS`, `MAX_TOOL_OUTPUT`) is decoded by an fp-go codec
   from `.env`, the process environment and the flags, the later source winning; each
   variable has a flag of the same name in kebab case (`--max-iterations`).
-  - **ask** (the default) answers questions with the read-only tools (`read_file`,
-    `list_files`, `glob`, `grep`).
   - **agent** carries out a task with every tool, including `write_file` and
     `execute_command`. These run without approval until PLAN.md I1.
+  - **plan** investigates the workspace with the read-only tools (`read_file`,
+    `list_files`, `glob`, `grep`) and answers with a plan.
+  - **ask** (the default) answers questions with the read-only tools.
+- **Modes and system prompt**: `mode.Modes` is the table of modes, each with its role and
+  the tools it allows. A mode is a Markdown file in [mode/modes/](mode/modes/): id, name,
+  description, order and tools in its YAML front matter, the role prompt as its body. A new
+  file adds a mode; unknown keys and unknown tools are errors. `mode.Request` assembles the first request of a mode: the system
+  prompt with the mode's `role_definition`, the static sections, `project_rules` and
+  `environment_info`, and the definitions of the mode's tools.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
   `apply_diff`, `insert_content` and `execute_command`, each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
@@ -48,13 +55,12 @@ recorded agent sessions.
   `ChatCompletionDeps` answer each request with the next recorded response.
 - **Prompt sections**: `prompt.RenderSections` renders tagged sections as
   `<tag>\nbody\n</tag>` and joins them with a blank line through a string monoid.
-  `prompt.StaticSections` holds the embedded `role_definition`, `tool_use`,
-  `markdown_rules` and `base_rules` sections, and `prompt.EnvironmentInfo` builds the
-  `environment_info` section (workspace root, OS, architecture, shell, date) as an
-  `Effect` over `EnvInfoDeps`. `prompt.ProjectRules` reads `AGENTS.md` and the files in
-  `.bob/rules/` from the workspace into the `project_rules` section; without rules there
-  is no section. They are the base of the system prompt assembly in
-  Phase D and are not wired into the CLI yet.
+  `prompt.StaticSections` holds the embedded `tool_use`, `markdown_rules` and `base_rules`
+  sections, without the rules that name a tool the mode doesn't allow, `prompt.RoleDefinition` wraps the role of a mode, and `prompt.EnvironmentInfo`
+  builds the `environment_info` section (workspace root, OS, architecture, shell, date) as
+  an `Effect` over `EnvInfoDeps`. `prompt.ProjectRules` reads `AGENTS.md`, the files in
+  `.bob/rules/` and those in the mode's `.bob/rules-<mode>/` from the workspace into the
+  `project_rules` section; without rules there is no section.
 
 ## 🚀 Quick start
 
@@ -63,6 +69,7 @@ Requires Go 1.27 or later and a DeepSeek API key.
 ```sh
 cp .env.example .env        # then set DEEPSEEK_API_KEY
 go run . "What is a Kleisli arrow?"
+go run . --mode plan "How would I add a retry to the HTTP client?"
 go run . --mode agent "Add a doc comment to every exported function in env/env.go"
 ```
 
@@ -81,9 +88,10 @@ replay tests.
 | Package | What it does |
 |---|---|
 | [`main`](main.go) | Runs the CLI command until Ctrl-C |
-| [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, picks the mode's system prompt and tools, wires the DeepSeek dependencies, runs the loop |
+| [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
-| [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring, modes and system prompts |
+| [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
+| [`mode`](mode/) | The modes (Agent, Plan, Ask), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info` and `project_rules` |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
@@ -99,7 +107,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ D1–D4 done |
+| D | Prompt assembly | ⏳ D1–D5 done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |

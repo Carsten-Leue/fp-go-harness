@@ -3,7 +3,9 @@ package cli
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	"github.com/IBM/fp-go/v2/result"
 	C "github.com/urfave/cli/v3"
 )
@@ -17,7 +19,7 @@ func configFlags() []C.Flag {
 	return []C.Flag{
 		&C.StringFlag{
 			Name:  name(KeyMode),
-			Usage: fmt.Sprintf("%q (read-only tools) or %q (all tools, changes the workspace), defaults to %q. Environment variable [%s].", askMode, agentMode, askMode, KeyMode),
+			Usage: fmt.Sprintf("the mode, one of %s (%s uses all tools and changes the workspace), defaults to %q. Environment variable [%s].", strings.Join(mode.IDs(), ", "), mode.AgentID, mode.AskID, KeyMode),
 		},
 		&C.StringFlag{
 			Name:      name(KeyWorkspace),

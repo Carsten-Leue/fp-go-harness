@@ -11,8 +11,10 @@ import (
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	"github.com/IBM/fp-go/v2/effect"
+	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
 	"github.com/IBM/fp-go/v2/option"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,8 +30,11 @@ func writeFiles(t *testing.T, root string, files map[string]string) {
 	}
 }
 
+// testModeID is the mode the tests read the rules of.
+const testModeID = "agent"
+
 func runProjectRules(deps ProjectRulesDeps) result.Result[Option[Section]] {
-	return effect.Provide[Option[Section]](deps)(ProjectRules())(context.Background())()
+	return effect.Provide[Option[Section]](deps)(ProjectRules()(testModeID))(context.Background())()
 }
 
 // projectRulesIn runs [ProjectRules] over the file system in root.
@@ -77,6 +82,28 @@ func TestProjectRulesRulesDir(t *testing.T) {
 			"<rule>\nrule a\n</rule>\n\n<rule>\nrule b\n</rule>"))),
 		projectRulesIn(root),
 	)
+}
+
+func TestProjectRulesModeDir(t *testing.T) {
+	root := t.TempDir()
+	writeFiles(t, root, map[string]string{
+		"AGENTS.md":             "agents",
+		".bob/rules-agent/m.md": "agent rule",
+		".bob/rules-ask/m.md":   "ask rule",
+		".bob/rules/a.md":       "rule a",
+	})
+
+	assert.Equal(t,
+		result.Of(option.Some(MakeSection(ProjectRulesTag,
+			"<agents_md>\n<rule>\nagents\n</rule>\n</agents_md>\n\n"+
+				"<rule>\nrule a\n</rule>\n\n"+
+				"<rule>\nagent rule\n</rule>"))),
+		projectRulesIn(root),
+	)
+}
+
+func TestModeRulesDir(t *testing.T) {
+	assert.Equal(t, ".bob/rules-plan", ModeRulesDir()("plan"))
 }
 
 func TestProjectRulesRender(t *testing.T) {
@@ -132,6 +159,10 @@ func TestProjectRulesReadsWorkspacePaths(t *testing.T) {
 		mu   sync.Mutex
 		read []string
 	)
+	listings := map[string][]tools.FileEntry{
+		filepath.Join(testRoot, ".bob", "rules"):       {{Path: "x.md"}, {Path: "d", IsDir: true}},
+		filepath.Join(testRoot, ".bob", "rules-agent"): {{Path: "y.md"}},
+	}
 	deps := MakeProjectRulesDeps(
 		tools.MakeWorkspaceDeps(testRoot),
 		tools.MakeFileDeps(func(path string) ioresult.IOResult[[]byte] {
@@ -145,19 +176,27 @@ func TestProjectRulesReadsWorkspacePaths(t *testing.T) {
 		tools.MakeWalkDeps(func(recursive bool) ioresult.Kleisli[string, []tools.FileEntry] {
 			assert.False(t, recursive)
 			return func(dir string) ioresult.IOResult[[]tools.FileEntry] {
-				assert.Equal(t, filepath.Join(testRoot, ".bob", "rules"), dir)
-				return ioresult.Of([]tools.FileEntry{{Path: "x.md"}, {Path: "d", IsDir: true}})
+				return F.Pipe2(
+					listings,
+					R.Lookup[[]tools.FileEntry](dir),
+					ioresult.FromOption[[]tools.FileEntry](F.Constant(fs.ErrNotExist)),
+				)
 			}
 		}),
 	)
 
 	assert.Equal(t,
 		result.Of(option.Some(MakeSection(ProjectRulesTag,
-			"<agents_md>\n<rule>\ntext of AGENTS.md\n</rule>\n</agents_md>\n\n<rule>\ntext of x.md\n</rule>"))),
+			"<agents_md>\n<rule>\ntext of AGENTS.md\n</rule>\n</agents_md>\n\n"+
+				"<rule>\ntext of x.md\n</rule>\n\n<rule>\ntext of y.md\n</rule>"))),
 		runProjectRules(deps),
 	)
 	assert.ElementsMatch(t,
-		[]string{filepath.Join(testRoot, "AGENTS.md"), filepath.Join(testRoot, ".bob", "rules", "x.md")},
+		[]string{
+			filepath.Join(testRoot, "AGENTS.md"),
+			filepath.Join(testRoot, ".bob", "rules", "x.md"),
+			filepath.Join(testRoot, ".bob", "rules-agent", "y.md"),
+		},
 		read,
 	)
 }

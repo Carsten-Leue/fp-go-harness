@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/optics/codec/validation"
 	"github.com/IBM/fp-go/v2/result"
@@ -9,7 +10,7 @@ import (
 // The variables of the configuration. Each one is also a flag, named by
 // [flagName]: MAX_ITERATIONS is --max-iterations.
 const (
-	// KeyMode selects the mode, [askMode] or [agentMode].
+	// KeyMode selects the mode by its ID, one of [mode.IDs].
 	KeyMode = "MODE"
 	// KeyWorkspace is the directory the tools work in.
 	KeyWorkspace = "WORKSPACE"
@@ -35,7 +36,7 @@ const (
 //
 // fp-go:Lens
 type Config struct {
-	// Mode is the name of the mode, [askMode] or [agentMode].
+	// Mode is the ID of the mode, one of [mode.IDs].
 	Mode string
 	// Workspace is the absolute path of the directory the tools work in.
 	Workspace string
@@ -54,13 +55,13 @@ func configKeys() []string {
 // GetConfigCodec returns the codec of [Config]: it decodes the configuration
 // from the variables and encodes it back to them.
 //
-//   - MODE            (string, default "ask")
+//   - MODE            (mode ID, default "ask")
 //   - WORKSPACE       (path, default the working directory), made absolute
 //   - MAX_ITERATIONS  (int > 0, default 25)
 //   - MAX_TOOL_OUTPUT (int > 0, default 50000)
 func GetConfigCodec() EnvCodec[Config] {
 	return F.Pipe3(
-		bindTo(MakeConfigModePrism(), stringWithDefault(KeyMode, askMode)),
+		bindTo(MakeConfigModePrism(), stringWithDefault(KeyMode, mode.AskID)),
 		apSL(MakeConfigWorkspaceLens(), stringWithDefault(KeyWorkspace, defaultWorkspace).
 			Pipe(absolutePath())),
 		apSL(MakeConfigMaxIterationsLens(), intWithDefault(KeyMaxIterations, defaultMaxIterations).

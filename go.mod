@@ -10,6 +10,7 @@ require (
 	github.com/openai/openai-go/v3 v3.82.0
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli/v3 v3.14.0
+	go.yaml.in/yaml/v3 v3.0.5
 )
 
 require (
@@ -35,7 +36,6 @@ require (
 	github.com/tidwall/pretty v1.2.2 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect

@@ -90,11 +90,6 @@ func timeoutOf() func(int) time.Duration {
 	)
 }
 
-// isDeadlineExceeded tests for the error of a context that ran out of time.
-func isDeadlineExceeded() P.Predicate[error] {
-	return F.Bind2nd(errors.Is, context.DeadlineExceeded)
-}
-
 // deadlineError is a leaf: [ER.OnError] is variadic and needs the duration
 // as argument.
 func deadlineError(d time.Duration) Endomorphism[error] {
@@ -103,11 +98,11 @@ func deadlineError(d time.Duration) Endomorphism[error] {
 
 // timeoutError names the time limit in the error of a command that hit it,
 // and leaves every other error alone.
-func timeoutError() Reader[time.Duration, Endomorphism[error]] {
+func timeoutError() Reader[time.Duration, thunk.Operator[ProcessOutput, ProcessOutput]] {
 	return F.Flow3(
 		deadlineError,
-		F.Bind1st(P.Fold[error, error], ER.Identity),
-		reader.Read[Endomorphism[error]](isDeadlineExceeded()),
+		reader.Map[error](thunk.Left[ProcessOutput]),
+		F.Bind1st(thunk.CatchIs[ProcessOutput], context.DeadlineExceeded),
 	)
 }
 
@@ -121,7 +116,7 @@ func withTimeLimit() Reader[int, thunk.Operator[ProcessOutput, ProcessOutput]] {
 	return F.Flow2(
 		timeoutOf(),
 		compose.Concat(
-			F.Flow2(timeoutError(), thunk.MapLeft[ProcessOutput]),
+			timeoutError(),
 			thunk.WithTimeout[ProcessOutput],
 		),
 	)

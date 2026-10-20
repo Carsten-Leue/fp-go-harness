@@ -179,15 +179,30 @@ and a text result. Validation errors (such as "path must be absolute") come back
   file directly in `.bob/rules/`, in lexical order. Missing or empty files and a missing directory are left
   out; other read errors fail. Mode-specific `.bob/rules-<mode>/` directories wait for D5. Not wired into the
   CLI yet (D5).
-- [ ] **D5 Mode definitions.** Generalise [openai/modes.go](openai/modes.go) to a `Mode{ID, Name, Prompt, AllowedTools}`
+- [x] **D5 Mode definitions.** Generalise `openai/modes.go` to a `Mode{ID, Name, Prompt, AllowedTools}`
   table (Agent, Plan, Ask). The system prompt and tool list for a mode are
   `Effect[ModeDeps, ChatCompletionNewParams]`.
-  Started: `openai.ForAgentMode` (prompt `prompts/agent.txt`) next to `ForAskMode`, and a `mode` table in the CLI
-  ([cli/modes.go](cli/modes.go)) that gives Ask the read-only tools and Agent all of them. Still open: the general `Mode`
-  table, Plan mode and `ModeDeps`.
+  The [`mode`](mode/) package replaces `openai/modes.go` and the CLI's own mode table. `mode.Modes()` lists
+  Agent (every tool), Plan and Ask (the read-only tools); each is a Markdown file in `mode/modes/`, with id, name, description, order and tools in its
+  YAML front matter (split by `mode.SplitFrontMatter`, decoded with `go.yaml.in/yaml/v3`; unknown keys and tools are rejected) and the role
+  prompt as its body, so a new mode is a new file (`mode.ReadModes` reads them from any `fs.FS`). Plan's
+  was written without comparing it to the recordings. `mode.Request()` is an
+  `effect.Kleisli[ModeDeps, Mode, ChatCompletionNewParams]`: the system prompt as the only message, rendered from
+  role_definition (the mode's prompt, which replaces the static `role_definition.txt`), the static sections
+  (without the rules that name a tool the mode doesn't allow, so Plan and Ask aren't told to write files),
+  project_rules and environment_info, plus the definitions of the tools the mode allows (`tools.SelectTools`).
+  `prompt.ProjectRules()` now takes the mode's ID and adds the rules in `.bob/rules-<id>/` after those in
+  `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt
+  reads the workspace the tools work in. The CLI (`--mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
+  The `available_modes` section waits for H5.
 - [ ] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.
 - [ ] **D7 Replay comparison.** Compare the assembled system prompt section by section with a recorded one (tag order and presence).
+- [ ] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
+  `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in
+  ones: the workspace wins over the home directory, both over the built-ins, by `id` (precedence is a monoid, as in G1).
+  Two files with the same `id` in one directory are an error. `Lookup` and `IDs` take the merged table through
+  `ModeDeps`. *Test:* `fstest.MapFS` per directory; an override, a new mode and a duplicate.
 
 ### Phase E: Session lifecycle
 

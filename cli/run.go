@@ -7,12 +7,14 @@ import (
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
 	"github.com/Carsten-Leue/fp-go-harness/http"
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/io"
@@ -41,52 +43,50 @@ func newDeepSeekDeps(e env.EnvironmentDeps) oai.DeepSeekDeps {
 	return &deepSeekDeps{http.MakeDefaultHttpDeps(), e}
 }
 
-// makeRegistry is wiring: it builds the registry of a mode's tools for the
-// workspace of the configuration, with the output of each tool limited to its
-// MaxToolOutput. Background commands log to [logDir] inside the workspace.
-func makeRegistry(cfg Config, modeTools reader.Reader[tools.ToolsDeps, tools.ToolRegistry]) io.IO[tools.ToolRegistry] {
+// makeToolsDeps is wiring: it builds the deps of the tools for the workspace
+// of the configuration. Background commands log to [logDir] inside it.
+func makeToolsDeps(cfg Config) io.IO[tools.ToolsDeps] {
 	root := MakeConfigWorkspaceLens().Get(cfg)
 
-	return F.Pipe1(
-		tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir)),
-		io.Map(F.Flow2(modeTools, tools.TruncateTools()(MakeConfigMaxToolOutputLens().Get(cfg)))),
+	return tools.MakeDefaultToolsDeps(root, filepath.Join(root, logDir))
+}
+
+// makeRegistry is wiring: it builds the registry of the tools of a mode, with
+// the output of each tool limited to the MaxToolOutput of the configuration.
+func makeRegistry(cfg Config, m mode.Mode) reader.Reader[tools.ToolsDeps, tools.ToolRegistry] {
+	return F.Flow2(
+		mode.Tools()(m),
+		tools.TruncateTools()(MakeConfigMaxToolOutputLens().Get(cfg)),
 	)
 }
 
-// makeRequest builds the request of a mode for a single user prompt,
-// including the tool definitions from the registry.
-func makeRequest(request openai.ChatCompletionNewParams, registry tools.ToolRegistry) func(string) openai.ChatCompletionNewParams {
+// withPrompt adds the user's prompt to the request of a mode and sets the
+// model.
+func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNewParams] {
 	modelLens := oai.MakeChatCompletionNewParamsModelLens()
 	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
-
-	base := F.Pipe2(
-		request,
-		modelLens.Set(oai.DeepSeekModelFlash),
-		tools.WithTools()(registry),
-	)
 
 	return F.Flow4(
 		openai.UserMessage[string],
 		A.Push[openai.ChatCompletionMessageParamUnion],
 		messagesLens.Modify,
-		reader.Read[openai.ChatCompletionNewParams](base),
+		reader.Map[openai.ChatCompletionNewParams](modelLens.Set(oai.DeepSeekModelFlash)),
 	)
 }
 
-// answer is wiring: it runs the agent loop for a prompt against DeepSeek, with
-// the registry the program built and at most MaxIterations requests.
+// answer is wiring: it runs the agent loop for a request against DeepSeek,
+// with the registry the program built and at most MaxIterations requests.
 //
 // session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
 // the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
 // from DeepSeekDeps with the effectful [oai.MakeDeepSeekChatCompletionDeps].
-func answer(cfg Config, request openai.ChatCompletionNewParams, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+func answer(cfg Config, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, openai.ChatCompletionNewParams, session.FinalResult] {
 	toSessionDeps := F.Bind23of3(session.MakeSessionDeps)(
 		tools.MakeRegistryToolDeps()(registry),
 		session.MakeLoopDeps(MakeConfigMaxIterationsLens().Get(cfg)),
 	)
 
-	return F.Flow5(
-		makeRequest(request, registry),
+	return F.Flow4(
 		session.MakeSession,
 		session.Run(),
 		effect.Local[session.FinalResult](toSessionDeps),
@@ -94,13 +94,29 @@ func answer(cfg Config, request openai.ChatCompletionNewParams, registry tools.T
 	)
 }
 
-// modeAnswer is wiring: it builds the registry of a mode and the agent loop
-// over it. The fields of [mode] are read directly at this boundary.
-func modeAnswer(cfg Config) io.Kleisli[mode, effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
-	return func(m mode) io.IO[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
+// ask is wiring: it answers a prompt in a mode, in the workspace of the tools.
+// The request of the mode reads its system prompt from that workspace.
+func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+	request := F.Pipe1(
+		mode.Request()(m),
+		effect.Local[openai.ChatCompletionNewParams](F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))),
+	)
+
+	return F.Flow4(
+		withPrompt(),
+		effect.Map[oai.DeepSeekDeps, openai.ChatCompletionNewParams, openai.ChatCompletionNewParams],
+		reader.Read[effect.Effect[oai.DeepSeekDeps, openai.ChatCompletionNewParams]](request),
+		effect.Chain(answer(cfg, makeRegistry(cfg, m)(deps))),
+	)
+}
+
+// modeAnswer is wiring: it builds the deps of the tools and the agent loop of
+// a mode over them.
+func modeAnswer(cfg Config) io.Kleisli[mode.Mode, effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
+	return func(m mode.Mode) io.IO[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
 		return F.Pipe1(
-			makeRegistry(cfg, m.tools),
-			io.Map(F.Bind12of3(answer)(cfg, m.request)),
+			makeToolsDeps(cfg),
+			io.Map(F.Bind12of3(ask)(cfg, m)),
 		)
 	}
 }
@@ -109,8 +125,8 @@ func modeAnswer(cfg Config) io.Kleisli[mode, effect.Kleisli[oai.DeepSeekDeps, st
 // the agent loop of that mode.
 func makeAnswer(cfg Config) IOResult[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
 	return F.Pipe2(
-		lookupMode()(MakeConfigModeLens().Get(cfg)),
-		ioresult.FromResult[mode],
+		mode.Lookup()(MakeConfigModeLens().Get(cfg)),
+		ioresult.FromResult[mode.Mode],
 		ioresult.ChainIOK(modeAnswer(cfg)),
 	)
 }
@@ -141,7 +157,7 @@ func promptOf() result.Kleisli[*C.Command, string] {
 		C.Args.Slice,
 		F.Bind2nd(strings.Join, " "),
 		option.FromNonZero[string](),
-		result.FromOption[string](ER.OnNone("missing prompt, usage: fp-go-harness [--mode ask|agent] <prompt>")),
+		result.FromOption[string](ER.OnNone("missing prompt, usage: fp-go-harness [--mode agent|plan|ask] <prompt>")),
 	)
 }
 

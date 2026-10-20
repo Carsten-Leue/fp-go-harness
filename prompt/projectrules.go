@@ -1,7 +1,6 @@
 package prompt
 
 import (
-	"errors"
 	"io/fs"
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
@@ -30,6 +29,13 @@ const AgentsMdFile = "AGENTS.md"
 // RulesDir is the directory in the workspace root whose files are further
 // project rules, one rule per file.
 const RulesDir = ".bob/rules"
+
+// ModeRulesDir is the directory in the workspace root with the rules of one
+// mode: [RulesDir] followed by a hyphen and the mode's ID, e.g.
+// .bob/rules-agent.
+func ModeRulesDir() func(string) string {
+	return S.Prepend(RulesDir + "-")
+}
 
 // ProjectRulesDeps gives the project_rules section the workspace it reads the
 // rules from, read access to its files and its directory listings.
@@ -62,23 +68,6 @@ func AsProjectRulesDeps[R ProjectRulesDeps](r R) ProjectRulesDeps {
 	return r
 }
 
-// isNotExist is a leaf: it tests for an error of a missing file or directory.
-func isNotExist(err error) bool {
-	return errors.Is(err, fs.ErrNotExist)
-}
-
-// missingAsNone turns a read of a missing file or directory into None, so the
-// rules are optional. Every other error fails the read.
-func missingAsNone[T any]() func(ioresult.IOResult[T]) ioresult.IOResult[Option[T]] {
-	return F.Flow2(
-		ioresult.Map(option.Some[T]),
-		ioresult.OrElse(P.Fold(
-			ioresult.Left[Option[T]],
-			F.Constant1[error](ioresult.Of(option.None[T]())),
-		)(isNotExist)),
-	)
-}
-
 // bytesToString is a leaf: the conversion as a function.
 func bytesToString(b []byte) string {
 	return string(b)
@@ -93,13 +82,15 @@ func inWorkspace(name string) Effect[ProjectRulesDeps, string] {
 }
 
 // readOptional lifts a file system access behind a getter, a function of the
-// path, into an effect that gives None for a missing path. Flipping the getter
-// turns the path into the reader of the dependencies.
+// path, into an effect that gives None for a missing path, so the rules are
+// optional. Every other error fails the read. Flipping the getter turns the
+// path into the reader of the dependencies.
 func readOptional[T any](get Reader[ProjectRulesDeps, ioresult.Kleisli[string, T]]) effect.Kleisli[ProjectRulesDeps, string, Option[T]] {
-	return F.Flow3(
+	return F.Flow4(
 		F.Flip(get),
 		effect.Asks[ProjectRulesDeps, ioresult.IOResult[T]],
-		effect.ChainIOResultK[ProjectRulesDeps](missingAsNone[T]()),
+		effect.ChainIOResultK[ProjectRulesDeps](ioresult.Map(option.Some[T])),
+		effect.CatchIs(fs.ErrNotExist, F.Constant1[error](effect.Of[ProjectRulesDeps](option.None[T]()))),
 	)
 }
 
@@ -186,11 +177,12 @@ func agentsMd() Effect[ProjectRulesDeps, []Section] {
 	)
 }
 
-// rulesDirSections reads every file directly in .bob/rules as a rule
-// section, skipping empty files.
-func rulesDirSections() Effect[ProjectRulesDeps, []Section] {
-	return F.Pipe3(
-		inWorkspace(RulesDir),
+// rulesDirSections reads every file directly in a rules directory of the
+// workspace as a rule section, skipping empty files. A missing directory has
+// no sections.
+func rulesDirSections() effect.Kleisli[ProjectRulesDeps, string, []Section] {
+	return F.Flow4(
+		inWorkspace,
 		effect.Chain(ruleFiles()),
 		effect.Chain(effect.TraverseArray(readRule())),
 		effect.Map[ProjectRulesDeps](F.Flow2(
@@ -200,14 +192,21 @@ func rulesDirSections() Effect[ProjectRulesDeps, []Section] {
 	)
 }
 
-// ProjectRules builds the project_rules section from AGENTS.md in the
-// workspace root, wrapped as <agents_md><rule>…, followed by one rule section
-// per file in .bob/rules. Without any rules it gives None, which yields no
-// section. A file or directory that exists but cannot be read fails.
-func ProjectRules() Effect[ProjectRulesDeps, Option[Section]] {
-	return F.Pipe1(
-		// Concat keeps the order of its arguments: AGENTS.md first.
-		effect.ApplicativeMonoid[ProjectRulesDeps](A.Monoid[Section]()).Concat(agentsMd(), rulesDirSections()),
+// ProjectRules builds the project_rules section of a mode, given its ID, from
+// AGENTS.md in the workspace root, wrapped as <agents_md><rule>…, followed by
+// one rule section per file in .bob/rules and then in the mode's own
+// directory, see [ModeRulesDir]. Without any rules it gives None, which
+// yields no section. A file or directory that exists but cannot be read
+// fails.
+func ProjectRules() effect.Kleisli[ProjectRulesDeps, string, Option[Section]] {
+	sections := effect.ApplicativeMonoid[ProjectRulesDeps](A.Monoid[Section]())
+
+	return F.Flow4(
+		ModeRulesDir(),
+		rulesDirSections(),
+		// Concat keeps the order of its arguments: AGENTS.md, .bob/rules, then
+		// the rules of the mode.
+		F.Bind1st(sections.Concat, sections.Concat(agentsMd(), rulesDirSections()(RulesDir))),
 		effect.Map[ProjectRulesDeps](F.Flow2(
 			option.FromPredicate(A.IsNonEmpty[Section]),
 			option.Map(F.Flow2(RenderSections(), F.Bind1st(MakeSection, ProjectRulesTag))),

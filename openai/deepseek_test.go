@@ -31,7 +31,9 @@ func makeSampleMessage() openai.ChatCompletionNewParams {
 	modelLens := MakeChatCompletionNewParamsModelLens()
 
 	return F.Pipe1(
-		ForAskMode(),
+		openai.ChatCompletionNewParams{
+			Messages: A.Of(openai.SystemMessage("You answer questions about code.")),
+		},
 		modelLens.Set(DeepSeekModelFlash),
 	)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/env"
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	A "github.com/IBM/fp-go/v2/array"
@@ -78,7 +79,7 @@ func runCLI(t *testing.T, root, prompt string) string {
 
 	deps := requireDeepSeekDeps(t)
 	cfg, err := result.Unwrap(decodeConfig()(R.FromEntries(A.From(
-		pair.MakePair(KeyMode, agentMode),
+		pair.MakePair(KeyMode, mode.AgentID),
 		pair.MakePair(KeyWorkspace, root),
 	))))
 	require.NoError(t, err)

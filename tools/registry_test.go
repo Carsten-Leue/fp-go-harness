@@ -7,6 +7,7 @@ import (
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 	"github.com/stretchr/testify/assert"
@@ -130,4 +131,13 @@ func TestWithTools_SetsSortedDefinitions(t *testing.T) {
 	assert.Equal(t, "zeta", decoded[1].Function.Name)
 	assert.Equal(t, "echoes its arguments", decoded[0].Function.Description)
 	assert.Equal(t, "object", decoded[0].Function.Parameters["type"])
+}
+
+func TestSelectTools(t *testing.T) {
+	registry := MakeToolRegistry(makeEchoTool("a", ""), makeEchoTool("b", ""), makeEchoTool("c", ""))
+
+	selected := SelectTools()([]string{"c", "a", "missing"})(registry)
+
+	assert.ElementsMatch(t, []string{"a", "c"}, R.Keys(selected))
+	assert.Empty(t, SelectTools()(nil)(registry))
 }
