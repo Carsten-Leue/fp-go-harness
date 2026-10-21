@@ -551,6 +551,10 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | `ChainLeft` / `OrElse` / `MapLeft` of a `P.Fold` over a hand-written `errors.Is` predicate | recovering from, or renaming, one kind of error | `CatchIs(target, f)` of the monad at hand (`effect`, `thunk` since fp-go v2.8.0; `result`, `ioresult`, `readerresult`, `readerioresult` since v2.9.0); by type `CatchAs`, `MapErrorAs`, `TapErrorAs` |
 | a leaf that builds the same pipeline twice: `MakePair(join()(xs), join()(ys))` | a constructor and a transformation of each field, mixed | the leaf only constructs, `pair.BiMap(join, join)` after it, with `join := joinLines()` bound once at the top of the enclosing function |
 | a value computed from the input, then used on the same input again: find an index, then split there | `Chain` over a reader | `readerresult.ChainReaderK(F.Curry2(leaf))` after the `ReaderResult` that computes the value; the curried leaf is a `reader.Kleisli[R, A, B]` |
+| `eq.Equals(eq.FromStrictEquals[int]())(0)`, `P.Not` of it, or a leaf `o.Field == 0` | a zero test | `P.IsZero[int]()` / `P.IsNonZero[int]()`; over a field `F.Flow2(fieldLens.Get, P.IsZero[int]())` |
+| the same domain predicate written twice, once as a leaf in one package and once from a lens in another (`isSuccess` and `exitCodeLens.Get` + `eq.Equals(…)(0)`) | one concept | one exported nullary predicate next to the type, `tools.IsSuccess()`, used by both |
+| `F.Bind1st(m.Concat, a)` + `F.Bind2nd(m.Concat, c)` around a Kleisli `b`, to concatenate three effects of which only `b` reads the input | a monoid over the Kleislis | `M.ConcatAll(reader.ApplicativeMonoid[In](effect.ApplicativeMonoid[C](m)))([]effect.Kleisli[C, In, A]{F.Constant1[In](a), b, F.Constant1[In](c)})`: the slice lists the parts in output order |
+| `effect.Map(f)` applied to a fixed effect with `reader.Read(fa)` in the middle of a `Flow`, where `f` is built from the input | applicative application with the function as the pure side (`liftA2`) | `effect.Of[C, F](f)` + `effect.Ap[B](fa)` + `effect.Ap[…](fb)`, with `F` named as a type alias; `effect` has no `Flap` and no `MonadAp` |
 
 Worked examples:
 
@@ -582,6 +586,12 @@ Worked examples:
   [tools/executecommand.go](../../../tools/executecommand.go) `timeoutError` renames the
   deadline error with `thunk.CatchIs`; [env/env.go](../../../env/env.go) `ReadDotEnv` gives
   a missing file no variables with `ioresult.CatchIs`.
+- [prompt/envdetails.go](../../../prompt/envdetails.go) `detailsSections`: three
+  Kleislis over the mode name (two of them `F.Constant1` of an effect that ignores it)
+  concatenated with `M.ConcatAll` over `reader.ApplicativeMonoid` of
+  `effect.ApplicativeMonoid`; `gitStatusSection` filters with `tools.IsSuccess()`.
+  [cli/run.go](../../../cli/run.go) `ask`: `effect.Of(withDetails)` + `effect.Ap(details)`
+  + `effect.Ap(request)`.
 - [mode/frontmatter.go](../../../mode/frontmatter.go) `splitAtClosing`: the index of the
   closing `---` is found with `A.FindFirstMapWithIndex`, the lines are split there with
   `readerresult.ChainReaderK(F.Curry2(splitAt))`, and both halves are joined with
@@ -608,6 +618,11 @@ Not a finding:
   has no `FromReaderIOResult` (fp-go v2.6.0), so this is already the right form.
   `effect.ChainThunkK(F.Flow2(…, thunk.FromIOResult))` *is* a finding since v2.6.0:
   it is `effect.ChainIOResultK`.
+- `effect.Asks(getter)` + `effect.ChainIOK(F.Identity[IO[A]])` lifts a getter that
+  returns an `IO` (a clock); `effect.Asks(reader)` + `effect.ChainThunkK(F.Identity[Thunk[A]])`
+  lifts a `Reader[C, Thunk[A]]`. `effect` has no `FromReaderIO` (fp-go v2.9.0), and
+  `ChainXxxK(F.Identity)` after `Asks` is a lift, not a `Map` + `Flatten`. Write it once
+  per getter (see *Dependencies are interfaces with getters*), not once per caller.
 - A function over its input that reads the input three or more times, where the reader
   form needs a helper per read (`grep.go` `fileScope`). Keep it, and say why in its doc
   comment (Rule 4).
@@ -675,6 +690,19 @@ handleToolCalls := F.Flow2(
   `AsXxxDeps[R XxxDeps](r R) XxxDeps` for use with `Local`.
 - Wider environments embed narrower ones (`SessionDeps` embeds `ChatCompletionDeps`,
   `ToolDeps` and `LoopDeps`). A function asks for the narrowest interface it needs.
+- **A getter that two `Deps` interfaces declare is its own interface.** `GetNow` sat in
+  both `EnvInfoDeps` and `EnvDetailsDeps`, each with its own `Asks` + `ChainIOK` reader;
+  now both embed `prompt.ClockDeps` and share one generic leaf over it:
+
+  ```go
+  func now[R ClockDeps]() Effect[R, time.Time] {
+  	return F.Pipe1(effect.Asks(R.GetNow), effect.ChainIOK[R](F.Identity[IO[time.Time]]))
+  }
+  ```
+
+  A method expression on a type parameter (`R.GetNow`) compiles, so the leaf needs no
+  `AsClockDeps` + `effect.Local`; callers write `now[EnvInfoDeps]()`. Overlapping
+  embedded interfaces (`ModeDeps` gets `ClockDeps` through `EnvInfoDeps`) are fine.
 - Every OS / SDK side effect sits behind a getter, wrapped once
   (`ioresult.Eitherize1`, `result.TryCatchError`, `thunk.FromIOResult`), so tests can
   replace it with a fake.

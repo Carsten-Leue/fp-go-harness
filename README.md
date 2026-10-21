@@ -60,7 +60,9 @@ recorded agent sessions.
   builds the `environment_info` section (workspace root, OS, architecture, shell, date) as
   an `Effect` over `EnvInfoDeps`. `prompt.ProjectRules` reads `AGENTS.md`, the files in
   `.bob/rules/` and those in the mode's `.bob/rules-<mode>/` from the workspace into the
-  `project_rules` section; without rules there is no section.
+  `project_rules` section; without rules there is no section. `prompt.EnvironmentDetails`
+  appends an `<environment_details>` block to the user's message (current date and time, mode,
+  `git status --porcelain --branch` of the workspace); the CLI sends its prompt with it.
 
 ## 🚀 Quick start
 
@@ -93,7 +95,7 @@ replay tests.
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
-| [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info` and `project_rules` |
+| [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details` |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
 | [`env`](env/) | Environment variables from the process and `.env` |
 | [`http`](http/) | HTTP client dependency |
@@ -107,7 +109,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ D1–D5 done |
+| D | Prompt assembly | ⏳ D1–D6 done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |

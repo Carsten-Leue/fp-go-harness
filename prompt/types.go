@@ -18,6 +18,7 @@ type (
 	Option[A any]       = option.Option[A]
 	Pair[A, B any]      = pair.Pair[A, B]
 	Reader[R, A any]    = reader.Reader[R, A]
+	Thunk[A any]        = effect.Thunk[A]
 
 	// Section is a prompt section: its tag in the head, its body in the tail.
 	Section = Pair[string, string]
