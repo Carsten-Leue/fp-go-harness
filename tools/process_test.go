@@ -160,8 +160,8 @@ func TestRunShell_ExitCode(t *testing.T) {
 }
 
 func TestIsSuccess(t *testing.T) {
-	assert.True(t, isSuccess(ProcessOutput{Stderr: "warning"}))
-	assert.False(t, isSuccess(ProcessOutput{ExitCode: 1}))
+	assert.True(t, IsSuccess()(ProcessOutput{Stderr: "warning"}))
+	assert.False(t, IsSuccess()(ProcessOutput{ExitCode: 1}))
 }
 
 func TestSection(t *testing.T) {

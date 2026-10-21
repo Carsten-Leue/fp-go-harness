@@ -95,9 +95,15 @@ func answer(cfg Config, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeek
 	)
 }
 
+// withDetails adds a prompt, wrapped by the environment_details of a turn, to
+// a request. It is named because [effect.Of] cannot infer it.
+type withDetails = func(endomorphism.Endomorphism[string]) endomorphism.Endomorphism[openai.ChatCompletionNewParams]
+
 // ask is wiring: it answers a prompt in a mode, in the workspace of the tools.
 // The request of the mode reads its system prompt from that workspace, and
-// the prompt is sent with the environment_details of the mode and workspace.
+// the prompt is sent with the environment_details of the mode and workspace:
+// the prompt's change to the request is applied to the details, then to the
+// request, both read concurrently.
 func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
 	modeDeps := F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))
 	nameLens := mode.MakeModeNameLens()
@@ -116,8 +122,8 @@ func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepS
 	return F.Flow6(
 		reader.Read[string, string],
 		reader.Map[endomorphism.Endomorphism[string]](withPrompt()),
-		effect.Map[oai.DeepSeekDeps, endomorphism.Endomorphism[string], endomorphism.Endomorphism[openai.ChatCompletionNewParams]],
-		reader.Read[effect.Effect[oai.DeepSeekDeps, endomorphism.Endomorphism[openai.ChatCompletionNewParams]]](details),
+		effect.Of[oai.DeepSeekDeps, withDetails],
+		effect.Ap[endomorphism.Endomorphism[openai.ChatCompletionNewParams]](details),
 		effect.Ap[openai.ChatCompletionNewParams](request),
 		effect.Chain(answer(cfg, makeRegistry(cfg, m)(deps))),
 	)

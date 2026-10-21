@@ -11,7 +11,6 @@ import (
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/endomorphism"
-	"github.com/IBM/fp-go/v2/eq"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
 	J "github.com/IBM/fp-go/v2/json"
@@ -179,9 +178,11 @@ func startCommand() effect.Kleisli[ExecuteCommandDeps, ExecuteCommandArgs, Backg
 	)
 }
 
-// isSuccess is a leaf: a command succeeds with exit code 0.
-func isSuccess(o ProcessOutput) bool {
-	return o.ExitCode == 0
+// IsSuccess tests whether a command succeeded: its exit code is 0.
+func IsSuccess() P.Predicate[ProcessOutput] {
+	exitCodeLens := MakeProcessOutputExitCodeLens()
+
+	return F.Flow2(exitCodeLens.Get, P.IsZero[int]())
 }
 
 // trimmedStream is an output stream without its trailing line breaks, none
@@ -209,7 +210,7 @@ func exitSection() Reader[ProcessOutput, Option[string]] {
 
 	return F.Flow3(
 		exitCodeLens.Get,
-		option.FromPredicate(P.Not(eq.Equals(eq.FromStrictEquals[int]())(0))),
+		option.FromPredicate(P.Not(P.IsZero[int]())),
 		option.Map(S.Format[int]("Exit code: %d")),
 	)
 }
@@ -219,7 +220,7 @@ func exitSection() Reader[ProcessOutput, Option[string]] {
 func stdoutSection() Reader[ProcessOutput, Option[string]] {
 	stdoutLens := MakeProcessOutputStdoutLens()
 
-	label := P.Fold(F.Constant1[ProcessOutput]("Stdout:\n"), F.Constant1[ProcessOutput](""))(isSuccess)
+	label := P.Fold(F.Constant1[ProcessOutput]("Stdout:\n"), F.Constant1[ProcessOutput](""))(IsSuccess())
 
 	return F.Pipe1(
 		F.Flow2(label, section()),
@@ -252,7 +253,7 @@ func renderOutput() result.Kleisli[ProcessOutput, string] {
 	text := outputText()
 
 	return F.Flow2(
-		result.FromPredicate(isSuccess, F.Flow2(text, errors.New)),
+		result.FromPredicate(IsSuccess(), F.Flow2(text, errors.New)),
 		result.Map(text),
 	)
 }

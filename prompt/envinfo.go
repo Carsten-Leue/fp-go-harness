@@ -17,18 +17,23 @@ const EnvironmentInfoTag = "environment_info"
 // dateLayout formats the current date of the environment_info section.
 const dateLayout = "2006-01-02"
 
+// ClockDeps gives a section the current time.
+type ClockDeps interface {
+	// GetNow reads the current time.
+	GetNow() IO[time.Time]
+}
+
 // EnvInfoDeps gives the environment_info section the facts about the machine
 // the agent runs on.
 type EnvInfoDeps interface {
 	tools.WorkspaceDeps
+	ClockDeps
 	// GetOS is the operating system, as in [runtime.GOOS].
 	GetOS() string
 	// GetArch is the architecture, as in [runtime.GOARCH].
 	GetArch() string
 	// GetShell is the shell that runs commands.
 	GetShell() string
-	// GetNow reads the current time.
-	GetNow() IO[time.Time]
 }
 
 type envInfoDeps struct {
@@ -92,11 +97,12 @@ func envInfoBody() Reader[EnvInfoDeps, envInfoFromNow] {
 	)
 }
 
-// now reads the current time through the dependencies.
-func now() Effect[EnvInfoDeps, time.Time] {
+// now reads the current time through the [ClockDeps] of any dependencies. It
+// is a generic I/O leaf: Go cannot infer R through a nullary call.
+func now[R ClockDeps]() Effect[R, time.Time] {
 	return F.Pipe1(
-		effect.Asks(EnvInfoDeps.GetNow),
-		effect.ChainIOK[EnvInfoDeps](F.Identity[IO[time.Time]]),
+		effect.Asks(R.GetNow),
+		effect.ChainIOK[R](F.Identity[IO[time.Time]]),
 	)
 }
 
@@ -105,7 +111,7 @@ func now() Effect[EnvInfoDeps, time.Time] {
 func EnvironmentInfo() Effect[EnvInfoDeps, Section] {
 	return F.Pipe2(
 		effect.Asks(envInfoBody()),
-		effect.Ap[string](now()),
+		effect.Ap[string](now[EnvInfoDeps]()),
 		effect.Map[EnvInfoDeps](F.Bind1st(MakeSection, EnvironmentInfoTag)),
 	)
 }

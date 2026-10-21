@@ -6,8 +6,8 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
-	"github.com/IBM/fp-go/v2/eq"
 	F "github.com/IBM/fp-go/v2/function"
+	M "github.com/IBM/fp-go/v2/monoid"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/reader"
 	S "github.com/IBM/fp-go/v2/string"
@@ -42,8 +42,7 @@ const (
 type EnvDetailsDeps interface {
 	tools.WorkspaceDeps
 	tools.ProcessDeps
-	// GetNow reads the current time.
-	GetNow() IO[time.Time]
+	ClockDeps
 }
 
 type envDetailsDeps struct {
@@ -77,9 +76,8 @@ func fenced(s string) string {
 
 // currentDatetime reads the clock into the current_datetime section.
 func currentDatetime() Effect[EnvDetailsDeps, []Section] {
-	return F.Pipe2(
-		effect.Asks(EnvDetailsDeps.GetNow),
-		effect.ChainIOK[EnvDetailsDeps](F.Identity[IO[time.Time]]),
+	return F.Pipe1(
+		now[EnvDetailsDeps](),
 		effect.Map[EnvDetailsDeps](F.Flow3(
 			formatDatetime,
 			F.Bind1st(MakeSection, CurrentDatetimeTag),
@@ -99,11 +97,10 @@ func gitStatusProcess() Reader[EnvDetailsDeps, tools.Process] {
 // gitStatusSection is the git_status_snapshot section of a successful git
 // status, none for a failed one, e.g. outside a repository or without git.
 func gitStatusSection() func(tools.ProcessOutput) []Section {
-	exitCodeLens := tools.MakeProcessOutputExitCodeLens()
 	stdoutLens := tools.MakeProcessOutputStdoutLens()
 
 	return F.Flow3(
-		option.FromPredicate(F.Flow2(exitCodeLens.Get, eq.Equals(eq.FromStrictEquals[int]())(0))),
+		option.FromPredicate(tools.IsSuccess()),
 		option.Map(F.Flow4(
 			stdoutLens.Get,
 			normalizeBody(),
@@ -126,20 +123,28 @@ func gitStatus() Effect[EnvDetailsDeps, []Section] {
 	)
 }
 
-// detailsSections are the sections of the environment_details block for the
-// name of a mode: current_datetime, current_mode and, in a git repository,
-// git_status_snapshot. They are read concurrently; the monoid keeps their
-// order.
-func detailsSections() effect.Kleisli[EnvDetailsDeps, string, []Section] {
-	sections := effect.ApplicativeMonoid[EnvDetailsDeps](A.Monoid[Section]())
-
-	return F.Flow5(
+// currentMode is the current_mode section for the name of a mode.
+func currentMode() effect.Kleisli[EnvDetailsDeps, string, []Section] {
+	return F.Flow3(
 		F.Bind1st(MakeSection, CurrentModeTag),
 		A.Of[Section],
 		effect.Of[EnvDetailsDeps, []Section],
-		F.Bind2nd(sections.Concat, gitStatus()),
-		F.Bind1st(sections.Concat, currentDatetime()),
 	)
+}
+
+// detailsSections are the sections of the environment_details block for the
+// name of a mode: current_datetime, current_mode and, in a git repository,
+// git_status_snapshot. Each is a Kleisli over the name; the monoid lifts the
+// concatenation of their sections over the name and the effect, so they are
+// read concurrently and stay in this order.
+func detailsSections() effect.Kleisli[EnvDetailsDeps, string, []Section] {
+	sections := reader.ApplicativeMonoid[string](effect.ApplicativeMonoid[EnvDetailsDeps](A.Monoid[Section]()))
+
+	return M.ConcatAll(sections)([]effect.Kleisli[EnvDetailsDeps, string, []Section]{
+		F.Constant1[string](currentDatetime()),
+		currentMode(),
+		F.Constant1[string](gitStatus()),
+	})
 }
 
 // renderDetails renders the nested sections into the environment_details
