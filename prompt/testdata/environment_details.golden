@@ -1,0 +1,16 @@
+Please implement the next step of the plan.
+
+<environment_details>
+<current_datetime>
+2026-10-21T12:37:30.431Z
+</current_datetime>
+<current_mode>
+Agent
+</current_mode>
+<git_status_snapshot>
+```
+## main...origin/main
+ M cli/run.go
+```
+</git_status_snapshot>
+</environment_details>

@@ -195,8 +195,15 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt
   reads the workspace the tools work in. The CLI (`--mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
   The `available_modes` section waits for H5.
-- [ ] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
+- [x] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.
+  `prompt.EnvironmentDetails()` is an `effect.Kleisli[EnvDetailsDeps, string, Endomorphism[string]]` over the mode's
+  name: the user's text, a blank line, then `<environment_details>` with `current_datetime` (UTC, milliseconds),
+  `current_mode` and `git_status_snapshot` (`git status --porcelain --branch` in the workspace root, through the
+  `RunProcess` of `tools.ProcessDeps`, in a code fence). A non-zero exit code (no repository) leaves the git
+  section out; a git that cannot be started fails the effect. The golden file follows the shape of a current user
+  message, since the recordings are not available (B5). The CLI wraps its prompt with it; `active_file` and
+  `external_changes` wait for an editor and I3.
 - [ ] **D7 Replay comparison.** Compare the assembled system prompt section by section with a recorded one (tag order and presence).
 - [ ] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
   `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in

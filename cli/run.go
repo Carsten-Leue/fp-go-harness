@@ -9,6 +9,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/http"
 	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
+	"github.com/Carsten-Leue/fp-go-harness/prompt"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
@@ -95,17 +96,29 @@ func answer(cfg Config, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeek
 }
 
 // ask is wiring: it answers a prompt in a mode, in the workspace of the tools.
-// The request of the mode reads its system prompt from that workspace.
+// The request of the mode reads its system prompt from that workspace, and
+// the prompt is sent with the environment_details of the mode and workspace.
 func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+	modeDeps := F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))
+	nameLens := mode.MakeModeNameLens()
+
 	request := F.Pipe1(
 		mode.Request()(m),
-		effect.Local[openai.ChatCompletionNewParams](F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))),
+		effect.Local[openai.ChatCompletionNewParams](modeDeps),
 	)
 
-	return F.Flow4(
-		withPrompt(),
-		effect.Map[oai.DeepSeekDeps, openai.ChatCompletionNewParams, openai.ChatCompletionNewParams],
-		reader.Read[effect.Effect[oai.DeepSeekDeps, openai.ChatCompletionNewParams]](request),
+	details := F.Pipe2(
+		nameLens.Get(m),
+		prompt.EnvironmentDetails(),
+		effect.Local[endomorphism.Endomorphism[string]](F.Flow2(modeDeps, prompt.AsEnvDetailsDeps[mode.ModeDeps])),
+	)
+
+	return F.Flow6(
+		reader.Read[string, string],
+		reader.Map[endomorphism.Endomorphism[string]](withPrompt()),
+		effect.Map[oai.DeepSeekDeps, endomorphism.Endomorphism[string], endomorphism.Endomorphism[openai.ChatCompletionNewParams]],
+		reader.Read[effect.Effect[oai.DeepSeekDeps, endomorphism.Endomorphism[openai.ChatCompletionNewParams]]](details),
+		effect.Ap[openai.ChatCompletionNewParams](request),
 		effect.Chain(answer(cfg, makeRegistry(cfg, m)(deps))),
 	)
 }
