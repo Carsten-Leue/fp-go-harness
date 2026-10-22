@@ -14,5 +14,7 @@
 // builds the optional project_rules section of a mode from AGENTS.md,
 // .bob/rules and the mode's own rules directory in the workspace.
 // [EnvironmentDetails] wraps each user message with the environment_details
-// block: date and time, mode and git status.
+// block: date and time, mode and git status. [CompareSections] compares the
+// top-level sections of a recorded system prompt with an assembled one, by
+// their [SectionTags].
 package prompt

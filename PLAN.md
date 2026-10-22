@@ -204,7 +204,16 @@ and a text result. Validation errors (such as "path must be absolute") come back
   section out; a git that cannot be started fails the effect. The golden file follows the shape of a current user
   message, since the recordings are not available (B5). The CLI wraps its prompt with it; `active_file` and
   `external_changes` wait for an editor and I3.
-- [ ] **D7 Replay comparison.** Compare the assembled system prompt section by section with a recorded one (tag order and presence).
+- [x] **D7 Replay comparison.** Compare the assembled system prompt section by section with a recorded one (tag order and presence).
+  `prompt.SectionTags` lists the tags of the top-level sections of a rendered prompt (a line that is only an opening tag
+  starts a section, the line that closes it ends it, nested tags are skipped), and `prompt.CompareSections` compares a
+  recorded prompt with an assembled one as a `SectionDiff`: the tags missing and extra, and the shared ones in each
+  prompt's order. `replay.SystemPrompt` reads the system message of a recorded request (a string or text parts, joined
+  by line breaks) and `replay.SystemPrompts` yields one per request of a log. The recording is synthetic
+  (`mode/testdata/recorded-system-prompt.log`, the tags of §0 in their order), since the real ones are not available (B5).
+  The test fixes the gap: the Agent prompt lacks investigate_before_answering, engineering_discipline,
+  auto_appended_context, available_skills (H1), user_custom_instructions and available_modes (H5), adds nothing,
+  and keeps the recorded order.
 - [ ] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
   `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in
   ones: the workspace wins over the home directory, both over the built-ins, by `id` (precedence is a monoid, as in G1).
