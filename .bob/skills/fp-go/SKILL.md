@@ -471,7 +471,7 @@ How a parameter disappears:
 | `func h(xs []T) func(T) Pair[T, B]` returns `t ↦ MakePair(t, g(xs, t))`: a value paired with something computed from it | `F.Flow3(F.Curry2(g), pair.MapTail[T, T, B], reader.Local[Pair[T, B]](pair.Of[T]))`: `pair.Of` duplicates the value, `MapTail` computes the tail. There is no fan-out combinator in `pair` |
 | `func h(o Option[A]) Endomorphism[S]` returns `s ↦ option.Fold(F.Constant(s), k(s))(o)`: "with a value change the state, without one keep it" | don't fold over the state: the option only picks the endomorphism. `F.Flow2(option.Map(k), option.GetOrElse(F.Constant(F.Identity[S])))` with `k: Reader[A, Endomorphism[S]]`, as in `prompt/compare.go` `opens`. Folding with branches over the state (`F.Flip` of the curried `option.Fold` with `reader.Ap`) works too, but is longer and harder to read |
 | `func h(a A) Endomorphism[Pair[H, T]]` returns `p ↦ MakePair(f(a), g(a, Tail(p)))`: both sides of a pair changed from the same value | one endomorphism per side, `F.Flow2(f, pair.MapHead[T, H, H])`-style, composed with `reader.ApplicativeMonoid[A](endomorphism.Monoid[Pair[H, T]]()).Concat(head, tail)`; the sides are independent, so the order doesn't matter. As in `prompt/compare.go` `enter` (`openTag` + `recordTag`) |
-| `func h(line string) Predicate[S]` returns `F.Flow2(getter, F.Bind1st(eq.Equals, line))` | `F.Flow2(F.Curry2(eq.Equals), reader.Local[bool](getter))`, then `P.Fold(F.Identity[S], f)` after it for "change `S` when it holds" |
+| `func h(line string) Predicate[S]` returns `F.Flow2(getter, F.Bind1st(eq.Equals, line))` | `F.Flow2(F.Curry2(S.Eq), reader.Local[bool](getter))` for strings (any `eq.Eq`'s `Equals` for other types), then `P.Fold(F.Identity[S], f)` after it for "change `S` when it holds", as in `prompt/compare.go` `closedBy` / `closes` |
 | `func h(p func(B) Predicate[A]) func(Pair[[]A, B]) []A` returns `pair.Paired(func(as, b) …A.Filter(p(b))(as))`: the tail configures what is applied to the head | `F.Flow2(reader.Map[B](A.Filter[A]), pair.Merge[Reader[B, Endomorphism[[]A]], []A, B, []A])`. `pair.Merge(f)` is `f(tail)(head)`; its type arguments are needed |
 
 `F.Curry2(g)` + `reader.Flatten` is the duplicating ("W") combinator: `Flatten` of a
@@ -495,13 +495,25 @@ and yields every state).
 
 - **The step is nullary too.** Build it as a `Reader[string, Endomorphism[State]]` over
   the line, then give `A.Reduce` the `func(state, line) state` it takes with
-  `F.Uncurry2(F.Flip(lineStep()))`. Choosing between two steps by a predicate on the
-  state is the curried `P.Fold` applied to both step readers, then `reader.Read(p)`:
-  `F.Pipe3(closes(), reader.Map[string](F.Curry2(P.Fold[S, S])), reader.Ap[func(P.Predicate[S]) Endomorphism[S]](opens()), reader.Map[string](reader.Read[Endomorphism[S]](isOutside())))`.
+  `F.Uncurry2(F.Flip(lineStep()))`.
+- **Make every step right in every state, then compose them; don't choose between them.**
+  A step that is only meant for one state ("closes, inside a section") invites a dispatch
+  on the state: `P.Fold(closes(line), opens(line))(isOutside())`, which as a nullary
+  reader becomes a hard-to-read `Map` / `Ap` / `reader.Read` chain. Check each step in the
+  other state instead. Often it already does nothing there (`closes` outside a section
+  waits for `</>`, and leaving then changes nothing). Where it doesn't, guard that one
+  step: `whenOutside() = F.Flow2(F.Curry2(P.Fold[S, S])(F.Identity[S]), reader.Read[Endomorphism[S]](isOutside()))`,
+  applied after the step. Then the line step is the monoid of the steps,
+  `reader.ApplicativeMonoid[string](endomorphism.Monoid[S]()).Concat(closes(), opens())`,
+  and a comment says why the order doesn't matter (no line both opens and closes).
 - **Each step is a `Reader[string, Endomorphism[State]]`** over the line, built with the
   rows above (`option.Map` + `option.GetOrElse(F.Constant(F.Identity))` for "an opening
-  tag enters, anything else keeps", the `eq.Equals` predicate and `P.Fold` for "the
-  closing line leaves").
+  tag enters, anything else keeps", `F.Curry2(S.Eq)` and `P.Fold` for "the closing line
+  leaves"). `S.Eq` is the curried-ready string equality; no `eq.FromStrictEquals[string]()`
+  variable is needed.
+- **Test the edge cases the composition relies on**: stray closing lines outside a section,
+  and what nesting does (`SectionTags` doesn't count depth: a tag nested in itself ends the
+  outer section at its first closing line).
 - **Changing one side of the state** is `pair.MapHead` / `pair.MapTail`
   (`openTag`, `recordTag`), not a rebuilt pair; changing both is their endomorphism monoid
   (`enter`), and a fixed change is the reader applied to a constant (`leave() = openTag()("")`).

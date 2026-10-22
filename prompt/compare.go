@@ -7,7 +7,6 @@ import (
 
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/endomorphism"
-	"github.com/IBM/fp-go/v2/eq"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
@@ -52,9 +51,6 @@ type (
 // openingTagPattern matches a line that is an opening tag and nothing else.
 var openingTagPattern = regexp.MustCompile(`^<([A-Za-z_][\w-]*)>$`)
 
-// stringEq compares tags and lines.
-var stringEq = eq.FromStrictEquals[string]()
-
 // openingTag is the tag a line opens, if the line is an opening tag on its
 // own.
 func openingTag() option.Kleisli[string, string] {
@@ -90,14 +86,32 @@ func recordTag() Reader[string, Endomorphism[tagScan]] {
 	)
 }
 
-// enter is the step into the section of a tag: open it and record it. The two
-// change different sides of the scan, so their order doesn't matter.
-func enter() Reader[string, Endomorphism[tagScan]] {
-	return reader.ApplicativeMonoid[string](endomorphism.Monoid[tagScan]()).Concat(openTag(), recordTag())
+// stepMonoid composes steps that read the same line.
+func stepMonoid() Monoid[Reader[string, Endomorphism[tagScan]]] {
+	return reader.ApplicativeMonoid[string](endomorphism.Monoid[tagScan]())
 }
 
-// opens is the step outside a section: an opening tag on its own line enters
-// its section, any other line leaves the scan as it is.
+// whenOutside applies a step only while the scan is not inside a section.
+func whenOutside() Endomorphism[Endomorphism[tagScan]] {
+	return F.Flow2(
+		F.Curry2(P.Fold[tagScan, tagScan])(F.Identity[tagScan]),
+		reader.Read[Endomorphism[tagScan]](isOutside()),
+	)
+}
+
+// enter is the step into the section of a tag: open it and record it, unless
+// the scan is in a section already, whose nested tags are skipped. Opening and
+// recording change different sides of the scan, so their order doesn't
+// matter.
+func enter() Reader[string, Endomorphism[tagScan]] {
+	return F.Flow2(
+		stepMonoid().Concat(openTag(), recordTag()),
+		whenOutside(),
+	)
+}
+
+// opens is the step for an opening tag: a line that is one enters its
+// section, any other line leaves the scan as it is.
 func opens() Reader[string, Endomorphism[tagScan]] {
 	return F.Flow3(
 		openingTag(),
@@ -109,7 +123,7 @@ func opens() Reader[string, Endomorphism[tagScan]] {
 // closedBy holds when a line closes the section the scan is in.
 func closedBy() Reader[string, P.Predicate[tagScan]] {
 	return F.Flow2(
-		F.Curry2(stringEq.Equals),
+		F.Curry2(S.Eq),
 		reader.Local[bool](F.Flow2(pair.Head[string, []string], closingTag)),
 	)
 }
@@ -119,8 +133,9 @@ func leave() Endomorphism[tagScan] {
 	return openTag()("")
 }
 
-// closes is the step inside a section: only the line that closes it ends the
-// section, so the tags nested in it are skipped.
+// closes is the step for a closing tag: only the line that closes the section
+// the scan is in ends it. Outside a section it changes nothing, because the
+// empty tag it would close is the one it leaves.
 func closes() Reader[string, Endomorphism[tagScan]] {
 	return F.Flow2(
 		closedBy(),
@@ -128,16 +143,11 @@ func closes() Reader[string, Endomorphism[tagScan]] {
 	)
 }
 
-// lineStep is the step over one line: [closes] inside a section, [opens]
-// outside one. Both steps are read from the line and given to the curried
-// [P.Fold], which [isOutside] then chooses between.
+// lineStep is the step over one line, [opens] and [closes]. Each of them is
+// right inside and outside a section, and no line both opens and closes one,
+// so they compose in either order.
 func lineStep() Reader[string, Endomorphism[tagScan]] {
-	return F.Pipe3(
-		closes(),
-		reader.Map[string](F.Curry2(P.Fold[tagScan, tagScan])),
-		reader.Ap[func(P.Predicate[tagScan]) Endomorphism[tagScan]](opens()),
-		reader.Map[string](reader.Read[Endomorphism[tagScan]](isOutside())),
-	)
+	return stepMonoid().Concat(closes(), opens())
 }
 
 // scanLine is [lineStep] in the shape [A.Reduce] takes: the scan first, then
@@ -148,8 +158,8 @@ func scanLine() func(tagScan, string) tagScan {
 
 // SectionTags are the tags of the top-level sections of a rendered prompt, in
 // order. A section starts at a line that is an opening tag, such as
-// "<tool_use>", and ends at the line that closes it; the tags nested in it
-// are not listed. Text between sections is skipped, and CRLF line endings are
+// "<tool_use>", and ends at the first line that closes it; the tags nested in
+// it are not listed, and a tag nested in itself ends the outer section. Text between sections is skipped, and CRLF line endings are
 // fine.
 func SectionTags() func(string) []string {
 	return F.Flow4(

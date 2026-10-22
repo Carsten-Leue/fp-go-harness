@@ -24,6 +24,19 @@ func TestSectionTagsSkipsTextAndInlineTags(t *testing.T) {
 	assert.Equal(t, []string{"tool_use", "markdown_rules"}, SectionTags()(text))
 }
 
+func TestSectionTagsStrayClosingTags(t *testing.T) {
+	text := "</>\n</tool_use>\n<project_rules>\n<tool_use>\n</project_rules>\n</tool_use>\n<base_rules>\n</base_rules>"
+
+	assert.Equal(t, []string{"project_rules", "base_rules"}, SectionTags()(text))
+}
+
+func TestSectionTagsSameTagNested(t *testing.T) {
+	// The first closing line ends the section: nesting depth is not counted.
+	text := "<rule>\n<rule>\ninner\n</rule>\n<base_rules>\n</base_rules>\n</rule>"
+
+	assert.Equal(t, []string{"rule", "base_rules"}, SectionTags()(text))
+}
+
 func TestSectionTagsUnclosed(t *testing.T) {
 	assert.Equal(t, []string{"base_rules"}, SectionTags()("<base_rules>\nno end\n<tool_use>\n</tool_use>"))
 	assert.Empty(t, SectionTags()(""))
