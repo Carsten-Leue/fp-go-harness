@@ -492,9 +492,11 @@ A pass over lines that has to remember where it is (inside a section or not) is 
 found so far. `fp-go` has no `A.Scan` or `A.Unfold` (`iter.Scan` exists, over a `Seq`,
 and yields every state).
 
-- **The step is the one leaf.** `A.Reduce` takes a `func(state, line) state`, so the step
-  keeps both parameters and says so in its doc comment. It only chooses between the
-  nullary steps: `P.Fold(closes()(line), opens()(line))(isOutside())(scan)`.
+- **The step is nullary too.** Build it as a `Reader[string, Endomorphism[State]]` over
+  the line, then give `A.Reduce` the `func(state, line) state` it takes with
+  `F.Uncurry2(F.Flip(lineStep()))`. Choosing between two steps by a predicate on the
+  state is the curried `P.Fold` applied to both step readers, then `reader.Read(p)`:
+  `F.Pipe3(closes(), reader.Map[string](F.Curry2(P.Fold[S, S])), reader.Ap[func(P.Predicate[S]) Endomorphism[S]](opens()), reader.Map[string](reader.Read[Endomorphism[S]](isOutside())))`.
 - **Each step is a `Reader[string, Endomorphism[State]]`** over the line, built with the
   rows above (the curried `option.Fold` for "an opening tag enters, anything else keeps",
   the `eq.Equals` predicate and `P.Fold` for "the closing line leaves").

@@ -124,10 +124,22 @@ func closes() Reader[string, Endomorphism[tagScan]] {
 	)
 }
 
-// scanLine is a leaf, the step of [SectionTags] over one line, in the shape
-// [A.Reduce] takes.
-func scanLine(scan tagScan, line string) tagScan {
-	return P.Fold(closes()(line), opens()(line))(isOutside())(scan)
+// lineStep is the step over one line: [closes] inside a section, [opens]
+// outside one. Both steps are read from the line and given to the curried
+// [P.Fold], which [isOutside] then chooses between.
+func lineStep() Reader[string, Endomorphism[tagScan]] {
+	return F.Pipe3(
+		closes(),
+		reader.Map[string](F.Curry2(P.Fold[tagScan, tagScan])),
+		reader.Ap[func(P.Predicate[tagScan]) Endomorphism[tagScan]](opens()),
+		reader.Map[string](reader.Read[Endomorphism[tagScan]](isOutside())),
+	)
+}
+
+// scanLine is [lineStep] in the shape [A.Reduce] takes: the scan first, then
+// the line.
+func scanLine() func(tagScan, string) tagScan {
+	return F.Uncurry2(F.Flip(lineStep()))
 }
 
 // SectionTags are the tags of the top-level sections of a rendered prompt, in
@@ -139,7 +151,7 @@ func SectionTags() func(string) []string {
 	return F.Flow4(
 		F.Bind2nd(strings.Split, "\n"),
 		A.Map(F.Bind2nd(strings.TrimSuffix, "\r")),
-		A.Reduce(scanLine, pair.MakePair("", A.Empty[string]())),
+		A.Reduce(scanLine(), pair.MakePair("", A.Empty[string]())),
 		pair.Tail[string, []string],
 	)
 }
