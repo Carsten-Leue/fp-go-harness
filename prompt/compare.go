@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	A "github.com/IBM/fp-go/v2/array"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	"github.com/IBM/fp-go/v2/eq"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/option"
@@ -73,32 +74,35 @@ func isOutside() P.Predicate[tagScan] {
 	return F.Flow2(pair.Head[string, []string], S.IsEmpty)
 }
 
-// enter is, for the tags found so far, the scan inside the section of a tag,
-// with the tag added to them: tag ↦ (tag, tags + tag).
-func enter() Reader[[]string, func(string) tagScan] {
-	return F.Flow3(
-		F.Curry2(A.Append[string]),
-		pair.MapTail[string, string, []string],
-		reader.Local[tagScan](pair.Of[string]),
+// openTag sets the section the scan is in to a tag; the empty tag leaves it.
+func openTag() Reader[string, Endomorphism[tagScan]] {
+	return F.Flow2(
+		F.Constant1[string, string],
+		pair.MapHead[[]string, string, string],
 	)
 }
 
-// fromOpeningTag is the step outside a section for the tag a line opens: with
-// a tag the scan enters its section, without one it stays as it is.
-func fromOpeningTag() Reader[Option[string], Endomorphism[tagScan]] {
-	return F.Flip(F.Pipe2(
-		F.Constant[tagScan],
-		reader.Map[tagScan](F.Curry2(option.Fold[string, tagScan])),
-		reader.Ap[func(Option[string]) tagScan](F.Flow2(pair.Tail[string, []string], enter())),
-	))
+// recordTag adds a tag to the tags found so far.
+func recordTag() Reader[string, Endomorphism[tagScan]] {
+	return F.Flow2(
+		F.Flip(F.Curry2(A.Append[string])),
+		pair.MapTail[string, []string, []string],
+	)
 }
 
-// opens is the step outside a section: an opening tag on its own line starts a
-// section, any other line is skipped.
+// enter is the step into the section of a tag: open it and record it. The two
+// change different sides of the scan, so their order doesn't matter.
+func enter() Reader[string, Endomorphism[tagScan]] {
+	return reader.ApplicativeMonoid[string](endomorphism.Monoid[tagScan]()).Concat(openTag(), recordTag())
+}
+
+// opens is the step outside a section: an opening tag on its own line enters
+// its section, any other line leaves the scan as it is.
 func opens() Reader[string, Endomorphism[tagScan]] {
-	return F.Flow2(
+	return F.Flow3(
 		openingTag(),
-		fromOpeningTag(),
+		option.Map(enter()),
+		option.GetOrElse(F.Constant(F.Identity[tagScan])),
 	)
 }
 
@@ -112,7 +116,7 @@ func closedBy() Reader[string, P.Predicate[tagScan]] {
 
 // leave is the scan outside a section, with the tags found so far.
 func leave() Endomorphism[tagScan] {
-	return pair.MapHead[[]string](F.Constant1[string](""))
+	return openTag()("")
 }
 
 // closes is the step inside a section: only the line that closes it ends the

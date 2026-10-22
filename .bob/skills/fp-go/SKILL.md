@@ -469,7 +469,8 @@ How a parameter disappears:
 | `func h(n N) Endomorphism[T]` returns `F.Flow2(f(n), g(n))`: two endomorphisms of the same `n`, composed | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(g, f)`. `Concat(g, f)` applies `f` first (right to left); when the order matters, say so in a comment |
 | `func h(xs []T) Predicate[T]` returns `F.Bind1st(f, xs)`: a two-argument function with its first argument fixed | `F.Curry2(f)`, e.g. `F.Curry2(slices.Contains[[]string])` for `Reader[[]string, Predicate[string]]`. The negation is `reader.Map[[]string](P.Not[string])` after it |
 | `func h(xs []T) func(T) Pair[T, B]` returns `t ↦ MakePair(t, g(xs, t))`: a value paired with something computed from it | `F.Flow3(F.Curry2(g), pair.MapTail[T, T, B], reader.Local[Pair[T, B]](pair.Of[T]))`: `pair.Of` duplicates the value, `MapTail` computes the tail. There is no fan-out combinator in `pair` |
-| `func h(o Option[A]) Endomorphism[S]` returns `s ↦ option.Fold(F.Constant(s), k(s))(o)`: both branches read the state | build the branches as readers over the state and combine them with the curried fold, then flip so the option comes first: `F.Flip(F.Pipe2(F.Constant[S], reader.Map[S](F.Curry2(option.Fold[A, S])), reader.Ap[func(Option[A]) S](kReader)))` |
+| `func h(o Option[A]) Endomorphism[S]` returns `s ↦ option.Fold(F.Constant(s), k(s))(o)`: "with a value change the state, without one keep it" | don't fold over the state: the option only picks the endomorphism. `F.Flow2(option.Map(k), option.GetOrElse(F.Constant(F.Identity[S])))` with `k: Reader[A, Endomorphism[S]]`, as in `prompt/compare.go` `opens`. Folding with branches over the state (`F.Flip` of the curried `option.Fold` with `reader.Ap`) works too, but is longer and harder to read |
+| `func h(a A) Endomorphism[Pair[H, T]]` returns `p ↦ MakePair(f(a), g(a, Tail(p)))`: both sides of a pair changed from the same value | one endomorphism per side, `F.Flow2(f, pair.MapHead[T, H, H])`-style, composed with `reader.ApplicativeMonoid[A](endomorphism.Monoid[Pair[H, T]]()).Concat(head, tail)`; the sides are independent, so the order doesn't matter. As in `prompt/compare.go` `enter` (`openTag` + `recordTag`) |
 | `func h(line string) Predicate[S]` returns `F.Flow2(getter, F.Bind1st(eq.Equals, line))` | `F.Flow2(F.Curry2(eq.Equals), reader.Local[bool](getter))`, then `P.Fold(F.Identity[S], f)` after it for "change `S` when it holds" |
 | `func h(p func(B) Predicate[A]) func(Pair[[]A, B]) []A` returns `pair.Paired(func(as, b) …A.Filter(p(b))(as))`: the tail configures what is applied to the head | `F.Flow2(reader.Map[B](A.Filter[A]), pair.Merge[Reader[B, Endomorphism[[]A]], []A, B, []A])`. `pair.Merge(f)` is `f(tail)(head)`; its type arguments are needed |
 
@@ -498,10 +499,12 @@ and yields every state).
   state is the curried `P.Fold` applied to both step readers, then `reader.Read(p)`:
   `F.Pipe3(closes(), reader.Map[string](F.Curry2(P.Fold[S, S])), reader.Ap[func(P.Predicate[S]) Endomorphism[S]](opens()), reader.Map[string](reader.Read[Endomorphism[S]](isOutside())))`.
 - **Each step is a `Reader[string, Endomorphism[State]]`** over the line, built with the
-  rows above (the curried `option.Fold` for "an opening tag enters, anything else keeps",
-  the `eq.Equals` predicate and `P.Fold` for "the closing line leaves").
+  rows above (`option.Map` + `option.GetOrElse(F.Constant(F.Identity))` for "an opening
+  tag enters, anything else keeps", the `eq.Equals` predicate and `P.Fold` for "the
+  closing line leaves").
 - **Changing one side of the state** is `pair.MapHead` / `pair.MapTail`
-  (`leave() = pair.MapHead[[]string](F.Constant1[string](""))`), not a rebuilt pair.
+  (`openTag`, `recordTag`), not a rebuilt pair; changing both is their endomorphism monoid
+  (`enter`), and a fixed change is the reader applied to a constant (`leave() = openTag()("")`).
 
 Worked example: [prompt/compare.go](../../../prompt/compare.go) `SectionTags`, which lists
 the top-level section tags of a rendered prompt and skips the tags nested in a section.

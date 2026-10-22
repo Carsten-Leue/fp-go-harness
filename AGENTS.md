@@ -201,7 +201,7 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | apply an effect of a function to a plain value (`Flap`), or `MonadAp` | in `effect` | `effect.Of[C, F](f)` + `effect.Ap(fa)`, as in `cli/run.go` `ask` |
 | lift a `Reader[C, IO[A]]` getter (`FromReaderIO`) | in `effect` | `effect.Asks(getter)` + `effect.ChainIOK(F.Identity[IO[A]])`, once, in `prompt/envinfo.go` `now` |
 | membership in a slice (`A.Elem`, `A.Contains`) | in `array` | `F.Bind1st(slices.Contains[[]string], names)`, as in `mode/mode.go` `isTool`; as a reader over the slice `F.Curry2(slices.Contains[[]string])`, as in `prompt/compare.go` `containedIn` |
-| pair a value with something computed from it (fan-out, `&&&`) | in `pair` | `F.Flow2(pair.Of[T], pair.MapTail[T](g))`, as in `prompt/compare.go` `enter` |
+| pair a value with something computed from it (fan-out, `&&&`) | in `pair` | `F.Flow2(pair.Of[T], pair.MapTail[T](g))`; to update an existing pair instead, one `MapHead` / `MapTail` endomorphism per side, as in `prompt/compare.go` `enter` |
 | a fold over a slice that keeps state (`A.Scan`, `A.Unfold`) | in `array` (`iter.Scan` yields every state) | `A.Reduce` over a `Pair` state, with a nullary step as `F.Uncurry2(F.Flip(lineStep()))`, as in `prompt/compare.go` `SectionTags` (see the [`fp-go` skill](.bob/skills/fp-go/SKILL.md#a-scan-with-state-areduce-over-a-pair)) |
 | `[]byte` to `string` | a `string` combinator | `B.ToString` from `github.com/IBM/fp-go/v2/bytes` |
 | split Markdown at its YAML front matter | a front matter parser in fp-go (and we don't use `adrg/frontmatter`) | `mode.SplitFrontMatter`, then decode the head with `go.yaml.in/yaml/v3` and `KnownFields(true)` |
