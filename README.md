@@ -53,6 +53,9 @@ recorded agent sessions.
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
   `ChatCompletionDeps` answer each request with the next recorded response.
+  `replay.SystemPrompts` picks the system prompt out of each recorded request, and
+  `prompt.CompareSections` compares it with an assembled one by the tags of their top-level
+  sections: which are missing, which are extra, and whether the shared ones are in the same order.
 - **Prompt sections**: `prompt.RenderSections` renders tagged sections as
   `<tag>\nbody\n</tag>` and joins them with a blank line through a string monoid.
   `prompt.StaticSections` holds the embedded `tool_use`, `markdown_rules` and `base_rules`
@@ -95,8 +98,8 @@ replay tests.
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
-| [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details` |
-| [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests |
+| [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details`, and the section comparison with a recorded prompt |
+| [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests, and extracts their system prompts |
 | [`env`](env/) | Environment variables from the process and `.env` |
 | [`http`](http/) | HTTP client dependency |
 
@@ -109,7 +112,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ D1–D6 done |
+| D | Prompt assembly | ⏳ D1–D7 done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
