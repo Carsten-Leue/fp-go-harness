@@ -467,6 +467,11 @@ How a parameter disappears:
 | `func h(n N) …` returns `F.Ternary(p(n), f(n), F.Identity)` / `if p(s) { return f(s) }; return s` | `F.Pipe2(fReader, reader.Map[N](orKeep[T]()), reader.Ap[Endomorphism[T]](pReader))` with `orKeep[T]() = F.Curry2(P.Fold[T, T])(F.Identity[T])`. `F.Ternary` is deprecated in favour of `P.Fold` |
 | `func h(f Endomorphism[B]) Endomorphism[S]` returns `t ↦ Make(get1(t), f(get2(t)))` | a lens `Modify` in disguise: `fieldLens.Modify`. Without a generated lens, build one with `L.MakeLens` (see [`go-conventions`](../go-conventions/SKILL.md#generator-rules-and-pitfalls-go-tool-gen-lens-fp-go-v240), `tools.MakeToolCallLens`, used in `TruncateTools`) |
 | `func h(n N) Endomorphism[T]` returns `F.Flow2(f(n), g(n))`: two endomorphisms of the same `n`, composed | `reader.ApplicativeMonoid[N](endomorphism.Monoid[T]()).Concat(g, f)`. `Concat(g, f)` applies `f` first (right to left); when the order matters, say so in a comment |
+| `func h(xs []T) Predicate[T]` returns `F.Bind1st(f, xs)`: a two-argument function with its first argument fixed | `F.Curry2(f)`, e.g. `F.Curry2(slices.Contains[[]string])` for `Reader[[]string, Predicate[string]]`. The negation is `reader.Map[[]string](P.Not[string])` after it |
+| `func h(xs []T) func(T) Pair[T, B]` returns `t ↦ MakePair(t, g(xs, t))`: a value paired with something computed from it | `F.Flow3(F.Curry2(g), pair.MapTail[T, T, B], reader.Local[Pair[T, B]](pair.Of[T]))`: `pair.Of` duplicates the value, `MapTail` computes the tail. There is no fan-out combinator in `pair` |
+| `func h(o Option[A]) Endomorphism[S]` returns `s ↦ option.Fold(F.Constant(s), k(s))(o)`: both branches read the state | build the branches as readers over the state and combine them with the curried fold, then flip so the option comes first: `F.Flip(F.Pipe2(F.Constant[S], reader.Map[S](F.Curry2(option.Fold[A, S])), reader.Ap[func(Option[A]) S](kReader)))` |
+| `func h(line string) Predicate[S]` returns `F.Flow2(getter, F.Bind1st(eq.Equals, line))` | `F.Flow2(F.Curry2(eq.Equals), reader.Local[bool](getter))`, then `P.Fold(F.Identity[S], f)` after it for "change `S` when it holds" |
+| `func h(p func(B) Predicate[A]) func(Pair[[]A, B]) []A` returns `pair.Paired(func(as, b) …A.Filter(p(b))(as))`: the tail configures what is applied to the head | `F.Flow2(reader.Map[B](A.Filter[A]), pair.Merge[Reader[B, Endomorphism[[]A]], []A, B, []A])`. `pair.Merge(f)` is `f(tail)(head)`; its type arguments are needed |
 
 `F.Curry2(g)` + `reader.Flatten` is the duplicating ("W") combinator: `Flatten` of a
 `Reader[X, Reader[X, A]]` passes the same `x` to both levels. It is not the `Map` +
@@ -479,6 +484,25 @@ comes second. A curried `func(int) func(string) X` is `Reader[int, Reader[string
 compiler error reads as if `Reader` and `Kleisli` were distinct defined types, but both
 are aliases: the argument order is what doesn't match. Spell nested curried functions as
 nested `Reader`s.
+
+### A scan with state: `A.Reduce` over a `Pair`
+
+A pass over lines that has to remember where it is (inside a section or not) is an
+`A.Reduce` whose state is a `Pair`: the head is the position, the tail is what has been
+found so far. `fp-go` has no `A.Scan` or `A.Unfold` (`iter.Scan` exists, over a `Seq`,
+and yields every state).
+
+- **The step is the one leaf.** `A.Reduce` takes a `func(state, line) state`, so the step
+  keeps both parameters and says so in its doc comment. It only chooses between the
+  nullary steps: `P.Fold(closes()(line), opens()(line))(isOutside())(scan)`.
+- **Each step is a `Reader[string, Endomorphism[State]]`** over the line, built with the
+  rows above (the curried `option.Fold` for "an opening tag enters, anything else keeps",
+  the `eq.Equals` predicate and `P.Fold` for "the closing line leaves").
+- **Changing one side of the state** is `pair.MapHead` / `pair.MapTail`
+  (`leave() = pair.MapHead[[]string](F.Constant1[string](""))`), not a rebuilt pair.
+
+Worked example: [prompt/compare.go](../../../prompt/compare.go) `SectionTags`, which lists
+the top-level section tags of a rendered prompt and skips the tags nested in a section.
 
 ## Several readers over one environment
 

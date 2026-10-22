@@ -255,6 +255,10 @@ pair.MapHead[Tool](F.Flow2(toolDefinition, nameLens.Get))
   element.** In the file with the annotated struct, write
   `openai "github.com/openai/openai-go/v3"`, not the bare import. Otherwise the generated
   file references `openai.X` without importing it (`undefined: openai`).
+- **A struct with only slice fields doesn't compile once generated**: the generator imports
+  `optics/iso/option` and `optics/lens/option` for `LensO`s it then skips (`imported and not
+  used`). Leave such a struct unannotated while nothing reads its fields through optics, and
+  say so in its doc comment (`prompt.SectionDiff`).
 - **Function-typed fields can't be lensed.** For a field such as `Call ToolCall` (a
   `Kleisli` alias) the generator emits `LensO`s that need `comparable`, or lenses over
   `any`. Don't annotate such a struct; write minimal leaf accessors and say why in a
