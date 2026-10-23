@@ -31,10 +31,16 @@ recorded agent sessions.
   - **plan** investigates the workspace with the read-only tools (`read_file`,
     `list_files`, `glob`, `grep`) and answers with a plan.
   - **ask** (the default) answers questions with the read-only tools.
+  - **custom modes** are mode files in `~/.bob/modes/` and `<workspace>/.bob/modes/`. A custom
+    mode with the id of another one replaces it: the workspace wins over the home directory,
+    both over the built-in modes.
 - **Modes and system prompt**: `mode.Modes` is the table of modes, each with its role and
   the tools it allows. A mode is a Markdown file in [mode/modes/](mode/modes/): id, name,
   description, order and tools in its YAML front matter, the role prompt as its body. A new
-  file adds a mode; unknown keys and unknown tools are errors. `mode.Request` assembles the first request of a mode: the system
+  file adds a mode; unknown keys and unknown tools are errors. `mode.ReadModeDirs` merges the
+  custom modes of the home directory and the workspace over the built-in ones by id (two files
+  with the same id in one directory are an error), and `mode.Lookup` finds a mode in that
+  merged table. `mode.Request` assembles the first request of a mode: the system
   prompt with the mode's `role_definition`, the static sections, `project_rules` and
   `environment_info`, and the definitions of the mode's tools.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
@@ -96,7 +102,7 @@ replay tests.
 | [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
-| [`mode`](mode/) | The modes (Agent, Plan, Ask), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
+| [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details`, and the section comparison with a recorded prompt |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests, and extracts their system prompts |
@@ -112,7 +118,7 @@ replay tests.
 | A | Close the loop | ✅ done |
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
-| D | Prompt assembly | ⏳ D1–D7 done |
+| D | Prompt assembly | ✅ done |
 | E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |

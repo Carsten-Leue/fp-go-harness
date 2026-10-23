@@ -29,7 +29,7 @@ type FrontMatter = Pair[string, string]
 
 // lines splits a text into lines that keep their line ending, so joining
 // them gives back the text.
-func lines() func(string) []string {
+func lines() A.Kleisli[string, string] {
 	return F.Bind2nd(strings.SplitAfter, "\n")
 }
 

@@ -113,7 +113,7 @@ func allowedRules() func([]string) Endomorphism[string] {
 // base_rules, for the tools a mode allows. Their bodies are embedded from
 // prompts/, with one rule per line; a rule that names a tool the mode doesn't
 // allow is left out, so a read-only mode isn't told to write files.
-func StaticSections() func([]string) []Section {
+func StaticSections() A.Operator[string, Section] {
 	return F.Flow5(
 		allowedRules(),
 		// normalize first, so the rules split at LF

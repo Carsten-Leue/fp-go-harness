@@ -96,7 +96,7 @@ func ToToolCaller() func(ToolRegistry) ToolCaller {
 
 // ToToolParams renders the registry into the tool definitions of a chat
 // completion request, ordered by name so that requests are deterministic.
-func ToToolParams() func(ToolRegistry) []openai.ChatCompletionToolUnionParam {
+func ToToolParams() A.Kleisli[ToolRegistry, openai.ChatCompletionToolUnionParam] {
 	return F.Flow2(
 		R.ValuesOrd[Tool](S.Ord),
 		A.Map(F.Flow2(toolDefinition, openai.ChatCompletionFunctionTool)),

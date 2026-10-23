@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -104,8 +105,8 @@ type withDetails = func(endomorphism.Endomorphism[string]) endomorphism.Endomorp
 // the prompt is sent with the environment_details of the mode and workspace:
 // the prompt's change to the request is applied to the details, then to the
 // request, both read concurrently.
-func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
-	modeDeps := F.Constant1[oai.DeepSeekDeps](mode.MakeDefaultModeDeps(deps))
+func ask(cfg Config, m mode.Mode, deps mode.ModeDeps) effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult] {
+	modeDeps := F.Constant1[oai.DeepSeekDeps](deps)
 	nameLens := mode.MakeModeNameLens()
 
 	request := F.Pipe1(
@@ -129,24 +130,54 @@ func ask(cfg Config, m mode.Mode, deps tools.ToolsDeps) effect.Kleisli[oai.DeepS
 	)
 }
 
-// modeAnswer is wiring: it builds the deps of the tools and the agent loop of
-// a mode over them.
-func modeAnswer(cfg Config) io.Kleisli[mode.Mode, effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
-	return func(m mode.Mode) io.IO[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
-		return F.Pipe1(
-			makeToolsDeps(cfg),
-			io.Map(F.Bind12of3(ask)(cfg, m)),
-		)
-	}
+// modeDirs is wiring: the directories of the custom modes, lowest
+// precedence first: the home directory's, then the workspace's.
+func modeDirs(home, root string) []string {
+	return A.From(filepath.Join(home, mode.ModesDir), filepath.Join(root, mode.ModesDir))
 }
 
-// makeAnswer is wiring: it looks the mode of the configuration up and builds
-// the agent loop of that mode.
-func makeAnswer(cfg Config) IOResult[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
+// readModes is wiring: it reads the table of the modes for a workspace root:
+// the built-in modes, overridden by those of the home directory, overridden
+// by those of the workspace.
+func readModes(root string) IOResult[[]mode.Mode] {
 	return F.Pipe2(
-		mode.Lookup()(MakeConfigModeLens().Get(cfg)),
-		ioresult.FromResult[mode.Mode],
-		ioresult.ChainIOK(modeAnswer(cfg)),
+		ioresult.Eitherize0(os.UserHomeDir)(),
+		ioresult.Map(F.Bind2nd(modeDirs, root)),
+		ioresult.Chain(mode.ReadModeDirs()(os.DirFS)),
+	)
+}
+
+// makeModeDeps is wiring: it builds the deps of the modes from the deps of
+// the tools and the table of the modes of the workspace, read concurrently.
+func makeModeDeps(cfg Config) IOResult[mode.ModeDeps] {
+	return F.Pipe2(
+		ioresult.FromIO(makeToolsDeps(cfg)),
+		ioresult.Map(F.Curry2(mode.MakeDefaultModeDeps)),
+		ioresult.Ap[mode.ModeDeps](readModes(MakeConfigWorkspaceLens().Get(cfg))),
+	)
+}
+
+// modeAnswer is wiring: it looks the mode of the configuration up in the
+// table of the deps and builds the agent loop of that mode over them. The
+// deps are read twice: for the lookup and for the agent loop.
+func modeAnswer(cfg Config) result.Kleisli[mode.ModeDeps, effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
+	return F.Pipe2(
+		F.Flip(F.Curry2(F.Bind1of3(ask)(cfg))),
+		reader.Map[mode.ModeDeps](result.Map[mode.Mode, effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]]),
+		reader.Ap[Result[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]]](F.Flow3(
+			mode.AsModeTableDeps[mode.ModeDeps],
+			mode.Lookup(),
+			reader.Read[Result[mode.Mode]](MakeConfigModeLens().Get(cfg)),
+		)),
+	)
+}
+
+// makeAnswer is wiring: it reads the modes, looks the mode of the
+// configuration up and builds the agent loop of that mode.
+func makeAnswer(cfg Config) IOResult[effect.Kleisli[oai.DeepSeekDeps, string, session.FinalResult]] {
+	return F.Pipe1(
+		makeModeDeps(cfg),
+		ioresult.ChainResultK(modeAnswer(cfg)),
 	)
 }
 

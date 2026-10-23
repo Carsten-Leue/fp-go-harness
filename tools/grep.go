@@ -225,7 +225,7 @@ func absoluteEntry() Reader[string, func(FileEntry) string] {
 }
 
 // segments splits a relative path into its segments; "." has none.
-func segments() func(string) []string {
+func segments() A.Kleisli[string, string] {
 	return F.Flow2(
 		filepath.ToSlash,
 		P.Fold(F.Bind2nd(strings.Split, "/"), F.Constant1[string]([]string(nil)))(S.Equals(".")),
@@ -234,7 +234,7 @@ func segments() func(string) []string {
 
 // ignoreDomain is the directory of a .gitignore entry as path segments
 // relative to the walked directory.
-func ignoreDomain() func(FileEntry) []string {
+func ignoreDomain() A.Kleisli[FileEntry, string] {
 	pathLens := MakeFileEntryPathLens()
 
 	return F.Flow3(pathLens.Get, path.Dir, segments())
@@ -248,7 +248,7 @@ func isPatternLine() P.Predicate[string] {
 
 // parseIgnore parses the content of a .gitignore file into the patterns for
 // a domain.
-func parseIgnore() Reader[[]string, func([]byte) []gitignore.Pattern] {
+func parseIgnore() Reader[[]string, A.Operator[byte, gitignore.Pattern]] {
 	return F.Flow3(
 		F.Flip(F.Curry2(gitignore.ParsePattern)),
 		A.Map[string, gitignore.Pattern],
@@ -288,9 +288,9 @@ func excludeFile() func(string) IgnoreFile {
 }
 
 // inits lists the prefixes of segs, from the empty one up to segs itself.
-func inits() func([]string) [][]string {
+func inits() A.Operator[string, []string] {
 	return F.Pipe1(
-		F.Flow3(A.Size[string], N.Inc[int], F.Curry2(A.MakeBy[func(int) []string, []string])),
+		F.Flow3(A.Size[string], N.Inc[int], F.Curry2(A.MakeBy[A.Kleisli[int, string], []string])),
 		reader.Ap[[][]string](F.Flip(F.Bind1st(A.Slice[string], 0))),
 	)
 }
@@ -308,7 +308,7 @@ func ancestorIgnore() func(string) func([]string) IgnoreFile {
 // ancestorFiles lists the .gitignore files of the workspace root and of
 // every directory down to the one with the workspace-relative segments it is
 // given, the outer ones first.
-func ancestorFiles() func(string) func([]string) []IgnoreFile {
+func ancestorFiles() func(string) A.Operator[string, IgnoreFile] {
 	return F.Flow2(
 		ancestorIgnore(),
 		F.Flow2(A.Map[[]string, IgnoreFile], reader.Local[[]IgnoreFile](inits())),
@@ -317,7 +317,7 @@ func ancestorFiles() func(string) func([]string) []IgnoreFile {
 
 // nestedIgnores keeps the .gitignore files strictly below the walked
 // directory, the outer ones first.
-func nestedIgnores() func([]FileEntry) []FileEntry {
+func nestedIgnores() A.Operator[FileEntry, FileEntry] {
 	return F.Flow2(
 		A.Filter(F.Pipe1(isGitignore(), P.And(P.Not(isFileNamed()(gitignoreFile))))),
 		A.SortBy(byDepth()),
@@ -338,7 +338,7 @@ func nestedIgnore() func(string) func([]string) func(FileEntry) IgnoreFile {
 // nestedFiles lists the .gitignore files below the searched directory dir,
 // whose workspace-relative segments are prefix, the outer ones first. The
 // .gitignore of dir itself is one of the [ancestorFiles].
-func nestedFiles() func(string) func([]string) func([]FileEntry) []IgnoreFile {
+func nestedFiles() func(string) func([]string) A.Operator[FileEntry, IgnoreFile] {
 	return F.Flow2(
 		nestedIgnore(),
 		reader.Map[[]string](F.Flow2(A.Map[FileEntry, IgnoreFile], reader.Local[[]IgnoreFile](nestedIgnores()))),
@@ -350,7 +350,7 @@ func nestedFiles() func(string) func([]string) func([]FileEntry) []IgnoreFile {
 // gitignore.NewMatcher expects them: .git/info/exclude, the .gitignore files
 // from the workspace root down to the searched directory, then the ones
 // below it.
-func ignoreFiles() Reader[string, func(GrepArgs) []IgnoreFile] {
+func ignoreFiles() Reader[string, A.Kleisli[GrepArgs, IgnoreFile]] {
 	nameLens := MakeGrepArgsNameLens()
 	scopeLens := MakeGrepArgsScopeLens()
 	dirLens := MakeGrepScopeDirLens()
@@ -360,7 +360,7 @@ func ignoreFiles() Reader[string, func(GrepArgs) []IgnoreFile] {
 
 	nested := F.Pipe2(
 		F.Flow3(scopeLens.Get, dirLens.Get, nestedFiles()),
-		reader.Ap[func([]FileEntry) []IgnoreFile](prefix),
+		reader.Ap[A.Operator[FileEntry, IgnoreFile]](prefix),
 		reader.Ap[[]IgnoreFile](F.Flow2(scopeLens.Get, entriesLens.Get)),
 	)
 
@@ -525,18 +525,18 @@ func matchingLine(match P.Predicate[string], name string) func(int, string) Opti
 // grepLines keeps the lines of a content that a line filter turns into
 // matches. A final line break ends the last line, it does not start an empty
 // one. Empty and binary content have none.
-func grepLines() func(func(int, string) Option[GrepLine]) func([]byte) []GrepLine {
+func grepLines() func(func(int, string) Option[GrepLine]) A.Operator[byte, GrepLine] {
 	return F.Flow4(
 		A.FilterMapWithIndex[string, GrepLine],
 		reader.Local[[]GrepLine](F.Flow2(F.Bind2nd(bytes.TrimSuffix, []byte("\n")), splitLines())),
 		F.Bind1st(P.Fold[[]byte, []GrepLine], F.Constant1[[]byte]([]GrepLine(nil))),
-		reader.Read[func([]byte) []GrepLine](hasLines()),
+		reader.Read[A.Operator[byte, GrepLine]](hasLines()),
 	)
 }
 
 // grepContent finds the lines of the content of a named file that a match
 // predicate accepts, see [grepLines].
-func grepContent() Reader[P.Predicate[string], Reader[string, func([]byte) []GrepLine]] {
+func grepContent() Reader[P.Predicate[string], Reader[string, A.Operator[byte, GrepLine]]] {
 	return F.Flow2(F.Curry2(matchingLine), reader.Map[string](grepLines()))
 }
 

@@ -177,6 +177,15 @@ that runs first is the *last* argument; comment it when the order matters.
 [tools/truncate.go](tools/truncate.go) `truncateThunk` and [tools/grep.go](tools/grep.go)
 `compilePattern` are the examples.
 
+### Slice-valued functions are `array.Kleisli` / `array.Operator`
+
+Write a function type that returns a slice by its fp-go alias, never spelled out:
+`func(Mode) []string` is `A.Kleisli[Mode, string]`, and a function from a slice to a slice,
+`func([]Record[string, Mode]) []Mode`, is `A.Operator[Record[string, Mode], Mode]`. This
+applies to return types, type aliases and explicit type arguments alike; generated `gen.go`
+files are left as the generator writes them. The aliases are identical types, so switching
+never breaks a call site. Details in the [`fp-go` skill, Rule 2](.bob/skills/fp-go/SKILL.md#rule-2--fp-go-best-practices).
+
 ### Combinators that don't exist, and what to use instead
 
 Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:

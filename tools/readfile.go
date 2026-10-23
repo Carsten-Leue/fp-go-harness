@@ -186,7 +186,7 @@ func lineSelector() result.Kleisli[string, result.Kleisli[[]string, string]] {
 
 // splitLines splits content at line breaks and drops the carriage returns of
 // CRLF line endings.
-func splitLines() func([]byte) []string {
+func splitLines() A.Operator[byte, string] {
 	return F.Flow3(
 		B.ToString,
 		F.Bind2nd(strings.Split, "\n"),

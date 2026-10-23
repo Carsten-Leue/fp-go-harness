@@ -31,7 +31,7 @@ func defaultConfig(t *testing.T) Config {
 }
 
 func TestMakeRegistry_ToolsOfTheMode(t *testing.T) {
-	m, err := result.Unwrap(mode.Lookup()(mode.AskID))
+	m, err := result.Unwrap(mode.Lookup()(mode.MakeModeTableDeps(mode.Modes()))(mode.AskID))
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t,
