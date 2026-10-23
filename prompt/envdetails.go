@@ -114,11 +114,10 @@ func gitStatusSection() A.Kleisli[tools.ProcessOutput, Section] {
 // gitStatus runs git status in the workspace with the [tools.RunProcess] of
 // the dependencies. A command that cannot be run fails the effect.
 func gitStatus() Effect[EnvDetailsDeps, []Section] {
-	return F.Pipe4(
+	return F.Pipe3(
 		EnvDetailsDeps.GetRunProcess,
 		reader.Ap[Thunk[tools.ProcessOutput]](gitStatusProcess()),
-		effect.Asks[EnvDetailsDeps, Thunk[tools.ProcessOutput]],
-		effect.ChainThunkK[EnvDetailsDeps](F.Identity[Thunk[tools.ProcessOutput]]),
+		effect.FromReaderThunk[EnvDetailsDeps, tools.ProcessOutput],
 		effect.Map[EnvDetailsDeps](gitStatusSection()),
 	)
 }

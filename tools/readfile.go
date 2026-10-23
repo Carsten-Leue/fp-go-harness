@@ -217,10 +217,11 @@ func renderFile() ReaderResult[ReadFileArgs, string] {
 // It is a generic I/O leaf and keeps its parameter: Go can't infer R through
 // a nullary call.
 func readBytes[R FileDeps](path string) Effect[R, []byte] {
-	return F.Pipe1(
-		effect.Asks(F.Flow2(AsFileDeps[R], FileDeps.GetReadFile)),
-		effect.ChainIOResultK[R](reader.Read[ioresult.IOResult[[]byte]](path)),
-	)
+	return effect.FromReaderIOResult(F.Flow3(
+		AsFileDeps[R],
+		FileDeps.GetReadFile,
+		reader.Read[ioresult.IOResult[[]byte]](path),
+	))
 }
 
 // ReadFile runs a read_file call: it decodes the JSON arguments, resolves the

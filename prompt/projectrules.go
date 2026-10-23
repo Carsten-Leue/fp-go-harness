@@ -88,8 +88,8 @@ func inWorkspace(name string) Effect[ProjectRulesDeps, string] {
 func readOptional[T any](get Reader[ProjectRulesDeps, ioresult.Kleisli[string, T]]) effect.Kleisli[ProjectRulesDeps, string, Option[T]] {
 	return F.Flow4(
 		F.Flip(get),
-		effect.Asks[ProjectRulesDeps, ioresult.IOResult[T]],
-		effect.ChainIOResultK[ProjectRulesDeps](ioresult.Map(option.Some[T])),
+		effect.FromReaderIOResult[ProjectRulesDeps, T],
+		effect.Map[ProjectRulesDeps](option.Some[T]),
 		effect.CatchIs(fs.ErrNotExist, F.Constant1[error](effect.Of[ProjectRulesDeps](option.None[T]()))),
 	)
 }

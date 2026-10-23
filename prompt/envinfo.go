@@ -100,10 +100,7 @@ func envInfoBody() Reader[EnvInfoDeps, envInfoFromNow] {
 // now reads the current time through the [ClockDeps] of any dependencies. It
 // is a generic I/O leaf: Go cannot infer R through a nullary call.
 func now[R ClockDeps]() Effect[R, time.Time] {
-	return F.Pipe1(
-		effect.Asks(R.GetNow),
-		effect.ChainIOK[R](F.Identity[IO[time.Time]]),
-	)
+	return effect.FromReaderIO(R.GetNow)
 }
 
 // EnvironmentInfo builds the environment_info section: the workspace root,

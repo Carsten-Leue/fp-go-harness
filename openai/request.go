@@ -93,6 +93,6 @@ func ChatCompletion() effect.Kleisli[ChatCompletionDeps, openai.ChatCompletionNe
 		// curried payload into Effect[ChatCompletionDeps, Thunk[*ChatCompletion]].
 		effect.Ap[Thunk[*openai.ChatCompletion]](ChatCompletionDeps.GetRequestOptions),
 		// flatten the resulting Thunk into the final Effect[ChatCompletionDeps, *ChatCompletion].
-		effect.Chain(effect.FromThunk[ChatCompletionDeps, *openai.ChatCompletion]),
+		effect.FlattenThunk[ChatCompletionDeps, *openai.ChatCompletion],
 	)
 }

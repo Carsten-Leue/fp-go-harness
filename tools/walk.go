@@ -134,12 +134,11 @@ func WalkFS(dirFS func(string) fs.FS) WalkDir {
 // nullary call.
 func walkDir[R WalkDeps](recursive bool) effect.Kleisli[R, string, []FileEntry] {
 	return func(dir string) Effect[R, []FileEntry] {
-		return F.Pipe1(
-			effect.Asks(F.Flow2(AsWalkDeps[R], WalkDeps.GetWalkDir)),
-			effect.ChainIOResultK[R](F.Flow2(
-				reader.Read[ioresult.Kleisli[string, []FileEntry]](recursive),
-				reader.Read[ioresult.IOResult[[]FileEntry]](dir),
-			)),
-		)
+		return effect.FromReaderIOResult(F.Flow4(
+			AsWalkDeps[R],
+			WalkDeps.GetWalkDir,
+			reader.Read[ioresult.Kleisli[string, []FileEntry]](recursive),
+			reader.Read[ioresult.IOResult[[]FileEntry]](dir),
+		))
 	}
 }

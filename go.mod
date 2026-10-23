@@ -3,7 +3,7 @@ module github.com/Carsten-Leue/fp-go-harness
 go 1.27.0
 
 require (
-	github.com/IBM/fp-go/v2 v2.9.0
+	github.com/IBM/fp-go/v2 v2.11.0
 	github.com/bmatcuk/doublestar/v4 v4.10.3
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1
@@ -14,9 +14,9 @@ require (
 )
 
 require (
-	github.com/IBM/fp-go/gen/v2 v2.5.2 // indirect
+	github.com/IBM/fp-go/gen/v2 v2.11.0 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/dustin/go-humanize v1.1.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.2 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
@@ -25,7 +25,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/modelcontextprotocol/go-sdk v1.8.0 // indirect
-	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/otiai10/copy v1.14.1 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -45,10 +45,10 @@ require (
 	golang.org/x/tools v0.52.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.77.1 // indirect
+	modernc.org/libc v1.79.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
-	modernc.org/sqlite v1.60.1 // indirect
+	modernc.org/sqlite v1.61.0 // indirect
 )
 
 tool github.com/IBM/fp-go/gen/v2
