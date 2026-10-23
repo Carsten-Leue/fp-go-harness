@@ -140,7 +140,7 @@ func TestReplaySyntheticTask(t *testing.T) {
 
 	got := pair.Head(final)
 	assert.Equal(t, 2, session.MakeSessioniterationsLens().Get(got))
-	assert.Len(t, session.MakeSessionhistoryLens().Get(got), 1)
+	assert.Len(t, session.MakeSessionhistoryLens().Get(got), 2)
 
 	usage := session.MakeSessionusageLens().Get(got)
 	assert.Equal(t, int64(110), usage.PromptTokens)
@@ -148,9 +148,9 @@ func TestReplaySyntheticTask(t *testing.T) {
 	assert.Equal(t, int64(130), usage.TotalTokens)
 	assert.Equal(t, int64(60), usage.PromptTokensDetails.CachedTokens)
 
-	// the replayed run rebuilds the second recorded request: system, user,
-	// assistant tool call and tool result
-	assert.Len(t, session.MakeSessioncurrentLens().Get(got).Messages, len(task.Turns[1].Request.Messages))
+	// the replayed run rebuilds the second recorded request (system, user,
+	// assistant tool call and tool result) and appends the final answer
+	assert.Len(t, session.MakeSessioncurrentLens().Get(got).Messages, len(task.Turns[1].Request.Messages)+1)
 
 	assert.Equal(t, "It is sunny in Berlin, 21C.", pair.Tail(final).Choices[0].Message.Content)
 }

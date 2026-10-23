@@ -5,6 +5,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
+	"github.com/IBM/fp-go/v2/endomorphism"
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
 	P "github.com/IBM/fp-go/v2/optics/prism"
@@ -58,6 +59,28 @@ func MakeSession(req openai.ChatCompletionNewParams) Session {
 	return Session{current: req}
 }
 
+// appendAnswer appends the message of the first choice of a completion to a
+// request. A completion without choices leaves the request unchanged.
+func appendAnswer() func(*openai.ChatCompletion) Endomorphism[openai.ChatCompletionNewParams] {
+	choicesLens := oai.MakeChatCompletionChoicesRefLens()
+	messageLens := oai.MakeChatCompletionChoiceMessageLens()
+	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
+
+	firstMessage := choicesLens.
+		ComposePrism(P.Head[openai.ChatCompletionChoice]()).
+		ComposeLens(messageLens)
+
+	return F.Flow3(
+		firstMessage.GetOption,
+		option.Map(F.Flow3(
+			openai.ChatCompletionMessage.ToParam,
+			A.Push[openai.ChatCompletionMessageParamUnion],
+			messagesLens.Modify,
+		)),
+		option.GetOrElse(endomorphism.Identity[openai.ChatCompletionNewParams]),
+	)
+}
+
 func isToolCallFinishReason() Predicate[string] {
 	return S.Equals(finishReasonToolCalls)
 }
@@ -75,8 +98,12 @@ func isToolCallFinishReason() Predicate[string] {
 //     records the (request, response) pair in session.history, and
 //     returns a Bounce carrying the updated [Session] so the loop can
 //     continue.
-//   - Otherwise, Next returns a Land carrying the final (session,
-//     completion) pair: the conversation has reached a terminal response.
+//   - Otherwise, Next records the (request, response) pair in
+//     session.history, appends the message of the response's first choice
+//     to session.current and returns a Land carrying the final (session,
+//     completion) pair: the conversation has reached a terminal response,
+//     and the session holds all of it, so [Continue] can add the next user
+//     message.
 //
 // The returned [NextStep] is a [Trampoline]; callers are expected to invoke
 // Next repeatedly on the bounced Session until it lands, which keeps
@@ -159,7 +186,16 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		effect.Map[SessionDeps](tailrec.Bounce[FinalResult, Session]),
 	)
 
-	landFinalResult := F.Flow2(
+	// the session with the answer of the completion appended to its request
+	appendAnswerToSession := F.Pipe1(
+		F.Flow3(pair.Tail[Session, *openai.ChatCompletion], appendAnswer(), currentLens.Modify),
+		updateSession,
+	)
+
+	// the request is recorded in the history before the answer is appended
+	landFinalResult := F.Flow4(
+		addToHistory,
+		appendAnswerToSession,
 		tailrec.Land[Session, FinalResult],
 		effect.Of[SessionDeps],
 	)
