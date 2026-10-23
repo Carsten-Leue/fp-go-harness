@@ -124,6 +124,8 @@ replay tests.
 | G | MCP client | ⏳ open |
 | H | Skills, todos, subtasks | ⏳ open |
 | I | Safety and approval | ⏳ open |
+| J | Agent Client Protocol (run as an ACP agent in editors) | ⏳ open |
+| K | Agent2Agent protocol (serve tasks to other agents, call remote agents) | ⏳ open |
 
 ## 🛠️ Development
 

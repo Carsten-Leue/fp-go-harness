@@ -241,14 +241,25 @@ and a text result. Validation errors (such as "path must be absolute") come back
   are running. Return the partial session as a `Land` result.
 - [ ] **E5 Interactive REPL.** Change `main.go` so it loops over stdin turns (`Continue` → `Run` → print). This loop
   runs at the edge of the program; it can be an `IO` loop through `tailrec`.
+- [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
+  with no access to the `Session`. Add a second kind of tool whose result is the text *and* an
+  `Endomorphism[Session]`, which `Next` applies after the tool messages are appended; the plain tools lift into it
+  with the identity. H3 (`update_todo_list`) and H5 (`switch_mode`) are built on it. *Test:* a fake tool that sets a
+  field through a lens changes the session the next request is built from.
 
 ### Phase F: Streaming and observability
 
 - [ ] **F1 Streaming request.** Add `openai.ChatCompletionStream()` as a Kleisli that returns a stream of chunks, and
   fold the chunks into a `*ChatCompletion` with `openai.ChatCompletionAccumulator`. Keep the
   Kleisli signature the same as `ChatCompletion` so the two can be swapped through `ChatCompletionDeps`.
-- [ ] **F2 Token sink.** Add `OutputDeps.Emit(delta)` so text appears while it streams. The fold calls it as a side
-  effect inside the thunk.
+- [ ] **F2 Event sink.** Add `EventDeps.Emit(Event)` to `SessionDeps`: one sink for everything a running turn
+  reports, so that the CLI, the REPL (E5), ACP (J4, J8), the MCP server (G6), A2A (K4) and subagents (H6) all
+  read the same events instead of each adding its own hook. The events are: assistant text that comes with tool
+  calls, a tool call started (id, name, arguments), a tool call finished (id, succeeded or failed, output), and,
+  once F1 is done, text and reasoning deltas, which the stream fold emits as a side effect inside the thunk. Tool
+  events are a `Tap` around each call in `MakeToolCall`. The CLI wires a no-op sink. *Test:* a recording sink
+  (guarded by a mutex, compared with `assert.ElementsMatch`, see AGENTS.md) sees one start and one finish per tool
+  call.
 - [ ] **F3 Structured logging.** Add `LogDeps` with JSONL output in the recorded record shape
   (`module`, `msg`, `taskId`, `data`), and log `Starting agent loop`, `Tool invoked`,
   `Agent loop completed` and the request/response payloads. Then Phase B can replay the harness's *own* logs.
@@ -268,6 +279,17 @@ and a text result. Validation errors (such as "path must be absolute") come back
 - [ ] **G4 Dogfood.** Connect this repo's `fp-go` server from [.mcp.json](.mcp.json). The harness can then use
   `mcp__fp-go__search_examples` while it works on itself.
 - [ ] **G5 Reconnect.** Retry with backoff and a maximum number of attempts (as in `Scheduling reconnect attempt` → `Max reconnect attempts reached`).
+- [ ] **G6 Harness as an MCP server.** `fp-go-harness mcp` serves the harness itself as an MCP server over stdio
+  (`mcp.NewServer` + `mcp.AddTool` from `github.com/modelcontextprotocol/go-sdk`, run with `mcp.StdioTransport`),
+  so any MCP host (Claude Code, Bob, …) can call it as a remote agent. One tool, `run_task`, takes the prompt and
+  an optional mode (ask by default, agent only with `--allow-agent-mode`) and returns the final answer as text,
+  with the iteration and token counts. The workspace is fixed per server (`--workspace`, as in K1). Each call is one
+  turn (J1) on a fresh session; a session id in the result and an optional `session_id` argument to continue it
+  come once J1 is done. Tool calls are reported as MCP progress notifications when the host sends a progress
+  token (from the F2 event sink), and a cancelled request cancels the turn (E4). stdout is the JSON-RPC channel,
+  as in Phase J. This is the cheap way to be callable; the full task lifecycle (cancel, `input-required`, artifacts)
+  is Phase K. *Test:* an in-memory MCP client (`mcp.NewInMemoryTransports`) calls `run_task` against replay
+  `ChatCompletionDeps`.
 
 ### Phase H: Skills, todos, subtasks
 
@@ -275,10 +297,13 @@ and a text result. Validation errors (such as "path must be absolute") come back
   for `SKILL.md` front matter and render them into the `<available_skills>` section.
 - [ ] **H2 `use_skill`.** Implement it as a tool that returns the body of the skill file (recorded result: the `SKILL.md` text).
 - [ ] **H3 `update_todo_list`.** Keep the todo list in `Session` (lens) and render it into the next `environment_details`.
-- [ ] **H4 `ask_followup_question`.** Implement it through `OutputDeps`/`InputDeps`: it waits for user input inside the thunk.
+  A session-changing tool (E6).
+- [ ] **H4 `ask_followup_question`.** Implement it through the event sink (F2) and an `InputDeps`: it waits for user
+  input inside the thunk. Needs a front end that can answer: the REPL (E5), ACP (J2) or A2A's `input-required` (K8).
 - [ ] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
+  A session-changing tool (E6); the endomorphism is shared with ACP's `session/set_mode` (J6).
 - [ ] **H6 `spawn_subagent` / `start_subtask`.** Run a nested `session.Run` with a fresh `Session` and narrower deps
-  (`effect.Local`). Return its final text as the tool result.
+  (`effect.Local`). Return its final text as the tool result. The nested run reports through the same event sink (F2).
 
 ### Phase I: Safety and approval
 
@@ -289,19 +314,246 @@ and a text result. Validation errors (such as "path must be absolute") come back
 - [ ] **I3 External-change detection.** Take a snapshot of file mtimes after each turn and report the diff as
   `<external_changes>` (Phase D6).
 
+### Phase J: Agent Client Protocol (ACP)
+
+Run the harness as an [Agent Client Protocol](https://agentclientprotocol.com) agent, so that editors such as
+Zed or JetBrains start it as a subprocess and talk JSON-RPC to it over stdin/stdout. The protocol layer is
+`github.com/coder/acp-go-sdk` (v0.13.5 when this was written): `acp.NewAgentSideConnection(agent, os.Stdout, os.Stdin)`
+serves an `acp.Agent` (`Initialize`, `NewSession`, `Prompt`, `Cancel`, `SetSessionMode`, …), and the connection
+sends `SessionUpdate` notifications and calls the client (`RequestPermission`, `ReadTextFile`, `WriteTextFile`,
+`CreateTerminal`, …).
+
+The `acp.Agent` methods are the imperative edge, as `main` and urfave/cli are for the CLI: each one builds a
+`ReaderIOResult` and runs it with the request's context. Two rules hold for every step:
+
+- **stdout is the JSON-RPC channel.** Nothing else may write to it; errors and logs go to stderr.
+- **The session table lives at the edge.** The map from session id to workspace, mode, `Session` and the
+  running turn's `context.CancelFunc` is mutable shared state, so it is a field of the `acp.Agent` struct,
+  guarded by a `sync.Mutex`, never behind a `Deps` getter (see *Everything is read-only* in AGENTS.md).
+  The background process table of C6 is the precedent.
+
+Several steps are an earlier phase's step with ACP as its front end (J1 ⊇ E1, J4 and J8 map the events of F2,
+J5 = E4, J7 = I1). Build those once and wire the CLI and ACP to the same code.
+
+- [ ] **J1 Turn as a value.** Move the wiring in [cli/run.go](cli/run.go) into a Kleisli over
+  (workspace, mode, `Option[Session]`, prompt) → `FinalResult`: the workspace comes from the input instead of
+  `Config`, so the tool and mode deps are built per session; `None` starts from the mode's request, `Some`
+  continues the session with `session.Continue` (E1). The CLI becomes one caller of it.
+  *Test:* the existing CLI tests pass; two turns on one session keep the history.
+- [ ] **J2 `acp` subcommand.** `fp-go-harness acp` serves ACP on stdin/stdout. `initialize` answers protocol
+  version 1, no `loadSession`, text and embedded-resource prompts. `session/new` resolves `cwd` and creates the
+  session in the table (its `mcpServers` are ignored until Phase G). `session/prompt` joins the text and
+  `resource` blocks into the user message, runs a turn (J1), sends the answer as one `agent_message_chunk`
+  and returns `end_turn`. The API key and limits come from `.env` and the environment, as in the CLI.
+  *Test:* an `acp.ClientSideConnection` over `io.Pipe` against replay `ChatCompletionDeps`, without a network.
+- [ ] **J3 Stop reasons.** Map the outcome of a turn to the ACP `StopReason`: finish reason `stop` → `end_turn`,
+  `length` → `max_tokens`, `content_filter` → `refusal`, `MaxIterationsError` → `max_turn_requests`, a cancelled
+  context → `cancelled`. Other errors are JSON-RPC errors. *Test:* one fake completion per finish reason.
+- [ ] **J4 Tool-call updates.** An event sink (F2) that sends `session/update` notifications: a started tool call
+  becomes a `tool_call` with its `kind` taken from the tool name (`read_file`, `list_files` → `read`;
+  `grep`, `glob` → `search`; the edit tools → `edit`; `execute_command` → `execute`) and the file `locations`,
+  a finished one a `tool_call_update` with `completed` or `failed` and the output. Assistant text that comes with
+  tool calls is sent as a message chunk. *Test:* the `io.Pipe` client of J2 receives one `tool_call` and one
+  `tool_call_update` per tool call.
+- [ ] **J5 Cancellation (= E4).** `session/cancel` calls the running turn's `CancelFunc`. The running request and
+  tools stop, the prompt returns `cancelled`, and the partial session is kept for the next prompt.
+- [ ] **J6 Modes.** `session/new` returns the `availableModes` of the mode table (D8) and the current mode.
+  `session/set_mode` swaps the system message and tools of `session.current` with one endomorphism, shared with
+  H5, and sends a `current_mode_update`.
+- [ ] **J7 Permissions (= I1).** An `ApprovalDeps` backed by `RequestPermission` asks before `write_file`, the edit
+  tools and `execute_command`, with the options `allow_once`, `allow_always`, `reject_once` and `reject_always`.
+  A rejection goes back to the model as a tool message; "always" is remembered per session in the table.
+- [ ] **J8 Streaming.** Map the delta events of F2 (with F1) to `agent_message_chunk`s, and reasoning to
+  `agent_thought_chunk`s.
+- [ ] **J9 Editor-backed files and terminal.** When the client advertises `fs.readTextFile`, `fs.writeTextFile`
+  or `terminal`, build the session's `FileDeps` from `fs/read_text_file` / `fs/write_text_file` (unsaved buffers
+  are read, the editor shows the diff) and run `execute_command` through `terminal/create`. Another `Deps` value
+  per session; the tools don't change.
+- [ ] **J10 Later.** `session/load` after E2, the `mcpServers` of `session/new` after Phase G, and `plan`
+  updates from the todo list of H3.
+
+A client starts the agent with the `acp` subcommand, e.g. in Zed's `settings.json`:
+
+```json
+"agent_servers": {
+  "fp-go-harness": {
+    "command": "C:\\d\\fp-go-harness\\fp-go-harness.exe",
+    "args": ["acp"],
+    "env": { "DEEPSEEK_API_KEY": "…" }
+  }
+}
+```
+
+### Phase K: Agent2Agent protocol (A2A)
+
+Make the harness an [A2A](https://a2a-protocol.org) agent that other agents send tasks to over HTTP, and let it
+call remote A2A agents as tools. Where ACP puts the harness into an editor, A2A puts it on the network.
+The protocol layer is `github.com/a2aproject/a2a-go/v2` (v2.7.0 when this was written, Go 1.26). The server
+side is one `a2asrv.AgentExecutor`: `Execute(ctx, execCtx) iter.Seq2[a2a.Event, error]` yields the task's status
+and artifact events, and `Cancel` stops it. `a2asrv.NewHandler`, `NewJSONRPCHandler` / `NewRESTHandler` and
+`NewStaticAgentCardHandler` (served at `/.well-known/agent-card.json`) provide the protocol, an in-memory task
+store and SSE. Server and client compile with `google/uuid`, `x/sync` and `x/mod` only; gRPC comes in only with
+the separate `a2agrpc` package, which is not needed.
+
+How A2A maps onto the harness:
+
+- **A context is a session, a task is a turn.** `contextId` keys the `Session` in a mutex-guarded table at the
+  edge, as in Phase J. A2A's own task history lacks the tool messages, so it cannot rebuild a `Session`. Two tasks
+  of one context run one after the other (a lock per context).
+- **The workspace is fixed per server** (`--workspace`). The protocol has no `cwd`; workspaces from message
+  metadata or a checkout per context can come later.
+- **Callers are remote and unattended.** Nobody can approve a tool call in a dialog, so approval is a policy
+  (I2) until K8. The server binds to loopback by default and offers the read-only modes unless told otherwise.
+- **Events are pulled, progress is pushed.** `Execute` returns a stream the SDK pulls, while the event sink
+  (F2) pushes. The bridge is a channel at the edge: the turn runs on a goroutine, `Emit` writes to the channel,
+  and the returned `iter.Seq2` reads from it.
+
+The server steps build on J1 (turn as a value), F2 (events) and E4 (cancellation), and reuse the mapping ideas of
+J3 and J8. K7 (client tools) does not depend on Phase J.
+
+- [ ] **K1 `a2a` subcommand.** `fp-go-harness a2a --addr 127.0.0.1:8080 --workspace …` serves the agent card
+  (name, description, version; the modes as `skills`; `text/plain` in and out; `streaming` once J8 is done) and
+  JSON-RPC on `/`. *Test:* an `a2aclient` against an `httptest.Server` reads the card.
+- [ ] **K2 Executor.** The text parts of the message are the prompt, and the message metadata may name the mode
+  (`mode`, ask by default). The executor runs a turn (J1) on the session of the `contextId` and emits `submitted`,
+  `working`, the answer as an artifact, then `completed`. *Test:* replay `ChatCompletionDeps`; two messages in one
+  context keep the history.
+- [ ] **K3 Outcome mapping.** `end_turn` → `completed`, `refusal` → `rejected`, `cancelled` → `canceled`,
+  `MaxIterationsError` and infrastructure errors → `failed`, with the error text as the status message.
+- [ ] **K4 Progress.** The event sink (F2) feeds `working` status updates, one message per tool call, through the
+  channel bridge. With streaming (F1), the answer's deltas become artifact updates with `append`.
+- [ ] **K5 Cancellation.** `Cancel` calls the running turn's `CancelFunc` (E4).
+- [ ] **K6 Auth and safety.** A bearer token from the environment, declared in the card's `securitySchemes` and
+  checked by a `CallInterceptor`. Without a token the server refuses to bind beyond loopback. Agent mode only with
+  `--allow-agent-mode`, its write and exec tools under the I2 policy.
+- [ ] **K7 Client tools.** Remote agents listed in a config file become tools `a2a__<agent>`: text in, the final
+  artifact's text out, with one `contextId` per harness session so follow-ups continue the remote conversation.
+  They are merged into the registry like the MCP tools (G3); the agent card's description becomes the tool's.
+  *Test:* the K1 server in an `httptest.Server` as the remote agent.
+- [ ] **K8 Later.** `input-required` for approvals and `ask_followup_question` (H4), which needs a turn that can be
+  suspended and persisted (E2); push notifications; a task store that survives restarts.
+
 ---
 
-## 3. Milestones
+## 3. Dependencies and order
+
+The letters group the steps by topic; they are not an order. Phases A–D are done, so only the open steps are
+listed. *Needs* means the step cannot be built without the other one; *better after* means it can, but would be
+built twice or with less.
+
+| Step | Needs | Better after |
+|---|---|---|
+| E1 Multi-turn | – | – |
+| E2 Persistence | – | E1 (a loaded session is only useful if it can continue) |
+| E3 Steering | – | E5 or J2 (someone has to queue the messages) |
+| E4 Cancellation | – | – |
+| E5 REPL | E1 | E4 (Ctrl-C stops the turn, not the process), F2 |
+| E6 Session-changing tools | – | – |
+| F1 Streaming request | – | F2 (the fold emits the deltas) |
+| F2 Event sink | – | – |
+| F3 Logging | – | – |
+| F4 Usage details | – | – |
+| F5 HTTP retry | – | – |
+| G1 MCP config | – | – |
+| G2 stdio session | G1 | – |
+| G3 Tool bridge | G2 | – |
+| G4 Dogfood | G3 | – |
+| G5 Reconnect | G2 | G3 |
+| G6 Harness as an MCP server | – | J1 (`session_id`), F2 (progress), E4 (cancel) |
+| H1 Skill discovery | – | – |
+| H2 `use_skill` | H1 | – |
+| H3 `update_todo_list` | E6 | E1 (the list shows in the next user turn) |
+| H4 `ask_followup_question` | F2, and one of E5, J2, K8 | – |
+| H5 `switch_mode` | E6 | – |
+| H6 Subagents | – | F2 (progress of the nested run) |
+| I1 Approval | – | – |
+| I2 Allow and deny lists | I1 | – |
+| I3 External changes | E1 | – |
+| J1 Turn as a value | E1 | – |
+| J2 `acp` subcommand | J1 | – |
+| J3 Stop reasons | J2 | – |
+| J4 Tool-call updates | J2, F2 | – |
+| J5 ACP cancel | J2, E4 | – |
+| J6 ACP modes | J2 | H5 (same endomorphism) |
+| J7 ACP permissions | J2, I1 | I2 |
+| J8 ACP streaming | J2, F1, F2 | – |
+| J9 Editor files and terminal | J2 | – |
+| J10 Load, MCP servers, plan | E2, G3, H3 | – |
+| K1 `a2a` subcommand, agent card | – | – |
+| K2 Executor | K1, J1 | – |
+| K3 Outcome mapping | K2 | J3 (the same mapping) |
+| K4 Progress | K2, F2 | F1 |
+| K5 A2A cancel | K2, E4 | – |
+| K6 Auth and safety | K1, I2 | – |
+| K7 A2A client tools | – | G3 (registry merge), K2 (as the test's remote agent) |
+| K8 `input-required` | K2, E2, H4, I1 | – |
+
+Solid arrows are *needs*, dotted ones *better after*:
+
+```mermaid
+flowchart LR
+  E1 --> E5 & I3 & J1
+  E6 --> H3 & H5
+  E4 --> J5 & K5
+  F1 --> J8
+  F2 --> J4 & J8 & K4 & H4
+  G1 --> G2 --> G3 --> G4
+  G2 --> G5
+  H1 --> H2
+  I1 --> I2 & J7
+  I2 --> K6
+  J1 --> J2 & K2
+  J2 --> J3 & J4 & J5 & J6 & J7 & J8 & J9
+  K1 --> K2 & K6
+  K2 --> K3 & K4 & K5 & K8
+  E2 & G3 & H3 --> J10
+  E2 & H4 & I1 --> K8
+  E5 -.-> H4
+  J2 -.-> H4
+  H5 -.-> J6
+  J1 -.-> G6
+  F2 -.-> G6 & H6
+  G3 -.-> K7
+```
+
+### A possible order
+
+Each wave needs only earlier waves; the steps within a wave are independent of each other and can be done in any
+order or in parallel.
+
+| Wave | Steps |
+|---|---|
+| 1 | E1, E4, E6, F1, F2, F3, F4, F5, G1, H1, H6, I1, K1 |
+| 2 | E2, E3, E5, I3, J1, G2, H2, H3, H5, I2 |
+| 3 | J2, G3, G5, G6, K2, H4 |
+| 4 | J3–J9, G4, K3–K7 |
+| 5 | J10, K8 |
+
+Three steps unblock most of the rest: **E1** (multi-turn), **F2** (the event sink) and **E4** (cancellation).
+
+Shortest paths:
+
+- **Into an editor (ACP):** E1 → J1 → J2 → J3, with F2 → J4. Six PRs.
+- **Callable by MCP hosts:** G6 alone, on today's one-shot wiring.
+- **Callable by other agents (A2A):** E1 → J1 → K1 → K2 → K3, with I1 → I2 → K6 before it leaves loopback.
+
+---
+
+## 4. Milestones
 
 | Milestone | Steps | Result |
 |---|---|---|
 | M1 "Hello agent" | A1–A5 | A CLI that answers questions with tools, without hanging |
 | M2 "Replayable" | B1–B5 | Recorded tasks replay offline in `go test` |
 | M3 "Can code" | C1–C11, D1–D8 | Reads, searches, edits files and runs commands with a tagged system prompt |
-| M4 "Conversational" | E1–E5, F1–F4 | Streaming REPL with multiple turns, steering and persistence |
-| M5 "Feature parity" | F5, G1–G5, H1–H6, I1–I3 | MCP, skills, modes, subagents and approvals. Can run a session like the recorded PR-review task |
+| M4 "Conversational" | E1–E6, F1–F4 | Streaming REPL with multiple turns, steering and persistence |
+| M5 "Feature parity" | F5, G1–G6, H1–H6, I1–I3 | MCP, skills, modes, subagents and approvals. Can run a session like the recorded PR-review task |
+| M6 "In the editor" | F2, J1–J4, then J5–J9 | Runs as an ACP agent in Zed and other ACP clients, with tool calls, cancellation, modes and permissions |
+| M7 "On the network" | K1–K7 | Serves coding tasks to other agents over A2A and delegates to remote A2A agents as tools |
 
-## 4. Definition of done (every step)
+The milestones name results, not an order: §3 says what can be built when.
+
+## 5. Definition of done (every step)
 
 - The new code follows the rules in section 1 (Deps getters, Kleisli/Effect composition, optics, no imperative error handling).
 - `go generate ./...`, `runCodeActions.bat`, `go vet ./...` and `go test ./...` pass.
