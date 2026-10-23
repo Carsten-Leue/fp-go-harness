@@ -612,6 +612,9 @@ found in this repository and replaced; the rewrites changed no behaviour.
 | the same domain predicate written twice, once as a leaf in one package and once from a lens in another (`isSuccess` and `exitCodeLens.Get` + `eq.Equals(…)(0)`) | one concept | one exported nullary predicate next to the type, `tools.IsSuccess()`, used by both |
 | `F.Bind1st(m.Concat, a)` + `F.Bind2nd(m.Concat, c)` around a Kleisli `b`, to concatenate three effects of which only `b` reads the input | a monoid over the Kleislis | `M.ConcatAll(reader.ApplicativeMonoid[In](effect.ApplicativeMonoid[C](m)))([]effect.Kleisli[C, In, A]{F.Constant1[In](a), b, F.Constant1[In](c)})`: the slice lists the parts in output order |
 | `effect.Map(f)` applied to a fixed effect with `reader.Read(fa)` in the middle of a `Flow`, where `f` is built from the input | applicative application with the function as the pure side (`liftA2`) | `effect.Of[C, F](f)` + `effect.Ap[B](fa)` + `effect.Ap[…](fb)`, with `F` named as a type alias; `effect` has no `Flap` and no `MonadAp` |
+| `effect.Asks(getter)` + `effect.ChainIOResultK(F.Identity[IOResult[A]])` (or `ChainIOK(F.Identity[IO[A]])`, `ChainThunkK(F.Identity[Thunk[A]])`), or `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))` | lifting a getter that does I/O, a `Reader[C, IOResult[A]]` / `Reader[C, IO[A]]` / `Reader[C, Thunk[A]]` | `effect.FromReaderIOResult` / `FromReaderIO` / `FromReaderThunk` (fp-go ≥ v2.11.0); `reader.Read(x)` moves into the reader: `effect.FromReaderIOResult(F.Flow2(getter, reader.Read[IOResult[A]](x)))` |
+| `reader.Map[C](thunk.FromIOResult[A])` producing an "effect" | `Effect`'s internal `Reader[C, Thunk[A]]` shape rebuilt by hand | `effect.FromReaderIOResult[C, A]` |
+| `effect.Chain(effect.FromThunk[C, A])`, `effect.ChainXxxK(F.Identity)` in the middle of a pipeline | flattening | `effect.FlattenThunk` / `FlattenIOResult` / `FlattenIO` / `Flatten` (fp-go ≥ v2.11.0) |
 
 Worked examples:
 
@@ -670,16 +673,6 @@ How to spot them:
 
 Not a finding:
 
-- `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))` lifts a getter that
-  returns a `ReaderIOResult` (`walkDir`, `readBytes`, `env.LookupEnvThunk`). `effect`
-  has no `FromReaderIOResult` (fp-go v2.6.0), so this is already the right form.
-  `effect.ChainThunkK(F.Flow2(…, thunk.FromIOResult))` *is* a finding since v2.6.0:
-  it is `effect.ChainIOResultK`.
-- `effect.Asks(getter)` + `effect.ChainIOK(F.Identity[IO[A]])` lifts a getter that
-  returns an `IO` (a clock); `effect.Asks(reader)` + `effect.ChainThunkK(F.Identity[Thunk[A]])`
-  lifts a `Reader[C, Thunk[A]]`. `effect` has no `FromReaderIO` (fp-go v2.9.0), and
-  `ChainXxxK(F.Identity)` after `Asks` is a lift, not a `Map` + `Flatten`. Write it once
-  per getter (see *Dependencies are interfaces with getters*), not once per caller.
 - A function over its input that reads the input three or more times, where the reader
   form needs a helper per read (`grep.go` `fileScope`). Keep it, and say why in its doc
   comment (Rule 4).
@@ -699,7 +692,8 @@ package before you move on.
 When a `Kleisli[C, In, Out]` combines several values taken from `C` (a service from the
 dependencies, plus options or config also from the dependencies), use `effect`'s
 combinators: `Asks`, `Map`, `Ap`, `Chain`, `FromThunk`, `ChainThunkK`,
-`ChainIOResultK`, `Local`, `FromReaderResult`, `TailRec`. Don't reach into `reader` / `context/readerioresult` to
+`ChainIOResultK`, `Local`, `FromReaderResult`, `FromReaderIOResult`, `FromReaderIO`,
+`FromReaderThunk`, the `Flatten*` family, `TailRec`. Don't reach into `reader` / `context/readerioresult` to
 rebuild `Effect`'s double-`Reader` shape by hand. That type-checks, but it depends on
 `Effect`'s internal representation rather than its public API, so it is hard to read and
 easy to get subtly wrong.
@@ -712,9 +706,11 @@ call":
 | lift a pure accessor `Reader[C, X]` (a `Deps` getter) into `Effect[C, X]` | `effect.Asks` |
 | apply a function that doesn't depend on `C` | `effect.Map` |
 | apply a second value from `C`, independently of the first (applicative) | `effect.Ap` |
-| flatten a resulting `Thunk` / `ReaderIOResult` into `Effect[C, _]` | `effect.Chain(effect.FromThunk[C, _])`, or `effect.ChainThunkK` |
-| flatten a resulting `IOResult` into `Effect[C, _]` | `effect.ChainIOResultK` (fp-go ≥ v2.6.0), not `ChainThunkK` + `thunk.FromIOResult` |
+| flatten a resulting `Thunk` into `Effect[C, _]` | `effect.FlattenThunk` (fp-go ≥ v2.11.0), not `effect.Chain(effect.FromThunk[C, _])` |
+| flatten a resulting `IOResult` / `IO` / `Effect` into `Effect[C, _]` | `effect.FlattenIOResult` / `FlattenIO` / `Flatten` (fp-go ≥ v2.11.0) |
+| run an `IOResult` step on the value | `effect.ChainIOResultK(f)` (fp-go ≥ v2.6.0), not `ChainThunkK` + `thunk.FromIOResult` |
 | lift a `ReaderResult[C, A]` (pure, can fail, reads `C`) | `effect.FromReaderResult` |
+| lift a getter that does I/O: `Reader[C, IOResult[A]]` / `Reader[C, IO[A]]` / `Reader[C, Thunk[A]]` | `effect.FromReaderIOResult` / `FromReaderIO` / `FromReaderThunk` (fp-go ≥ v2.11.0), not `Asks` + `ChainXxxK(F.Identity)` |
 
 [`openai/request.go`](../../../openai/request.go) `ChatCompletion` is the worked example;
 [`openai/deepseek.go`](../../../openai/deepseek.go) `MakeDeepSeekChatCompletionDeps` uses
@@ -753,7 +749,7 @@ handleToolCalls := F.Flow2(
 
   ```go
   func now[R ClockDeps]() Effect[R, time.Time] {
-  	return F.Pipe1(effect.Asks(R.GetNow), effect.ChainIOK[R](F.Identity[IO[time.Time]]))
+  	return effect.FromReaderIO(R.GetNow)
   }
   ```
 
@@ -950,7 +946,8 @@ MCP servers or restart the session and the tools come up quickly.
       without a lens setter, no `Map`+`Flatten`, no `Chain(Local(fa))` for an
       independent read (that is `Ap`), no `Fold` choosing `Left`/`Right`, no
       "empty fallback, then test for empty" (see *The combinator that matches the operation*)
-- [ ] Effects built with `effect`'s combinators (`Asks`/`Map`/`Ap`/`Chain`/`FromThunk`),
+- [ ] Effects built with `effect`'s combinators (`Asks`/`Map`/`Ap`/`Chain`/`FromThunk`,
+      `FromReaderIOResult`/`FromReaderIO`/`FromReaderThunk` for getters that do I/O),
       reused under another environment with `Local`; dependencies as getter interfaces;
       loops with `effect.TailRec`; run only at the boundary with `Provide` + `RunSync`
 - [ ] Everything is read-only (`Ap`, `Concat`, `TraverseArray` run concurrently):

@@ -9,7 +9,6 @@ import (
 
 	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
@@ -326,7 +325,7 @@ func writeEditedWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Rea
 func writeEdited() effect.Kleisli[SearchAndReplaceDeps, SearchAndReplaceArgs, []byte] {
 	return F.Flow2(
 		F.Flip(F.Flow2(SearchAndReplaceDeps.GetWriteFile, writeEditedWith())),
-		reader.Map[SearchAndReplaceDeps](thunk.FromIOResult[[]byte]),
+		effect.FromReaderIOResult[SearchAndReplaceDeps, []byte],
 	)
 }
 

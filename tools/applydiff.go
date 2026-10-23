@@ -9,7 +9,6 @@ import (
 
 	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/endomorphism"
 	ER "github.com/IBM/fp-go/v2/errors"
@@ -249,7 +248,7 @@ func writePatchedWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Re
 func writePatched() effect.Kleisli[ApplyDiffDeps, ApplyDiffArgs, []byte] {
 	return F.Flow2(
 		F.Flip(F.Flow2(ApplyDiffDeps.GetWriteFile, writePatchedWith())),
-		reader.Map[ApplyDiffDeps](thunk.FromIOResult[[]byte]),
+		effect.FromReaderIOResult[ApplyDiffDeps, []byte],
 	)
 }
 

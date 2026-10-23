@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	B "github.com/IBM/fp-go/v2/bytes"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
@@ -177,7 +176,7 @@ func writeInsertedWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], R
 func writeInserted() effect.Kleisli[InsertContentDeps, InsertContentArgs, []byte] {
 	return F.Flow2(
 		F.Flip(F.Flow2(InsertContentDeps.GetWriteFile, writeInsertedWith())),
-		reader.Map[InsertContentDeps](thunk.FromIOResult[[]byte]),
+		effect.FromReaderIOResult[InsertContentDeps, []byte],
 	)
 }
 

@@ -237,9 +237,16 @@ and a text result. Validation errors (such as "path must be absolute") come back
   pair in `history` and the message of the first choice appended to `current`, so the session of a `FinalResult` holds
   the whole conversation and `Continue` can append to it. *Test:* two `Run`s joined by `Continue` against a sequenced
   fake; the second request carries the first answer and the new user message.
-- [ ] **E2 Persistence.** Add `TaskStoreDeps` with `Save: Kleisli[Session, Unit]` and `Load: Kleisli[TaskID, Session]`
+- [x] **E2 Persistence.** Add `TaskStoreDeps` with `Save: Kleisli[Session, Unit]` and `Load: Kleisli[TaskID, Session]`
   (JSON files under `~/.fp-go-harness/tasks`). `Session` needs exported DTO fields or a codec; use an `Iso`
   between `Session` and its DTO.
+  `Save()` is an `effect.Kleisli[TaskStoreDeps, Task, Void]` over a `Task = Pair[TaskID, Session]`: the session
+  has no ID of its own, because the ID belongs to whoever names the task (the CLI, an ACP `sessionId`, an A2A task
+  ID). `Load()` is an `effect.Kleisli[TaskStoreDeps, TaskID, Session]`. `TaskStoreDeps` is the tasks directory plus
+  `tools.FileDeps` and `tools.FileWriteDeps`; a task ID must be a plain file name, and an unknown one fails with
+  `fs.ErrNotExist`. `SessionIso()` converts to the exported `SessionDTO`. No CLI flag yet: resuming a task from the
+  command line fits E5. *Test:* save after a first `Run`, load, `Continue` and `Run` again; the second request
+  carries the first answer.
 - [ ] **E3 Steering.** Add `SteeringDeps.Poll(): Thunk[[]string]`. Before each `Next` request, read the queued user messages
   and append them. `Next` stays pure in its loop structure.
 - [ ] **E4 Cancellation.** Pass the `context.Context` of the `Thunk` through. Ctrl-C cancels the request and the tools that

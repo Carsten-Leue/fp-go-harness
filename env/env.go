@@ -127,9 +127,8 @@ func MakeDotEnvEnvironmentDeps() ioresult.Kleisli[[]string, EnvironmentDeps] {
 
 // LookupEnvThunk looks the variable key up through the [EnvironmentDeps].
 func LookupEnvThunk() effect.Kleisli[EnvironmentDeps, string, string] {
-	return F.Flow3(
-		reader.Read[IOResult[string], string],
-		effect.ChainIOResultK[EnvironmentDeps, ReaderIOResult[string, string], string],
-		reader.Read[Effect[EnvironmentDeps, string]](effect.Asks(EnvironmentDeps.GetLookupEnv)),
+	return F.Flow2(
+		F.Flip(EnvironmentDeps.GetLookupEnv),
+		effect.FromReaderIOResult[EnvironmentDeps, string],
 	)
 }

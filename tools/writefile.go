@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	A "github.com/IBM/fp-go/v2/array"
-	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
@@ -155,7 +154,7 @@ func checkComplete() result.Kleisli[WriteFileArgs, WriteFileArgs] {
 func makeParentDirs() effect.Kleisli[WriteFileDeps, string, string] {
 	return F.Flow2(
 		F.Flip(F.Flow2(WriteFileDeps.GetMakeDirs, reader.Local[ioresult.IOResult[string]](filepath.Dir))),
-		reader.Map[WriteFileDeps](thunk.FromIOResult[string]),
+		effect.FromReaderIOResult[WriteFileDeps, string],
 	)
 }
 
@@ -175,7 +174,7 @@ func writeWith() Reader[func(string) ioresult.Kleisli[[]byte, []byte], Reader[Wr
 func writeContent() effect.Kleisli[WriteFileDeps, WriteFileArgs, []byte] {
 	return F.Flow2(
 		F.Flip(F.Flow2(WriteFileDeps.GetWriteFile, writeWith())),
-		reader.Map[WriteFileDeps](thunk.FromIOResult[[]byte]),
+		effect.FromReaderIOResult[WriteFileDeps, []byte],
 	)
 }
 

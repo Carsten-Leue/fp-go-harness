@@ -72,9 +72,10 @@ primitives for Go: Reader, IOResult, ReaderIOResult, Effect, Kleisli composition
 ### Composing `Effect[C, A]`
 
 Build `Effect`s with the `effect` package's own combinators (`Asks`, `Map`, `Ap`, `Chain`,
-`FromThunk`, `Local`, `TailRec`), not by rebuilding its internal double-`Reader` shape from
-`reader` / `context/readerioresult`. Use `Asks` + `Map` to build an effect from a `Deps` getter,
-and `Local` to reuse an existing `Effect` / `Kleisli` under a different environment. The full rules
+`FromThunk`, `FromReaderIOResult`, `Local`, `TailRec`), not by rebuilding its internal double-`Reader`
+shape from `reader` / `context/readerioresult`. Use `Asks` + `Map` to build an effect from a pure
+`Deps` getter, `FromReaderIOResult` / `FromReaderIO` / `FromReaderThunk` (fp-go ≥ v2.11.0) for a
+getter that does I/O, and `Local` to reuse an existing `Effect` / `Kleisli` under a different environment. The full rules
 and examples are in the [`fp-go` skill, section *Composing `Effect[C, A]`*](.bob/skills/fp-go/SKILL.md#composing-effectc-a);
 [openai/request.go](openai/request.go) `ChatCompletion` is the worked example.
 
@@ -203,12 +204,12 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | `if p(x) { return f(x) }; return x` | `F.Ternary` is deprecated | `P.Fold(F.Identity[T], f)(p)` |
 | the first `n` bytes of a string | a slicing combinator in `string` | a leaf (`prefix` in `tools/truncate.go`), then `F.Bind2nd(strings.ToValidUTF8, "")` |
 | `liftA2` over two readers of one environment | `reader.LiftA2` | `reader.Map[R](F.Curry2(g))` + `reader.Ap[C](fb)`; it is applicative, not `Chain` |
-| lift a `ReaderIOResult[C, A]` (a deps getter returning an `ioresult.Kleisli`) into `Effect` | `effect.FromReaderIOResult` | `effect.Asks(getter)` + `effect.ChainIOResultK(reader.Read(x))`, as in `tools/walk.go` `walkDir`; as a Kleisli over `x`, `F.Flow3(F.Flip(getter), effect.Asks[C, IOResult[A]], effect.ChainIOResultK[C](f))` with `f` the operation on the `IOResult`, as in `prompt/projectrules.go` `readOptional` |
+| lift a `Reader[C, IOResult[A]]` / `Reader[C, IO[A]]` / `Reader[C, Thunk[A]]` (a deps getter) into `Effect` | before fp-go v2.11.0 | `effect.FromReaderIOResult` / `FromReaderIO` / `FromReaderThunk`, never `effect.Asks` + `ChainIOResultK(F.Identity)` (or `ChainIOK` / `ChainThunkK`), nor `reader.Map[C](thunk.FromIOResult)`, which rebuilds `Effect`'s shape by hand. For a getter returning an `ioresult.Kleisli`, as a Kleisli over `x`: `F.Flow2(F.Flip(getter), effect.FromReaderIOResult[C, A])`, as in `session/store.go` `readTaskFile` and `env.LookupEnvThunk`; for a fixed `x`, `effect.FromReaderIOResult(F.Flow2(getter, reader.Read[IOResult[A]](x)))`, as in `tools/readfile.go` `readBytes` |
+| flatten an `Effect[C, IOResult[A]]` / `IO` / `Thunk` / `Effect` | before fp-go v2.11.0 | `effect.FlattenIOResult` / `FlattenIO` / `FlattenThunk` / `Flatten`, not `effect.Chain(effect.FromThunk)` or `ChainXxxK(F.Identity)`, as in `openai/request.go` `ChatCompletion` |
 | run an `IOResult` inside `Effect` (`ChainIOResultK`, `TapIOResultK`, `FromIOResult`) | before fp-go v2.6.0 | `effect.ChainIOResultK(f)` instead of `effect.ChainThunkK(F.Flow2(f, thunk.FromIOResult))` |
 | recover from, or rename, one kind of error only (`errors.Is` / `errors.As`) | before fp-go v2.8.0 (`effect`, `thunk`) and v2.9.0 (`result`, `ioresult`, `readerresult`, `readerioresult`) | `CatchIs(target, f)` of the monad at hand, by type `CatchAs` / `MapErrorAs` / `TapErrorAs`, as in `prompt/projectrules.go` `readOptional` (`effect`), `tools/executecommand.go` `timeoutError` (`thunk`) and `env.ReadDotEnv` (`ioresult`). Never a hand-written `errors.Is` predicate in a `P.Fold`, nor `ChainLeft` over `result.ErrorIs` |
 | a zero test (`x == 0`) | an `eq` shortcut | `P.IsZero[int]()` / `P.IsNonZero[int]()` from `predicate`, not `eq.Equals(eq.FromStrictEquals[int]())(0)` |
 | apply an effect of a function to a plain value (`Flap`), or `MonadAp` | in `effect` | `effect.Of[C, F](f)` + `effect.Ap(fa)`, as in `cli/run.go` `ask` |
-| lift a `Reader[C, IO[A]]` getter (`FromReaderIO`) | in `effect` | `effect.Asks(getter)` + `effect.ChainIOK(F.Identity[IO[A]])`, once, in `prompt/envinfo.go` `now` |
 | membership in a slice (`A.Elem`, `A.Contains`) | in `array` | `F.Bind1st(slices.Contains[[]string], names)`, as in `mode/mode.go` `isTool`; as a reader over the slice `F.Curry2(slices.Contains[[]string])`, as in `prompt/compare.go` `containedIn` |
 | pair a value with something computed from it (fan-out, `&&&`) | in `pair` | `F.Flow2(pair.Of[T], pair.MapTail[T](g))`; to update an existing pair instead, one `MapHead` / `MapTail` endomorphism per side, as in `prompt/compare.go` `enter` |
 | a fold over a slice that keeps state (`A.Scan`, `A.Unfold`) | in `array` (`iter.Scan` yields every state) | `A.Reduce` over a `Pair` state, with a nullary step as `F.Uncurry2(F.Flip(lineStep()))`, as in `prompt/compare.go` `SectionTags` (see the [`fp-go` skill](.bob/skills/fp-go/SKILL.md#a-scan-with-state-areduce-over-a-pair)) |
