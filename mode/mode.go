@@ -15,12 +15,10 @@ import (
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
-	Mg "github.com/IBM/fp-go/v2/magma"
 	"github.com/IBM/fp-go/v2/ord"
 	"github.com/IBM/fp-go/v2/pair"
 	P "github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
-	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	"go.yaml.in/yaml/v3"
@@ -92,19 +90,21 @@ var errMissingID = errors.New("mode without id")
 // matter of a mode file into a [Mode]. Keys that aren't fields of [Mode] are
 // errors, so a misspelt key in a mode file doesn't go unnoticed. An empty
 // front matter has no document, which is [io.EOF].
-func decodeFrontMatter(text string) (Mode, error) {
+func decodeFrontMatter(text string) Result[Mode] {
 	var m Mode
 	decoder := yaml.NewDecoder(strings.NewReader(text))
 	decoder.KnownFields(true)
+	// Decode runs before m is read: in one call expression, Go doesn't fix
+	// the order of reading m and calling Decode.
 	err := decoder.Decode(&m)
-	return m, err
+	return result.TryCatchError(m, err)
 }
 
 // decodeYAML decodes the front matter of a mode file; an empty one is the
 // empty [Mode].
 func decodeYAML() result.Kleisli[string, Mode] {
 	return F.Flow2(
-		result.Eitherize1(decodeFrontMatter),
+		decodeFrontMatter,
 		result.CatchIs(io.EOF, F.Constant1[error](result.Of(Mode{}))),
 	)
 }
@@ -128,7 +128,7 @@ func isTool() P.Predicate[string] {
 }
 
 // unknownTools are the tools a mode allows that don't exist.
-func unknownTools() func(Mode) []string {
+func unknownTools() A.Kleisli[Mode, string] {
 	allowedToolsLens := MakeModeAllowedToolsLens()
 
 	return F.Flow2(
@@ -230,43 +230,4 @@ func ReadModes() ioresult.Kleisli[fs.FS, []Mode] {
 // read from the files in modes/.
 func Modes() []Mode {
 	return builtin
-}
-
-// IDs are the IDs of the built-in modes, in the order of [Modes].
-func IDs() []string {
-	idLens := MakeModeIDLens()
-
-	return F.Pipe1(
-		Modes(),
-		A.Map(idLens.Get),
-	)
-}
-
-// byID indexes the built-in modes by their ID.
-func byID() map[string]Mode {
-	idLens := MakeModeIDLens()
-
-	return F.Pipe1(
-		Modes(),
-		R.FromArrayMap[Mode, string](Mg.Second[Mode]())(F.Flow2(
-			pair.Of[Mode],
-			pair.MapHead[Mode](idLens.Get),
-		)),
-	)
-}
-
-// unknownModeError is a leaf: one formatter over the ID and the known IDs.
-func unknownModeError(id string) func() error {
-	return func() error {
-		return fmt.Errorf("unknown mode %q, use one of %s", id, strings.Join(IDs(), ", "))
-	}
-}
-
-// Lookup finds a built-in mode by its ID. The lookup and the error for an
-// unknown ID both read the ID.
-func Lookup() result.Kleisli[string, Mode] {
-	return F.Pipe1(
-		F.Flow2(unknownModeError, result.FromOption[Mode]),
-		reader.Ap[Result[Mode]](F.Flip(R.Lookup[Mode, string])(byID())),
-	)
 }

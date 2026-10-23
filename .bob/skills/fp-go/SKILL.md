@@ -142,6 +142,22 @@ rules that come up in nearly every change:
   with `result.Unwrap` only at the boundary.
 - **Pipelines from functions, not package `var`s:** `func parsePorts() result.Kleisli[...]`.
   A `var` is fine for a lens or a single pre-bound helper.
+- **Function types by their named alias:** a function that returns a slice is an
+  `array.Kleisli`, one from a slice to a slice an `array.Operator`, just as
+  `func(A) Result[B]` is a `result.Kleisli[A, B]`. The aliases are identical types, so
+  the change touches no call site:
+
+  | Spelled out | Alias |
+  |---|---|
+  | `func(Mode) []string` | `A.Kleisli[Mode, string]` |
+  | `func(string) []string` | `A.Kleisli[string, string]` |
+  | `func([]Mode) []string` | `A.Operator[Mode, string]` |
+  | `func([]byte) []GrepLine` | `A.Operator[byte, GrepLine]` |
+  | `func([]string) [][]string` | `A.Operator[string, []string]` |
+
+  This holds in every type position: return types, type aliases, and explicit type
+  arguments (`reader.Read[A.Operator[byte, GrepLine]]`). Generated files (`gen.go`) keep
+  what the generator writes.
 
 ## Rule 3 — monadic over imperative, wherever possible
 
@@ -920,7 +936,8 @@ MCP servers or restart the session and the tools come up quickly.
 - [ ] MCP skills loaded (`fp-go` + topics); every fp-go call checked with `get_example` /
       `search_examples` / `go doc`; nothing recalled from memory
 - [ ] fp-go best practices (Rule 2): v2, data-last, simplest monad, `Result`, lifted with
-      `Eitherize`, lenses, `Tap*` logging, no hidden mutation
+      `Eitherize`, lenses, `Tap*` logging, no hidden mutation; `func(A) []B` written as
+      `A.Kleisli[A, B]`, `func([]A) []B` as `A.Operator[A, B]`
 - [ ] Monadic (Rule 3): no `if err != nil` chains, `nil` checks or accumulating loops
       where a combinator exists; imperative code only at the boundary or a leaf, with a reason
 - [ ] Point-free (Rule 4): lambdas only at the leaves; combinators, lens getters and

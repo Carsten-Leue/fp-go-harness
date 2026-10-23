@@ -215,7 +215,7 @@ func replaceLines(low, high int, f Endomorphism[string]) Reader[[]string, string
 
 // splitAfterLines splits a text after its line breaks, so that joining the
 // lines gives the text back.
-func splitAfterLines() func(string) []string {
+func splitAfterLines() A.Kleisli[string, string] {
 	return F.Bind2nd(strings.SplitAfter, "\n")
 }
 

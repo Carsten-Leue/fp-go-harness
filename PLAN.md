@@ -214,11 +214,19 @@ and a text result. Validation errors (such as "path must be absolute") come back
   The test fixes the gap: the Agent prompt lacks investigate_before_answering, engineering_discipline,
   auto_appended_context, available_skills (H1), user_custom_instructions and available_modes (H5), adds nothing,
   and keeps the recorded order.
-- [ ] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
+- [x] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
   `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in
   ones: the workspace wins over the home directory, both over the built-ins, by `id` (precedence is a monoid, as in G1).
   Two files with the same `id` in one directory are an error. `Lookup` and `IDs` take the merged table through
   `ModeDeps`. *Test:* `fstest.MapFS` per directory; an override, a new mode and a duplicate.
+  `mode.ReadModeDirs()` is a `Reader[func(string) fs.FS, ioresult.Kleisli[[]string, []Mode]]`: the reader's function
+  opens a directory (`os.DirFS` in the CLI, a map of `fstest.MapFS` in the tests), the directories are read
+  concurrently, lowest precedence first. Each one is indexed by `mode.IndexModes` (a duplicate `id` is an error with the
+  directory in it), and `mode.MergeModes` merges the indexes over the built-in modes with `R.UnionLastMonoid`, sorted
+  by order, then id. No `CatchIs` was needed: `fs.Glob` already ignores the error of reading a missing directory, so
+  it has no modes. `ModeDeps` embeds the new `ModeTableDeps` (`GetModes`), and `Lookup` and `IDs` are readers over it.
+  The CLI reads the table from `~/.bob/modes/` and `<ws>/.bob/modes/` before it looks the mode up; `--help` lists the
+  built-in modes and names the two directories.
 
 ### Phase E: Session lifecycle
 
@@ -289,7 +297,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
 |---|---|---|
 | M1 "Hello agent" | A1–A5 | A CLI that answers questions with tools, without hanging |
 | M2 "Replayable" | B1–B5 | Recorded tasks replay offline in `go test` |
-| M3 "Can code" | C1–C11, D1–D7 | Reads, searches, edits files and runs commands with a tagged system prompt |
+| M3 "Can code" | C1–C11, D1–D8 | Reads, searches, edits files and runs commands with a tagged system prompt |
 | M4 "Conversational" | E1–E5, F1–F4 | Streaming REPL with multiple turns, steering and persistence |
 | M5 "Feature parity" | F5, G1–G5, H1–H6, I1–I3 | MCP, skills, modes, subagents and approvals. Can run a session like the recorded PR-review task |
 

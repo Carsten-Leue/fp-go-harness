@@ -161,7 +161,7 @@ func scanLine() func(tagScan, string) tagScan {
 // "<tool_use>", and ends at the first line that closes it; the tags nested in
 // it are not listed, and a tag nested in itself ends the outer section. Text between sections is skipped, and CRLF line endings are
 // fine.
-func SectionTags() func(string) []string {
+func SectionTags() A.Kleisli[string, string] {
 	return F.Flow4(
 		F.Bind2nd(strings.Split, "\n"),
 		A.Map(F.Bind2nd(strings.TrimSuffix, "\r")),

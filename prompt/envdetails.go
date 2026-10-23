@@ -96,7 +96,7 @@ func gitStatusProcess() Reader[EnvDetailsDeps, tools.Process] {
 
 // gitStatusSection is the git_status_snapshot section of a successful git
 // status, none for a failed one, e.g. outside a repository or without git.
-func gitStatusSection() func(tools.ProcessOutput) []Section {
+func gitStatusSection() A.Kleisli[tools.ProcessOutput, Section] {
 	stdoutLens := tools.MakeProcessOutputStdoutLens()
 
 	return F.Flow3(

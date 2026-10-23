@@ -39,7 +39,7 @@ var writeToolNames = []string{
 
 // makeTestDeps builds [ModeDeps] over a temporary workspace with the files,
 // relative path to content, on a fixed machine and date.
-func makeTestDeps(t *testing.T, files map[string]string) (string, ModeDeps) {
+func makeTestDeps(t *testing.T, files Record[string, string]) (string, ModeDeps) {
 	t.Helper()
 
 	root := t.TempDir()
@@ -53,13 +53,13 @@ func makeTestDeps(t *testing.T, files map[string]string) (string, ModeDeps) {
 	now := time.Date(2026, 10, 19, 12, 0, 0, 0, time.UTC)
 	env := prompt.MakeEnvInfoDeps(toolsDeps, "linux", "amd64", "sh", io.Of(now))
 
-	return root, MakeModeDeps(toolsDeps, env)
+	return root, MakeModeDeps(toolsDeps, env, Modes())
 }
 
 func lookup(t *testing.T, id string) Mode {
 	t.Helper()
 
-	m, err := result.Unwrap(Lookup()(id))
+	m, err := result.Unwrap(Lookup()(MakeModeTableDeps(Modes()))(id))
 	require.NoError(t, err)
 	return m
 }
@@ -85,15 +85,15 @@ func tagsOf(systemPrompt string) []string {
 }
 
 func TestIDs(t *testing.T) {
-	assert.Equal(t, []string{AgentID, PlanID, AskID}, IDs())
+	assert.Equal(t, []string{AgentID, PlanID, AskID}, IDs()(MakeModeTableDeps(Modes())))
 }
 
 func TestLookup(t *testing.T) {
-	for _, id := range IDs() {
+	for _, id := range IDs()(MakeModeTableDeps(Modes())) {
 		assert.Equal(t, id, lookup(t, id).ID)
 	}
 
-	_, err := result.Unwrap(Lookup()("code"))
+	_, err := result.Unwrap(Lookup()(MakeModeTableDeps(Modes()))("code"))
 	assert.EqualError(t, err, `unknown mode "code", use one of agent, plan, ask`)
 }
 
@@ -111,7 +111,7 @@ func TestTools(t *testing.T) {
 }
 
 func TestRequestPlan(t *testing.T) {
-	root, deps := makeTestDeps(t, map[string]string{
+	root, deps := makeTestDeps(t, Record[string, string]{
 		"AGENTS.md":             "Use fp-go.",
 		".bob/rules-plan/a.md":  "Plans list their tests.",
 		".bob/rules-agent/a.md": "Agents run the tests.",
@@ -185,14 +185,16 @@ func TestParseMode(t *testing.T) {
 }
 
 func TestParseModeErrors(t *testing.T) {
-	for name, file := range map[string]string{
+	cases := Record[string, string]{
 		"no front matter": "You review.\n",
 		"unknown key":     "---\nid: review\ntool: [grep]\n---\nYou review.\n",
 		"no id":           "---\nname: Review\n---\nYou review.\n",
 		"unclosed":        "---\nid: review\nYou review.\n",
 		"empty":           "---\n---\nYou review.\n",
 		"not yaml":        "---\nid: [review\n---\nYou review.\n",
-	} {
+	}
+
+	for name, file := range cases {
 		_, err := result.Unwrap(ParseMode()([]byte(file)))
 		assert.Error(t, err, name)
 	}
@@ -219,24 +221,28 @@ func TestReadModes(t *testing.T) {
 }
 
 func TestSplitFrontMatter(t *testing.T) {
-	for name, tc := range map[string]struct{ file, head, body string }{
+	cases := Record[string, struct{ file, head, body string }]{
 		"lf":                 {"---\nid: a\n---\nBody\n", "id: a\n", "Body\n"},
 		"crlf":               {"---\r\nid: a\r\n---\r\n\r\nBody\r\n", "id: a\r\n", "\r\nBody\r\n"},
 		"empty front matter": {"---\n---\nBody", "", "Body"},
 		"no body":            {"---\nid: a\n---", "id: a\n", ""},
 		"delimiter in body":  {"---\nid: a\n---\nBody\n---\nMore\n", "id: a\n", "Body\n---\nMore\n"},
 		"spaces":             {"--- \nid: a\n  ---\nBody", "id: a\n", "Body"},
-	} {
+	}
+
+	for name, tc := range cases {
 		assert.Equal(t, result.Of(pair.MakePair(tc.head, tc.body)), SplitFrontMatter()(tc.file), name)
 	}
 
-	for name, file := range map[string]string{
+	broken := Record[string, string]{
 		"empty":           "",
 		"no front matter": "Body\n---\n",
 		"unclosed":        "---\nid: a\nBody\n",
 		"only opening":    "---",
 		"not first line":  "\n---\nid: a\n---\n",
-	} {
+	}
+
+	for name, file := range broken {
 		_, err := result.Unwrap(SplitFrontMatter()(file))
 		assert.Error(t, err, name)
 	}

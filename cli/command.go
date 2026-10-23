@@ -19,7 +19,7 @@ func configFlags() []C.Flag {
 	return []C.Flag{
 		&C.StringFlag{
 			Name:  name(KeyMode),
-			Usage: fmt.Sprintf("the mode, one of %s (%s uses all tools and changes the workspace), defaults to %q. Environment variable [%s].", strings.Join(mode.IDs(), ", "), mode.AgentID, mode.AskID, KeyMode),
+			Usage: fmt.Sprintf("the mode, one of %s (%s uses all tools and changes the workspace) or a custom mode of ~/%s or <workspace>/%s, defaults to %q. Environment variable [%s].", strings.Join(mode.IDs()(mode.MakeModeTableDeps(mode.Modes())), ", "), mode.AgentID, mode.ModesDir, mode.ModesDir, mode.AskID, KeyMode),
 		},
 		&C.StringFlag{
 			Name:      name(KeyWorkspace),

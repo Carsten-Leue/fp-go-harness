@@ -38,7 +38,7 @@ func recordedSystemPrompt(t *testing.T, name string) string {
 // system prompts in their order. Missing lists the sections that later steps
 // add: available_skills (H1) and available_modes (H5) among them.
 func TestSystemPromptAgainstRecording(t *testing.T) {
-	_, deps := makeTestDeps(t, map[string]string{"AGENTS.md": "Use fp-go."})
+	_, deps := makeTestDeps(t, Record[string, string]{"AGENTS.md": "Use fp-go."})
 
 	assembled, err := effect.RunSync(effect.Provide[string](deps)(SystemPrompt()(lookup(t, AgentID))))(t.Context())
 	require.NoError(t, err)

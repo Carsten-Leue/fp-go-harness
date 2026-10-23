@@ -110,7 +110,7 @@ func readRule() effect.Kleisli[ProjectRulesDeps, string, Option[string]] {
 // The non-recursive walker, and the absolute paths of the files of a listing.
 type (
 	walkFiles   = ioresult.Kleisli[string, []tools.FileEntry]
-	listedFiles = func([]tools.FileEntry) []string
+	listedFiles = A.Operator[tools.FileEntry, string]
 )
 
 // listFiles lists the files directly in an absolute directory, relative to
