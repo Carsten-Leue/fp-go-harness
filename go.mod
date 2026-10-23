@@ -7,7 +7,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.3
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1
-	github.com/openai/openai-go/v3 v3.82.0
+	github.com/openai/openai-go/v3 v3.86.0
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli/v3 v3.14.0
 	go.yaml.in/yaml/v3 v3.0.5
