@@ -93,13 +93,13 @@ func TestRun_LandsAfterToolRoundTrips(t *testing.T) {
 	gotCompletion := pair.Tail(final)
 
 	assert.Equal(t, 3, gotSession.iterations)
-	assert.Len(t, gotSession.history, 2)
+	assert.Len(t, gotSession.history, 3)
 	assert.Equal(t, int64(50), gotSession.usage.PromptTokens)
 	assert.Equal(t, int64(9), gotSession.usage.CompletionTokens)
 	assert.Equal(t, int64(59), gotSession.usage.TotalTokens)
 
-	// system + user + 2 x (assistant tool call + tool result)
-	assert.Len(t, gotSession.current.Messages, 6)
+	// system + user + 2 x (assistant tool call + tool result) + answer
+	assert.Len(t, gotSession.current.Messages, 7)
 
 	assert.Equal(t, "chatcmpl-3", gotCompletion.ID)
 	assert.Equal(t, "It is sunny.", gotCompletion.Choices[0].Message.Content)

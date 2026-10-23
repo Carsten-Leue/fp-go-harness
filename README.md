@@ -19,6 +19,10 @@ recorded agent sessions.
 - **Agent loop**: `session.Run` drives the conversation until the model stops calling
   tools, or until the iteration limit (25 by default in the CLI) is reached. It accumulates token usage
   with a monoid. Tool failures go back to the model as tool messages and never stop the loop.
+- **Multi-turn sessions**: the session `Run` returns holds the whole conversation, including the
+  model's last answer. `session.Continue()(text)` appends the next user message and resets the
+  per-turn iteration counter; history and usage carry over, so the next `Run` continues the
+  conversation.
 - **CLI (agent, plan and ask mode)**: `go run . [--mode agent|plan|ask] "<prompt>"` runs one
   prompt with DeepSeek in the workspace (the current directory unless `--workspace` says
   otherwise) and prints the answer and the token usage. The command is built on
@@ -100,7 +104,7 @@ replay tests.
 |---|---|
 | [`main`](main.go) | Runs the CLI command until Ctrl-C |
 | [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
-| [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), usage monoid, iteration limit |
+| [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`), the next turn (`Continue`), usage monoid, iteration limit |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
@@ -119,7 +123,7 @@ replay tests.
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
 | D | Prompt assembly | ✅ done |
-| E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ open |
+| E | Session lifecycle (multi-turn, persistence, steering, REPL) | ⏳ E1 done |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
 | H | Skills, todos, subtasks | ⏳ open |

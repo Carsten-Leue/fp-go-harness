@@ -97,8 +97,9 @@ func runNext(t *testing.T, session Session, deps SessionDeps) NextStep {
 
 // TestNext_LandsOnStop asserts that a completion with a "stop" finish
 // reason lands immediately: the iteration counter and usage are updated,
-// but history and the current request are left untouched since no tool
-// round trip is needed.
+// the (request, response) pair is recorded in history and the answer is
+// appended to the current request, so the session holds the whole
+// conversation.
 func TestNext_LandsOnStop(t *testing.T) {
 	req := openai.ChatCompletionNewParams{
 		Model: "gpt-test",
@@ -137,8 +138,13 @@ func TestNext_LandsOnStop(t *testing.T) {
 
 	assert.Equal(t, 1, gotSession.iterations)
 	assert.Equal(t, response.Usage, gotSession.usage)
-	assert.Empty(t, gotSession.history)
-	assert.Equal(t, req, gotSession.current)
+	require.Len(t, gotSession.history, 1)
+	assert.Equal(t, req, pair.Head(gotSession.history[0]))
+	assert.Equal(t, response.ID, pair.Tail(gotSession.history[0]).ID)
+
+	require.Len(t, gotSession.current.Messages, 3)
+	assert.Equal(t, req.Messages, gotSession.current.Messages[:2])
+	assert.Equal(t, response.Choices[0].Message.ToParam(), gotSession.current.Messages[2])
 
 	assert.Equal(t, response.ID, gotCompletion.ID)
 	assert.Equal(t, "All done.", gotCompletion.Choices[0].Message.Content)

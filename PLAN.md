@@ -230,8 +230,13 @@ and a text result. Validation errors (such as "path must be absolute") come back
 
 ### Phase E: Session lifecycle
 
-- [ ] **E1 Multi-turn.** Add `session.Continue(userText)`, an endomorphism that appends a user message to `current` and
+- [x] **E1 Multi-turn.** Add `session.Continue(userText)`, an endomorphism that appends a user message to `current` and
   resets the per-turn iteration counter. History is kept.
+  `session.Continue()` is a `func(string) Endomorphism[Session]`; usage keeps accumulating over the turns. Before this
+  step a landing `Next` dropped the model's answer: it is now recorded like a tool round trip, the (request, response)
+  pair in `history` and the message of the first choice appended to `current`, so the session of a `FinalResult` holds
+  the whole conversation and `Continue` can append to it. *Test:* two `Run`s joined by `Continue` against a sequenced
+  fake; the second request carries the first answer and the new user message.
 - [ ] **E2 Persistence.** Add `TaskStoreDeps` with `Save: Kleisli[Session, Unit]` and `Load: Kleisli[TaskID, Session]`
   (JSON files under `~/.fp-go-harness/tasks`). `Session` needs exported DTO fields or a codec; use an `Iso`
   between `Session` and its DTO.
