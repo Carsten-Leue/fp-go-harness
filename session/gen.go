@@ -12,6 +12,511 @@ import (
 	github_com_openai_openai_go_v3 "github.com/openai/openai-go/v3"
 )
 
+// SessionDTOLenses provides [lenses] for accessing fields of [SessionDTO]
+//
+// [lenses]: __lens.Lens
+type SessionDTOLenses struct {
+	// History is a [__lens.Lens] for the History field of [SessionDTO]
+	History __lens.Lens[SessionDTO, []HistoryEntryDTO]
+	// Current is a [__lens.Lens] for the Current field of [SessionDTO]
+	Current __lens.Lens[SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Usage is a [__lens.Lens] for the Usage field of [SessionDTO]
+	Usage __lens.Lens[SessionDTO, github_com_openai_openai_go_v3.CompletionUsage]
+	// Iterations is a [__lens.Lens] for the Iterations field of [SessionDTO]
+	Iterations __lens.Lens[SessionDTO, int]
+	// IterationsO is a [__lens_option.LensO] for the Iterations field of [SessionDTO], treating the zero value as absent
+	IterationsO __lens_option.LensO[SessionDTO, int]
+}
+
+// SessionDTORefLenses provides [lenses] for accessing fields of [SessionDTO] via a pointer to [SessionDTO]
+//
+// [lenses]: __lens.Lens
+type SessionDTORefLenses struct {
+	// History is a [__lens.Lens] for the History field of [SessionDTO] via a pointer receiver
+	History __lens.Lens[*SessionDTO, []HistoryEntryDTO]
+	// Current is a [__lens.Lens] for the Current field of [SessionDTO] via a pointer receiver
+	Current __lens.Lens[*SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Usage is a [__lens.Lens] for the Usage field of [SessionDTO] via a pointer receiver
+	Usage __lens.Lens[*SessionDTO, github_com_openai_openai_go_v3.CompletionUsage]
+	// Iterations is a [__lens.Lens] for the Iterations field of [SessionDTO] via a pointer receiver
+	Iterations __lens.Lens[*SessionDTO, int]
+	// IterationsO is a [__lens_option.LensO] for the Iterations field of [SessionDTO] via a pointer receiver, treating the zero value as absent
+	IterationsO __lens_option.LensO[*SessionDTO, int]
+}
+
+// SessionDTOPrisms provides [prisms] for accessing fields of [SessionDTO]
+//
+// [prisms]: __prism.Prism
+type SessionDTOPrisms struct {
+	// History is a [__prism.Prism] for the History field of [SessionDTO]
+	History __prism.Prism[SessionDTO, []HistoryEntryDTO]
+	// Current is a [__prism.Prism] for the Current field of [SessionDTO]
+	Current __prism.Prism[SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Usage is a [__prism.Prism] for the Usage field of [SessionDTO]
+	Usage __prism.Prism[SessionDTO, github_com_openai_openai_go_v3.CompletionUsage]
+	// Iterations is a [__prism.Prism] for the Iterations field of [SessionDTO]
+	Iterations __prism.Prism[SessionDTO, int]
+}
+
+// SessionDTORefPrisms provides [prisms] for accessing fields of [SessionDTO] via a pointer to [SessionDTO]
+//
+// [prisms]: __prism.Prism
+type SessionDTORefPrisms struct {
+	// History is a [__prism.Prism] for the History field of [SessionDTO] via a pointer receiver
+	History __prism.Prism[*SessionDTO, []HistoryEntryDTO]
+	// Current is a [__prism.Prism] for the Current field of [SessionDTO] via a pointer receiver
+	Current __prism.Prism[*SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Usage is a [__prism.Prism] for the Usage field of [SessionDTO] via a pointer receiver
+	Usage __prism.Prism[*SessionDTO, github_com_openai_openai_go_v3.CompletionUsage]
+	// Iterations is a [__prism.Prism] for the Iterations field of [SessionDTO] via a pointer receiver
+	Iterations __prism.Prism[*SessionDTO, int]
+}
+
+// MakeSessionDTOHistoryLens returns a [__lens.Lens] for the History field of [SessionDTO]
+func MakeSessionDTOHistoryLens() __lens.Lens[SessionDTO, []HistoryEntryDTO] {
+	return __lens.MakeLensWithName(
+		func(s SessionDTO) []HistoryEntryDTO { return s.History },
+		func(s SessionDTO, v []HistoryEntryDTO) SessionDTO { s.History = v; return s },
+		"SessionDTO.History",
+	)
+}
+
+// MakeSessionDTOHistoryRefLens returns a [__lens.Lens] for the History field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOHistoryRefLens() __lens.Lens[*SessionDTO, []HistoryEntryDTO] {
+	return __lens.MakeLensRefWithName(
+		func(s *SessionDTO) []HistoryEntryDTO { return s.History },
+		func(s *SessionDTO, v []HistoryEntryDTO) *SessionDTO { s.History = v; return s },
+		"(*SessionDTO).History",
+	)
+}
+
+// MakeSessionDTOHistoryPrism returns a [__prism.Prism] for the History field of [SessionDTO]
+func MakeSessionDTOHistoryPrism() __prism.Prism[SessionDTO, []HistoryEntryDTO] {
+	return __prism.MakePrismWithName(
+		func(s SessionDTO) __option.Option[[]HistoryEntryDTO] { return __option.Some(s.History) },
+		func(v []HistoryEntryDTO) SessionDTO {
+			return SessionDTO{History: v}
+		},
+		"SessionDTO.History",
+	)
+}
+
+// MakeSessionDTOHistoryRefPrism returns a [__prism.Prism] for the History field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOHistoryRefPrism() __prism.Prism[*SessionDTO, []HistoryEntryDTO] {
+	return __prism.MakePrismWithName(
+		func(s *SessionDTO) __option.Option[[]HistoryEntryDTO] { return __option.Some(s.History) },
+		func(v []HistoryEntryDTO) *SessionDTO {
+			return &SessionDTO{History: v}
+		},
+		"SessionDTO.History",
+	)
+}
+
+// MakeSessionDTOCurrentLens returns a [__lens.Lens] for the Current field of [SessionDTO]
+func MakeSessionDTOCurrentLens() __lens.Lens[SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __lens.MakeLensWithName(
+		func(s SessionDTO) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.Current },
+		func(s SessionDTO, v github_com_openai_openai_go_v3.ChatCompletionNewParams) SessionDTO {
+			s.Current = v
+			return s
+		},
+		"SessionDTO.Current",
+	)
+}
+
+// MakeSessionDTOCurrentRefLens returns a [__lens.Lens] for the Current field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOCurrentRefLens() __lens.Lens[*SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __lens.MakeLensRefWithName(
+		func(s *SessionDTO) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.Current },
+		func(s *SessionDTO, v github_com_openai_openai_go_v3.ChatCompletionNewParams) *SessionDTO {
+			s.Current = v
+			return s
+		},
+		"(*SessionDTO).Current",
+	)
+}
+
+// MakeSessionDTOCurrentPrism returns a [__prism.Prism] for the Current field of [SessionDTO]
+func MakeSessionDTOCurrentPrism() __prism.Prism[SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __prism.MakePrismWithName(
+		func(s SessionDTO) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.Current)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) SessionDTO {
+			return SessionDTO{Current: v}
+		},
+		"SessionDTO.Current",
+	)
+}
+
+// MakeSessionDTOCurrentRefPrism returns a [__prism.Prism] for the Current field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOCurrentRefPrism() __prism.Prism[*SessionDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __prism.MakePrismWithName(
+		func(s *SessionDTO) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.Current)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) *SessionDTO {
+			return &SessionDTO{Current: v}
+		},
+		"SessionDTO.Current",
+	)
+}
+
+// MakeSessionDTOUsageLens returns a [__lens.Lens] for the Usage field of [SessionDTO]
+func MakeSessionDTOUsageLens() __lens.Lens[SessionDTO, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __lens.MakeLensWithName(
+		func(s SessionDTO) github_com_openai_openai_go_v3.CompletionUsage { return s.Usage },
+		func(s SessionDTO, v github_com_openai_openai_go_v3.CompletionUsage) SessionDTO { s.Usage = v; return s },
+		"SessionDTO.Usage",
+	)
+}
+
+// MakeSessionDTOUsageRefLens returns a [__lens.Lens] for the Usage field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOUsageRefLens() __lens.Lens[*SessionDTO, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __lens.MakeLensRefWithName(
+		func(s *SessionDTO) github_com_openai_openai_go_v3.CompletionUsage { return s.Usage },
+		func(s *SessionDTO, v github_com_openai_openai_go_v3.CompletionUsage) *SessionDTO {
+			s.Usage = v
+			return s
+		},
+		"(*SessionDTO).Usage",
+	)
+}
+
+// MakeSessionDTOUsagePrism returns a [__prism.Prism] for the Usage field of [SessionDTO]
+func MakeSessionDTOUsagePrism() __prism.Prism[SessionDTO, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __prism.MakePrismWithName(
+		func(s SessionDTO) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.Usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) SessionDTO {
+			return SessionDTO{Usage: v}
+		},
+		"SessionDTO.Usage",
+	)
+}
+
+// MakeSessionDTOUsageRefPrism returns a [__prism.Prism] for the Usage field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOUsageRefPrism() __prism.Prism[*SessionDTO, github_com_openai_openai_go_v3.CompletionUsage] {
+	return __prism.MakePrismWithName(
+		func(s *SessionDTO) __option.Option[github_com_openai_openai_go_v3.CompletionUsage] {
+			return __option.Some(s.Usage)
+		},
+		func(v github_com_openai_openai_go_v3.CompletionUsage) *SessionDTO {
+			return &SessionDTO{Usage: v}
+		},
+		"SessionDTO.Usage",
+	)
+}
+
+// MakeSessionDTOIterationsLens returns a [__lens.Lens] for the Iterations field of [SessionDTO]
+func MakeSessionDTOIterationsLens() __lens.Lens[SessionDTO, int] {
+	return __lens.MakeLensWithName(
+		func(s SessionDTO) int { return s.Iterations },
+		func(s SessionDTO, v int) SessionDTO { s.Iterations = v; return s },
+		"SessionDTO.Iterations",
+	)
+}
+
+// MakeSessionDTOIterationsLensO returns a [__lens_option.LensO] for the Iterations field of [SessionDTO]
+func MakeSessionDTOIterationsLensO() __lens_option.LensO[SessionDTO, int] {
+	return __lens_option.FromIso[SessionDTO](__iso_option.FromZero[int]())(MakeSessionDTOIterationsLens())
+}
+
+// MakeSessionDTOIterationsRefLens returns a [__lens.Lens] for the Iterations field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOIterationsRefLens() __lens.Lens[*SessionDTO, int] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SessionDTO) int { return s.Iterations },
+		func(s *SessionDTO, v int) *SessionDTO { s.Iterations = v; return s },
+		"(*SessionDTO).Iterations",
+	)
+}
+
+// MakeSessionDTOIterationsRefLensO returns a [__lens_option.LensO] for the Iterations field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOIterationsRefLensO() __lens_option.LensO[*SessionDTO, int] {
+	return __lens_option.FromIso[*SessionDTO](__iso_option.FromZero[int]())(MakeSessionDTOIterationsRefLens())
+}
+
+// MakeSessionDTOIterationsPrism returns a [__prism.Prism] for the Iterations field of [SessionDTO]
+func MakeSessionDTOIterationsPrism() __prism.Prism[SessionDTO, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s SessionDTO) __option.Option[int] { return _fromNonZero(s.Iterations) },
+		func(v int) SessionDTO {
+			return SessionDTO{Iterations: v}
+		},
+		"SessionDTO.Iterations",
+	)
+}
+
+// MakeSessionDTOIterationsRefPrism returns a [__prism.Prism] for the Iterations field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOIterationsRefPrism() __prism.Prism[*SessionDTO, int] {
+	_fromNonZero := __option.FromNonZero[int]()
+	return __prism.MakePrismWithName(
+		func(s *SessionDTO) __option.Option[int] { return _fromNonZero(s.Iterations) },
+		func(v int) *SessionDTO {
+			return &SessionDTO{Iterations: v}
+		},
+		"SessionDTO.Iterations",
+	)
+}
+
+// MakeSessionDTOLenses creates a new [SessionDTOLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeSessionDTOLenses() SessionDTOLenses {
+	return SessionDTOLenses{
+		// mandatory lenses
+		History:    MakeSessionDTOHistoryLens(),
+		Current:    MakeSessionDTOCurrentLens(),
+		Usage:      MakeSessionDTOUsageLens(),
+		Iterations: MakeSessionDTOIterationsLens(),
+		// optional lenses
+		IterationsO: MakeSessionDTOIterationsLensO(),
+	}
+}
+
+// MakeSessionDTORefLenses creates a new [SessionDTORefLenses] with [lenses] for all fields via a pointer to [SessionDTO]
+//
+// [lenses]: __lens.Lens
+func MakeSessionDTORefLenses() SessionDTORefLenses {
+	return SessionDTORefLenses{
+		// mandatory lenses
+		History:    MakeSessionDTOHistoryRefLens(),
+		Current:    MakeSessionDTOCurrentRefLens(),
+		Usage:      MakeSessionDTOUsageRefLens(),
+		Iterations: MakeSessionDTOIterationsRefLens(),
+		// optional lenses
+		IterationsO: MakeSessionDTOIterationsRefLensO(),
+	}
+}
+
+// MakeSessionDTOPrisms creates a new [SessionDTOPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeSessionDTOPrisms() SessionDTOPrisms {
+	return SessionDTOPrisms{
+		History:    MakeSessionDTOHistoryPrism(),
+		Current:    MakeSessionDTOCurrentPrism(),
+		Usage:      MakeSessionDTOUsagePrism(),
+		Iterations: MakeSessionDTOIterationsPrism(),
+	}
+}
+
+// MakeSessionDTORefPrisms creates a new [SessionDTORefPrisms] with [prisms] for all fields via a pointer to [SessionDTO]
+//
+// [prisms]: __prism.Prism
+func MakeSessionDTORefPrisms() SessionDTORefPrisms {
+	return SessionDTORefPrisms{
+		History:    MakeSessionDTOHistoryRefPrism(),
+		Current:    MakeSessionDTOCurrentRefPrism(),
+		Usage:      MakeSessionDTOUsageRefPrism(),
+		Iterations: MakeSessionDTOIterationsRefPrism(),
+	}
+}
+
+// HistoryEntryDTOLenses provides [lenses] for accessing fields of [HistoryEntryDTO]
+//
+// [lenses]: __lens.Lens
+type HistoryEntryDTOLenses struct {
+	// Request is a [__lens.Lens] for the Request field of [HistoryEntryDTO]
+	Request __lens.Lens[HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Response is a [__lens.Lens] for the Response field of [HistoryEntryDTO]
+	Response __lens.Lens[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+	// ResponseO is a [__lens_option.LensO] for the Response field of [HistoryEntryDTO], treating the zero value as absent
+	ResponseO __lens_option.LensO[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+}
+
+// HistoryEntryDTORefLenses provides [lenses] for accessing fields of [HistoryEntryDTO] via a pointer to [HistoryEntryDTO]
+//
+// [lenses]: __lens.Lens
+type HistoryEntryDTORefLenses struct {
+	// Request is a [__lens.Lens] for the Request field of [HistoryEntryDTO] via a pointer receiver
+	Request __lens.Lens[*HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Response is a [__lens.Lens] for the Response field of [HistoryEntryDTO] via a pointer receiver
+	Response __lens.Lens[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+	// ResponseO is a [__lens_option.LensO] for the Response field of [HistoryEntryDTO] via a pointer receiver, treating the zero value as absent
+	ResponseO __lens_option.LensO[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+}
+
+// HistoryEntryDTOPrisms provides [prisms] for accessing fields of [HistoryEntryDTO]
+//
+// [prisms]: __prism.Prism
+type HistoryEntryDTOPrisms struct {
+	// Request is a [__prism.Prism] for the Request field of [HistoryEntryDTO]
+	Request __prism.Prism[HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Response is a [__prism.Prism] for the Response field of [HistoryEntryDTO]
+	Response __prism.Prism[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+}
+
+// HistoryEntryDTORefPrisms provides [prisms] for accessing fields of [HistoryEntryDTO] via a pointer to [HistoryEntryDTO]
+//
+// [prisms]: __prism.Prism
+type HistoryEntryDTORefPrisms struct {
+	// Request is a [__prism.Prism] for the Request field of [HistoryEntryDTO] via a pointer receiver
+	Request __prism.Prism[*HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams]
+	// Response is a [__prism.Prism] for the Response field of [HistoryEntryDTO] via a pointer receiver
+	Response __prism.Prism[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion]
+}
+
+// MakeHistoryEntryDTORequestLens returns a [__lens.Lens] for the Request field of [HistoryEntryDTO]
+func MakeHistoryEntryDTORequestLens() __lens.Lens[HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __lens.MakeLensWithName(
+		func(s HistoryEntryDTO) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.Request },
+		func(s HistoryEntryDTO, v github_com_openai_openai_go_v3.ChatCompletionNewParams) HistoryEntryDTO {
+			s.Request = v
+			return s
+		},
+		"HistoryEntryDTO.Request",
+	)
+}
+
+// MakeHistoryEntryDTORequestRefLens returns a [__lens.Lens] for the Request field of [HistoryEntryDTO] via a pointer receiver
+func MakeHistoryEntryDTORequestRefLens() __lens.Lens[*HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __lens.MakeLensRefWithName(
+		func(s *HistoryEntryDTO) github_com_openai_openai_go_v3.ChatCompletionNewParams { return s.Request },
+		func(s *HistoryEntryDTO, v github_com_openai_openai_go_v3.ChatCompletionNewParams) *HistoryEntryDTO {
+			s.Request = v
+			return s
+		},
+		"(*HistoryEntryDTO).Request",
+	)
+}
+
+// MakeHistoryEntryDTORequestPrism returns a [__prism.Prism] for the Request field of [HistoryEntryDTO]
+func MakeHistoryEntryDTORequestPrism() __prism.Prism[HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __prism.MakePrismWithName(
+		func(s HistoryEntryDTO) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.Request)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) HistoryEntryDTO {
+			return HistoryEntryDTO{Request: v}
+		},
+		"HistoryEntryDTO.Request",
+	)
+}
+
+// MakeHistoryEntryDTORequestRefPrism returns a [__prism.Prism] for the Request field of [HistoryEntryDTO] via a pointer receiver
+func MakeHistoryEntryDTORequestRefPrism() __prism.Prism[*HistoryEntryDTO, github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+	return __prism.MakePrismWithName(
+		func(s *HistoryEntryDTO) __option.Option[github_com_openai_openai_go_v3.ChatCompletionNewParams] {
+			return __option.Some(s.Request)
+		},
+		func(v github_com_openai_openai_go_v3.ChatCompletionNewParams) *HistoryEntryDTO {
+			return &HistoryEntryDTO{Request: v}
+		},
+		"HistoryEntryDTO.Request",
+	)
+}
+
+// MakeHistoryEntryDTOResponseLens returns a [__lens.Lens] for the Response field of [HistoryEntryDTO]
+func MakeHistoryEntryDTOResponseLens() __lens.Lens[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	return __lens.MakeLensWithName(
+		func(s HistoryEntryDTO) *github_com_openai_openai_go_v3.ChatCompletion { return s.Response },
+		func(s HistoryEntryDTO, v *github_com_openai_openai_go_v3.ChatCompletion) HistoryEntryDTO {
+			s.Response = v
+			return s
+		},
+		"HistoryEntryDTO.Response",
+	)
+}
+
+// MakeHistoryEntryDTOResponseLensO returns a [__lens_option.LensO] for the Response field of [HistoryEntryDTO]
+func MakeHistoryEntryDTOResponseLensO() __lens_option.LensO[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	return __lens_option.FromIso[HistoryEntryDTO](__iso_option.FromZero[*github_com_openai_openai_go_v3.ChatCompletion]())(MakeHistoryEntryDTOResponseLens())
+}
+
+// MakeHistoryEntryDTOResponseRefLens returns a [__lens.Lens] for the Response field of [HistoryEntryDTO] via a pointer receiver
+func MakeHistoryEntryDTOResponseRefLens() __lens.Lens[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	return __lens.MakeLensStrictWithName(
+		func(s *HistoryEntryDTO) *github_com_openai_openai_go_v3.ChatCompletion { return s.Response },
+		func(s *HistoryEntryDTO, v *github_com_openai_openai_go_v3.ChatCompletion) *HistoryEntryDTO {
+			s.Response = v
+			return s
+		},
+		"(*HistoryEntryDTO).Response",
+	)
+}
+
+// MakeHistoryEntryDTOResponseRefLensO returns a [__lens_option.LensO] for the Response field of [HistoryEntryDTO] via a pointer receiver
+func MakeHistoryEntryDTOResponseRefLensO() __lens_option.LensO[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	return __lens_option.FromIso[*HistoryEntryDTO](__iso_option.FromZero[*github_com_openai_openai_go_v3.ChatCompletion]())(MakeHistoryEntryDTOResponseRefLens())
+}
+
+// MakeHistoryEntryDTOResponsePrism returns a [__prism.Prism] for the Response field of [HistoryEntryDTO]
+func MakeHistoryEntryDTOResponsePrism() __prism.Prism[HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	_fromNonZero := __option.FromNonZero[*github_com_openai_openai_go_v3.ChatCompletion]()
+	return __prism.MakePrismWithName(
+		func(s HistoryEntryDTO) __option.Option[*github_com_openai_openai_go_v3.ChatCompletion] {
+			return _fromNonZero(s.Response)
+		},
+		func(v *github_com_openai_openai_go_v3.ChatCompletion) HistoryEntryDTO {
+			return HistoryEntryDTO{Response: v}
+		},
+		"HistoryEntryDTO.Response",
+	)
+}
+
+// MakeHistoryEntryDTOResponseRefPrism returns a [__prism.Prism] for the Response field of [HistoryEntryDTO] via a pointer receiver
+func MakeHistoryEntryDTOResponseRefPrism() __prism.Prism[*HistoryEntryDTO, *github_com_openai_openai_go_v3.ChatCompletion] {
+	_fromNonZero := __option.FromNonZero[*github_com_openai_openai_go_v3.ChatCompletion]()
+	return __prism.MakePrismWithName(
+		func(s *HistoryEntryDTO) __option.Option[*github_com_openai_openai_go_v3.ChatCompletion] {
+			return _fromNonZero(s.Response)
+		},
+		func(v *github_com_openai_openai_go_v3.ChatCompletion) *HistoryEntryDTO {
+			return &HistoryEntryDTO{Response: v}
+		},
+		"HistoryEntryDTO.Response",
+	)
+}
+
+// MakeHistoryEntryDTOLenses creates a new [HistoryEntryDTOLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeHistoryEntryDTOLenses() HistoryEntryDTOLenses {
+	return HistoryEntryDTOLenses{
+		// mandatory lenses
+		Request:  MakeHistoryEntryDTORequestLens(),
+		Response: MakeHistoryEntryDTOResponseLens(),
+		// optional lenses
+		ResponseO: MakeHistoryEntryDTOResponseLensO(),
+	}
+}
+
+// MakeHistoryEntryDTORefLenses creates a new [HistoryEntryDTORefLenses] with [lenses] for all fields via a pointer to [HistoryEntryDTO]
+//
+// [lenses]: __lens.Lens
+func MakeHistoryEntryDTORefLenses() HistoryEntryDTORefLenses {
+	return HistoryEntryDTORefLenses{
+		// mandatory lenses
+		Request:  MakeHistoryEntryDTORequestRefLens(),
+		Response: MakeHistoryEntryDTOResponseRefLens(),
+		// optional lenses
+		ResponseO: MakeHistoryEntryDTOResponseRefLensO(),
+	}
+}
+
+// MakeHistoryEntryDTOPrisms creates a new [HistoryEntryDTOPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeHistoryEntryDTOPrisms() HistoryEntryDTOPrisms {
+	return HistoryEntryDTOPrisms{
+		Request:  MakeHistoryEntryDTORequestPrism(),
+		Response: MakeHistoryEntryDTOResponsePrism(),
+	}
+}
+
+// MakeHistoryEntryDTORefPrisms creates a new [HistoryEntryDTORefPrisms] with [prisms] for all fields via a pointer to [HistoryEntryDTO]
+//
+// [prisms]: __prism.Prism
+func MakeHistoryEntryDTORefPrisms() HistoryEntryDTORefPrisms {
+	return HistoryEntryDTORefPrisms{
+		Request:  MakeHistoryEntryDTORequestRefPrism(),
+		Response: MakeHistoryEntryDTOResponseRefPrism(),
+	}
+}
+
 // SessionLenses provides [lenses] for accessing fields of [Session]
 //
 // [lenses]: __lens.Lens
