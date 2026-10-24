@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/tools"
+	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
@@ -137,9 +138,10 @@ func TestMaxIterationsError_Error(t *testing.T) {
 func TestMakeSessionDeps(t *testing.T) {
 	stub := makeSequencedSessionDeps(t, []openai.ChatCompletion{makeStopCompletion("chatcmpl-1", "done")}, makeWeatherRegistry(), 10)
 
-	deps := MakeSessionDeps(stub, tools.MakeToolDeps(stub.GetToolCaller()), MakeLoopDeps(4))
+	deps := MakeSessionDeps(stub, tools.MakeToolDeps(stub.GetToolCaller()), MakeLoopDeps(4), MakeSteeringDeps(thunk.Of(A.From("steer"))))
 
 	assert.Equal(t, 4, deps.GetMaxIterations())
+	assert.Equal(t, result.Of(A.From("steer")), deps.GetPoll()(t.Context())())
 	assert.Same(t, stub.GetChatCompletionService(), deps.GetChatCompletionService())
 	assert.True(t, option.IsSome(deps.GetToolCaller()("get_weather")))
 

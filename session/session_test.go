@@ -45,6 +45,10 @@ func (d *stubSessionDeps) GetToolCaller() ToolCaller {
 	return d.toolCall
 }
 
+func (d *stubSessionDeps) GetPoll() Thunk[[]string] {
+	return NoSteering()
+}
+
 // makeStubSessionDeps starts a test server that answers every chat
 // completion request with the given canned response, and wires up registry
 // as the tool caller. The server is closed automatically when the test

@@ -78,14 +78,17 @@ func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNe
 
 // answer is wiring: it runs the agent loop for a request against DeepSeek,
 // with the registry the program built and at most MaxIterations requests.
+// A one-shot prompt has no way to steer a running turn, hence
+// [session.NoSteering].
 //
 // session.Run is reused unchanged: [effect.Local] widens it from SessionDeps to
 // the provider's ChatCompletionDeps, and [effect.LocalEffectK] builds those
 // from DeepSeekDeps with the effectful [oai.MakeDeepSeekChatCompletionDeps].
 func answer(cfg Config, registry tools.ToolRegistry) effect.Kleisli[oai.DeepSeekDeps, openai.ChatCompletionNewParams, session.FinalResult] {
-	toSessionDeps := F.Bind23of3(session.MakeSessionDeps)(
+	toSessionDeps := F.Bind234of4(session.MakeSessionDeps)(
 		tools.MakeRegistryToolDeps()(registry),
 		session.MakeLoopDeps(MakeConfigMaxIterationsLens().Get(cfg)),
+		session.MakeSteeringDeps(session.NoSteering()),
 	)
 
 	return F.Flow4(

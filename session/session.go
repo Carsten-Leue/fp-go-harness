@@ -36,18 +36,20 @@ type SessionDeps interface {
 	oai.ChatCompletionDeps
 	tools.ToolDeps
 	LoopDeps
+	SteeringDeps
 }
 
 type sessionDeps struct {
 	oai.ChatCompletionDeps
 	tools.ToolDeps
 	LoopDeps
+	SteeringDeps
 }
 
-// MakeSessionDeps is wiring: it combines the chat completions, the tools and
-// the loop limit into [SessionDeps].
-func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps) SessionDeps {
-	return &sessionDeps{c, t, l}
+// MakeSessionDeps is wiring: it combines the chat completions, the tools, the
+// loop limit and the steering messages into [SessionDeps].
+func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps, s SteeringDeps) SessionDeps {
+	return &sessionDeps{c, t, l, s}
 }
 
 type FinalResult = Pair[Session, *openai.ChatCompletion]

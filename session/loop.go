@@ -82,7 +82,10 @@ func limitIterations() reader.Reader[int, result.Kleisli[Session, Session]] {
 // The loop is stack-safe ([effect.TailRec]) and checks the context before each
 // step. Before each request the session's iteration counter is checked against
 // [LoopDeps.GetMaxIterations]; once the limit is reached, Run fails with a
-// [MaxIterationsError] instead of sending another request.
+// [MaxIterationsError] instead of sending another request. After the check,
+// [Steer] appends the user messages queued since the previous step, so the
+// request carries them. Messages queued after the last request stay queued
+// for the next Run, so after a [Continue] they come after its new prompt.
 func Run() effect.Kleisli[SessionDeps, Session, FinalResult] {
 	guard := F.Flow2(
 		reader.Sequence(F.Flow2(
@@ -92,9 +95,15 @@ func Run() effect.Kleisli[SessionDeps, Session, FinalResult] {
 		effect.FromReaderResult[SessionDeps, Session],
 	)
 
+	steer := F.Flow2(
+		Steer(),
+		effect.Local[Session](AsSteeringDeps[SessionDeps]),
+	)
+
 	return F.Pipe1(
-		F.Flow2(
+		F.Flow3(
 			guard,
+			effect.Chain(steer),
 			effect.Chain(Next()),
 		),
 		effect.TailRec,
