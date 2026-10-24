@@ -153,3 +153,9 @@ derives the version and release notes from the conventional commit messages.
 
 The coding rules (fp-go composition patterns, generated lenses, naming, PR conventions) are
 in [AGENTS.md](AGENTS.md) and the [repository skills](.bob/skills/).
+
+Planning and implementation workflows use the [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD):
+the install and its team overrides are in [_bmad/](_bmad/) (the overrides in [_bmad/custom/](_bmad/custom/)
+make `bmad-build` and `bmad-code-review` apply the fp-go rules), the skills in
+[.claude/skills/](.claude/skills/), and the epics, sprint status and deferred work in
+[_bmad-output/](_bmad-output/).

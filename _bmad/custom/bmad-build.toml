@@ -1,0 +1,57 @@
+# Team overrides for bmad-build: implement and review with the fp-go rules.
+
+[workflow]
+
+persistent_facts = [
+  "file:{project-root}/AGENTS.md",
+  "Every Go change follows .bob/skills/fp-go/SKILL.md and .bob/skills/go-conventions/SKILL.md. List both, and AGENTS.md, in the spec's frontmatter `context:`.",
+  "A violation of a rule in AGENTS.md, .bob/skills/fp-go/SKILL.md or .bob/skills/go-conventions/SKILL.md is a verified defect, never `false` or a 'this is messy' finding. Its named harm is the rule it breaks. Grade it at least `medium` and route it to `patch` when the fix is unambiguous.",
+  "A shared mutable value reachable from code inside an Effect (a Deps getter, captured slice or map, counter, test fake without a mutex) is `high`: `Ap`, `ApS`, `Concat` and `Traverse*` run on two goroutines and CI runs `go test -race`.",
+  "A finding that proposes replacing fp-go composition with imperative Go (`if err != nil` chains, loops, in-place mutation, recursion, `ApSeq`/`Chain` to silence the race detector) contradicts the project rules: verdict `false`, citing the rule.",
+  "Done means: `go generate ./...`, `runCodeActions.bat` (from PowerShell), `go vet ./...` and `go test ./...` pass; README.md is updated per AGENTS.md. Never run `gofmt -w`.",
+]
+
+implementation_handoff = """
+Launch a subagent with no prior conversation context, with this prompt:
+
+> Read {spec_file} fully and implement it — the spec is the sole source of truth. Load every file listed in its frontmatter `context:` before you start, and always `{project-root}/AGENTS.md`, `{project-root}/.bob/skills/fp-go/SKILL.md` and `{project-root}/.bob/skills/go-conventions/SKILL.md`. Check every fp-go combinator with `go doc github.com/IBM/fp-go/v2/<pkg>` (or the fp-go MCP server) instead of writing signatures from memory.
+>
+> When done, report what you changed, how you verified it, and anything left incomplete or risky.
+"""
+
+[[workflow.review_layers]]
+id = "fp-go-conformance"
+name = "fp-go Conformance"
+instruction = """
+Launch a subagent with this prompt:
+
+You review a Go diff against the coding rules of this repository (an agent harness built on github.com/IBM/fp-go/v2).
+
+Read these files completely before you look at the diff; they are the rules:
+- `{project-root}/AGENTS.md`
+- `{project-root}/.bob/skills/fp-go/SKILL.md` (follow its "Workflow for reviewing code" and its "Checklist for every change")
+- `{project-root}/.bob/skills/go-conventions/SKILL.md`
+
+Then read the unified diff at `{diff_file}` and, where needed, the surrounding code in the repository.
+
+Check every changed Go file against each checklist item and each section of AGENTS.md: Deps getters and read-only state (Ap runs concurrently, test fakes included), Effect built from the effect package's combinators, readers instead of closures over the input, point-free and nullary style, the combinator that matches the operation, A.Kleisli / A.Operator aliases, generated lenses instead of hand-written getters, type parameters named T, the table of combinators that do not exist, and the README / PLAN rules.
+
+Verify every combinator you name with `go doc github.com/IBM/fp-go/v2/<pkg>` (or the fp-go MCP server if you have it). Do not suggest a combinator you did not verify.
+
+Output a Markdown list of findings. Each finding: one-line title, file:line, the rule it breaks (file and section heading), the evidence from the diff, and the verified fix. Report only rule violations; leave general bugs to the other reviewers. If there are none, say "No fp-go rule violations" and list which checklist items you checked.
+
+Do not invoke any skill, and do not spawn subagents of your own — you are the reviewer. Do not edit files. Return your findings as text in your final message; do not route them through any findings-reporting tool the host may offer.
+
+"""
+
+[[workflow.oneshot_review_layers]]
+id = "fp-go-conformance"
+name = "fp-go Conformance"
+instruction = """
+Launch a subagent with this prompt:
+
+You review the changed Go files in the current worktree (`git diff` and untracked files) against the coding rules of this repository. Read `{project-root}/AGENTS.md`, `{project-root}/.bob/skills/fp-go/SKILL.md` (its "Checklist for every change") and `{project-root}/.bob/skills/go-conventions/SKILL.md` completely first. Verify every combinator you name with `go doc github.com/IBM/fp-go/v2/<pkg>`.
+
+Output a Markdown list of findings: title, file:line, the rule it breaks (file and section), evidence, verified fix. Only rule violations. Do not invoke any skill, do not spawn subagents, do not edit files. Return your findings as text in your final message.
+
+"""
