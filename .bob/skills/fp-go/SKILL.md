@@ -277,11 +277,18 @@ func validateLookup() thunk.Operator[LookupResponse, LookupResponse] {
 }
 ```
 
-**A branch on a field is a `predicate.Fold` over a lens**, not an `if`. A struct with a
-tag field and one payload per case (fp-go's `tailrec.Trampoline`: `Landed`, `Bounce`,
-`Land`) has no `Fold` of its own, but its generated lenses give the predicate and both
-payloads, third-party and generic types included (`--type Trampoline
-github.com/IBM/fp-go/v2/tailrec`):
+**A branch on a field is a `predicate.Fold` over a lens**, not an `if`: the tag field's
+generated lens is the predicate, the payload lenses feed each case, third-party and
+generic types included (`--type`).
+
+**Better still, don't convert a sum type after the fact: build the target type where
+the value is constructed.** `session.Next` once returned `Trampoline[Session,
+FinalResult]` and `Run` needed a converter (`landAnswer`) to turn it into a
+`Trampoline[Session, TurnResult]`. A `Trampoline` has no `Fold` (fp-go v2.13.0 has
+`tailrec.IsLand` / `GetLand` / `GetBounce` and the prisms `prism.FromLand` /
+`prism.FromBounce`, all partial), so any converter needs either a hand-written branch or
+an unreachable default. Now `Next` lands its answer as the `TurnResult` directly, and
+the converter is gone:
 
 ```go
 // AVOID: nullary, but the closure names its argument and branches by hand
@@ -295,18 +302,19 @@ func landAnswer() func(NextStep) TurnStep {
 	}
 }
 
-// PREFER: one composition: the tag lens is the predicate, the payload lenses feed each case
-func landAnswer() func(NextStep) TurnStep {
-	landedLens := MakeTrampolineLandedLens[Session, FinalResult]()
-	bounceLens := MakeTrampolineBounceLens[Session, FinalResult]()
-	landLens := MakeTrampolineLandLens[Session, FinalResult]()
-
-	return predicate.Fold(
-		F.Flow2(bounceLens.Get, tailrec.Bounce[TurnResult, Session]),
-		F.Flow3(landLens.Get, pair.MapTail[Session](result.Of[*openai.ChatCompletion]), tailrec.Land[Session, TurnResult]),
-	)(landedLens.Get)
-}
+// PREFER: no converter; the constructor in Next builds the type Run needs
+landFinalResult := F.Flow5(
+	addToHistory,
+	appendAnswerToSession,
+	pair.MapTail[Session](result.Of[*openai.ChatCompletion]),
+	tailrec.Land[Session, TurnResult],
+	effect.Of[SessionDeps],
+)
 ```
+
+To *read* one case of a `Trampoline` (in a test), use the prisms:
+`option.Unwrap(prism.FromLand[Session, TurnResult]().GetOption(step))`, not
+`step.Landed` / `step.Land`, as in `session/session_test.go`.
 
 The only escape is a leaf in the sense above (a multi-field formatter, a raw I/O sink, a
 `select`), named as a leaf in its doc comment with the reason no combinator fits. Before

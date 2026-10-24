@@ -9,7 +9,6 @@ import (
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
 	"github.com/IBM/fp-go/v2/pair"
-	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
 	"github.com/IBM/fp-go/v2/result"
@@ -117,20 +116,6 @@ func IsCancelled() Predicate[error] {
 	return F.Bind2nd(errors.Is, context.Canceled)
 }
 
-// landAnswer lands the final result of [Next] as an answered turn and keeps
-// a bounce. tailrec has no Fold, so the tag lens of the [Trampoline] is the
-// predicate and its payload lenses feed each case.
-func landAnswer() func(NextStep) TurnStep {
-	landedLens := MakeTrampolineLandedLens[Session, FinalResult]()
-	bounceLens := MakeTrampolineBounceLens[Session, FinalResult]()
-	landLens := MakeTrampolineLandLens[Session, FinalResult]()
-
-	return predicate.Fold(
-		F.Flow2(bounceLens.Get, tailrec.Bounce[TurnResult, Session]),
-		F.Flow3(landLens.Get, pair.MapTail[Session](result.Of[*openai.ChatCompletion]), tailrec.Land[Session, TurnResult]),
-	)(landedLens.Get)
-}
-
 // failedTurn lands the error of a stage as the outcome of the turn, with the
 // session the stage received.
 func failedTurn() Reader[Session, effect.Kleisli[SessionDeps, error, TurnStep]] {
@@ -190,10 +175,7 @@ func Run() effect.Kleisli[SessionDeps, Session, TurnResult] {
 		effect.Local[Session](AsSteeringDeps[SessionDeps]),
 	)
 
-	next := F.Flow2(
-		Next(),
-		effect.Map[SessionDeps](landAnswer()),
-	)
+	next := Next()
 
 	try := attempt()
 	andThen := RRIOE.Chain[SessionDeps, context.Context, error, Session, TurnStep]

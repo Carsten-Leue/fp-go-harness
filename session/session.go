@@ -16,6 +16,7 @@ import (
 	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
+	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/IBM/fp-go/v2/tailrec"
 	openai "github.com/openai/openai-go/v3"
@@ -55,9 +56,8 @@ func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps, s S
 	return &sessionDeps{c, t, l, s}
 }
 
+// FinalResult is a session paired with the completion that answered it.
 type FinalResult = Pair[Session, *openai.ChatCompletion]
-
-type NextStep = Trampoline[Session, FinalResult]
 
 // MakeSession is a leaf: the constructor of a [Session] that starts from req.
 func MakeSession(req openai.ChatCompletionNewParams) Session {
@@ -105,16 +105,17 @@ func isToolCallFinishReason() Predicate[string] {
 //     continue.
 //   - Otherwise, Next records the (request, response) pair in
 //     session.history, appends the message of the response's first choice
-//     to session.current and returns a Land carrying the final (session,
-//     completion) pair: the conversation has reached a terminal response,
-//     and the session holds all of it, so [Continue] can add the next user
-//     message.
+//     to session.current and returns a Land carrying the answered
+//     [TurnResult], the session paired with Right of the completion: the
+//     conversation has reached a terminal response, and the session holds
+//     all of it, so [Continue] can add the next user message.
 //
-// The returned [NextStep] is a [Trampoline]; callers are expected to invoke
+// The returned [TurnStep] is a [Trampoline]; callers are expected to invoke
 // Next repeatedly on the bounced Session until it lands, which keeps
 // multi-round tool-call conversations stack-safe regardless of how many
-// round trips they require.
-func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
+// round trips they require. It is the step type of [Run], so Run lands it
+// as it is.
+func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 
 	currentLens := MakeSessioncurrentLens()
 	historyLens := MakeSessionhistoryLens()
@@ -188,7 +189,7 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 	bounceToolCall := F.Flow3(
 		addToHistory,
 		applyToolCalls,
-		effect.Map[SessionDeps](tailrec.Bounce[FinalResult, Session]),
+		effect.Map[SessionDeps](tailrec.Bounce[TurnResult, Session]),
 	)
 
 	// the session with the answer of the completion appended to its request
@@ -197,11 +198,13 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 		updateSession,
 	)
 
-	// the request is recorded in the history before the answer is appended
-	landFinalResult := F.Flow4(
+	// the request is recorded in the history before the answer is appended;
+	// the turn lands answered, with the completion as its outcome
+	landFinalResult := F.Flow5(
 		addToHistory,
 		appendAnswerToSession,
-		tailrec.Land[Session, FinalResult],
+		pair.MapTail[Session](result.Of[*openai.ChatCompletion]),
+		tailrec.Land[Session, TurnResult],
 		effect.Of[SessionDeps],
 	)
 
