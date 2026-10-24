@@ -1,11 +1,15 @@
 package cli
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/mode"
+	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -69,8 +73,44 @@ func TestPromptCommand_DuplicateCustomMode(t *testing.T) {
 	assert.ErrorContains(t, err, `mode "review" is defined twice`)
 }
 
+// TestPromptCommand_InvalidMaxIterations asserts that a failed decoding is
+// returned and printed once on the standard error, with the variable and its
+// value.
 func TestPromptCommand_InvalidMaxIterations(t *testing.T) {
-	err := MakePromptCommand().Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir(), "--max-iterations", "0", "hello"})
+	var errOut bytes.Buffer
+	cmd := MakePromptCommand()
+	cmd.ErrWriter = &errOut
 
-	assert.Error(t, err)
+	err := cmd.Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir(), "--max-iterations", "0", "hello"})
+
+	require.Error(t, err)
+	// the %+v of the decoding lists the failed refinement and the value; its
+	// context label is fp-go's name of the composed codec, which ends with
+	// the last field, so it does not name MAX_ITERATIONS
+	assert.Equal(t, fmt.Sprintf("%+v\n", err), errOut.String())
+	assert.Contains(t, errOut.String(), "type cannot be refined: positive")
+	assert.Contains(t, errOut.String(), "value: 0")
+}
+
+// TestPromptCommand_Cancelled asserts that a run whose context is cancelled
+// fails with the cancellation, which main maps to exit code 130, and prints
+// it once. The turn has not started, so there is no session to report and no
+// request is sent.
+func TestPromptCommand_Cancelled(t *testing.T) {
+	withHome(t)
+	t.Setenv("DEEPSEEK_API_KEY", "test-key")
+
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	var out, errOut bytes.Buffer
+	cmd := MakePromptCommand()
+	cmd.Writer = &out
+	cmd.ErrWriter = &errOut
+
+	err := cmd.Run(ctx, []string{"fp-go-harness", "--workspace", t.TempDir(), "hello"})
+
+	assert.True(t, session.IsCancelled()(err), "%v", err)
+	assert.Empty(t, out.String())
+	assert.Equal(t, context.Canceled.Error()+"\n", errOut.String())
 }

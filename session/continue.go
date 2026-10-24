@@ -13,8 +13,10 @@ import (
 // so the turn gets the full [LoopDeps.GetMaxIterations] budget.
 //
 // The history and the accumulated usage are kept. Applied to the session of
-// the [FinalResult] of [Run], whose request already holds the model's last
-// answer, the next [Run] sends the whole conversation.
+// the [TurnResult] of [Run], whose request already holds the model's last
+// answer, the next [Run] sends the whole conversation. After a failed or
+// cancelled turn the session holds what the turn got to, and the new message
+// follows it.
 func Continue() func(string) Endomorphism[Session] {
 	currentLens := MakeSessioncurrentLens()
 	iterLens := MakeSessioniterationsLens()

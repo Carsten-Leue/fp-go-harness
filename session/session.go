@@ -1,6 +1,8 @@
 package session
 
 import (
+	"context"
+
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
@@ -13,6 +15,7 @@ import (
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
+	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/IBM/fp-go/v2/tailrec"
 	openai "github.com/openai/openai-go/v3"
@@ -215,13 +218,14 @@ func Next() effect.Kleisli[SessionDeps, Session, NextStep] {
 	)
 
 	// the request and the session it is paired with are independent reads of
-	// the session
+	// the session; dispatch is joined without a check of the context, so a
+	// completion that arrives after a cancellation is still recorded
 	return F.Pipe2(
 		F.Flow2(pair.FromHead[*openai.ChatCompletion, Session], effect.Map[SessionDeps, *openai.ChatCompletion, FinalResult]),
 		reader.Ap[Effect[SessionDeps, FinalResult]](F.Flow2(currentLens.Get, chatCompletion)),
 		reader.Map[Session](F.Flow2(
 			effect.Map[SessionDeps](recordCompletion),
-			effect.Chain(dispatch),
+			RRIOE.Chain[SessionDeps, context.Context, error](dispatch),
 		)),
 	)
 }

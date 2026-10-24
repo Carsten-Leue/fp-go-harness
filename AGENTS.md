@@ -106,6 +106,18 @@ not share mutable state:
 CI runs `go test -race`. It can't run on this laptop (no cgo), so a race only shows up in
 CI: check every fake and dependency against these rules before you push.
 
+### Every function is nullary and point-free
+
+This is the goal for **every** function, not a preference: `func f() Reader[A, B]`, and
+the value it returns is one composition of named functions, generated lens getters and
+combinators. A nullary function that returns `func(a A) B { … }` has only moved its
+parameter and is a review finding. A branch on a field (`if step.Landed`) is a
+`predicate.Fold` over the field's generated lens, third-party and generic types included.
+The only exceptions are leaves (a multi-field formatter, a raw I/O sink, a `select`),
+wiring, tests and `main`, each named as such in its doc comment with the reason. The rules
+and the worked example (`session/loop.go` `landAnswer`) are in the
+[`fp-go` skill, Rules 4 and 5](.bob/skills/fp-go/SKILL.md#rule-4--every-function-is-point-free).
+
 ### Closures over a pipeline's input
 
 A pipeline that reads its input in more than one place is a `reader.Reader[R, A]`, not a

@@ -126,7 +126,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
 - [x] **C6 `execute_command` (background).** Start the process, send its output to a log file and return the pid and path
   (format as in the recordings). Register the process in an `IORef`-backed table owned by `ProcessDeps`.
   The result text was written without comparing it to the recordings. The log directory is a parameter of `MakeDefaultProcessDeps`; it has to lie inside the workspace so that
-  `read_file` can read the logs. Processes leave the table when they exit. Not done yet: stopping them (E4).
+  `read_file` can read the logs. Processes leave the table when they exit. `StopProcesses()` (E4) kills them: the shell process only, its children may survive.
 - [x] **C7 `write_file`.** Write the whole file and create parent directories. Check `line_count` to detect truncated content.
   Content with fewer lines than `line_count` fails as truncated; more lines pass, because models miscount the last line.
   The definition and the result text were written without comparing them to the recordings. Registered in the CLI
@@ -258,8 +258,23 @@ and a text result. Validation errors (such as "path must be absolute") come back
   per step. The one-shot CLI wires `NoSteering()`. *Test:* the fake server queues a message while it answers the
   first request (a tool call); the second request carries it after the tool result. The fake keeps no state: it
   tells the first request from the second by its number of messages.
-- [ ] **E4 Cancellation.** Pass the `context.Context` of the `Thunk` through. Ctrl-C cancels the request and the tools that
+- [x] **E4 Cancellation.** Pass the `context.Context` of the `Thunk` through. Ctrl-C cancels the request and the tools that
   are running. Return the partial session as a `Land` result.
+  `Run` never fails: it is an `effect.Kleisli[SessionDeps, Session, TurnResult]`, where `TurnResult` pairs the session as far
+  as the turn got with an `Outcome` (`Result[*ChatCompletion]`). Each stage (iteration guard, `Steer`, `Next`) is made total
+  by `attempt`, which lands a failure with the session the stage received (`effect.ChainLeft`, which doesn't check the
+  context). The stages and the loop are joined with `readerreaderioeither.Chain` / `TailRec`, the same type as `Effect`
+  without the context check, so a cancelled context fails the poll or the request, and that stage lands the cancellation
+  with its session, including the steered messages it took. `IsCancelled()` matches `context.Canceled`, also the cause of
+  `signal.NotifyContext`. The CLI prints a failed turn by one rule (error, last assistant text of the session, stats) on
+  stderr, stops the background processes after a cancellation with a tap that doesn't check the context, and `main` maps
+  the outcome to the exit code (130 for a cancellation, 1 for any other error); `context.AfterFunc(ctx, stop)` restores the
+  default signal handling, so a second Ctrl-C exits at once. Background processes are not stopped on a normal exit.
+  *Test:* a fake completion asks for a tool that blocks until its context ends, the next request blocks until its context
+  ends, and the test cancels once the tool started: the outcome is the cancellation and the history keeps the first round
+  trip. A request error after a poll keeps the steered message in the request. A real background command
+  (`sleep 30; exit 0`) leaves the table after `StopProcesses`, and after a cancelled turn of the agent mode against a fake
+  DeepSeek server.
 - [ ] **E5 Interactive REPL.** Change `main.go` so it loops over stdin turns (`Continue` → `Run` → print). This loop
   runs at the edge of the program; it can be an `IO` loop through `tailrec`.
 - [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
@@ -357,7 +372,7 @@ Several steps are an earlier phase's step with ACP as its front end (J1 ⊇ E1, 
 J5 = E4, J7 = I1). Build those once and wire the CLI and ACP to the same code.
 
 - [ ] **J1 Turn as a value.** Move the wiring in [cli/run.go](cli/run.go) into a Kleisli over
-  (workspace, mode, `Option[Session]`, prompt) → `FinalResult`: the workspace comes from the input instead of
+  (workspace, mode, `Option[Session]`, prompt) → `TurnResult` (E4): the workspace comes from the input instead of
   `Config`, so the tool and mode deps are built per session; `None` starts from the mode's request, `Some`
   continues the session with `session.Continue` (E1). The CLI becomes one caller of it.
   *Test:* the existing CLI tests pass; two turns on one session keep the history.

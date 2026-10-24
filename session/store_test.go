@@ -22,10 +22,7 @@ import (
 func runTurn(t *testing.T, s Session, deps SessionDeps) Session {
 	t.Helper()
 
-	final, err := result.Unwrap(Run()(s)(deps)(t.Context())())
-	require.NoError(t, err)
-
-	return pair.Head(final)
+	return pair.Head(runAnswer(t, s, deps))
 }
 
 // saveTask stores a session under an ID.

@@ -14,8 +14,8 @@ reports it as a violation of a documented standard.
 | 1 | **The fp-go MCP server is the primary source of truth** | Look up every fp-go signature, pattern and best practice there before writing or judging code. Never rely on memory. |
 | 2 | **Follow fp-go best practices** | v2 imports, data-last, the simplest monad that fits, `Result` over `Either[error, A]`, lifting with `Eitherize`, lenses, `Tap*` for logging, no hidden mutation. |
 | 3 | **Monadic over imperative, wherever possible** | Model failure, absence, effects and iteration with `Result`, `Option`, `thunk` / `Effect`, `Chain`, `Traverse`, not with `if err != nil` chains, `nil` checks and `for` loops. |
-| 4 | **Point-free wherever possible** | Compose named functions, lens getters and combinators with `F.Flow` / `F.Pipe`. Lambdas only at the leaves. |
-| 5 | **Every function is nullary** | `func f() Reader[A, B]`, not `func f(a A) B`: parameters move into the returned `Reader` / `Kleisli`, inner steps are hoisted into named nullary functions. Only leaves, wiring and tests take parameters. |
+| 4 | **Every function is point-free** | The goal for every function, not a preference: compose named functions, lens getters and combinators with `F.Flow` / `F.Pipe`. Lambdas only at the leaves. |
+| 5 | **Every function is nullary** | `func f() Reader[A, B]`, not `func f(a A) B`: parameters move into the returned `Reader` / `Kleisli`, inner steps are hoisted into named nullary functions. Only leaves, wiring and tests take parameters. Nullary *and* point-free: a nullary function that returns `func(a A) B { … }` has only moved its parameter. |
 
 Repository conventions (aliases, header constants, doc comments, tests) are in
 [`go-conventions`](../go-conventions/SKILL.md). Load it together with this
@@ -229,10 +229,12 @@ Only in these places, and kept as small as possible:
 
 Don't rewrite imperative code you don't otherwise touch (no drive-by refactors).
 
-## Rule 4 — point-free wherever possible
+## Rule 4 — every function is point-free
 
 A function is point-free when it is built by composition and never names the value it
-works on. Aim for it at every level above the leaves.
+works on. **This is the goal for every function** above the leaves, and together with
+Rule 5 it means: every function is nullary, and the value it returns is one composition,
+never a `return func(x X) Y { … }` closure.
 
 - **Lambdas only at the leaves:** a field accessor (better: a generated lens `.Get` or
   prism `.ReverseGet`), a lens setter for `L.MakeLens`, a multi-field formatter, a raw
@@ -275,9 +277,41 @@ func validateLookup() thunk.Operator[LookupResponse, LookupResponse] {
 }
 ```
 
-Point-free is not a goal in itself: if the composed version needs more helper types or a
-longer lambda than the plain one, keep the plain one and say why. That case is rare;
-check the MCP server for a combinator first.
+**A branch on a field is a `predicate.Fold` over a lens**, not an `if`. A struct with a
+tag field and one payload per case (fp-go's `tailrec.Trampoline`: `Landed`, `Bounce`,
+`Land`) has no `Fold` of its own, but its generated lenses give the predicate and both
+payloads, third-party and generic types included (`--type Trampoline
+github.com/IBM/fp-go/v2/tailrec`):
+
+```go
+// AVOID: nullary, but the closure names its argument and branches by hand
+func landAnswer() func(NextStep) TurnStep {
+	answered := pair.MapTail[Session](result.Of[*openai.ChatCompletion])
+	return func(step NextStep) TurnStep {
+		if step.Landed {
+			return tailrec.Land[Session](answered(step.Land))
+		}
+		return tailrec.Bounce[TurnResult](step.Bounce)
+	}
+}
+
+// PREFER: one composition: the tag lens is the predicate, the payload lenses feed each case
+func landAnswer() func(NextStep) TurnStep {
+	landedLens := MakeTrampolineLandedLens[Session, FinalResult]()
+	bounceLens := MakeTrampolineBounceLens[Session, FinalResult]()
+	landLens := MakeTrampolineLandLens[Session, FinalResult]()
+
+	return predicate.Fold(
+		F.Flow2(bounceLens.Get, tailrec.Bounce[TurnResult, Session]),
+		F.Flow3(landLens.Get, pair.MapTail[Session](result.Of[*openai.ChatCompletion]), tailrec.Land[Session, TurnResult]),
+	)(landedLens.Get)
+}
+```
+
+The only escape is a leaf in the sense above (a multi-field formatter, a raw I/O sink, a
+`select`), named as a leaf in its doc comment with the reason no combinator fits. Before
+you call something a leaf, check the MCP server and `go doc` for a combinator, and the
+lens generator for the field access.
 
 ## Readers instead of closures over the input
 
@@ -823,12 +857,22 @@ A loop of effectful steps is a step function `Kleisli[C, S, Trampoline[S, B]]` t
 `context.Context` before each step. Never write `Chain` recursion inside `Effect`.
 
 ```go
-// session.Run: guard the iteration limit, then run one step, until it lands
+// a loop: guard the iteration limit, then run one step, until it lands
 return F.Pipe1(
 	F.Flow2(guard, effect.Chain(Next())),
 	effect.TailRec,
 )
 ```
+
+**A loop that must not fail on a cancelled context** (it returns what it got so far) can't
+use `effect.TailRec` or `effect.Chain`: both check the context and fail with its cause,
+dropping the state. `session.Run` makes each stage total with `effect.ChainLeft` (no context
+check), which lands a failure with the stage's input, and joins the stages and the loop with
+`readerreaderioeither.Chain` / `TailRec`, the same type as `Effect` without the check. A
+cancelled context then fails the stage that runs (a poll, a request), and that stage lands it.
+Taps after such a loop must not check the context either: `thunk.TapIOK` /
+`ChainIOResultK` / `TapLeftIOK` and `readerreaderioeither.TapIOK` don't, `effect.TapIOK`
+does (it is built on `Chain`).
 
 ### Errors: data for the model, `Result` for infrastructure
 
@@ -859,8 +903,8 @@ F.Flow5(
 	makeRequest(registry),
 	session.MakeSession,
 	session.Run(),
-	effect.Local[session.FinalResult](toSessionDeps),
-	effect.LocalEffectK[session.FinalResult](F.Constant1[oai.DeepSeekDeps](oai.MakeDeepSeekChatCompletionDeps())),
+	effect.Local[session.TurnResult](toSessionDeps),
+	effect.LocalEffectK[session.TurnResult](F.Constant1[oai.DeepSeekDeps](oai.MakeDeepSeekChatCompletionDeps())),
 )
 ```
 
@@ -936,8 +980,10 @@ MCP servers or restart the session and the tools come up quickly.
       `A.Kleisli[A, B]`, `func([]A) []B` as `A.Operator[A, B]`
 - [ ] Monadic (Rule 3): no `if err != nil` chains, `nil` checks or accumulating loops
       where a combinator exists; imperative code only at the boundary or a leaf, with a reason
-- [ ] Point-free (Rule 4): lambdas only at the leaves; combinators, lens getters and
-      `F.FlowN` above them; pipelines returned from functions
+- [ ] Point-free (Rule 4), the goal for every function: lambdas only at the leaves;
+      combinators, lens getters and `F.FlowN` above them; pipelines returned from
+      functions, no `return func(x) …` closure from a nullary function; a branch on a
+      field is `predicate.Fold` over its generated lens
 - [ ] Nullary (Rule 5): every function except leaves, wiring and tests is `func f() …`,
       with its parameters in the returned `Reader` / `Kleisli` and its inner steps hoisted
       into named functions; a value used twice goes through `reader.Chain` or

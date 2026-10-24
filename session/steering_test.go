@@ -105,11 +105,15 @@ func TestMakeSteeringDeps(t *testing.T) {
 }
 
 // steeredAnswer is the fake server's answer to one kind of request: the
-// response, and the text the user types while it is being answered (none
-// when empty).
+// response, the text the user types while it is being answered (none when
+// empty), the HTTP status of a failed answer (none when zero), and, when
+// set, the channel the fake signals on before it blocks until the request is
+// cancelled instead of answering.
 type steeredAnswer struct {
 	response openai.ChatCompletion
 	typed    string
+	status   int
+	arrived  chan<- struct{}
 }
 
 // makeSteeredSessionDeps starts a fake server that answers the initial
@@ -139,6 +143,15 @@ func makeSteeredSessionDeps(t *testing.T, queue chan string, maxIterations int, 
 		if answer.typed != "" {
 			queue <- answer.typed
 		}
+		if answer.arrived != nil {
+			answer.arrived <- struct{}{}
+			<-r.Context().Done()
+			return
+		}
+		if answer.status != 0 {
+			http.Error(w, http.StatusText(answer.status), answer.status)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		assert.NoError(t, json.NewEncoder(w).Encode(answer.response))
 	}))
@@ -166,12 +179,11 @@ func makeSteeredSessionDeps(t *testing.T, queue chan string, maxIterations int, 
 func TestRun_SendsSteeringMessages(t *testing.T) {
 	queue := make(chan string, 1)
 	deps := makeSteeredSessionDeps(t, queue, 10,
-		steeredAnswer{makeToolCallCompletion("chatcmpl-1", "call_1"), "and in Paris?"},
-		steeredAnswer{makeStopCompletion("chatcmpl-2", "Sunny in Berlin, rain in Paris."), "and in Rome?"},
+		steeredAnswer{response: makeToolCallCompletion("chatcmpl-1", "call_1"), typed: "and in Paris?"},
+		steeredAnswer{response: makeStopCompletion("chatcmpl-2", "Sunny in Berlin, rain in Paris."), typed: "and in Rome?"},
 	)
 
-	final, err := result.Unwrap(Run()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
-	require.NoError(t, err)
+	final := runAnswer(t, MakeSession(makeLoopRequest()), deps)
 
 	got := pair.Head(final)
 	assert.Equal(t, 2, got.iterations)
@@ -196,16 +208,74 @@ func TestRun_SendsSteeringMessages(t *testing.T) {
 
 // TestRun_KeepsSteeringMessagesAtMaxIterations asserts that no poll happens
 // once the iteration limit is reached: a message queued during the last
-// allowed request is still queued when Run fails.
+// allowed request is still queued when the turn ends with a
+// MaxIterationsError.
 func TestRun_KeepsSteeringMessagesAtMaxIterations(t *testing.T) {
-	toolCall := steeredAnswer{makeToolCallCompletion("chatcmpl-loop", "call_loop"), "too late"}
+	toolCall := steeredAnswer{response: makeToolCallCompletion("chatcmpl-loop", "call_loop"), typed: "too late"}
 
 	queue := make(chan string, 1)
 	deps := makeSteeredSessionDeps(t, queue, 1, toolCall, toolCall)
 
-	_, err := result.Unwrap(Run()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
+	turn := runTurnIn(t, t.Context(), MakeSession(makeLoopRequest()), deps)
 
 	var maxErr *MaxIterationsError
-	require.ErrorAs(t, err, &maxErr)
+	require.ErrorAs(t, result.ToError(pair.Tail(turn)), &maxErr)
 	assert.Equal(t, result.Of(A.From("too late")), ChannelSteering(queue)(t.Context())())
+}
+
+// TestRun_RequestErrorKeepsSteeringMessages asserts that a request that fails
+// after the poll took the queued messages ends the turn with its error, and
+// that the session keeps the messages in its request.
+func TestRun_RequestErrorKeepsSteeringMessages(t *testing.T) {
+	queue := make(chan string, 1)
+	deps := makeSteeredSessionDeps(t, queue, 10,
+		steeredAnswer{response: makeToolCallCompletion("chatcmpl-1", "call_1"), typed: "and in Paris?"},
+		steeredAnswer{status: http.StatusInternalServerError},
+	)
+
+	turn := runTurnIn(t, t.Context(), MakeSession(makeLoopRequest()), deps)
+
+	var apiErr *openai.Error
+	require.ErrorAs(t, result.ToError(pair.Tail(turn)), &apiErr)
+	assert.Equal(t, http.StatusInternalServerError, apiErr.StatusCode)
+
+	got := pair.Head(turn)
+	assert.Equal(t, 1, got.iterations)
+	require.Len(t, got.history, 1)
+
+	// system, user, tool call, tool result, steering message
+	require.Len(t, got.current.Messages, 5)
+	assert.Equal(t, openai.UserMessage("and in Paris?"), got.current.Messages[4])
+	assert.Equal(t, result.Of(A.Empty[string]()), ChannelSteering(queue)(t.Context())())
+}
+
+// TestRun_CancelledDuringRequestKeepsSteeringMessages asserts that a turn
+// cancelled while request N runs ends with the cancellation, and that the
+// session is the input of request N, with the steered message it carries.
+func TestRun_CancelledDuringRequestKeepsSteeringMessages(t *testing.T) {
+	queue := make(chan string, 1)
+	arrived := make(chan struct{}, 1)
+	deps := makeSteeredSessionDeps(t, queue, 10,
+		steeredAnswer{response: makeToolCallCompletion("chatcmpl-1", "call_1"), typed: "and in Paris?"},
+		steeredAnswer{arrived: arrived},
+	)
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	go func() {
+		<-arrived
+		cancel()
+	}()
+
+	turn := runTurnIn(t, ctx, MakeSession(makeLoopRequest()), deps)
+
+	assert.True(t, IsCancelled()(result.ToError(pair.Tail(turn))))
+
+	got := pair.Head(turn)
+	assert.Equal(t, 1, got.iterations)
+	require.Len(t, got.history, 1)
+
+	// system, user, tool call, tool result, steering message
+	require.Len(t, got.current.Messages, 5)
+	assert.Equal(t, openai.UserMessage("and in Paris?"), got.current.Messages[4])
 }
