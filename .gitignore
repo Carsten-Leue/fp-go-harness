@@ -36,3 +36,6 @@ go.work.sum
 # Personal BMAD and Claude Code settings
 _bmad/config.user.toml
 .claude/settings.local.json
+
+# GoReleaser output
+dist/

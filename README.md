@@ -161,7 +161,16 @@ go generate ./...  # regenerates the lenses (directives in each package's doc.go
 
 [CI](.github/workflows/build.yml) checks `go mod tidy`, runs `go vet` and the tests with the
 race detector on the latest Go release. Every push to `main` runs semantic release, which
-derives the version and release notes from the conventional commit messages.
+derives the version and release notes from the conventional commit messages. When it tags a
+release, [GoReleaser](.goreleaser.yaml) builds the binaries for Linux, macOS and Windows
+(amd64, arm64) and attaches them to the GitHub release. They are built with
+`-tags urfave_cli_no_template -trimpath -ldflags="-s -w"`, about 40 MB instead of 87 MB:
+the tag replaces urfave/cli's `text/template` help printer, whose method lookup by name
+keeps the linker from dropping unused methods. To build the same binary locally:
+
+```sh
+go build -tags urfave_cli_no_template -trimpath -ldflags="-s -w" .
+```
 
 The coding rules (fp-go composition patterns, generated lenses, naming, PR conventions) are
 in [AGENTS.md](AGENTS.md) and the [repository skills](.bob/skills/).

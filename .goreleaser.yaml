@@ -1,0 +1,49 @@
+# GoReleaser builds the binaries and attaches them to the GitHub release that
+# semantic-release created for the tag on HEAD. semantic-release owns the
+# version, the tag and the release notes; GoReleaser only adds the artifacts.
+version: 2
+
+project_name: fp-go-harness
+
+builds:
+  - id: fp-go-harness
+    main: .
+    binary: fp-go-harness
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # urfave/cli renders its help with text/template, whose method lookup by
+    # name stops the linker from dropping unused methods (all of openai-go's
+    # services); this tag swaps in the template-free help printer.
+    tags:
+      - urfave_cli_no_template
+    flags:
+      - -trimpath
+    # no symbol table and no DWARF; stack traces still work (pclntab)
+    ldflags:
+      - -s -w
+
+archives:
+  - id: fp-go-harness
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: checksums.txt
+
+# the release notes come from semantic-release
+changelog:
+  disable: true
+
+release:
+  mode: keep-existing
