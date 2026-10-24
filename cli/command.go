@@ -42,6 +42,13 @@ func configFlags() []C.Flag {
 // MakePromptCommand creates the command that answers a prompt with DeepSeek
 // and the tools of a mode, and prints the answer and the session statistics.
 //
+// A turn that does not answer, because it was cancelled, a request failed or
+// it reached the iteration limit, prints the error, the last assistant text
+// of the session and the statistics on the standard error. After a cancelled
+// turn the background processes of execute_command are stopped. The command
+// prints every error it returns once; usage errors are printed by
+// [C.Command] itself.
+//
 // Example:
 //
 //	fp-go-harness --mode agent --max-iterations 10 "add a test for grep"
@@ -51,8 +58,9 @@ func MakePromptCommand() *C.Command {
 		Usage:     "answers a prompt with DeepSeek and the tools of a mode",
 		ArgsUsage: "<prompt>",
 		Flags:     configFlags(),
-		// Errors are returned to main. The default handler exits the process
-		// on an error that carries several errors, as a failed decoding does.
+		// Errors are returned to main for the exit code. The default
+		// handler exits the process on an error that carries several
+		// errors, as a failed decoding does.
 		ExitErrHandler: func(context.Context, *C.Command, error) {},
 		Action: func(ctx context.Context, cmd *C.Command) error {
 			_, err := result.Unwrap(printResult()(cmd)(ctx)())

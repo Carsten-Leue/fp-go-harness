@@ -20,15 +20,19 @@ Every Go change, whether you write it, generate it or review it, must:
    `Effect`, `Chain`, `TraverseArray` instead of `if err != nil` chains, `nil` checks and
    accumulating `for` loops. Imperative code only at the boundary (`main`, handler glue)
    or in a leaf without an fp-go lift, with a reason.
-3. **Use point-free style wherever possible**: compose named functions, lens getters and
-   combinators (`N.MoreThan`, `S.IsEmpty`, `P.Not`, `F.Constant1`) with `F.Flow` /
-   `F.Pipe`; lambdas only at the leaves.
+3. **Write every function point-free**, the goal for all of them: compose named
+   functions, lens getters and combinators (`N.MoreThan`, `S.IsEmpty`, `P.Not`,
+   `F.Constant1`) with `F.Flow` / `F.Pipe`; lambdas only at the leaves; a branch on a
+   field is `predicate.Fold` over its generated lens
+   ([`fp-go`, Rule 4](../fp-go/SKILL.md#rule-4--every-function-is-point-free)).
 4. **Use the fp-go MCP server as the primary source of truth**: `use_skill`,
    `get_example` and `search_examples` before writing or judging an fp-go call; `go doc`
    on the pinned module as the fallback; never memory.
 5. **Implement every function as a nullary function**: `func f() Reader[A, B]`, not
    `func f(a A) B`. Parameters move into the returned `Reader` / `Kleisli` and inner steps
-   are hoisted into named nullary functions; only leaves, wiring and tests take parameters
+   are hoisted into named nullary functions; only leaves, wiring and tests take parameters.
+   Nullary and point-free together: the returned value is one composition, not a
+   `return func(x) …` closure
    ([`fp-go`, Rule 5](../fp-go/SKILL.md#rule-5--nullary-functions-with-the-inner-functions-hoisted)).
 
 The details, the replacement table for imperative shapes, the accepted exceptions and the

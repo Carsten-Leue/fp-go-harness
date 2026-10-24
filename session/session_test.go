@@ -11,6 +11,8 @@ import (
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	F "github.com/IBM/fp-go/v2/function"
+	P "github.com/IBM/fp-go/v2/optics/prism"
+	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
@@ -90,7 +92,7 @@ func makeSequencedSessionDeps(t *testing.T, responses []openai.ChatCompletion, r
 
 // runNext executes [Next] for the given session/deps pair and unwraps the
 // outer [result.Result], failing the test if the effect itself errors.
-func runNext(t *testing.T, session Session, deps SessionDeps) NextStep {
+func runNext(t *testing.T, session Session, deps SessionDeps) TurnStep {
 	t.Helper()
 
 	step, err := result.Unwrap(Next()(session)(deps)(t.Context())())
@@ -135,10 +137,14 @@ func TestNext_LandsOnStop(t *testing.T) {
 
 	step := runNext(t, MakeSession(req), deps)
 
-	require.True(t, step.Landed)
+	landPrism := P.FromLand[Session, TurnResult]()
 
-	gotSession := pair.Head(step.Land)
-	gotCompletion := pair.Tail(step.Land)
+	turn, landed := option.Unwrap(landPrism.GetOption(step))
+	require.True(t, landed)
+
+	gotSession := pair.Head(turn)
+	gotCompletion, err := result.Unwrap(pair.Tail(turn))
+	require.NoError(t, err)
 
 	assert.Equal(t, 1, gotSession.iterations)
 	assert.Equal(t, response.Usage, gotSession.usage)
@@ -206,9 +212,10 @@ func TestNext_BouncesOnToolCalls(t *testing.T) {
 
 	step := runNext(t, MakeSession(req), deps)
 
-	require.False(t, step.Landed)
+	bouncePrism := P.FromBounce[Session, TurnResult]()
 
-	gotSession := step.Bounce
+	gotSession, bounced := option.Unwrap(bouncePrism.GetOption(step))
+	require.True(t, bounced)
 
 	assert.Equal(t, 1, gotSession.iterations)
 	assert.Equal(t, response.Usage, gotSession.usage)

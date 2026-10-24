@@ -86,13 +86,15 @@ func runCLI(t *testing.T, root, prompt string) string {
 	run, err := result.Unwrap(makeAnswer(cfg)())
 	require.NoError(t, err)
 
-	final, err := effect.RunSync(F.Pipe1(
+	turn, err := effect.RunSync(F.Pipe1(
 		run(prompt),
-		effect.Provide[session.FinalResult](deps),
+		effect.Provide[session.TurnResult](deps),
 	))(t.Context())
 	require.NoError(t, err)
+	completion, err := result.Unwrap(pair.Tail(turn))
+	require.NoError(t, err)
 
-	out := formatResult()(final)
+	out := formatResult()(pair.MakePair(pair.Head(turn), completion))
 	t.Logf("$ fp-go-harness %q\n%s", prompt, out)
 	require.Contains(t, out, "[iterations: ")
 	return out

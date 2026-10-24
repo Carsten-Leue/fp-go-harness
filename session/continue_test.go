@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/IBM/fp-go/v2/pair"
-	"github.com/IBM/fp-go/v2/result"
 	"github.com/openai/openai-go/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,11 +47,8 @@ func TestContinue_SecondTurnSendsWholeConversation(t *testing.T) {
 
 	deps := makeSequencedSessionDeps(t, responses, makeWeatherRegistry(), 10)
 
-	first, err := result.Unwrap(Run()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
-	require.NoError(t, err)
-
-	second, err := result.Unwrap(Run()(Continue()("and in Paris?")(pair.Head(first)))(deps)(t.Context())())
-	require.NoError(t, err)
+	first := runAnswer(t, MakeSession(makeLoopRequest()), deps)
+	second := runAnswer(t, Continue()("and in Paris?")(pair.Head(first)), deps)
 
 	got := pair.Head(second)
 

@@ -106,6 +106,19 @@ not share mutable state:
 CI runs `go test -race`. It can't run on this laptop (no cgo), so a race only shows up in
 CI: check every fake and dependency against these rules before you push.
 
+### Every function is nullary and point-free
+
+This is the goal for **every** function, not a preference: `func f() Reader[A, B]`, and
+the value it returns is one composition of named functions, generated lens getters and
+combinators. A nullary function that returns `func(a A) B { … }` has only moved its
+parameter and is a review finding. A branch on a field (`if step.Landed`) is a
+`predicate.Fold` over the field's generated lens, third-party and generic types included;
+better still, build the target type where the value is constructed so no converter is
+needed (`session.Next` lands a `TurnResult` directly). The only exceptions are leaves (a
+multi-field formatter, a raw I/O sink, a `select`), wiring, tests and `main`, each named
+as such in its doc comment with the reason. The rules and the worked example are in the
+[`fp-go` skill, Rules 4 and 5](.bob/skills/fp-go/SKILL.md#rule-4--every-function-is-point-free).
+
 ### Closures over a pipeline's input
 
 A pipeline that reads its input in more than one place is a `reader.Reader[R, A]`, not a
@@ -214,6 +227,7 @@ Each of these was searched for and confirmed absent in fp-go v2 with `go doc`:
 | pair a value with something computed from it (fan-out, `&&&`) | in `pair` | `F.Flow2(pair.Of[T], pair.MapTail[T](g))`; to update an existing pair instead, one `MapHead` / `MapTail` endomorphism per side, as in `prompt/compare.go` `enter` |
 | a fold over a slice that keeps state (`A.Scan`, `A.Unfold`) | in `array` (`iter.Scan` yields every state) | `A.Reduce` over a `Pair` state, with a nullary step as `F.Uncurry2(F.Flip(lineStep()))`, as in `prompt/compare.go` `SectionTags` (see the [`fp-go` skill](.bob/skills/fp-go/SKILL.md#a-scan-with-state-areduce-over-a-pair)) |
 | `[]byte` to `string` | a `string` combinator | `B.ToString` from `github.com/IBM/fp-go/v2/bytes` |
+| a total case split (`Fold`, `Map` over the landed value) of a `tailrec.Trampoline` | in fp-go v2.13.0 (only the partial `tailrec.IsLand` / `GetLand` / `GetBounce` and `prism.FromLand` / `FromBounce`) | build the needed `Trampoline` type where it is constructed, as `session.Next` lands a `TurnResult`; read one case in a test with `option.Unwrap(prism.FromLand[B, L]().GetOption(step))` |
 | split Markdown at its YAML front matter | a front matter parser in fp-go (and we don't use `adrg/frontmatter`) | `mode.SplitFrontMatter`, then decode the head with `go.yaml.in/yaml/v3` and `KnownFields(true)` |
 
 Before concluding that a combinator is missing, `go doc` the **whole** package: the ones

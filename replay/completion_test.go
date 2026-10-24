@@ -136,8 +136,11 @@ func TestReplaySyntheticTask(t *testing.T) {
 		session.MakeSteeringDeps(session.NoSteering()),
 	)
 
-	final, err := result.Unwrap(session.Run()(session.MakeSession(start))(deps)(t.Context())())
+	turn, err := result.Unwrap(session.Run()(session.MakeSession(start))(deps)(t.Context())())
 	require.NoError(t, err)
+	completion, err := result.Unwrap(pair.Tail(turn))
+	require.NoError(t, err)
+	final := pair.MakePair(pair.Head(turn), completion)
 
 	got := pair.Head(final)
 	assert.Equal(t, 2, session.MakeSessioniterationsLens().Get(got))

@@ -1,13 +1,19 @@
 package session
 
 import (
+	"context"
+	"errors"
 	"fmt"
 
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
+	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
+	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
 	"github.com/IBM/fp-go/v2/result"
+	"github.com/IBM/fp-go/v2/tailrec"
+	openai "github.com/openai/openai-go/v3"
 )
 
 // LoopDeps configures how the agent loop driven by [Run] is bounded.
@@ -76,17 +82,86 @@ func limitIterations() reader.Reader[int, result.Kleisli[Session, Session]] {
 	)
 }
 
-// Run drives [Next] until the model returns a terminal response and returns the
-// final (session, completion) pair.
+// Outcome is how a turn ended: the final completion of the model, or the
+// error that ended the turn: a cancellation (see [IsCancelled]), a failed
+// request or poll, or a [MaxIterationsError].
+type Outcome = Result[*openai.ChatCompletion]
+
+// TurnResult is what [Run] returns: the session as far as the turn got,
+// paired with its [Outcome]. The session holds every round trip whose request
+// returned, the usage so far and the steered messages already taken from the
+// queue, also when the turn failed.
 //
-// The loop is stack-safe ([effect.TailRec]) and checks the context before each
-// step. Before each request the session's iteration counter is checked against
-// [LoopDeps.GetMaxIterations]; once the limit is reached, Run fails with a
-// [MaxIterationsError] instead of sending another request. After the check,
-// [Steer] appends the user messages queued since the previous step, so the
-// request carries them. Messages queued after the last request stay queued
-// for the next Run, so after a [Continue] they come after its new prompt.
-func Run() effect.Kleisli[SessionDeps, Session, FinalResult] {
+// Its consumers:
+//
+//   - E5, the REPL, continues the head with [Continue], also after a
+//     cancelled turn.
+//   - J1, the turn as a value, returns it.
+//   - J3, ACP session/prompt, maps a Right by its finish reason, a cancelled
+//     Left to "cancelled", a [MaxIterationsError] to "max_turn_requests" and
+//     any other Left to a JSON-RPC error.
+//   - J5, ACP cancellation, keeps the head in the ACP session table.
+//   - K3 and K5, the A2A tasks, map a cancelled Left to "canceled" and any
+//     other Left to "failed".
+//   - G6, the MCP server, ends a cancelled request with the partial answer.
+type TurnResult = Pair[Session, Outcome]
+
+// TurnStep is one step of the loop of [Run]: the session to continue with,
+// or the result of the turn.
+type TurnStep = Trampoline[Session, TurnResult]
+
+// IsCancelled matches the errors of a cancelled context, also the cause that
+// [os/signal.NotifyContext] sets.
+func IsCancelled() Predicate[error] {
+	return F.Bind2nd(errors.Is, context.Canceled)
+}
+
+// failedTurn lands the error of a stage as the outcome of the turn, with the
+// session the stage received.
+func failedTurn() Reader[Session, effect.Kleisli[SessionDeps, error, TurnStep]] {
+	return F.Flow3(
+		F.Curry2(pair.MakePair[Session, Outcome]),
+		reader.Local[TurnResult](result.Left[*openai.ChatCompletion]),
+		reader.Map[error](F.Flow2(tailrec.Land[Session, TurnResult], effect.Of[SessionDeps, TurnStep])),
+	)
+}
+
+// attempt makes a stage of the loop total: a failure of the stage lands with
+// the session it received. The session is read twice, by the stage and by the
+// recovery, hence the reader applicative. [effect.ChainLeft] does not check
+// the context, so a cancelled stage lands too.
+func attempt() Endomorphism[effect.Kleisli[SessionDeps, Session, TurnStep]] {
+	recovery := F.Flow2(failedTurn(), effect.ChainLeft[SessionDeps, TurnStep])
+
+	return F.Flow2(
+		reader.Ap[Effect[SessionDeps, TurnStep], Session, Effect[SessionDeps, TurnStep]],
+		reader.Read[Reader[Session, Effect[SessionDeps, TurnStep]]](recovery),
+	)
+}
+
+// Run drives [Next] until the model returns a terminal response and returns
+// the [TurnResult]: the session paired with the final completion.
+//
+// Run never fails. Each step runs the iteration guard, [Steer] and [Next],
+// and a failure of any of them ends the turn with the error as its [Outcome]
+// and the session that stage received: the guard's, so a [MaxIterationsError]
+// comes with the session that reached the limit; the session after [Steer]
+// for a failed request, so the steered messages it took are in its request.
+//
+// Before each request the session's iteration counter is checked against
+// [LoopDeps.GetMaxIterations]; once the limit is reached, the turn ends with
+// a [MaxIterationsError] instead of sending another request. After the
+// check, [Steer] appends the user messages queued since the previous step,
+// so the request carries them. Messages queued after the last request stay
+// queued for the next Run, so after a [Continue] they come after its new
+// prompt.
+//
+// The stages and the loop are joined without a check of the context
+// (readerreaderioeither's Chain and TailRec, same type as [Effect]): a
+// cancelled context makes the stage that runs fail, through the poll or the
+// request, and that stage lands the cancellation with its session. The loop
+// is stack-safe.
+func Run() effect.Kleisli[SessionDeps, Session, TurnResult] {
 	guard := F.Flow2(
 		reader.Sequence(F.Flow2(
 			SessionDeps.GetMaxIterations,
@@ -100,12 +175,18 @@ func Run() effect.Kleisli[SessionDeps, Session, FinalResult] {
 		effect.Local[Session](AsSteeringDeps[SessionDeps]),
 	)
 
-	return F.Pipe1(
-		F.Flow3(
-			guard,
-			effect.Chain(steer),
-			effect.Chain(Next()),
-		),
-		effect.TailRec,
-	)
+	next := Next()
+
+	try := attempt()
+	andThen := RRIOE.Chain[SessionDeps, context.Context, error, Session, TurnStep]
+
+	// the inner stages never fail, so each failure lands in the attempt
+	// around the stage that failed
+	return RRIOE.TailRec(try(F.Flow2(
+		guard,
+		andThen(try(F.Flow2(
+			steer,
+			andThen(try(next)),
+		))),
+	)))
 }

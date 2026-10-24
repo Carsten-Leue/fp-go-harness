@@ -264,3 +264,30 @@ func StartShell(shell []string, logDir string) Reader[IORef[ProcessTable], Start
 		thunk.Eitherize1[func(context.Context, Process) (BackgroundProcess, error)],
 	)
 }
+
+// killPid is a leaf, a raw I/O sink: it kills the process with the id pid.
+// [os.Process.Kill] has no fp-go lift. A process that has already exited is
+// not an error, so the outcome is dropped.
+func killPid(pid int) {
+	if p, err := os.FindProcess(pid); err == nil {
+		_ = p.Kill()
+		_ = p.Release()
+	}
+}
+
+// StopProcesses kills every background process in the table. Only the shell
+// process that [StartShell] started is killed, so a process it started may
+// keep running. The killed processes leave the table when the goroutine that
+// waits for each of them sees it exit.
+func StopProcesses() Reader[IORef[ProcessTable], IO[F.Void]] {
+	pidLens := MakeBackgroundProcessPidLens()
+
+	return F.Flow2(
+		ioref.Read[ProcessTable],
+		io.Chain(F.Flow3(
+			R.Values[int, BackgroundProcess],
+			io.TraverseArray(F.Flow2(pidLens.Get, io.FromConsumer(killPid))),
+			io.MapTo[[]F.Void](F.VOID),
+		)),
+	)
+}

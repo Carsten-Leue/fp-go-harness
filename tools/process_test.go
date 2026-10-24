@@ -231,3 +231,32 @@ func TestInvokeProcess(t *testing.T) {
 	assert.Equal(t, []Process{{Command: "build", Dir: "/work"}}, fake.got)
 	assert.InDelta(t, float64(60*time.Second), float64(fake.deadline), float64(time.Second))
 }
+
+// TestStopProcesses starts a real background command and stops it. The
+// command line has a second statement, so sh does not exec into sleep and
+// the test kills the shell, as StopProcesses does with every process.
+func TestStopProcesses(t *testing.T) {
+	if testing.Short() {
+		t.Skip("starts shell processes")
+	}
+
+	table := ioref.MakeIORef(ProcessTable{})()
+	start := StartShell(DefaultShell(), t.TempDir())(table)
+
+	started, err := result.Unwrap(start(MakeProcess("sleep 30; exit 0", t.TempDir()))(t.Context())())
+	require.NoError(t, err)
+	require.Equal(t, ProcessTable{started.Pid: started}, tableOf(table))
+
+	StopProcesses()(table)()
+
+	assert.Eventually(t, func() bool { return len(tableOf(table)) == 0 }, 20*time.Second, 50*time.Millisecond)
+}
+
+// TestStopProcesses_Empty asserts that stopping an empty table does nothing.
+func TestStopProcesses_Empty(t *testing.T) {
+	table := ioref.MakeIORef(ProcessTable{})()
+
+	StopProcesses()(table)()
+
+	assert.Empty(t, tableOf(table))
+}
