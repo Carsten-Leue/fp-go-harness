@@ -4,8 +4,12 @@ github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 h1:fhqpLE3UEXi9lPaBRpQ6Xu
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0/go.mod h1:7dCRMLwisfRH3dBupKeNCioWYUZ4SS09Z14H+7i8ZoY=
 github.com/IBM/fp-go/gen/v2 v2.11.0 h1:4yiPzm8r8dR/LuyOyqTeJKht7ngZNvT+QrPfKty542E=
 github.com/IBM/fp-go/gen/v2 v2.11.0/go.mod h1:GcfjejjKXdFqjbUcr+66+Zrhc2mmgdoc3w0Dz/x/rDc=
+github.com/IBM/fp-go/gen/v2 v2.12.0 h1:XTR+DJFDiV+3vNoSDv13MYkJHHcumy2aJ2SWWvJQGio=
+github.com/IBM/fp-go/gen/v2 v2.12.0/go.mod h1:CEkGsJTsb9rQZA6HllkLU2J/ir/xQ46rQLb8l8K5SZ8=
 github.com/IBM/fp-go/v2 v2.11.0 h1:dusPzL5WD8ySCkEg3x6X9J0NRvHRQEZge8PkiaYpJDA=
 github.com/IBM/fp-go/v2 v2.11.0/go.mod h1:FOIrMSfoFLsaZ3tjFoo2EX1CjdbSm0l0047RcuLHGSw=
+github.com/IBM/fp-go/v2 v2.12.0 h1:gpaSTcV4H9sjNjY2na+Z4c5VIMTuEDmTIGTNGWA49U0=
+github.com/IBM/fp-go/v2 v2.12.0/go.mod h1:FOIrMSfoFLsaZ3tjFoo2EX1CjdbSm0l0047RcuLHGSw=
 github.com/bmatcuk/doublestar/v4 v4.10.3 h1:1UIv1+fqH3++ViVkpnaPTB+Pi1UHycnPFAq14zgK+gI=
 github.com/bmatcuk/doublestar/v4 v4.10.3/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
 github.com/coder/websocket v1.8.15 h1:6B2JPeOGlpff2Uz6vOEH1Vzpi0iUz20A+lPVhPHtNUA=

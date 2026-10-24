@@ -3,7 +3,7 @@ module github.com/Carsten-Leue/fp-go-harness
 go 1.27.0
 
 require (
-	github.com/IBM/fp-go/v2 v2.11.0
+	github.com/IBM/fp-go/v2 v2.12.0
 	github.com/bmatcuk/doublestar/v4 v4.10.3
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1
@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	github.com/IBM/fp-go/gen/v2 v2.11.0 // indirect
+	github.com/IBM/fp-go/gen/v2 v2.12.0 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect

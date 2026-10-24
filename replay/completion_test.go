@@ -133,6 +133,7 @@ func TestReplaySyntheticTask(t *testing.T) {
 		MakeTaskChatCompletionDeps()(task)(),
 		tools.MakeToolDeps(F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry)),
 		session.MakeLoopDeps(10),
+		session.MakeSteeringDeps(session.NoSteering()),
 	)
 
 	final, err := result.Unwrap(session.Run()(session.MakeSession(start))(deps)(t.Context())())

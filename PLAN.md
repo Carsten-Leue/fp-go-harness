@@ -247,8 +247,17 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `fs.ErrNotExist`. `SessionIso()` converts to the exported `SessionDTO`. No CLI flag yet: resuming a task from the
   command line fits E5. *Test:* save after a first `Run`, load, `Continue` and `Run` again; the second request
   carries the first answer.
-- [ ] **E3 Steering.** Add `SteeringDeps.Poll(): Thunk[[]string]`. Before each `Next` request, read the queued user messages
+- [x] **E3 Steering.** Add `SteeringDeps.Poll(): Thunk[[]string]`. Before each `Next` request, read the queued user messages
   and append them. `Next` stays pure in its loop structure.
+  The getter is `SteeringDeps.GetPoll()`, embedded in `SessionDeps` (so `MakeSessionDeps` takes a fourth argument).
+  `session.Steer()` is an `effect.Kleisli[SteeringDeps, Session, Session]` that appends one user message per polled
+  text and keeps the iteration counter (the messages belong to the running turn, unlike `Continue`). `Run` chains it
+  after the iteration guard, so no poll happens once the limit is reached; messages queued after the last request
+  stay queued for the next `Run`, so after a `Continue` they come after its new prompt. `ChannelSteering(queue)` is the poll of a channel, drained without blocking, for
+  the REPL of E5: an `io.TailRec` over the messages taken so far, one non-blocking receive (`option.Optionize0`)
+  per step. The one-shot CLI wires `NoSteering()`. *Test:* the fake server queues a message while it answers the
+  first request (a tool call); the second request carries it after the tool result. The fake keeps no state: it
+  tells the first request from the second by its number of messages.
 - [ ] **E4 Cancellation.** Pass the `context.Context` of the `Thunk` through. Ctrl-C cancels the request and the tools that
   are running. Return the partial session as a `Land` result.
 - [ ] **E5 Interactive REPL.** Change `main.go` so it loops over stdin turns (`Continue` → `Run` → print). This loop
