@@ -1,0 +1,149 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-24-2026 14:54
+last_updated: 10-24-2026 14:54
+project: fp-go-harness
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: done
+  1-1-a1-clean-up-todos: done
+  1-2-a2-loop-driver: done
+  1-3-a3-iteration-limit: done
+  1-4-a4-tool-definitions-in-the-request: done
+  1-5-a5-main-go-cli: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-b1-log-reader: done
+  2-2-b2-payload-extraction: done
+  2-3-b3-task-grouping: done
+  2-4-b4-replay-chatcompletiondeps: done
+  epic-2-retrospective: optional
+
+  epic-3: in-progress
+  3-1-c1-workspace-dependency: done
+  3-2-c2-read_file: done
+  3-3-c3-list_files-and-glob: done
+  3-4-c4-grep: done
+  3-5-c5-execute_command-foreground: done
+  3-6-c6-execute_command-background: done
+  3-7-c7-write_file: done
+  3-8-c8-search_and_replace: done
+  3-9-c9-apply_diff: done
+  3-10-c10-insert_content: done
+  3-11-c11-output-limits: done
+  3-12-c12-grep-with-ripgrep-and-core-excludesfile: backlog
+  epic-3-retrospective: optional
+
+  epic-4: in-progress
+  4-1-d1-promptsection-monoid: done
+  4-2-d2-static-sections: done
+  4-3-d3-environment_info: done
+  4-4-d4-project_rules: done
+  4-5-d5-mode-definitions: done
+  4-6-d6-environment_details-per-turn: done
+  4-7-d7-replay-comparison: done
+  4-8-d8-custom-modes: done
+  4-9-d9-investigation-and-engineering-discipline-sections: backlog
+  4-10-d10-custom-instructions-and-auto-appended-context: backlog
+  epic-4-retrospective: optional
+
+  epic-5: in-progress
+  5-1-e1-multi-turn: done
+  5-2-e2-persistence: done
+  5-3-e3-steering: review
+  5-4-e4-cancellation-and-the-partial-session: backlog
+  5-5-e5-interactive-repl: backlog
+  5-6-e6-session-changing-tools: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-f1-streaming-request: backlog
+  6-2-f2-event-sink: backlog
+  6-3-f3-structured-logging: backlog
+  6-4-f4-usage-details-and-cost: backlog
+  6-5-f5-http-retry: backlog
+  6-6-b5-replay-fixtures-from-the-harness-s-own-logs: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-g1-mcp-config: backlog
+  7-2-g2-stdio-session: backlog
+  7-3-g3-tool-bridge: backlog
+  7-4-g4-dogfood-the-fp-go-server: backlog
+  7-5-g5-reconnect: backlog
+  7-6-g6-harness-as-an-mcp-server: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-h1-skill-discovery: backlog
+  8-2-h2-use_skill: backlog
+  8-3-h3-update_todo_list: backlog
+  8-4-h4-ask_followup_question: backlog
+  8-5-h5-switch_mode-and-available_modes: backlog
+  8-6-h6-subagents: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-i1-approval-hook: backlog
+  9-2-i2-allow-and-deny-lists: backlog
+  9-3-i3-external-change-detection: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog
+  10-1-j1-turn-as-a-value: backlog
+  10-2-j2-acp-subcommand: backlog
+  10-3-j3-stop-reasons: backlog
+  10-4-j4-tool-call-updates: backlog
+  10-5-j5-acp-cancel: backlog
+  10-6-j6-acp-modes: backlog
+  10-7-j7-acp-permissions: backlog
+  10-8-j8-acp-streaming: backlog
+  10-9-j9-editor-backed-files-and-terminal: backlog
+  10-10-j10-session-load: backlog
+  10-11-j11-mcp-servers-from-the-client: backlog
+  10-12-j12-plan-updates-from-the-todo-list: backlog
+  epic-10-retrospective: optional
+
+  epic-11: backlog
+  11-1-k1-a2a-subcommand-and-agent-card: backlog
+  11-2-k2-executor: backlog
+  11-3-k3-outcome-mapping: backlog
+  11-4-k4-progress: backlog
+  11-5-k5-a2a-cancel: backlog
+  11-6-k6-auth-and-safety: backlog
+  11-7-k7-a2a-client-tools: backlog
+  11-8-k8-input-required: backlog
+  11-9-k9-push-notifications: backlog
+  11-10-k10-persistent-task-store: backlog
+  epic-11-retrospective: optional
