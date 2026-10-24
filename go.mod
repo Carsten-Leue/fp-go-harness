@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/IBM/fp-go/v2 v2.13.0
-	github.com/bmatcuk/doublestar/v4 v4.10.3
+	github.com/bmatcuk/doublestar/v4 v4.10.4
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/joho/godotenv v1.5.1
 	github.com/openai/openai-go/v3 v3.86.0
