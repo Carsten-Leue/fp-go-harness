@@ -106,12 +106,12 @@ func TestAsk_CancelStopsBackgroundProcesses(t *testing.T) {
 	))))
 	require.NoError(t, err)
 
-	deps, err := result.Unwrap(makeModeDeps(cfg)())
+	deps, err := result.Unwrap(makeModeDeps()(cfg)())
 	require.NoError(t, err)
 	table := deps.GetProcessTable()
 	t.Cleanup(func() { tools.StopProcesses()(table)() })
 
-	run, err := result.Unwrap(modeAnswer(cfg)(deps))
+	run, err := result.Unwrap(result.Map(ask())(modeEnvOf()(cfg)(deps)))
 	require.NoError(t, err)
 
 	var deepSeek oai.DeepSeekDeps = &deepSeekDeps{

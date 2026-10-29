@@ -165,7 +165,7 @@ func TestMakeRegistry_ToolsOfTheMode(t *testing.T) {
 
 	assert.ElementsMatch(t,
 		[]string{tools.ReadFileName, tools.ListFilesName, tools.GlobName, tools.GrepName},
-		R.Keys(makeRegistry(defaultConfig(t), m)(makeTestToolsDeps(t))))
+		R.Keys(makeRegistry()(newModeEnv(defaultConfig(t), mode.MakeDefaultModeDeps(makeTestToolsDeps(t), mode.Modes()), m))))
 }
 
 func TestWithPrompt(t *testing.T) {
@@ -178,4 +178,16 @@ func TestWithPrompt(t *testing.T) {
 	assert.Equal(t, "system", request.Messages[0].OfSystem.Content.OfString.Value)
 	assert.Equal(t, "hello", request.Messages[1].OfUser.Content.OfString.Value)
 	assert.Len(t, system.Messages, 1)
+}
+
+// TestModeDirs asserts the precedence of the custom mode directories: the
+// home directory's first, so the workspace's override them.
+func TestModeDirs(t *testing.T) {
+	root := filepath.Join("work", "space")
+	home := filepath.Join("home", "user")
+
+	assert.Equal(t, []string{
+		filepath.Join(home, mode.ModesDir),
+		filepath.Join(root, mode.ModesDir),
+	}, modeDirs()(root)(home))
 }

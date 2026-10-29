@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Carsten-Leue/fp-go-harness/mode"
@@ -17,10 +18,45 @@ import (
 // The tests below fail before any request is sent, so they don't need an API
 // key.
 
+// TestPromptCommand_MissingPrompt runs the REPL without a prompt: at the end
+// of an empty input it ends at once, without an error and without a request.
+// The DeepSeek deps need a key to be built, not to be used.
 func TestPromptCommand_MissingPrompt(t *testing.T) {
-	err := MakePromptCommand().Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir()})
+	withHome(t)
+	t.Setenv("DEEPSEEK_API_KEY", "test-key")
 
-	assert.ErrorContains(t, err, "missing prompt")
+	var out, errOut bytes.Buffer
+	cmd := MakePromptCommand()
+	cmd.Reader = strings.NewReader("")
+	cmd.Writer = &out
+	cmd.ErrWriter = &errOut
+
+	err := cmd.Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir()})
+
+	require.NoError(t, err)
+	assert.Empty(t, out.String())
+	assert.Equal(t, promptMarker, errOut.String())
+}
+
+// TestPromptCommand_ReplMissingAPIKey runs the REPL without an API key: the
+// DeepSeek deps fail to build, and the error is returned and printed once.
+func TestPromptCommand_ReplMissingAPIKey(t *testing.T) {
+	withHome(t)
+	t.Setenv("DEEPSEEK_API_KEY", "")
+	os.Unsetenv("DEEPSEEK_API_KEY")
+
+	var out, errOut bytes.Buffer
+	cmd := MakePromptCommand()
+	cmd.Reader = strings.NewReader("hello\n")
+	cmd.Writer = &out
+	cmd.ErrWriter = &errOut
+
+	err := cmd.Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir()})
+
+	require.Error(t, err)
+	assert.Empty(t, out.String())
+	assert.Equal(t, err.Error()+"\n", errOut.String())
+	assert.Contains(t, err.Error(), "DEEPSEEK_API_KEY")
 }
 
 // withHome makes a temporary directory the home directory of the test, so

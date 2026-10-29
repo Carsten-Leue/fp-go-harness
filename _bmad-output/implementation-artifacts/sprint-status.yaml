@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-24-2026 14:54
-last_updated: 10-24-2026 16:20
+last_updated: 10-29-2026 17:30
 project: fp-go-harness
 project_key: NOKEY
 tracking_system: file-system
@@ -82,8 +82,8 @@ development_status:
   5-1-e1-multi-turn: done
   5-2-e2-persistence: done
   5-3-e3-steering: done
-  5-4-e4-cancellation-and-the-partial-session: review
-  5-5-e5-interactive-repl: backlog
+  5-4-e4-cancellation-and-the-partial-session: done
+  5-5-e5-interactive-repl: review
   5-6-e6-session-changing-tools: backlog
   epic-5-retrospective: optional
 

@@ -83,7 +83,7 @@ func runCLI(t *testing.T, root, prompt string) string {
 		pair.MakePair(KeyWorkspace, root),
 	))))
 	require.NoError(t, err)
-	run, err := result.Unwrap(makeAnswer(cfg)())
+	run, err := result.Unwrap(makeAnswer()(cfg)())
 	require.NoError(t, err)
 
 	turn, err := effect.RunSync(F.Pipe1(

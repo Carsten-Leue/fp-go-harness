@@ -275,8 +275,22 @@ and a text result. Validation errors (such as "path must be absolute") come back
   trip. A request error after a poll keeps the steered message in the request. A real background command
   (`sleep 30; exit 0`) leaves the table after `StopProcesses`, and after a cancelled turn of the agent mode against a fake
   DeepSeek server.
-- [ ] **E5 Interactive REPL.** Change `main.go` so it loops over stdin turns (`Continue` → `Run` → print). This loop
-  runs at the edge of the program; it can be an `IO` loop through `tailrec`.
+- [ ] **E5 Interactive REPL.** Loop over stdin turns (`Continue` → `Run` → print) at the edge of the program, a
+  `tailrec` loop over the `Session`. Split into three shippable steps; tick E5 after E5c.
+  - [x] **E5a Turns and steering.** Without a prompt, or with `--interactive`, the command runs a REPL
+    ([cli/repl.go](cli/repl.go)). One stdin reader goroutine feeds one line channel, both the prompt source and the
+    steering queue (`ChannelSteering`). Each line is wrapped with the environment_details, added with `Continue`
+    and run with `session.RunPrompt`, which skips the poll before the turn's first request, so a line queued before
+    it waits for the second request or the next turn. A failed turn is reported and the REPL continues its partial
+    session; a cancelled turn ends the REPL with 130; end of input or Ctrl-C at the prompt exits 0. *Test:*
+    [cli/repl_test.go](cli/repl_test.go) covers two turns, steering, a late line, a request error, a cancellation in
+    a turn (which stops a background process) and at the prompt, the end of input, a long line, and which commands
+    run the REPL with which first line.
+  - [ ] **E5b Per-turn Ctrl-C.** Ctrl-C stops only the running turn (a child context per turn); the REPL continues
+    on the partial session. Needs the signal wiring out of `main.go`, whose `context.AfterFunc(ctx, stop)` drops the
+    handler after the first Ctrl-C.
+  - [ ] **E5c `--task <id>`.** Load a saved task and continue it, save after every turn; without `--task` create an
+    id and print it on stderr.
 - [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
   with no access to the `Session`. Add a second kind of tool whose result is the text *and* an
   `Endomorphism[Session]`, which `Next` applies after the tool messages are appended; the plain tools lift into it

@@ -279,3 +279,40 @@ func TestRun_CancelledDuringRequestKeepsSteeringMessages(t *testing.T) {
 	require.Len(t, got.current.Messages, 5)
 	assert.Equal(t, openai.UserMessage("and in Paris?"), got.current.Messages[4])
 }
+
+// TestRunPrompt_KeepsQueuedMessagesForTheSecondRequest asserts that a
+// message queued before the turn is not sent with its first request, but
+// with the second one, after the tool results.
+func TestRunPrompt_KeepsQueuedMessagesForTheSecondRequest(t *testing.T) {
+	queue := make(chan string, 1)
+	queue <- "queued"
+	deps := makeSteeredSessionDeps(t, queue, 10,
+		steeredAnswer{response: makeToolCallCompletion("chatcmpl-1", "call_1")},
+		steeredAnswer{response: makeStopCompletion("chatcmpl-2", "done")},
+	)
+
+	turn, err := result.Unwrap(RunPrompt()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
+	require.NoError(t, err)
+
+	got := pair.Head(turn)
+	require.Len(t, got.history, 2)
+	assert.Equal(t, makeLoopRequest().Messages, pair.Head(got.history[0]).Messages)
+	second := pair.Head(got.history[1]).Messages
+	require.Len(t, second, 5)
+	assert.Equal(t, openai.UserMessage("queued"), second[4])
+}
+
+// TestRunPrompt_LeavesQueuedMessagesAfterAnAnswer asserts that a turn the
+// first request answers leaves the queued message for the next prompt.
+func TestRunPrompt_LeavesQueuedMessagesAfterAnAnswer(t *testing.T) {
+	queue := make(chan string, 1)
+	queue <- "next prompt"
+	stop := steeredAnswer{response: makeStopCompletion("chatcmpl-1", "done")}
+	deps := makeSteeredSessionDeps(t, queue, 10, stop, stop)
+
+	turn, err := result.Unwrap(RunPrompt()(MakeSession(makeLoopRequest()))(deps)(t.Context())())
+	require.NoError(t, err)
+
+	assert.Equal(t, makeLoopRequest().Messages, pair.Head(pair.Head(turn).history[0]).Messages)
+	assert.Equal(t, result.Of(A.From("next prompt")), ChannelSteering(queue)(t.Context())())
+}
