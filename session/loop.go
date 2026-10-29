@@ -9,6 +9,7 @@ import (
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
 	"github.com/IBM/fp-go/v2/pair"
+	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
 	"github.com/IBM/fp-go/v2/result"
@@ -162,6 +163,36 @@ func attempt() Endomorphism[effect.Kleisli[SessionDeps, Session, TurnStep]] {
 // request, and that stage lands the cancellation with its session. The loop
 // is stack-safe.
 func Run() effect.Kleisli[SessionDeps, Session, TurnResult] {
+	return runWith()(steerStage())
+}
+
+// RunPrompt is [Run] for a turn that a prompt started, as [Continue] does: the
+// first request of the turn is sent without a poll, so it carries the prompt
+// only. User messages queued before it stay queued; the poll before the
+// second request takes them, and a turn that lands at once leaves them for
+// the next prompt. The first request is the one at iteration zero, which
+// [Continue] and [MakeSession] set. Everything else is as in [Run].
+func RunPrompt() effect.Kleisli[SessionDeps, Session, TurnResult] {
+	iterLens := MakeSessioniterationsLens()
+
+	return F.Pipe2(
+		F.Flow2(iterLens.Get, predicate.IsZero[int]()),
+		predicate.Fold(steerStage(), effect.Of[SessionDeps, Session]),
+		runWith(),
+	)
+}
+
+// steerStage is the [Steer] stage of the loop, under [SessionDeps].
+func steerStage() effect.Kleisli[SessionDeps, Session, Session] {
+	return F.Flow2(
+		Steer(),
+		effect.Local[Session](AsSteeringDeps[SessionDeps]),
+	)
+}
+
+// runWith is the loop of [Run] with a given steer stage: each step runs the
+// iteration guard, the steer stage and [Next], each in an [attempt].
+func runWith() Reader[effect.Kleisli[SessionDeps, Session, Session], effect.Kleisli[SessionDeps, Session, TurnResult]] {
 	guard := F.Flow2(
 		reader.Sequence(F.Flow2(
 			SessionDeps.GetMaxIterations,
@@ -170,23 +201,16 @@ func Run() effect.Kleisli[SessionDeps, Session, TurnResult] {
 		effect.FromReaderResult[SessionDeps, Session],
 	)
 
-	steer := F.Flow2(
-		Steer(),
-		effect.Local[Session](AsSteeringDeps[SessionDeps]),
-	)
-
-	next := Next()
-
 	try := attempt()
 	andThen := RRIOE.Chain[SessionDeps, context.Context, error, Session, TurnStep]
 
 	// the inner stages never fail, so each failure lands in the attempt
-	// around the stage that failed
-	return RRIOE.TailRec(try(F.Flow2(
-		guard,
-		andThen(try(F.Flow2(
-			steer,
-			andThen(try(next)),
-		))),
-	)))
+	// around the stage that failed: guard >=> try(steer >=> try(next))
+	return F.Flow5(
+		reader.Map[Session](andThen(try(Next()))),
+		try,
+		andThen,
+		reader.Local[Effect[SessionDeps, TurnStep]](guard),
+		F.Flow2(try, RRIOE.TailRec[SessionDeps, context.Context, error, Session, TurnResult]),
+	)
 }

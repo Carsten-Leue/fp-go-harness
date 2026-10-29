@@ -32,6 +32,9 @@ recorded agent sessions.
   messages queued while the turn runs and appends them (`session.Steer()`), so the user can
   redirect the agent without waiting for its answer. `session.ChannelSteering(queue)` takes them
   from a channel without blocking; the one-shot CLI uses `session.NoSteering()`.
+  `session.RunPrompt()` is `Run` for a turn that a prompt started: its first request carries
+  the prompt only, and messages queued before it wait for the second request or the next
+  prompt.
 - **Cancellation and the partial session**: `session.Run` never fails. It returns a
   `TurnResult`, the session as far as the turn got paired with its `Outcome`: the final
   completion, or the error that ended the turn (a cancellation, a failed request or poll, the
@@ -59,6 +62,15 @@ recorded agent sessions.
   - **custom modes** are mode files in `~/.bob/modes/` and `<workspace>/.bob/modes/`. A custom
     mode with the id of another one replaces it: the workspace wins over the home directory,
     both over the built-in modes.
+- **REPL**: without a prompt, or with `--interactive`, the CLI holds a conversation over
+  stdin. Each line is the next turn of one session (`Continue` → `RunPrompt`), reported like a
+  one-shot turn; `> ` on stderr marks the prompt. Lines typed while a turn runs steer it: they
+  are sent as plain user messages with its next request, after the tool results. A line that
+  arrives after the turn's last poll, that is, while its last request runs, is the next turn's
+  line. A failed turn is reported and the next line continues its partial session. The prompt
+  given with `--interactive` is the first line. The REPL ends with exit code 0 at the end of
+  the input or on Ctrl-C at the prompt, even after a failed turn; Ctrl-C during a turn reports
+  it, stops its background processes and exits with 130.
 - **Modes and system prompt**: `mode.Modes` is the table of modes, each with its role and
   the tools it allows. A mode is a Markdown file in [mode/modes/](mode/modes/): id, name,
   description, order and tools in its YAML front matter, the role prompt as its body. A new
@@ -107,6 +119,8 @@ cp .env.example .env        # then set DEEPSEEK_API_KEY
 go run . "What is a Kleisli arrow?"
 go run . --mode plan "How would I add a retry to the HTTP client?"
 go run . --mode agent "Add a doc comment to every exported function in env/env.go"
+go run .                    # REPL: one turn per line, Ctrl-D (Ctrl-Z on Windows) ends it
+go run . --interactive "Summarize README.md"   # REPL with a first line
 ```
 
 Variables set in the process environment take precedence over `.env`, and flags over
@@ -125,7 +139,7 @@ replay tests.
 |---|---|
 | [`main`](main.go) | Runs the CLI command, stops the turn on Ctrl-C and maps the outcome to the exit code (0, 1, 130) |
 | [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
-| [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`) and its `TurnResult`, the next turn (`Continue`), steering (`Steer`), usage monoid, iteration limit, the task store (`Save`, `Load`) |
+| [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`) and its `TurnResult`, the next turn (`Continue`, `RunPrompt`), steering (`Steer`), usage monoid, iteration limit, the task store (`Save`, `Load`) |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
@@ -144,7 +158,7 @@ replay tests.
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
 | D | Prompt assembly | ✅ done |
-| E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL) | ⏳ E1–E4 done |
+| E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL) | ⏳ E1–E4 done, E5 in progress (E5a REPL done) |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
 | H | Skills, todos, subtasks | ⏳ open |
