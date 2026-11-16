@@ -605,10 +605,14 @@ type replEnvLenses struct {
 	Command __lens.Lens[replEnv, *github_com_urfave_cli_v3.Command]
 	// Lines is a [__lens.Lens] for the Lines field of [replEnv]
 	Lines __lens.Lens[replEnv, lineQueue]
+	// Interrupts is a [__lens.Lens] for the Interrupts field of [replEnv]
+	Interrupts __lens.Lens[replEnv, InterruptDeps]
 	// CommandO is a [__lens_option.LensO] for the Command field of [replEnv], treating the zero value as absent
 	CommandO __lens_option.LensO[replEnv, *github_com_urfave_cli_v3.Command]
 	// LinesO is a [__lens_option.LensO] for the Lines field of [replEnv], treating the zero value as absent
 	LinesO __lens_option.LensO[replEnv, lineQueue]
+	// InterruptsO is a [__lens_option.LensO] for the Interrupts field of [replEnv], treating the zero value as absent
+	InterruptsO __lens_option.LensO[replEnv, InterruptDeps]
 }
 
 // replEnvRefLenses provides [lenses] for accessing fields of [replEnv] via a pointer to [replEnv]
@@ -621,10 +625,14 @@ type replEnvRefLenses struct {
 	Command __lens.Lens[*replEnv, *github_com_urfave_cli_v3.Command]
 	// Lines is a [__lens.Lens] for the Lines field of [replEnv] via a pointer receiver
 	Lines __lens.Lens[*replEnv, lineQueue]
+	// Interrupts is a [__lens.Lens] for the Interrupts field of [replEnv] via a pointer receiver
+	Interrupts __lens.Lens[*replEnv, InterruptDeps]
 	// CommandO is a [__lens_option.LensO] for the Command field of [replEnv] via a pointer receiver, treating the zero value as absent
 	CommandO __lens_option.LensO[*replEnv, *github_com_urfave_cli_v3.Command]
 	// LinesO is a [__lens_option.LensO] for the Lines field of [replEnv] via a pointer receiver, treating the zero value as absent
 	LinesO __lens_option.LensO[*replEnv, lineQueue]
+	// InterruptsO is a [__lens_option.LensO] for the Interrupts field of [replEnv] via a pointer receiver, treating the zero value as absent
+	InterruptsO __lens_option.LensO[*replEnv, InterruptDeps]
 }
 
 // replEnvPrisms provides [prisms] for accessing fields of [replEnv]
@@ -637,6 +645,8 @@ type replEnvPrisms struct {
 	Command __prism.Prism[replEnv, *github_com_urfave_cli_v3.Command]
 	// Lines is a [__prism.Prism] for the Lines field of [replEnv]
 	Lines __prism.Prism[replEnv, lineQueue]
+	// Interrupts is a [__prism.Prism] for the Interrupts field of [replEnv]
+	Interrupts __prism.Prism[replEnv, InterruptDeps]
 }
 
 // replEnvRefPrisms provides [prisms] for accessing fields of [replEnv] via a pointer to [replEnv]
@@ -649,6 +659,8 @@ type replEnvRefPrisms struct {
 	Command __prism.Prism[*replEnv, *github_com_urfave_cli_v3.Command]
 	// Lines is a [__prism.Prism] for the Lines field of [replEnv] via a pointer receiver
 	Lines __prism.Prism[*replEnv, lineQueue]
+	// Interrupts is a [__prism.Prism] for the Interrupts field of [replEnv] via a pointer receiver
+	Interrupts __prism.Prism[*replEnv, InterruptDeps]
 }
 
 // MakereplEnvEnvLens returns a [__lens.Lens] for the Env field of [replEnv]
@@ -795,18 +807,72 @@ func MakereplEnvLinesRefPrism() __prism.Prism[*replEnv, lineQueue] {
 	)
 }
 
+// MakereplEnvInterruptsLens returns a [__lens.Lens] for the Interrupts field of [replEnv]
+func MakereplEnvInterruptsLens() __lens.Lens[replEnv, InterruptDeps] {
+	return __lens.MakeLensWithName(
+		func(s replEnv) InterruptDeps { return s.Interrupts },
+		func(s replEnv, v InterruptDeps) replEnv { s.Interrupts = v; return s },
+		"replEnv.Interrupts",
+	)
+}
+
+// MakereplEnvInterruptsLensO returns a [__lens_option.LensO] for the Interrupts field of [replEnv]
+func MakereplEnvInterruptsLensO() __lens_option.LensO[replEnv, InterruptDeps] {
+	return __lens_option.FromIso[replEnv](__iso_option.FromZero[InterruptDeps]())(MakereplEnvInterruptsLens())
+}
+
+// MakereplEnvInterruptsRefLens returns a [__lens.Lens] for the Interrupts field of [replEnv] via a pointer receiver
+func MakereplEnvInterruptsRefLens() __lens.Lens[*replEnv, InterruptDeps] {
+	return __lens.MakeLensStrictWithName(
+		func(s *replEnv) InterruptDeps { return s.Interrupts },
+		func(s *replEnv, v InterruptDeps) *replEnv { s.Interrupts = v; return s },
+		"(*replEnv).Interrupts",
+	)
+}
+
+// MakereplEnvInterruptsRefLensO returns a [__lens_option.LensO] for the Interrupts field of [replEnv] via a pointer receiver
+func MakereplEnvInterruptsRefLensO() __lens_option.LensO[*replEnv, InterruptDeps] {
+	return __lens_option.FromIso[*replEnv](__iso_option.FromZero[InterruptDeps]())(MakereplEnvInterruptsRefLens())
+}
+
+// MakereplEnvInterruptsPrism returns a [__prism.Prism] for the Interrupts field of [replEnv]
+func MakereplEnvInterruptsPrism() __prism.Prism[replEnv, InterruptDeps] {
+	_fromNonZero := __option.FromNonZero[InterruptDeps]()
+	return __prism.MakePrismWithName(
+		func(s replEnv) __option.Option[InterruptDeps] { return _fromNonZero(s.Interrupts) },
+		func(v InterruptDeps) replEnv {
+			return replEnv{Interrupts: v}
+		},
+		"replEnv.Interrupts",
+	)
+}
+
+// MakereplEnvInterruptsRefPrism returns a [__prism.Prism] for the Interrupts field of [replEnv] via a pointer receiver
+func MakereplEnvInterruptsRefPrism() __prism.Prism[*replEnv, InterruptDeps] {
+	_fromNonZero := __option.FromNonZero[InterruptDeps]()
+	return __prism.MakePrismWithName(
+		func(s *replEnv) __option.Option[InterruptDeps] { return _fromNonZero(s.Interrupts) },
+		func(v InterruptDeps) *replEnv {
+			return &replEnv{Interrupts: v}
+		},
+		"replEnv.Interrupts",
+	)
+}
+
 // MakereplEnvLenses creates a new [replEnvLenses] with [lenses] for all fields
 //
 // [lenses]: __lens.Lens
 func MakereplEnvLenses() replEnvLenses {
 	return replEnvLenses{
 		// mandatory lenses
-		Env:     MakereplEnvEnvLens(),
-		Command: MakereplEnvCommandLens(),
-		Lines:   MakereplEnvLinesLens(),
+		Env:        MakereplEnvEnvLens(),
+		Command:    MakereplEnvCommandLens(),
+		Lines:      MakereplEnvLinesLens(),
+		Interrupts: MakereplEnvInterruptsLens(),
 		// optional lenses
-		CommandO: MakereplEnvCommandLensO(),
-		LinesO:   MakereplEnvLinesLensO(),
+		CommandO:    MakereplEnvCommandLensO(),
+		LinesO:      MakereplEnvLinesLensO(),
+		InterruptsO: MakereplEnvInterruptsLensO(),
 	}
 }
 
@@ -816,12 +882,14 @@ func MakereplEnvLenses() replEnvLenses {
 func MakereplEnvRefLenses() replEnvRefLenses {
 	return replEnvRefLenses{
 		// mandatory lenses
-		Env:     MakereplEnvEnvRefLens(),
-		Command: MakereplEnvCommandRefLens(),
-		Lines:   MakereplEnvLinesRefLens(),
+		Env:        MakereplEnvEnvRefLens(),
+		Command:    MakereplEnvCommandRefLens(),
+		Lines:      MakereplEnvLinesRefLens(),
+		Interrupts: MakereplEnvInterruptsRefLens(),
 		// optional lenses
-		CommandO: MakereplEnvCommandRefLensO(),
-		LinesO:   MakereplEnvLinesRefLensO(),
+		CommandO:    MakereplEnvCommandRefLensO(),
+		LinesO:      MakereplEnvLinesRefLensO(),
+		InterruptsO: MakereplEnvInterruptsRefLensO(),
 	}
 }
 
@@ -830,9 +898,10 @@ func MakereplEnvRefLenses() replEnvRefLenses {
 // [prisms]: __prism.Prism
 func MakereplEnvPrisms() replEnvPrisms {
 	return replEnvPrisms{
-		Env:     MakereplEnvEnvPrism(),
-		Command: MakereplEnvCommandPrism(),
-		Lines:   MakereplEnvLinesPrism(),
+		Env:        MakereplEnvEnvPrism(),
+		Command:    MakereplEnvCommandPrism(),
+		Lines:      MakereplEnvLinesPrism(),
+		Interrupts: MakereplEnvInterruptsPrism(),
 	}
 }
 
@@ -841,8 +910,9 @@ func MakereplEnvPrisms() replEnvPrisms {
 // [prisms]: __prism.Prism
 func MakereplEnvRefPrisms() replEnvRefPrisms {
 	return replEnvRefPrisms{
-		Env:     MakereplEnvEnvRefPrism(),
-		Command: MakereplEnvCommandRefPrism(),
-		Lines:   MakereplEnvLinesRefPrism(),
+		Env:        MakereplEnvEnvRefPrism(),
+		Command:    MakereplEnvCommandRefPrism(),
+		Lines:      MakereplEnvLinesRefPrism(),
+		Interrupts: MakereplEnvInterruptsRefPrism(),
 	}
 }

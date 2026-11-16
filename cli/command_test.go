@@ -26,7 +26,7 @@ func TestPromptCommand_MissingPrompt(t *testing.T) {
 	t.Setenv("DEEPSEEK_API_KEY", "test-key")
 
 	var out, errOut bytes.Buffer
-	cmd := MakePromptCommand()
+	cmd := MakePromptCommand(noInterrupts())
 	cmd.Reader = strings.NewReader("")
 	cmd.Writer = &out
 	cmd.ErrWriter = &errOut
@@ -46,7 +46,7 @@ func TestPromptCommand_ReplMissingAPIKey(t *testing.T) {
 	os.Unsetenv("DEEPSEEK_API_KEY")
 
 	var out, errOut bytes.Buffer
-	cmd := MakePromptCommand()
+	cmd := MakePromptCommand(noInterrupts())
 	cmd.Reader = strings.NewReader("hello\n")
 	cmd.Writer = &out
 	cmd.ErrWriter = &errOut
@@ -82,7 +82,7 @@ func writeMode(t *testing.T, root, name, text string) {
 func TestPromptCommand_UnknownMode(t *testing.T) {
 	withHome(t)
 
-	err := MakePromptCommand().Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir(), "--mode", "review", "hello"})
+	err := MakePromptCommand(noInterrupts()).Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir(), "--mode", "review", "hello"})
 
 	assert.EqualError(t, err, `unknown mode "review", use one of agent, plan, ask`)
 }
@@ -93,7 +93,7 @@ func TestPromptCommand_CustomModes(t *testing.T) {
 	writeMode(t, home, "review.md", "---\nid: review\norder: 5\ntools: [grep]\n---\nYou review.\n")
 	writeMode(t, workspace, "docs.md", "---\nid: docs\norder: 4\ntools: [read_file]\n---\nYou write docs.\n")
 
-	err := MakePromptCommand().Run(t.Context(), []string{"fp-go-harness", "--workspace", workspace, "--mode", "code", "hello"})
+	err := MakePromptCommand(noInterrupts()).Run(t.Context(), []string{"fp-go-harness", "--workspace", workspace, "--mode", "code", "hello"})
 
 	assert.EqualError(t, err, `unknown mode "code", use one of agent, plan, ask, docs, review`)
 }
@@ -104,7 +104,7 @@ func TestPromptCommand_DuplicateCustomMode(t *testing.T) {
 	writeMode(t, workspace, "a.md", "---\nid: review\n---\nYou review.\n")
 	writeMode(t, workspace, "b.md", "---\nid: review\n---\nYou review too.\n")
 
-	err := MakePromptCommand().Run(t.Context(), []string{"fp-go-harness", "--workspace", workspace, "hello"})
+	err := MakePromptCommand(noInterrupts()).Run(t.Context(), []string{"fp-go-harness", "--workspace", workspace, "hello"})
 
 	assert.ErrorContains(t, err, `mode "review" is defined twice`)
 }
@@ -114,7 +114,7 @@ func TestPromptCommand_DuplicateCustomMode(t *testing.T) {
 // value.
 func TestPromptCommand_InvalidMaxIterations(t *testing.T) {
 	var errOut bytes.Buffer
-	cmd := MakePromptCommand()
+	cmd := MakePromptCommand(noInterrupts())
 	cmd.ErrWriter = &errOut
 
 	err := cmd.Run(t.Context(), []string{"fp-go-harness", "--workspace", t.TempDir(), "--max-iterations", "0", "hello"})
@@ -140,7 +140,7 @@ func TestPromptCommand_Cancelled(t *testing.T) {
 	cancel()
 
 	var out, errOut bytes.Buffer
-	cmd := MakePromptCommand()
+	cmd := MakePromptCommand(noInterrupts())
 	cmd.Writer = &out
 	cmd.ErrWriter = &errOut
 

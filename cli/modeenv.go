@@ -31,7 +31,8 @@ func newModeEnv(cfg Config, deps mode.ModeDeps, m mode.Mode) modeEnv {
 type lineQueue = <-chan string
 
 // replEnv is the environment of the REPL: the [modeEnv] of its mode, the
-// command it prints to and the channel of its lines, see [scanLines].
+// command it prints to, the channel of its lines, see [scanLines], and the
+// source of its interrupts.
 //
 // fp-go:Lens
 type replEnv struct {
@@ -41,9 +42,11 @@ type replEnv struct {
 	Command *C.Command
 	// Lines are the lines of the input, also the steering queue.
 	Lines lineQueue
+	// Interrupts end the wait for a line or the running turn.
+	Interrupts InterruptDeps
 }
 
-// newReplEnv is a leaf: the constructor of [replEnv] that [F.Curry3] lifts.
-func newReplEnv(cmd *C.Command, lines lineQueue, env modeEnv) replEnv {
-	return replEnv{env, cmd, lines}
+// newReplEnv is a leaf: the constructor of [replEnv] that [F.Curry4] lifts.
+func newReplEnv(interrupts InterruptDeps, cmd *C.Command, lines lineQueue, env modeEnv) replEnv {
+	return replEnv{env, cmd, lines, interrupts}
 }

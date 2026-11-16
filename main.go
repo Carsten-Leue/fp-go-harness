@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"os/signal"
 
 	"github.com/Carsten-Leue/fp-go-harness/cli"
 	"github.com/Carsten-Leue/fp-go-harness/session"
@@ -34,13 +33,11 @@ func exitCode() func(error) int {
 }
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-	// The first Ctrl-C cancels ctx and the turn stops. Stopping the
-	// notification restores the default handling, so a second Ctrl-C while
-	// the turn stops exits at once.
-	context.AfterFunc(ctx, stop)
+	// Ctrl-C cancels what the command runs under a child context of its
+	// interrupts, see [cli.SignalInterrupts]: the one prompt, or the wait for
+	// a line and each turn of the REPL.
+	interrupts := cli.MakeInterruptDeps(cli.SignalInterrupts())
 
 	// the command prints its errors, see [cli.MakePromptCommand]
-	os.Exit(exitCode()(cli.MakePromptCommand().Run(ctx, os.Args)))
+	os.Exit(exitCode()(cli.MakePromptCommand(interrupts).Run(context.Background(), os.Args)))
 }

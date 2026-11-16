@@ -39,14 +39,16 @@ func configFlags() []C.Flag {
 	}
 }
 
-// MakePromptCommand creates the command that answers a prompt with DeepSeek
-// and the tools of a mode, and prints the answer and the session statistics.
+// MakePromptCommand is wiring: it creates the command that answers a prompt
+// with DeepSeek and the tools of a mode, and prints the answer and the
+// session statistics. An interrupt of interrupts (Ctrl-C) cancels the turn.
 //
 // Without a prompt, or with --interactive, it runs a REPL instead: each line
 // of the standard input is the next turn of one session, and lines typed
 // while a turn runs steer it. The prompt given with --interactive is the
-// first line. The REPL ends with the input, with exit code 0, or with a
-// cancelled turn.
+// first line. An interrupt during a turn ends only that turn, and the next
+// line continues its session. The REPL ends with the input, or with an
+// interrupt at the prompt, with exit code 0.
 //
 // A turn that does not answer, because it was cancelled, a request failed or
 // it reached the iteration limit, prints the error, the last assistant text
@@ -58,7 +60,7 @@ func configFlags() []C.Flag {
 // Example:
 //
 //	fp-go-harness --mode agent --max-iterations 10 "add a test for grep"
-func MakePromptCommand() *C.Command {
+func MakePromptCommand(interrupts InterruptDeps) *C.Command {
 	return &C.Command{
 		Name:      "fp-go-harness",
 		Usage:     "answers a prompt with DeepSeek and the tools of a mode",
@@ -72,7 +74,7 @@ func MakePromptCommand() *C.Command {
 		// errors, as a failed decoding does.
 		ExitErrHandler: func(context.Context, *C.Command, error) {},
 		Action: func(ctx context.Context, cmd *C.Command) error {
-			_, err := result.Unwrap(runCommand()(cmd)(ctx)())
+			_, err := result.Unwrap(runCommand()(interrupts)(cmd)(ctx)())
 			return err
 		},
 	}
