@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioresult"
@@ -184,6 +185,7 @@ func TestSessionIso_RoundTrip(t *testing.T) {
 		current:    Continue()("next")(MakeSession(makeLoopRequest())).current,
 		usage:      openai.CompletionUsage{PromptTokens: 10, CompletionTokens: 2, TotalTokens: 12},
 		iterations: 3,
+		todos:      []todo.Todo{todo.MakeTodo("one", todo.InProgress)},
 	}
 
 	assert.Equal(t, s, SessionIso().ReverseGet(SessionIso().Get(s)))

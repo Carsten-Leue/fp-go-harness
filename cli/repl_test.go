@@ -176,9 +176,17 @@ type fakeMessage struct {
 	Content json.RawMessage `json:"content"`
 }
 
+// fakeTool is the part of a tool of a request the fake server reads.
+type fakeTool struct {
+	Function struct {
+		Name string `json:"name"`
+	} `json:"function"`
+}
+
 // fakeRequest is the part of a chat completion request the fake server reads.
 type fakeRequest struct {
 	Messages []fakeMessage `json:"messages"`
+	Tools    []fakeTool    `json:"tools"`
 }
 
 // lastUserLine is the first line of the last user message of a request: the

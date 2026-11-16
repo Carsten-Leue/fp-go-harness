@@ -15,6 +15,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/Carsten-Leue/fp-go-harness/skill"
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -32,6 +33,7 @@ import (
 	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/openai/openai-go/v3"
@@ -113,19 +115,37 @@ func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNe
 // [session.SessionDeps] of a turn.
 type toSessionDeps = Reader[oai.ChatCompletionDeps, session.SessionDeps]
 
+// sessionTools are the session tools every mode has, whatever tools it
+// allows: update_todo_list (H3). H5's switch_mode joins them here.
+func sessionTools() session.SessionRegistry {
+	return session.TodoTools()
+}
+
+// sessionRegistry is wiring: the registry of the session tools of the mode of
+// an environment: the plain tools of [makeRegistry], lifted into session
+// tools that change nothing, and the [sessionTools]. A session tool wins over
+// a plain one of the same name.
+func sessionRegistry() Reader[modeEnv, session.SessionRegistry] {
+	registries := R.UnionLastMonoid[string, session.SessionTool]()
+
+	return F.Flow3(
+		makeRegistry(),
+		tools.LiftRegistry[session.Session](),
+		F.Bind2nd(registries.Concat, sessionTools()),
+	)
+}
+
 // sessionDeps is wiring: the [session.SessionDeps] of a turn of the mode of an
-// environment over any provider's ChatCompletionDeps: the registry of
-// [makeRegistry], its plain tools lifted into session tools that change
-// nothing, at most MaxIterations requests and the user messages of a poll
-// steering the turn.
+// environment over any provider's ChatCompletionDeps: the tools of
+// [sessionRegistry], at most MaxIterations requests and the user messages of
+// a poll steering the turn.
 func sessionDeps() Reader[modeEnv, Reader[session.Thunk[[]string], toSessionDeps]] {
 	configLens := MakemodeEnvConfigLens()
 	maxIterationsLens := MakeConfigMaxIterationsLens()
 
 	return F.Pipe2(
-		F.Flow4(
-			makeRegistry(),
-			tools.LiftRegistry[session.Session](),
+		F.Flow3(
+			sessionRegistry(),
 			tools.MakeStateRegistryToolDeps[session.Session](),
 			F.Curry3(F.Bind234of4(session.MakeSessionDeps)),
 		),
@@ -208,12 +228,15 @@ type withDetails = func(endomorphism.Endomorphism[string]) endomorphism.Endomorp
 
 // modeRequest is wiring: the request the mode of an environment starts with,
 // its system prompt read from the workspace of the deps, under any
-// environment T, which it ignores.
+// environment T, which it ignores. Its tool definitions are those of
+// [sessionRegistry], the tools the session can call: the mode's own and the
+// [sessionTools]. The request and the registry are independent reads of the
+// environment.
 func modeRequest[T any]() Reader[modeEnv, Effect[T, openai.ChatCompletionNewParams]] {
 	modeLens := MakemodeEnvModeLens()
 	depsLens := MakemodeEnvDepsLens()
 
-	return F.Pipe1(
+	request := F.Pipe1(
 		F.Flow3(
 			depsLens.Get,
 			F.Constant1[T, mode.ModeDeps],
@@ -221,24 +244,43 @@ func modeRequest[T any]() Reader[modeEnv, Effect[T, openai.ChatCompletionNewPara
 		),
 		reader.Ap[Effect[T, openai.ChatCompletionNewParams]](F.Flow2(modeLens.Get, mode.Request())),
 	)
+
+	return F.Pipe2(
+		F.Flow2(sessionRegistry(), tools.WithToolsOf[session.SessionCall]()),
+		reader.Map[modeEnv](effect.Map[T, openai.ChatCompletionNewParams, openai.ChatCompletionNewParams]),
+		reader.Ap[Effect[T, openai.ChatCompletionNewParams]](request),
+	)
+}
+
+// detailsWith are the environment_details of the mode of an environment with
+// the todo_list section of a todo list, see [todo.Section].
+func detailsWith() Reader[modeEnv, Reader[[]todo.Todo, Effect[prompt.EnvDetailsDeps, endomorphism.Endomorphism[string]]]] {
+	modeLens := MakemodeEnvModeLens()
+	nameLens := mode.MakeModeNameLens()
+
+	return F.Flow3(
+		modeLens.Get,
+		nameLens.Get,
+		F.Flip(F.Flow2(todo.Section(), prompt.EnvironmentDetailsWith())),
+	)
 }
 
 // modeDetails is wiring: the environment_details of the mode and the
-// workspace of an environment, which wrap the prompt of a turn, under any
-// environment T, which it ignores.
-func modeDetails[T any]() Reader[modeEnv, Effect[T, endomorphism.Endomorphism[string]]] {
-	modeLens := MakemodeEnvModeLens()
+// workspace of an environment for the todo list of the session, which wrap
+// the prompt of a turn, under any environment T, which it ignores. An empty
+// todo list shows no todo_list section.
+func modeDetails[T any]() Reader[modeEnv, Reader[[]todo.Todo, Effect[T, endomorphism.Endomorphism[string]]]] {
 	depsLens := MakemodeEnvDepsLens()
-	nameLens := mode.MakeModeNameLens()
 
-	return F.Pipe1(
+	return F.Pipe2(
 		F.Flow4(
 			depsLens.Get,
 			prompt.AsEnvDetailsDeps[mode.ModeDeps],
 			F.Constant1[T, prompt.EnvDetailsDeps],
 			effect.Local[endomorphism.Endomorphism[string], T, prompt.EnvDetailsDeps],
 		),
-		reader.Ap[Effect[T, endomorphism.Endomorphism[string]]](F.Flow3(modeLens.Get, nameLens.Get, prompt.EnvironmentDetails())),
+		reader.Map[modeEnv](reader.Map[[]todo.Todo, Effect[prompt.EnvDetailsDeps, endomorphism.Endomorphism[string]], Effect[T, endomorphism.Endomorphism[string]]]),
+		reader.Ap[Reader[[]todo.Todo, Effect[T, endomorphism.Endomorphism[string]]]](detailsWith()),
 	)
 }
 
@@ -254,9 +296,9 @@ type (
 // workspace of its tools. The request of the mode reads its system prompt
 // from that workspace, and the prompt is sent with the environment_details of
 // the mode and workspace: the prompt's change to the request is applied to
-// the details, then to the request, both read concurrently. After a cancelled
-// turn the background processes of the tools are stopped, see
-// [stopProcesses].
+// the details, then to the request, both read concurrently. The one prompt
+// starts a new session, which has no todo list yet. After a cancelled turn
+// the background processes of the tools are stopped, see [stopProcesses].
 //
 // Each stage reads the environment; they are composed in data-flow order:
 // the change of the prompt, the details, the request, the turn and the tap.
@@ -270,8 +312,9 @@ func ask() Reader[modeEnv, effect.Kleisli[oai.DeepSeekDeps, string, session.Turn
 	return F.Pipe8(
 		start,
 		reader.Map[modeEnv](reader.Compose[askEffect[askChange], string, askEffect[withDetails]]),
-		reader.Ap[func(string) askEffect[askChange]](F.Flow2(
+		reader.Ap[func(string) askEffect[askChange]](F.Flow3(
 			modeDetails[oai.DeepSeekDeps](),
+			reader.Read[askEffect[endomorphism.Endomorphism[string]]](A.Empty[todo.Todo]()),
 			effect.Ap[askChange, oai.DeepSeekDeps, endomorphism.Endomorphism[string]],
 		)),
 		reader.Map[modeEnv](reader.Compose[askEffect[askParams], string, askEffect[askChange]]),

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
@@ -28,12 +29,18 @@ type HistoryEntry = pair.Pair[openai.ChatCompletionNewParams, *openai.ChatComple
 
 type History = []HistoryEntry
 
+// Session is the state of a conversation: the history of requests and
+// completions, the request of the next step, the accumulated usage, the
+// number of requests of the current turn and the todo list the model keeps
+// with update_todo_list (H3), see [TodoTools].
+//
 // fp-go:Lens
 type Session struct {
 	history    History
 	current    openai.ChatCompletionNewParams
 	usage      openai.CompletionUsage
 	iterations int
+	todos      []todo.Todo
 }
 
 // SessionDeps are the dependencies of [Next]. Its tools are session-changing

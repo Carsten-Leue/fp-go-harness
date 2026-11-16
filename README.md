@@ -90,7 +90,7 @@ recorded agent sessions.
   out and reported on stderr. The skills become the `available_skills` section of every mode
   and the `use_skill` tool, which returns the whole `SKILL.md` of a skill.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
-  `apply_diff`, `insert_content`, `execute_command` and `use_skill` (in every mode), each with its definition for the model, confined to the workspace
+  `apply_diff`, `insert_content`, `execute_command`, `use_skill` and `update_todo_list` (both in every mode), each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
   content that is shorter than its announced `line_count`. `search_and_replace` replaces
   literal text or a regular expression, optionally within a line range, and fails when
@@ -108,6 +108,11 @@ recorded agent sessions.
   nothing. There is one tool type, `tools.ToolOf[C]`: plain tools are `ToolOf[ToolCall]` and
   lift into session tools with the identity (`tools.LiftTool`, `tools.LiftRegistry`), so the
   registry functions, truncation (`tools.TruncateStateTools`) and mode selection work on both.
+- **Todo list**: `update_todo_list` takes the whole Markdown checklist (`[ ]` pending, `[x]`
+  completed, `[-]` in progress, one level) and replaces the session's todo list
+  (`todo.Todo` with text and status) through a lens; an invalid list is a tool message and
+  changes nothing. In the REPL the next user message shows the list as a `<todo_list>` section
+  in its `environment_details` (an empty list shows nothing), and a saved task keeps it.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -124,7 +129,8 @@ recorded agent sessions.
   `.bob/rules/` and those in the mode's `.bob/rules-<mode>/` from the workspace into the
   `project_rules` section; without rules there is no section. `prompt.EnvironmentDetails`
   appends an `<environment_details>` block to the user's message (current date and time, mode,
-  `git status --porcelain --branch` of the workspace); the CLI sends its prompt with it.
+  `git status --porcelain --branch` of the workspace, and in the REPL the session's todo list);
+  the CLI sends its prompt with it.
 
 ## 🚀 Quick start
 
@@ -159,6 +165,7 @@ replay tests.
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`skill`](skill/) | Skill discovery from the skill directories of the home directory and the workspace, the `available_skills` section and the `use_skill` tool |
+| [`todo`](todo/) | The todo list: `Todo` items parsed from and rendered to a Markdown checklist, the `todo_list` section of `environment_details` and the session-changing `update_todo_list` tool |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, plain and state-changing tools (`ToolOf`, `StateCall`, the lifts), workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details`, and the section comparison with a recorded prompt |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests, and extracts their system prompts |
@@ -178,7 +185,7 @@ replay tests.
 | E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL, session-changing tools) | ⏳ E1–E4 and E6 done, E5 in progress (E5a–E5b done) |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
-| H | Skills, todos, subtasks | ⏳ H1–H2 done |
+| H | Skills, todos, subtasks | ⏳ H1–H3 done |
 | I | Safety and approval | ⏳ open |
 | J | Agent Client Protocol (run as an ACP agent in editors) | ⏳ open |
 | K | Agent2Agent protocol (serve tasks to other agents, call remote agents) | ⏳ open |

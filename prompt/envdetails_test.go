@@ -102,3 +102,27 @@ func TestEnvironmentDetailsGitMissing(t *testing.T) {
 
 	assert.Equal(t, result.Left[string](missing), wrapWith(deps, "Agent", "hi"))
 }
+
+// TestEnvironmentDetailsWithSections asserts that extra sections, such as
+// the todo list, come after the git status, and that no extra sections
+// render the same as EnvironmentDetails.
+func TestEnvironmentDetailsWithSections(t *testing.T) {
+	deps := testEnvDetailsDeps(result.Of(tools.ProcessOutput{Stdout: "## main\n"}))
+	wrapWithSections := func(sections []Section) result.Result[string] {
+		return result.Map(func(e Endomorphism[string]) string { return e("hi") })(
+			effect.Provide[Endomorphism[string]](deps)(EnvironmentDetailsWith()(sections)("Agent"))(context.Background())(),
+		)
+	}
+
+	assert.Equal(t,
+		result.Of("hi\n\n"+
+			"<environment_details>\n"+
+			"<current_datetime>\n2026-10-21T12:37:30.431Z\n</current_datetime>\n"+
+			"<current_mode>\nAgent\n</current_mode>\n"+
+			"<git_status_snapshot>\n```\n## main\n```\n</git_status_snapshot>\n"+
+			"<todo_list>\n[x] one\n[ ] two\n</todo_list>\n"+
+			"</environment_details>"),
+		wrapWithSections([]Section{MakeSection(TodoListTag, "[x] one\n[ ] two")}),
+	)
+	assert.Equal(t, wrapWith(deps, "Agent", "hi"), wrapWithSections(nil))
+}

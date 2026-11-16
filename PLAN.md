@@ -376,8 +376,16 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `skill.Tools` registers `use_skill` (`{"skill_name": string}`, required). It returns the whole `SKILL.md` text; an
   unknown name is a tool error that names the available skills. It only reads, so `mode.Tools` merges it into the tools
   of every mode, ask and plan included, through `mode.SharedDeps`.
-- [ ] **H3 `update_todo_list`.** Keep the todo list in `Session` (lens) and render it into the next `environment_details`.
+- [x] **H3 `update_todo_list`.** Keep the todo list in `Session` (lens) and render it into the next `environment_details`.
   A session-changing tool (E6).
+  *Done:* the `todo` package parses the `todos` checklist (`[ ]`, `[x]`/`[X]`, `[-]`, optional `-`/`*`/`+` marker,
+  one level) into `[]todo.Todo{Text, Status}` with the ACP statuses `pending`, `in_progress`, `completed` (for J12);
+  an invalid line is a tool error, so the list stays as it was. `todo.Tools[T]` is generic over a lens to the list;
+  `session.TodoTools` binds it to the new `todos` field of `Session`. The CLI merges the session tools
+  (`cli.sessionTools`, where H5 adds `switch_mode`) into the lifted mode registry in `sessionRegistry`, and
+  `modeRequest` offers their definitions in every mode. `prompt.EnvironmentDetailsWith` takes extra sections after
+  `git_status_snapshot`; the REPL reads `session.Todos` of the session it continues and renders a `<todo_list>`
+  section (no recording has one, so the format is ours). `SessionDTO.Todos` is `omitempty`, so older task files load.
 - [ ] **H4 `ask_followup_question`.** Implement it through the event sink (F2) and an `InputDeps`: it waits for user
   input inside the thunk. Needs a front end that can answer: the REPL (E5), ACP (J2) or A2A's `input-required` (K8).
 - [ ] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
