@@ -19,6 +19,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
+	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
 	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/ioref"
@@ -40,18 +41,74 @@ type replOutput struct {
 	errOut string
 }
 
+// fakeInterrupts is a source of interrupts that a test triggers: interrupt
+// cancels every child that is not released yet, as a signal reaches every
+// registration. The children are guarded: the REPL derives and releases
+// them on its own goroutines.
+type fakeInterrupts struct {
+	mu   sync.Mutex
+	next int
+	live map[int]context.CancelFunc
+}
+
+func newFakeInterrupts() *fakeInterrupts {
+	return &fakeInterrupts{live: map[int]context.CancelFunc{}}
+}
+
+// deps are the [InterruptDeps] of the fake.
+func (f *fakeInterrupts) deps() InterruptDeps {
+	return MakeInterruptDeps(func(parent context.Context) thunk.ContextCancel {
+		ctx, cancel := context.WithCancel(parent)
+
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		id := f.next
+		f.next++
+		f.live[id] = cancel
+
+		var release context.CancelFunc = func() {
+			f.mu.Lock()
+			defer f.mu.Unlock()
+			delete(f.live, id)
+			cancel()
+		}
+		return pair.MakePair(release, ctx)
+	})
+}
+
+// interrupt is Ctrl-C: it cancels the children that are not released.
+func (f *fakeInterrupts) interrupt() {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for _, cancel := range f.live {
+		cancel()
+	}
+}
+
+// liveCount is the number of children that are not released.
+func (f *fakeInterrupts) liveCount() int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return len(f.live)
+}
+
+// noInterrupts is a source of interrupts that never interrupts.
+func noInterrupts() InterruptDeps {
+	return newFakeInterrupts().deps()
+}
+
 // runReplWith runs the REPL of the ask mode in a temporary workspace over
-// lines, against chat, and returns what it printed.
+// lines, against chat and without interrupts, and returns what it printed.
 func runReplWith(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps, lines <-chan string) replOutput {
 	t.Helper()
 
 	var errOut bytes.Buffer
-	return runReplTo(t, ctx, chat, lines, &errOut, &errOut)
+	return runReplTo(t, ctx, chat, noInterrupts(), lines, &errOut, &errOut)
 }
 
-// runReplTo runs the REPL like [runReplWith], with errWriter as the error
-// writer of the command; errOut is what it wrote.
-func runReplTo(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps, lines <-chan string, errWriter io.Writer, errOut fmt.Stringer) replOutput {
+// runReplTo runs the REPL like [runReplWith], with interrupts and with
+// errWriter as the error writer of the command; errOut is what it wrote.
+func runReplTo(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps, interrupts InterruptDeps, lines <-chan string, errWriter io.Writer, errOut fmt.Stringer) replOutput {
 	t.Helper()
 	withHome(t)
 
@@ -67,16 +124,16 @@ func runReplTo(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps, l
 	cmd := &C.Command{Writer: &out, ErrWriter: errWriter}
 
 	_, err = effect.RunSync(F.Pipe1(
-		repl()(newReplEnv(cmd, lines, env)),
+		repl()(newReplEnv(interrupts, cmd, lines, env)),
 		effect.Provide[F.Void](chat),
 	))(ctx)
 
 	return replOutput{err, out.String(), errOut.String()}
 }
 
-// cancelOnWrite is an error writer that cancels a context on its first
-// write, as Ctrl-C at the prompt does. The buffer is guarded: the REPL
-// writes from its own goroutine.
+// cancelOnWrite is an error writer that calls cancel on every write, to
+// cancel a context or interrupt while the REPL prompts. The buffer is
+// guarded: the REPL writes from its own goroutine.
 type cancelOnWrite struct {
 	mu     sync.Mutex
 	buf    bytes.Buffer
@@ -223,7 +280,7 @@ func TestRunCommand_Dispatch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var interactive bool
 			var lines []string
-			cmd := MakePromptCommand()
+			cmd := MakePromptCommand(noInterrupts())
 			cmd.Reader = strings.NewReader("in\n")
 			cmd.Action = func(_ context.Context, cmd *C.Command) error {
 				interactive = isInteractive()(cmd)
@@ -346,8 +403,36 @@ func TestRepl_RequestError(t *testing.T) {
 	assert.Contains(t, got.errOut, "400 Bad Request")
 }
 
-// TestRepl_CancelInTurn cancels the context while a request blocks: the turn
-// is reported and the REPL ends with the cancellation.
+// TestRepl_InterruptInTurn interrupts the turn of the first line while its
+// request blocks: the turn is reported with the cancellation, and the second
+// line runs a further turn on the partial session, which keeps the first
+// line. The REPL ends at the end of the input, without an error.
+func TestRepl_InterruptInTurn(t *testing.T) {
+	interrupts := newFakeInterrupts()
+	chat := fakeServer(t, func(r *nethttp.Request, req fakeRequest) *openai.ChatCompletion {
+		if lastUserLine(req) == "a" {
+			interrupts.interrupt()
+			<-r.Context().Done()
+			return nil
+		}
+		return answerCompletion(req)
+	})
+
+	var errOut bytes.Buffer
+	got := runReplTo(t, t.Context(), chat, interrupts.deps(), closedLines("a", "b"), &errOut, &errOut)
+
+	require.NoError(t, got.err)
+	// system, a, b: the interrupted turn kept its line
+	assert.Equal(t, "n=3 last=b\n\n"+statsOf(1)+"\n", got.out)
+	assert.Contains(t, got.errOut, context.Canceled.Error())
+	// a prompt for a, for b and for the end of the input
+	assert.Equal(t, 3, strings.Count(got.errOut, promptMarker))
+	assert.Zero(t, interrupts.liveCount())
+}
+
+// TestRepl_CancelInTurn cancels the context of the REPL itself while a
+// request blocks: the turn is reported and the REPL ends with the
+// cancellation before it prompts again.
 func TestRepl_CancelInTurn(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
@@ -367,25 +452,45 @@ func TestRepl_CancelInTurn(t *testing.T) {
 	assert.Equal(t, 1, strings.Count(got.errOut, promptMarker))
 }
 
-// TestRepl_CancelAtPrompt cancels the context once the REPL prints its
-// prompt, while it waits for a line: it ends without an error.
-func TestRepl_CancelAtPrompt(t *testing.T) {
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
-	errWriter := &cancelOnWrite{cancel: cancel}
+// TestRepl_InterruptAtPrompt interrupts once the REPL prints its prompt,
+// while it waits for a line: it ends without an error.
+func TestRepl_InterruptAtPrompt(t *testing.T) {
+	interrupts := newFakeInterrupts()
+	errWriter := &cancelOnWrite{cancel: interrupts.interrupt}
 
-	got := runReplTo(t, ctx, fakeServer(t, func(*nethttp.Request, fakeRequest) *openai.ChatCompletion { return nil }), make(chan string), errWriter, errWriter)
+	got := runReplTo(t, t.Context(), fakeServer(t, func(*nethttp.Request, fakeRequest) *openai.ChatCompletion { return nil }), interrupts.deps(), make(chan string), errWriter, errWriter)
 
 	require.NoError(t, got.err)
 	assert.Empty(t, got.out)
 	assert.Equal(t, promptMarker, got.errOut)
+	assert.Zero(t, interrupts.liveCount())
 }
 
-// TestRepl_CancelStopsBackgroundProcesses runs a REPL turn of the agent mode:
-// the first answer starts a background command, the request after it cancels
-// the context and blocks. The REPL ends with the cancellation and the
-// background process leaves the table.
-func TestRepl_CancelStopsBackgroundProcesses(t *testing.T) {
+// TestInterruptibleThunk interrupts a computation that waits for its
+// context: it fails with the cancellation, its child is released, and the
+// context it runs under is not cancelled.
+func TestInterruptibleThunk(t *testing.T) {
+	interrupts := newFakeInterrupts()
+	wait := func(ctx context.Context) IOResult[F.Void] {
+		return func() Result[F.Void] {
+			interrupts.interrupt()
+			<-ctx.Done()
+			return result.Left[F.Void](context.Cause(ctx))
+		}
+	}
+
+	got := interruptibleThunk[F.Void]()(interrupts.deps())(wait)(t.Context())()
+
+	assert.Equal(t, result.Left[F.Void](context.Canceled), got)
+	assert.Zero(t, interrupts.liveCount())
+	assert.NoError(t, t.Context().Err())
+}
+
+// TestRepl_InterruptStopsBackgroundProcesses runs a REPL turn of the agent
+// mode: the first answer starts a background command, the request after it
+// interrupts the turn and blocks. The background process leaves the table,
+// and the REPL goes on to the end of the input, without an error.
+func TestRepl_InterruptStopsBackgroundProcesses(t *testing.T) {
 	if testing.Short() {
 		t.Skip("starts shell processes")
 	}
@@ -401,15 +506,14 @@ func TestRepl_CancelStopsBackgroundProcesses(t *testing.T) {
 	table := MakemodeEnvDepsLens().Get(env).GetProcessTable()
 	t.Cleanup(func() { tools.StopProcesses()(table)() })
 
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
+	interrupts := newFakeInterrupts()
 
 	start := startBackgroundCompletion(t, "sleep 30; exit 0")
 	chat := fakeServer(t, func(r *nethttp.Request, req fakeRequest) *openai.ChatCompletion {
 		// the request after the tool call carries its result
 		if A.Any(func(m fakeMessage) bool { return m.Role == "tool" })(req.Messages) {
 			assert.Len(t, ioref.Read(table)(), 1)
-			cancel()
+			interrupts.interrupt()
 			<-r.Context().Done()
 			return nil
 		}
@@ -419,11 +523,12 @@ func TestRepl_CancelStopsBackgroundProcesses(t *testing.T) {
 	var out, errOut bytes.Buffer
 	cmd := &C.Command{Writer: &out, ErrWriter: &errOut}
 	_, err = effect.RunSync(F.Pipe1(
-		repl()(newReplEnv(cmd, bufferedLines("start the server"), env)),
+		repl()(newReplEnv(interrupts.deps(), cmd, closedLines("start the server"), env)),
 		effect.Provide[F.Void](chat),
-	))(ctx)
+	))(t.Context())
 
-	assert.True(t, session.IsCancelled()(err), "%v", err)
+	require.NoError(t, err)
+	assert.Contains(t, errOut.String(), context.Canceled.Error())
 	assert.Eventually(t, func() bool { return len(ioref.Read(table)()) == 0 }, 20*time.Second, 50*time.Millisecond)
 }
 

@@ -286,9 +286,16 @@ and a text result. Validation errors (such as "path must be absolute") come back
     [cli/repl_test.go](cli/repl_test.go) covers two turns, steering, a late line, a request error, a cancellation in
     a turn (which stops a background process) and at the prompt, the end of input, a long line, and which commands
     run the REPL with which first line.
-  - [ ] **E5b Per-turn Ctrl-C.** Ctrl-C stops only the running turn (a child context per turn); the REPL continues
-    on the partial session. Needs the signal wiring out of `main.go`, whose `context.AfterFunc(ctx, stop)` drops the
-    handler after the first Ctrl-C.
+  - [x] **E5b Per-turn Ctrl-C.** The signal wiring moved out of `main.go` into an injected `InterruptDeps`
+    ([cli/interrupt.go](cli/interrupt.go)): `Interrupts` derives from a context a child that the next Ctrl-C cancels,
+    and `SignalInterrupts` makes it with `signal.NotifyContext`, one registration per child. The one-shot run, each
+    REPL prompt and each REPL turn run under their own child (`thunk.Local`), derived from the program context. A
+    Ctrl-C during a turn cancels only that turn: the REPL reports it, stops the background processes and continues
+    on the partial session at the prompt. Ctrl-C at the prompt still ends the REPL with 0; the one-shot run still
+    exits with 130. A second Ctrl-C while a turn stops exits at once. *Test:* [cli/repl_test.go](cli/repl_test.go)
+    with a fake interrupt source: a Ctrl-C in a turn continues on its partial session and the next line runs a
+    further turn, a Ctrl-C at the prompt exits 0, a Ctrl-C in a turn stops its background process, the child is
+    released after the run, and a cancelled REPL context still ends the REPL.
   - [ ] **E5c `--task <id>`.** Load a saved task and continue it, save after every turn; without `--task` create an
     id and print it on stderr.
 - [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,

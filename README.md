@@ -51,7 +51,8 @@ recorded agent sessions.
   variable has a flag of the same name in kebab case (`--max-iterations`).
   A turn that does not answer prints the error, the last assistant text of the session and
   the token usage on stderr. Ctrl-C stops the running turn and the background processes it
-  started, and the CLI exits with 130. A second Ctrl-C, while the turn stops, exits at once,
+  started, and the one-shot CLI exits with 130 (the REPL continues, see below). A second
+  Ctrl-C, while the turn stops, exits at once,
   without the partial-session report and without stopping the background processes. Other
   errors exit with 1.
   - **agent** carries out a task with every tool, including `write_file` and
@@ -68,9 +69,11 @@ recorded agent sessions.
   are sent as plain user messages with its next request, after the tool results. A line that
   arrives after the turn's last poll, that is, while its last request runs, is the next turn's
   line. A failed turn is reported and the next line continues its partial session. The prompt
-  given with `--interactive` is the first line. The REPL ends with exit code 0 at the end of
-  the input or on Ctrl-C at the prompt, even after a failed turn; Ctrl-C during a turn reports
-  it, stops its background processes and exits with 130.
+  given with `--interactive` is the first line. Ctrl-C during a turn stops only that turn: it
+  is reported, its background processes are stopped and the REPL continues the partial
+  session at the prompt; a second Ctrl-C, while the turn stops, exits at once. The REPL ends
+  with exit code 0 at the end of the input or on Ctrl-C at the prompt, even after a failed or
+  interrupted turn.
 - **Modes and system prompt**: `mode.Modes` is the table of modes, each with its role and
   the tools it allows. A mode is a Markdown file in [mode/modes/](mode/modes/): id, name,
   description, order and tools in its YAML front matter, the role prompt as its body. A new
@@ -137,7 +140,7 @@ replay tests.
 
 | Package | What it does |
 |---|---|
-| [`main`](main.go) | Runs the CLI command, stops the turn on Ctrl-C and maps the outcome to the exit code (0, 1, 130) |
+| [`main`](main.go) | Runs the CLI command with the process's Ctrl-C as its interrupt source (`cli.SignalInterrupts`) and maps the outcome to the exit code (0, 1, 130) |
 | [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`) and its `TurnResult`, the next turn (`Continue`, `RunPrompt`), steering (`Steer`), usage monoid, iteration limit, the task store (`Save`, `Load`) |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |

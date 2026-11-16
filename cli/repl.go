@@ -20,7 +20,6 @@ import (
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
 	"github.com/IBM/fp-go/v2/result"
 	"github.com/IBM/fp-go/v2/tailrec"
-	"github.com/openai/openai-go/v3"
 	C "github.com/urfave/cli/v3"
 )
 
@@ -101,17 +100,10 @@ func printPrompt() Reader[*C.Command, IOResult[int]] {
 	)
 }
 
-// continueOrEnd decides the step after a reported turn: a cancelled turn ends
-// the REPL with its cancellation, any other turn continues with its session.
-func continueOrEnd() effect.Kleisli[oai.ChatCompletionDeps, session.TurnResult, replStep] {
-	return F.Flow3(
-		result.FromPredicate(
-			P.Not(isCancelledTurn()),
-			F.Flow2(pair.Tail[session.Session, session.Outcome], result.ToError[*openai.ChatCompletion]),
-		),
-		result.Map(F.Flow2(pair.Head[session.Session, session.Outcome], tailrec.Bounce[F.Void, session.Session])),
-		effect.FromResult[oai.ChatCompletionDeps, replStep],
-	)
+// continueSession is the step after a reported turn: the REPL continues with
+// its session, whatever ended the turn, an interrupt included.
+func continueSession() func(session.TurnResult) replStep {
+	return F.Flow2(pair.Head[session.Session, session.Outcome], tailrec.Bounce[F.Void, session.Session])
 }
 
 // replStart is the session the REPL starts with: the request of its mode,
@@ -135,10 +127,10 @@ func replStart() Reader[replEnv, replEffect[session.Session]] {
 	)
 }
 
-// readLine prints the prompt marker, then waits for the next line, see
+// promptLine prints the prompt marker, then waits for the next line, see
 // [nextLine]. Neither step checks the context, so a cancelled context ends
 // the wait with None.
-func readLine() Reader[replEnv, replEffect[Option[string]]] {
+func promptLine() Reader[replEnv, replEffect[Option[string]]] {
 	commandLens := MakereplEnvCommandLens()
 	linesLens := MakereplEnvLinesLens()
 
@@ -154,6 +146,20 @@ func readLine() Reader[replEnv, replEffect[Option[string]]] {
 			printPrompt(),
 			effect.FromIO[oai.ChatCompletionDeps, Result[int]],
 		)),
+	)
+}
+
+// readLine prompts for the next line under a child of the context that an
+// interrupt cancels, see [promptLine] and [interruptible]: Ctrl-C at the
+// prompt ends the wait with None. A cancelled context of the REPL itself
+// fails at once, before the prompt, with the check of [thunk.WithContext].
+func readLine() Reader[replEnv, replEffect[Option[string]]] {
+	interruptsLens := MakereplEnvInterruptsLens()
+
+	return F.Pipe2(
+		F.Flow2(interruptsLens.Get, interruptible[oai.ChatCompletionDeps, Option[string]]()),
+		reader.Ap[replEffect[Option[string]]](promptLine()),
+		reader.Map[replEnv](reader.Map[oai.ChatCompletionDeps](thunk.WithContext[Option[string]])),
 	)
 }
 
@@ -183,21 +189,29 @@ func applyTo() Reader[session.Session, func(replEffect[endomorphism.Endomorphism
 	)
 }
 
+// turnKleisli is a turn of a session, see [runTurn].
+type turnKleisli = effect.Kleisli[oai.ChatCompletionDeps, session.Session, session.TurnResult]
+
 // runTurn runs a turn of the session with the lines of the REPL steering it,
-// see [runSession].
+// see [runSession], under a child of the context that an interrupt cancels,
+// see [interruptible]. The turn is total, so Ctrl-C ends it with its partial
+// session and the cancellation, and the REPL goes on.
 func runTurn() Reader[replEnv, func(replEffect[session.Session]) replEffect[session.TurnResult]] {
 	envLens := MakereplEnvEnvLens()
 	linesLens := MakereplEnvLinesLens()
+	interruptsLens := MakereplEnvInterruptsLens()
 
-	return F.Pipe2(
+	return F.Pipe4(
 		F.Flow2(envLens.Get, runSession()),
-		reader.Ap[effect.Kleisli[oai.ChatCompletionDeps, session.Session, session.TurnResult]](F.Flow2(linesLens.Get, session.ChannelSteering)),
+		reader.Ap[turnKleisli](F.Flow2(linesLens.Get, session.ChannelSteering)),
+		reader.Map[replEnv](reader.Compose[replEffect[session.TurnResult], session.Session, replEffect[session.TurnResult]]),
+		reader.Ap[turnKleisli](F.Flow2(interruptsLens.Get, interruptible[oai.ChatCompletionDeps, session.TurnResult]())),
 		reader.Map[replEnv](RRIOE.Chain[oai.ChatCompletionDeps, context.Context, error, session.Session, session.TurnResult]),
 	)
 }
 
 // reportTurnTap prints the report of a turn, see [reportTurn]. The REPL
-// drops the error of a failed turn: it decides with [continueOrEnd].
+// drops the error of a failed turn: it continues, see [continueSession].
 func reportTurnTap() Reader[replEnv, endomorphism.Endomorphism[replEffect[session.TurnResult]]] {
 	commandLens := MakereplEnvCommandLens()
 
@@ -209,8 +223,8 @@ func reportTurnTap() Reader[replEnv, endomorphism.Endomorphism[replEffect[sessio
 }
 
 // turn runs a turn of a session, stops the background processes after a
-// cancelled turn, reports the turn and decides the next step. The taps do
-// not check the context, so a cancelled turn is reported too.
+// cancelled turn, reports the turn and continues with its session. The taps
+// do not check the context, so a cancelled turn is reported too.
 func turn() Reader[replEnv, func(replEffect[session.Session]) replEffect[replStep]] {
 	envLens := MakereplEnvEnvLens()
 
@@ -225,7 +239,7 @@ func turn() Reader[replEnv, func(replEffect[session.Session]) replEffect[replSte
 		runTurn(),
 		reader.Map[replEnv](reader.Compose[replEffect[session.TurnResult], replEffect[session.Session], replEffect[session.TurnResult]]),
 		reader.Ap[func(replEffect[session.Session]) replEffect[session.TurnResult]](taps),
-		reader.Map[replEnv](reader.Map[replEffect[session.Session]](RRIOE.Chain[oai.ChatCompletionDeps, context.Context, error](continueOrEnd()))),
+		reader.Map[replEnv](reader.Map[replEffect[session.Session]](effect.Map[oai.ChatCompletionDeps](continueSession()))),
 	)
 }
 
@@ -267,15 +281,19 @@ func replLoopStep() Reader[replEnv, func(session.Session) replEffect[replStep]] 
 // the request of the mode. Each line is wrapped by the environment_details of
 // the turn, added with [session.Continue] and run with the lines of the
 // channel steering the turn after its first request. The turn is reported
-// like a one-shot turn; after a cancelled turn the background processes are
-// stopped and the REPL ends with the cancellation. At the end of the input,
-// or when the context is cancelled while it waits for a line, the REPL ends
-// without an error. A failure to build the first request is printed on the
-// standard error; the turns report their own errors.
+// like a one-shot turn, and the next line continues its session, also after
+// a failed or interrupted turn; after a cancelled turn the background
+// processes are stopped. The wait for a line and each turn run under their
+// own child of the context, which an interrupt cancels, see [readLine] and
+// [runTurn]: Ctrl-C during a turn ends only that turn, Ctrl-C at the prompt
+// ends the REPL without an error, as the end of the input does. A failure to
+// build the first request is printed on the standard error; the turns report
+// their own errors.
 //
 // The steps are joined by readerreaderioeither's Chain and TailRec, which do
-// not check the context, so a cancelled context ends a waiting REPL with
-// success and a running turn with its report.
+// not check the context. When the context of the REPL itself is cancelled, a
+// running turn ends with its report and the REPL with the cancellation, at
+// the next prompt.
 func repl() Reader[replEnv, replEffect[F.Void]] {
 	return F.Pipe1(
 		F.Flow3(
@@ -287,12 +305,12 @@ func repl() Reader[replEnv, replEffect[F.Void]] {
 	)
 }
 
-// replOf is the REPL of a command, over a channel of lines and the
-// environment of a mode, see [newReplEnv].
-func replOf() Reader[*C.Command, Reader[lineQueue, Reader[modeEnv, replEffect[F.Void]]]] {
+// replOf is the REPL of a source of interrupts and a command, over a channel
+// of lines and the environment of a mode, see [newReplEnv].
+func replOf() Reader[InterruptDeps, Reader[*C.Command, Reader[lineQueue, Reader[modeEnv, replEffect[F.Void]]]]] {
 	return F.Flow2(
-		F.Curry3(newReplEnv),
-		reader.Map[lineQueue](reader.Map[modeEnv](repl())),
+		F.Curry4(newReplEnv),
+		reader.Map[*C.Command](reader.Map[lineQueue](reader.Map[modeEnv](repl()))),
 	)
 }
 
@@ -306,17 +324,19 @@ func scanCommand() Reader[*C.Command, IOResult[lineQueue]] {
 	)
 }
 
-// replWithLines is the REPL of a command over the environment of a mode,
-// once the reader of its lines is started, see [scanCommand].
-func replWithLines() Reader[*C.Command, ioresult.Kleisli[modeEnv, replEffect[F.Void]]] {
+// replWithLines is the REPL of a source of interrupts and a command over the
+// environment of a mode, once the reader of its lines is started, see
+// [scanCommand].
+func replWithLines() Reader[InterruptDeps, Reader[*C.Command, ioresult.Kleisli[modeEnv, replEffect[F.Void]]]] {
 	withLines := F.Flow3(
 		scanCommand(),
 		reader.Read[IOResult[replEffect[F.Void]], IOResult[lineQueue]],
 		reader.Compose[IOResult[replEffect[F.Void]]](ioresult.Map[lineQueue, replEffect[F.Void]]),
 	)
 
-	return F.Pipe2(
-		F.Flow2(replOf(), F.Flip[lineQueue, modeEnv, replEffect[F.Void]]),
+	return F.Flow4(
+		replOf(),
+		reader.Map[*C.Command](F.Flip[lineQueue, modeEnv, replEffect[F.Void]]),
 		reader.Map[*C.Command](reader.Compose[IOResult[replEffect[F.Void]], modeEnv, func(lineQueue) replEffect[F.Void]]),
 		reader.Ap[ioresult.Kleisli[modeEnv, replEffect[F.Void]]](withLines),
 	)
@@ -325,11 +345,13 @@ func replWithLines() Reader[*C.Command, ioresult.Kleisli[modeEnv, replEffect[F.V
 // makeRepl is wiring: it looks the mode of a configuration up and builds its
 // REPL over the lines of the reader of a command, the prompt of the
 // arguments first. The reader goroutine starts only after the lookup.
-func makeRepl() Reader[*C.Command, ioresult.Kleisli[Config, replEffect[F.Void]]] {
-	return F.Flow3(
+func makeRepl() Reader[InterruptDeps, Reader[*C.Command, ioresult.Kleisli[Config, replEffect[F.Void]]]] {
+	return F.Flow2(
 		replWithLines(),
-		ioresult.Chain[modeEnv, replEffect[F.Void]],
-		reader.Compose[IOResult[replEffect[F.Void]]](makeModeEnv()),
+		reader.Map[*C.Command](F.Flow2(
+			ioresult.Chain[modeEnv, replEffect[F.Void]],
+			reader.Compose[IOResult[replEffect[F.Void]]](makeModeEnv()),
+		)),
 	)
 }
 
@@ -356,12 +378,12 @@ func liftDeepSeek() Reader[*C.Command, func(replEffect[F.Void]) deepSeekRepl] {
 }
 
 // replProgram is wiring: it decodes the [Config] from the variables of a run
-// and returns the REPL of its mode for a command against DeepSeek, with the
-// DeepSeek deps reading their API key from the same variables, see
-// [provideDeepSeek] and [liftDeepSeek]. The variables are read twice: for the
-// configuration and for the deps; the command for the REPL and for the
-// printer of a failure to build the deps.
-func replProgram() Reader[*C.Command, ioresult.Kleisli[Record[string, string], ReaderIOResult[F.Void]]] {
+// and returns the REPL of its mode for a source of interrupts and a command
+// against DeepSeek, with the DeepSeek deps reading their API key from the
+// same variables, see [provideDeepSeek] and [liftDeepSeek]. The variables are
+// read twice: for the configuration and for the deps; the command for the
+// REPL and for the printer of a failure to build the deps.
+func replProgram() Reader[InterruptDeps, Reader[*C.Command, ioresult.Kleisli[Record[string, string], ReaderIOResult[F.Void]]]] {
 	provide := F.Flow5(
 		liftDeepSeek(),
 		reader.Local[ReaderIOResult[F.Void], deepSeekRepl, replEffect[F.Void]],
@@ -370,30 +392,38 @@ func replProgram() Reader[*C.Command, ioresult.Kleisli[Record[string, string], R
 		reader.Map[Record[string, string]](ioresult.Map[replEffect[F.Void], ReaderIOResult[F.Void]]),
 	)
 
-	program := F.Flow3(
+	program := F.Flow2(
 		makeRepl(),
-		ioresult.Chain[Config, replEffect[F.Void]],
-		reader.Compose[IOResult[replEffect[F.Void]]](F.Flow2(decodeConfig(), ioresult.FromResult[Config])),
+		reader.Map[*C.Command](F.Flow2(
+			ioresult.Chain[Config, replEffect[F.Void]],
+			reader.Compose[IOResult[replEffect[F.Void]]](F.Flow2(decodeConfig(), ioresult.FromResult[Config])),
+		)),
 	)
 
-	return F.Pipe1(
-		F.Flow2(program, reader.Ap[IOResult[ReaderIOResult[F.Void]], Record[string, string], IOResult[replEffect[F.Void]]]),
+	return F.Flow3(
+		program,
+		reader.Map[*C.Command](reader.Ap[IOResult[ReaderIOResult[F.Void]], Record[string, string], IOResult[replEffect[F.Void]]]),
 		reader.Ap[ioresult.Kleisli[Record[string, string], ReaderIOResult[F.Void]]](provide),
 	)
 }
 
-// runRepl runs the REPL of the command under the configuration of its run.
-// An error before the REPL starts is printed on the standard error; the
-// turns report their own errors.
-func runRepl() Reader[*C.Command, ReaderIOResult[F.Void]] {
-	setup := F.Pipe1(
-		F.Flow2(replProgram(), ioresult.Chain[Record[string, string], ReaderIOResult[F.Void]]),
-		reader.Ap[IOResult[ReaderIOResult[F.Void]]](loadEnv()),
-	)
+// replTarget is the command's REPL, once its setup is done, see [runRepl].
+type replTarget = Reader[*C.Command, IOResult[ReaderIOResult[F.Void]]]
 
-	return F.Pipe2(
-		F.Flow2(printError(), ioresult.TapLeft[ReaderIOResult[F.Void], int]),
-		reader.Ap[IOResult[ReaderIOResult[F.Void]]](setup),
+// runRepl runs the REPL of a source of interrupts and the command under the
+// configuration of its run. An error before the REPL starts is printed on
+// the standard error; the turns report their own errors.
+func runRepl() Reader[InterruptDeps, Reader[*C.Command, ReaderIOResult[F.Void]]] {
+	printSetupError := F.Flow2(printError(), ioresult.TapLeft[ReaderIOResult[F.Void], int])
+
+	return F.Flow5(
+		replProgram(),
+		reader.Map[*C.Command](ioresult.Chain[Record[string, string], ReaderIOResult[F.Void]]),
+		reader.Ap[IOResult[ReaderIOResult[F.Void]]](loadEnv()),
+		F.Flow2(
+			reader.Ap[IOResult[ReaderIOResult[F.Void]], *C.Command, IOResult[ReaderIOResult[F.Void]]],
+			reader.Read[replTarget](printSetupError),
+		),
 		reader.Map[*C.Command](F.Flow2(
 			thunk.FromIOResult[ReaderIOResult[F.Void]],
 			thunk.Flatten[F.Void],
@@ -410,11 +440,24 @@ func isInteractive() P.Predicate[*C.Command] {
 	)
 }
 
+// commandRun is the run of a command, see [runCommand].
+type commandRun = Reader[*C.Command, ReaderIOResult[F.Void]]
+
 // runCommand runs the REPL or answers the one prompt of the command, see
-// [isInteractive].
-func runCommand() Reader[*C.Command, ReaderIOResult[F.Void]] {
-	return P.Fold(
-		F.Flow2(printResult(), thunk.MapTo[int](F.VOID)),
-		runRepl(),
-	)(isInteractive())
+// [isInteractive], with a source of interrupts. The one prompt runs under a
+// child of the context that an interrupt cancels, see [interruptibleThunk],
+// so Ctrl-C ends the run with the cancellation; the REPL scopes each wait
+// and each turn, see [repl].
+func runCommand() Reader[InterruptDeps, commandRun] {
+	oneShot := F.Flow2(
+		interruptibleThunk[F.Void](),
+		reader.Compose[ReaderIOResult[F.Void]](F.Flow2(printResult(), thunk.MapTo[int](F.VOID))),
+	)
+
+	return F.Pipe3(
+		oneShot,
+		reader.Map[InterruptDeps](F.Curry2(P.Fold[*C.Command, ReaderIOResult[F.Void]])),
+		reader.Ap[func(P.Predicate[*C.Command]) commandRun](runRepl()),
+		reader.Map[InterruptDeps](reader.Read[commandRun](isInteractive())),
+	)
 }
