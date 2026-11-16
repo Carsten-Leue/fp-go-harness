@@ -14,12 +14,15 @@ import (
 )
 
 // Tags of the environment_details block and the sections nested in it, as in
-// the recorded user messages.
+// the recorded user messages. TodoListTag is the section of the todo list
+// (H3); no recording has one, so its tag and format were chosen here, see
+// package todo.
 const (
 	EnvironmentDetailsTag = "environment_details"
 	CurrentDatetimeTag    = "current_datetime"
 	CurrentModeTag        = "current_mode"
 	GitStatusTag          = "git_status_snapshot"
+	TodoListTag           = "todo_list"
 )
 
 // GitStatusCommand is the command line whose output is the git status
@@ -146,6 +149,18 @@ func detailsSections() effect.Kleisli[EnvDetailsDeps, string, []Section] {
 	})
 }
 
+// detailsSectionsWith are the [detailsSections] followed by further sections,
+// such as the todo list of the session, which the caller builds.
+func detailsSectionsWith() Reader[[]Section, effect.Kleisli[EnvDetailsDeps, string, []Section]] {
+	sections := reader.ApplicativeMonoid[string](effect.ApplicativeMonoid[EnvDetailsDeps](A.Monoid[Section]()))
+
+	return F.Flow3(
+		effect.Of[EnvDetailsDeps, []Section],
+		F.Constant1[string, Effect[EnvDetailsDeps, []Section]],
+		F.Bind1st(sections.Concat, detailsSections()),
+	)
+}
+
 // renderDetails renders the nested sections into the environment_details
 // block, one line break between them.
 func renderDetails() func([]Section) string {
@@ -162,6 +177,17 @@ func appendDetails() func(string) Endomorphism[string] {
 	return F.Flip(F.Curry2(S.Intersperse(messageSeparator)))
 }
 
+// EnvironmentDetailsWith is [EnvironmentDetails] with further sections at the
+// end of the block, after the git status, such as the todo_list section of
+// the session (H3). No further sections give the block of
+// [EnvironmentDetails].
+func EnvironmentDetailsWith() Reader[[]Section, effect.Kleisli[EnvDetailsDeps, string, Endomorphism[string]]] {
+	return F.Flow2(
+		detailsSectionsWith(),
+		reader.Map[string](effect.Map[EnvDetailsDeps](F.Flow2(renderDetails(), appendDetails()))),
+	)
+}
+
 // EnvironmentDetails builds, for the name of the current mode, the
 // endomorphism that wraps a user message: the text, a blank line and the
 // environment_details block with the current date and time, the mode and the
@@ -169,8 +195,5 @@ func appendDetails() func(string) Endomorphism[string] {
 // so every turn sees the current state. Outside a git repository there is no
 // git status section.
 func EnvironmentDetails() effect.Kleisli[EnvDetailsDeps, string, Endomorphism[string]] {
-	return F.Flow2(
-		detailsSections(),
-		effect.Map[EnvDetailsDeps](F.Flow2(renderDetails(), appendDetails())),
-	)
+	return EnvironmentDetailsWith()(A.Empty[Section]())
 }

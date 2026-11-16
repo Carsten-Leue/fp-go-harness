@@ -472,3 +472,203 @@ func MakeModeRefPrisms() ModeRefPrisms {
 		Prompt:       MakeModePromptRefPrism(),
 	}
 }
+
+// SwitchModeArgsLenses provides [lenses] for accessing fields of [SwitchModeArgs]
+//
+// [lenses]: __lens.Lens
+type SwitchModeArgsLenses struct {
+	// ModeID is a [__lens.Lens] for the ModeID field of [SwitchModeArgs]
+	ModeID __lens.Lens[SwitchModeArgs, string]
+	// Reason is a [__lens.Lens] for the Reason field of [SwitchModeArgs]
+	Reason __lens.Lens[SwitchModeArgs, string]
+	// ModeIDO is a [__lens_option.LensO] for the ModeID field of [SwitchModeArgs], treating the zero value as absent
+	ModeIDO __lens_option.LensO[SwitchModeArgs, string]
+	// ReasonO is a [__lens_option.LensO] for the Reason field of [SwitchModeArgs], treating the zero value as absent
+	ReasonO __lens_option.LensO[SwitchModeArgs, string]
+}
+
+// SwitchModeArgsRefLenses provides [lenses] for accessing fields of [SwitchModeArgs] via a pointer to [SwitchModeArgs]
+//
+// [lenses]: __lens.Lens
+type SwitchModeArgsRefLenses struct {
+	// ModeID is a [__lens.Lens] for the ModeID field of [SwitchModeArgs] via a pointer receiver
+	ModeID __lens.Lens[*SwitchModeArgs, string]
+	// Reason is a [__lens.Lens] for the Reason field of [SwitchModeArgs] via a pointer receiver
+	Reason __lens.Lens[*SwitchModeArgs, string]
+	// ModeIDO is a [__lens_option.LensO] for the ModeID field of [SwitchModeArgs] via a pointer receiver, treating the zero value as absent
+	ModeIDO __lens_option.LensO[*SwitchModeArgs, string]
+	// ReasonO is a [__lens_option.LensO] for the Reason field of [SwitchModeArgs] via a pointer receiver, treating the zero value as absent
+	ReasonO __lens_option.LensO[*SwitchModeArgs, string]
+}
+
+// SwitchModeArgsPrisms provides [prisms] for accessing fields of [SwitchModeArgs]
+//
+// [prisms]: __prism.Prism
+type SwitchModeArgsPrisms struct {
+	// ModeID is a [__prism.Prism] for the ModeID field of [SwitchModeArgs]
+	ModeID __prism.Prism[SwitchModeArgs, string]
+	// Reason is a [__prism.Prism] for the Reason field of [SwitchModeArgs]
+	Reason __prism.Prism[SwitchModeArgs, string]
+}
+
+// SwitchModeArgsRefPrisms provides [prisms] for accessing fields of [SwitchModeArgs] via a pointer to [SwitchModeArgs]
+//
+// [prisms]: __prism.Prism
+type SwitchModeArgsRefPrisms struct {
+	// ModeID is a [__prism.Prism] for the ModeID field of [SwitchModeArgs] via a pointer receiver
+	ModeID __prism.Prism[*SwitchModeArgs, string]
+	// Reason is a [__prism.Prism] for the Reason field of [SwitchModeArgs] via a pointer receiver
+	Reason __prism.Prism[*SwitchModeArgs, string]
+}
+
+// MakeSwitchModeArgsModeIDLens returns a [__lens.Lens] for the ModeID field of [SwitchModeArgs]
+func MakeSwitchModeArgsModeIDLens() __lens.Lens[SwitchModeArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SwitchModeArgs) string { return s.ModeID },
+		func(s SwitchModeArgs, v string) SwitchModeArgs { s.ModeID = v; return s },
+		"SwitchModeArgs.ModeID",
+	)
+}
+
+// MakeSwitchModeArgsModeIDLensO returns a [__lens_option.LensO] for the ModeID field of [SwitchModeArgs]
+func MakeSwitchModeArgsModeIDLensO() __lens_option.LensO[SwitchModeArgs, string] {
+	return __lens_option.FromIso[SwitchModeArgs](__iso_option.FromZero[string]())(MakeSwitchModeArgsModeIDLens())
+}
+
+// MakeSwitchModeArgsModeIDRefLens returns a [__lens.Lens] for the ModeID field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsModeIDRefLens() __lens.Lens[*SwitchModeArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SwitchModeArgs) string { return s.ModeID },
+		func(s *SwitchModeArgs, v string) *SwitchModeArgs { s.ModeID = v; return s },
+		"(*SwitchModeArgs).ModeID",
+	)
+}
+
+// MakeSwitchModeArgsModeIDRefLensO returns a [__lens_option.LensO] for the ModeID field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsModeIDRefLensO() __lens_option.LensO[*SwitchModeArgs, string] {
+	return __lens_option.FromIso[*SwitchModeArgs](__iso_option.FromZero[string]())(MakeSwitchModeArgsModeIDRefLens())
+}
+
+// MakeSwitchModeArgsModeIDPrism returns a [__prism.Prism] for the ModeID field of [SwitchModeArgs]
+func MakeSwitchModeArgsModeIDPrism() __prism.Prism[SwitchModeArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SwitchModeArgs) __option.Option[string] { return _fromNonZero(s.ModeID) },
+		func(v string) SwitchModeArgs {
+			return SwitchModeArgs{ModeID: v}
+		},
+		"SwitchModeArgs.ModeID",
+	)
+}
+
+// MakeSwitchModeArgsModeIDRefPrism returns a [__prism.Prism] for the ModeID field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsModeIDRefPrism() __prism.Prism[*SwitchModeArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SwitchModeArgs) __option.Option[string] { return _fromNonZero(s.ModeID) },
+		func(v string) *SwitchModeArgs {
+			return &SwitchModeArgs{ModeID: v}
+		},
+		"SwitchModeArgs.ModeID",
+	)
+}
+
+// MakeSwitchModeArgsReasonLens returns a [__lens.Lens] for the Reason field of [SwitchModeArgs]
+func MakeSwitchModeArgsReasonLens() __lens.Lens[SwitchModeArgs, string] {
+	return __lens.MakeLensWithName(
+		func(s SwitchModeArgs) string { return s.Reason },
+		func(s SwitchModeArgs, v string) SwitchModeArgs { s.Reason = v; return s },
+		"SwitchModeArgs.Reason",
+	)
+}
+
+// MakeSwitchModeArgsReasonLensO returns a [__lens_option.LensO] for the Reason field of [SwitchModeArgs]
+func MakeSwitchModeArgsReasonLensO() __lens_option.LensO[SwitchModeArgs, string] {
+	return __lens_option.FromIso[SwitchModeArgs](__iso_option.FromZero[string]())(MakeSwitchModeArgsReasonLens())
+}
+
+// MakeSwitchModeArgsReasonRefLens returns a [__lens.Lens] for the Reason field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsReasonRefLens() __lens.Lens[*SwitchModeArgs, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SwitchModeArgs) string { return s.Reason },
+		func(s *SwitchModeArgs, v string) *SwitchModeArgs { s.Reason = v; return s },
+		"(*SwitchModeArgs).Reason",
+	)
+}
+
+// MakeSwitchModeArgsReasonRefLensO returns a [__lens_option.LensO] for the Reason field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsReasonRefLensO() __lens_option.LensO[*SwitchModeArgs, string] {
+	return __lens_option.FromIso[*SwitchModeArgs](__iso_option.FromZero[string]())(MakeSwitchModeArgsReasonRefLens())
+}
+
+// MakeSwitchModeArgsReasonPrism returns a [__prism.Prism] for the Reason field of [SwitchModeArgs]
+func MakeSwitchModeArgsReasonPrism() __prism.Prism[SwitchModeArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SwitchModeArgs) __option.Option[string] { return _fromNonZero(s.Reason) },
+		func(v string) SwitchModeArgs {
+			return SwitchModeArgs{Reason: v}
+		},
+		"SwitchModeArgs.Reason",
+	)
+}
+
+// MakeSwitchModeArgsReasonRefPrism returns a [__prism.Prism] for the Reason field of [SwitchModeArgs] via a pointer receiver
+func MakeSwitchModeArgsReasonRefPrism() __prism.Prism[*SwitchModeArgs, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SwitchModeArgs) __option.Option[string] { return _fromNonZero(s.Reason) },
+		func(v string) *SwitchModeArgs {
+			return &SwitchModeArgs{Reason: v}
+		},
+		"SwitchModeArgs.Reason",
+	)
+}
+
+// MakeSwitchModeArgsLenses creates a new [SwitchModeArgsLenses] with [lenses] for all fields
+//
+// [lenses]: __lens.Lens
+func MakeSwitchModeArgsLenses() SwitchModeArgsLenses {
+	return SwitchModeArgsLenses{
+		// mandatory lenses
+		ModeID: MakeSwitchModeArgsModeIDLens(),
+		Reason: MakeSwitchModeArgsReasonLens(),
+		// optional lenses
+		ModeIDO: MakeSwitchModeArgsModeIDLensO(),
+		ReasonO: MakeSwitchModeArgsReasonLensO(),
+	}
+}
+
+// MakeSwitchModeArgsRefLenses creates a new [SwitchModeArgsRefLenses] with [lenses] for all fields via a pointer to [SwitchModeArgs]
+//
+// [lenses]: __lens.Lens
+func MakeSwitchModeArgsRefLenses() SwitchModeArgsRefLenses {
+	return SwitchModeArgsRefLenses{
+		// mandatory lenses
+		ModeID: MakeSwitchModeArgsModeIDRefLens(),
+		Reason: MakeSwitchModeArgsReasonRefLens(),
+		// optional lenses
+		ModeIDO: MakeSwitchModeArgsModeIDRefLensO(),
+		ReasonO: MakeSwitchModeArgsReasonRefLensO(),
+	}
+}
+
+// MakeSwitchModeArgsPrisms creates a new [SwitchModeArgsPrisms] with [prisms] for all fields
+//
+// [prisms]: __prism.Prism
+func MakeSwitchModeArgsPrisms() SwitchModeArgsPrisms {
+	return SwitchModeArgsPrisms{
+		ModeID: MakeSwitchModeArgsModeIDPrism(),
+		Reason: MakeSwitchModeArgsReasonPrism(),
+	}
+}
+
+// MakeSwitchModeArgsRefPrisms creates a new [SwitchModeArgsRefPrisms] with [prisms] for all fields via a pointer to [SwitchModeArgs]
+//
+// [prisms]: __prism.Prism
+func MakeSwitchModeArgsRefPrisms() SwitchModeArgsRefPrisms {
+	return SwitchModeArgsRefPrisms{
+		ModeID: MakeSwitchModeArgsModeIDRefPrism(),
+		Reason: MakeSwitchModeArgsReasonRefPrism(),
+	}
+}

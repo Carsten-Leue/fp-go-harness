@@ -17,10 +17,21 @@ import (
 	"github.com/IBM/fp-go/v2/tailrec"
 )
 
+// The session-changing tools (E6) at the [Session]: a [SessionCall] returns
+// its text and an endomorphism of the session, see [tools.ToolResult]. A
+// plain tool lifts into a [SessionTool] with [tools.LiftTool].
+type (
+	ToolResult      = tools.ToolResult[Session]
+	SessionCall     = tools.StateCall[Session]
+	SessionTool     = tools.StateTool[Session]
+	SessionRegistry = tools.StateRegistry[Session]
+	ToolCaller      = tools.StateToolCaller[Session]
+	ToolDeps        = tools.StateToolDeps[Session]
+)
+
 type (
 	Effect[C, A any]     = effect.Effect[C, A]
 	Trampoline[B, L any] = tailrec.Trampoline[B, L]
-	ToolCaller           = tools.ToolCaller
 	Thunk[A any]         = effect.Thunk[A]
 	Endomorphism[A any]  = endomorphism.Endomorphism[A]
 	Reader[R, A any]     = reader.Reader[R, A]

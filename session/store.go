@@ -201,8 +201,9 @@ func readTaskFile() effect.Kleisli[TaskStoreDeps, string, []byte] {
 }
 
 // Load reads the session stored by [Save] under a task ID. The session is
-// restored with its whole history, request, usage and iteration count, so
-// [Continue] and [Run] carry on where it was saved.
+// restored with its whole history, request, usage, iteration count and todo
+// list, so [Continue] and [Run] carry on where it was saved. A file without a
+// todo list loads with an empty one.
 //
 // An unknown ID fails with an error that matches fs.ErrNotExist; an
 // invalid ID and a file that doesn't decode fail too.

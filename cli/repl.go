@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -163,29 +164,92 @@ func readLine() Reader[replEnv, replEffect[Option[string]]] {
 	)
 }
 
-// withLine is the change of a line to the session, the line wrapped by the
-// environment_details of the turn and added with [session.Continue].
-func withLine() Reader[replEnv, Reader[string, replEffect[endomorphism.Endomorphism[session.Session]]]] {
-	envLens := MakereplEnvEnvLens()
+// The values of [withLine]: the environment_details that wrap a line, and the
+// session continued with a line, before and after the details are read.
+type (
+	lineDetails   = replEffect[endomorphism.Endomorphism[string]]
+	wrappedLine   = func(endomorphism.Endomorphism[string]) session.Session
+	continuedLine = func(string) replEffect[session.Session]
+)
 
-	lineChange := F.Flow3(
+// lineChange is the change of a line to the session, the line wrapped by the
+// environment_details of the turn and added with [session.Continue].
+func lineChange() func(string) func(endomorphism.Endomorphism[string]) endomorphism.Endomorphism[session.Session] {
+	return F.Flow2(
 		reader.Read[string, string],
 		reader.Map[endomorphism.Endomorphism[string]](session.Continue()),
-		effect.Map[oai.ChatCompletionDeps, endomorphism.Endomorphism[string], endomorphism.Endomorphism[session.Session]],
-	)
-
-	return F.Flow3(
-		F.Flow2(envLens.Get, modeDetails[oai.ChatCompletionDeps]()),
-		reader.Read[replEffect[endomorphism.Endomorphism[session.Session]], replEffect[endomorphism.Endomorphism[string]]],
-		reader.Compose[replEffect[endomorphism.Endomorphism[session.Session]]](lineChange),
 	)
 }
 
-// applyTo applies the change of an effect to a session.
-func applyTo() Reader[session.Session, func(replEffect[endomorphism.Endomorphism[session.Session]]) replEffect[session.Session]] {
+// sessionLine is a session continued with a line, once the
+// environment_details that wrap it are known, see [lineChange].
+func sessionLine() Reader[session.Session, func(string) wrappedLine] {
+	return F.Flip(F.Flow2(lineChange(), F.Flip[endomorphism.Endomorphism[string], session.Session, session.Session]))
+}
+
+// switchedEnv is the environment with the mode of an ID, looked up in the
+// table of its deps; an ID that is not in the table keeps the environment.
+// The lookup and the change both read the environment.
+func switchedEnv() func(string) endomorphism.Endomorphism[modeEnv] {
+	modeLens := MakemodeEnvModeLens()
+	depsLens := MakemodeEnvDepsLens()
+
+	return F.Flow3(
+		F.Flip(F.Flow4(
+			depsLens.Get,
+			mode.AsModeTableDeps[mode.ModeDeps],
+			mode.Lookup(),
+			reader.Map[string](result.ToOption[mode.Mode]),
+		)),
+		reader.Map[modeEnv](option.Fold(endomorphism.Identity[modeEnv], modeLens.Set)),
+		reader.Flatten[modeEnv, modeEnv],
+	)
+}
+
+// sessionEnv is the environment of the mode a session is in: the mode it
+// switched to with switch_mode (H5), see [session.ModeID], or the start mode
+// of the environment.
+func sessionEnv() Reader[session.Session, endomorphism.Endomorphism[modeEnv]] {
 	return F.Flow2(
-		reader.Read[session.Session, session.Session],
-		effect.Map[oai.ChatCompletionDeps, endomorphism.Endomorphism[session.Session], session.Session],
+		session.ModeID(),
+		option.Fold(endomorphism.Identity[modeEnv], switchedEnv()),
+	)
+}
+
+// sessionDetails are the environment_details of a turn of a session: those
+// of the mode the session is in (see [sessionEnv]), so current_mode shows a
+// switch, with the todo list of the session (H3). The mode and the todo list
+// are independent reads of the session.
+func sessionDetails() Reader[modeEnv, Reader[session.Session, lineDetails]] {
+	return F.Flow3(
+		F.Flip(sessionEnv()),
+		reader.Map[session.Session](modeDetails[oai.ChatCompletionDeps]()),
+		reader.Ap[lineDetails](session.Todos()),
+	)
+}
+
+// withLine continues a session with a line: the line wrapped by the
+// environment_details of the turn, see [sessionDetails], and added with
+// [session.Continue], see [sessionLine]. The details and the continuation
+// are independent reads of the session.
+func withLine() Reader[replEnv, Reader[session.Session, continuedLine]] {
+	envLens := MakereplEnvEnvLens()
+
+	continuation := F.Pipe1(
+		sessionLine(),
+		reader.Map[session.Session](F.Flow2(
+			reader.Map[string](effect.Map[oai.ChatCompletionDeps, endomorphism.Endomorphism[string], session.Session]),
+			F.Flip[string, lineDetails, replEffect[session.Session]],
+		)),
+	)
+
+	return F.Flow3(
+		envLens.Get,
+		sessionDetails(),
+		F.Flow2(
+			reader.Ap[continuedLine, session.Session, lineDetails],
+			reader.Read[Reader[session.Session, continuedLine]](continuation),
+		),
 	)
 }
 
@@ -243,20 +307,17 @@ func turn() Reader[replEnv, func(replEffect[session.Session]) replEffect[replSte
 	)
 }
 
-// The stages of [lineTurn], each a function of the change of a line.
-type (
-	sessionOf = func(replEffect[endomorphism.Endomorphism[session.Session]]) replEffect[session.Session]
-	lineStep  = func(string) replEffect[replStep]
-)
+// lineStep is the step of the REPL for a line, see [lineTurn].
+type lineStep = func(string) replEffect[replStep]
 
-// lineTurn is the turn of a session for a line: the change of the line is
-// applied to the session, then the turn runs.
+// lineTurn is the turn of a session for a line: the session is continued
+// with the line, see [withLine], then the turn runs. The stages are composed
+// in data-flow order.
 func lineTurn() Reader[replEnv, func(session.Session) lineStep] {
-	return F.Pipe3(
-		F.Flow2(withLine(), reader.Local[replEffect[session.Session], replEffect[endomorphism.Endomorphism[session.Session]], string]),
-		reader.Map[replEnv](reader.Compose[lineStep, sessionOf, func(string) replEffect[session.Session]]),
-		reader.Ap[func(sessionOf) lineStep](F.Flow2(turn(), reader.Map[string, replEffect[session.Session], replEffect[replStep]])),
-		reader.Map[replEnv](reader.Compose[lineStep](applyTo())),
+	return F.Pipe2(
+		withLine(),
+		reader.Map[replEnv](reader.Compose[lineStep, session.Session, continuedLine]),
+		reader.Ap[func(session.Session) lineStep](F.Flow2(turn(), reader.Map[string, replEffect[session.Session], replEffect[replStep]])),
 	)
 }
 

@@ -1,20 +1,14 @@
 package tools
 
 import (
-	oai "github.com/Carsten-Leue/fp-go-harness/openai"
-	A "github.com/IBM/fp-go/v2/array"
 	B "github.com/IBM/fp-go/v2/bytes"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
-	"github.com/IBM/fp-go/v2/endomorphism"
 	F "github.com/IBM/fp-go/v2/function"
 	J "github.com/IBM/fp-go/v2/json"
-	L "github.com/IBM/fp-go/v2/optics/lens"
-	P "github.com/IBM/fp-go/v2/optics/prism"
+	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
-	"github.com/IBM/fp-go/v2/readeroption"
 	"github.com/IBM/fp-go/v2/readerresult"
-	S "github.com/IBM/fp-go/v2/string"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -78,56 +72,26 @@ func makeErrorChatCompletionMessageParamUnion() func(string) ReaderResult[openai
 	)
 }
 
+// atUnit runs a session-changing handler with plain [ToolDeps]: the plain
+// tools are lifted at the unit state, see [LiftToolDeps], and the change,
+// always the identity, is dropped. The plain handlers are built this way, so
+// there is one implementation of the tool calls.
+func atUnit[T, U any]() func(effect.Kleisli[StateToolDeps[F.Void], T, Pair[Endomorphism[F.Void], U]]) effect.Kleisli[ToolDeps, T, U] {
+	return reader.Map[T](F.Flow2(
+		effect.Local[Pair[Endomorphism[F.Void], U]](LiftToolDeps[F.Void]()),
+		effect.Map[ToolDeps](pair.Tail[Endomorphism[F.Void], U]),
+	))
+}
+
 // MakeToolCall builds a Kleisli arrow that resolves and executes a single tool
 // call requested by the model. Given a ToolCaller registry, it looks up the
 // tool by name, invokes it with the call's arguments, and turns the outcome —
 // success, an unknown tool name, or a failed invocation — into a tool
 // ChatCompletionMessageParamUnion carrying the call's ID. The returned Effect
 // never fails: every error is captured in the resulting message rather than
-// propagated as a Result error.
+// propagated as a Result error. It is [MakeStateToolCall] of plain tools.
 func MakeToolCall() effect.Kleisli[ToolDeps, openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion] {
-	functionLens := MakeChatCompletionMessageToolCallUnionFunctionLens()
-	nameLens := MakeChatCompletionMessageFunctionToolCallFunctionNameLens()
-	argsLens := MakeChatCompletionMessageFunctionToolCallFunctionArgumentsLens()
-
-	makeSuccess := makeSuccessChatCompletionMessageParamUnion()
-	makeError := makeErrorChatCompletionMessageParamUnion()
-
-	functionNameLens := functionLens.Compose(nameLens)
-
-	functionArgsLens := functionLens.Compose(argsLens)
-
-	toolNotFoundError := F.Pipe4(
-		functionNameLens.Get,
-		reader.Map[openai.ChatCompletionMessageToolCallUnion](S.Format[string]("Unable to find tool '%s'.")),
-		readerresult.Asks,
-		readerresult.Chain(makeError),
-		effect.FromReaderResult,
-	)
-
-	generalError := F.Flow3(
-		error.Error,
-		makeError,
-		effect.FromReaderResult,
-	)
-
-	return F.Pipe1(
-		functionNameLens.Get,
-		reader.Chain(F.Flow5(
-			readeroption.Read[ToolCall, string],
-			readeroption.Local[ToolCall](ToolDeps.GetToolCaller),
-			readeroption.Map[ToolDeps](F.Flow3(
-				effect.Local[string](functionArgsLens.Get),
-				effect.ChainReaderK(makeSuccess),
-				effect.ChainLeft(generalError),
-			)),
-			readeroption.GetOrElse(F.Pipe1(
-				toolNotFoundError,
-				reader.Of[ToolDeps],
-			)),
-			reader.Sequence,
-		)),
-	)
+	return atUnit[openai.ChatCompletionMessageToolCallUnion, openai.ChatCompletionMessageParamUnion]()(MakeStateToolCall[F.Void]())
 }
 
 func MakeToolCalls() effect.Kleisli[ToolDeps, []openai.ChatCompletionMessageToolCallUnion, []openai.ChatCompletionMessageParamUnion] {
@@ -137,57 +101,9 @@ func MakeToolCalls() effect.Kleisli[ToolDeps, []openai.ChatCompletionMessageTool
 	)
 }
 
+// handleToolCallsForChoice is [handleStateToolCallsForChoice] of plain tools.
 func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionChoice, Endomorphism[openai.ChatCompletionNewParams]] {
-	messageLens := oai.MakeChatCompletionChoiceMessageLens()
-	toolCallsLens := oai.MakeChatCompletionMessageToolCallsLens()
-
-	toolCallsFromChoiceOptional := messageLens.
-		Compose(toolCallsLens).
-		ComposePrism(P.FromPredicate(A.IsNonEmpty[openai.ChatCompletionMessageToolCallUnion]))
-
-	makeToolCalls := MakeToolCalls()
-
-	messageToParam := F.Flow2(
-		messageLens.Get,
-		openai.ChatCompletionMessage.ToParam,
-	)
-
-	messagesLens := oai.MakeChatCompletionNewParamsMessagesLens()
-
-	appendMessages := F.Flow3(
-		A.Concat[openai.ChatCompletionMessageParamUnion],
-		L.Modify[openai.ChatCompletionNewParams],
-		reader.Read[Endomorphism[openai.ChatCompletionNewParams]](messagesLens),
-	)
-
-	// the assistant message comes before the tool messages; both are read from
-	// the choice independently
-	prependMessage := F.Flow3(
-		messageToParam,
-		A.Prepend[openai.ChatCompletionMessageParamUnion],
-		effect.Map[ToolDeps, []openai.ChatCompletionMessageParamUnion, []openai.ChatCompletionMessageParamUnion],
-	)
-
-	return F.Pipe3(
-		readeroption.Asks(prependMessage),
-		readeroption.Ap[Effect[ToolDeps, []openai.ChatCompletionMessageParamUnion]](F.Pipe1(
-			toolCallsFromChoiceOptional.GetOption,
-			readeroption.Map[openai.ChatCompletionChoice](makeToolCalls),
-		)),
-		readeroption.Map[openai.ChatCompletionChoice](
-			F.Pipe1(
-				appendMessages,
-				effect.Map[ToolDeps],
-			),
-		),
-		readeroption.GetOrElse(
-			F.Pipe2(
-				F.Identity[openai.ChatCompletionNewParams],
-				effect.Of[ToolDeps],
-				reader.Of[openai.ChatCompletionChoice],
-			),
-		),
-	)
+	return atUnit[openai.ChatCompletionChoice, Endomorphism[openai.ChatCompletionNewParams]]()(handleStateToolCallsForChoice[F.Void]())
 }
 
 // HandleToolCalls resolves and executes every tool call across all choices of
@@ -195,21 +111,7 @@ func handleToolCallsForChoice() effect.Kleisli[ToolDeps, openai.ChatCompletionCh
 // handleToolCallsForChoice) into a single Endomorphism that appends the
 // resulting assistant/tool messages to a ChatCompletionNewParams. A
 // completion whose choices carry no tool calls yields the identity
-// endomorphism.
+// endomorphism. It is [HandleStateToolCalls] of plain tools.
 func HandleToolCalls() effect.Kleisli[ToolDeps, *openai.ChatCompletion, Endomorphism[openai.ChatCompletionNewParams]] {
-	choicesLens := oai.MakeChatCompletionChoicesRefLens()
-	flattenEndo := endomorphism.Monoid[openai.ChatCompletionNewParams]()
-
-	return F.Pipe2(
-		handleToolCallsForChoice(),
-		effect.TraverseArray,
-		reader.ProMap(
-			choicesLens.Get,
-			F.Pipe2(
-				flattenEndo,
-				A.Fold[Endomorphism[openai.ChatCompletionNewParams]],
-				effect.Map[ToolDeps],
-			),
-		),
-	)
+	return atUnit[*openai.ChatCompletion, Endomorphism[openai.ChatCompletionNewParams]]()(HandleStateToolCalls[F.Void]())
 }

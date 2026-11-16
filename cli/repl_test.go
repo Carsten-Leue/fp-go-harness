@@ -110,10 +110,17 @@ func runReplWith(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps,
 // errWriter as the error writer of the command; errOut is what it wrote.
 func runReplTo(t *testing.T, ctx context.Context, chat oai.ChatCompletionDeps, interrupts InterruptDeps, lines <-chan string, errWriter io.Writer, errOut fmt.Stringer) replOutput {
 	t.Helper()
+
+	return runReplIn(t, ctx, mode.AskID, chat, interrupts, lines, errWriter, errOut)
+}
+
+// runReplIn runs the REPL like [runReplTo], in the mode of modeID.
+func runReplIn(t *testing.T, ctx context.Context, modeID string, chat oai.ChatCompletionDeps, interrupts InterruptDeps, lines <-chan string, errWriter io.Writer, errOut fmt.Stringer) replOutput {
+	t.Helper()
 	withHome(t)
 
 	cfg, err := result.Unwrap(decodeConfig()(R.FromEntries(A.From(
-		pair.MakePair(KeyMode, mode.AskID),
+		pair.MakePair(KeyMode, modeID),
 		pair.MakePair(KeyWorkspace, t.TempDir()),
 	))))
 	require.NoError(t, err)
@@ -176,9 +183,17 @@ type fakeMessage struct {
 	Content json.RawMessage `json:"content"`
 }
 
+// fakeTool is the part of a tool of a request the fake server reads.
+type fakeTool struct {
+	Function struct {
+		Name string `json:"name"`
+	} `json:"function"`
+}
+
 // fakeRequest is the part of a chat completion request the fake server reads.
 type fakeRequest struct {
 	Messages []fakeMessage `json:"messages"`
+	Tools    []fakeTool    `json:"tools"`
 }
 
 // lastUserLine is the first line of the last user message of a request: the

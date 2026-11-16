@@ -9,6 +9,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -23,6 +24,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// offering are the definitions of tools of names: Next only calls the tools
+// a request offers.
+func offering(names ...string) []openai.ChatCompletionToolUnionParam {
+	return A.Map(func(name string) openai.ChatCompletionToolUnionParam {
+		return openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{Name: name})
+	})(names)
+}
+
+// makeLoopRequest is the request of the session tests. It offers the tools
+// the tests call; unknown stays unoffered.
 func makeLoopRequest() openai.ChatCompletionNewParams {
 	return openai.ChatCompletionNewParams{
 		Model: "gpt-test",
@@ -30,6 +41,7 @@ func makeLoopRequest() openai.ChatCompletionNewParams {
 			openai.SystemMessage("you are a helpful assistant"),
 			openai.UserMessage("what's the weather in Berlin?"),
 		},
+		Tools: offering("get_weather", waitToolName, "set_model", "first", "second", "failing", todo.UpdateTodoListName),
 	}
 }
 
@@ -210,7 +222,7 @@ func makeCancellingSessionDeps(t *testing.T, started chan<- struct{}, onDone fun
 
 	return &stubSessionDeps{
 		svc:           &client.Chat.Completions,
-		toolCall:      F.Bind1st(record.MonadLookup[tools.ToolCall, string], map[string]tools.ToolCall{waitToolName: wait}),
+		toolCall:      tools.LiftToolCaller[Session]()(F.Bind1st(record.MonadLookup[tools.ToolCall, string], map[string]tools.ToolCall{waitToolName: wait})),
 		maxIterations: 10,
 	}
 }
@@ -301,7 +313,7 @@ func TestMaxIterationsError_Error(t *testing.T) {
 func TestMakeSessionDeps(t *testing.T) {
 	stub := makeSequencedSessionDeps(t, []openai.ChatCompletion{makeStopCompletion("chatcmpl-1", "done")}, makeWeatherRegistry(), 10)
 
-	deps := MakeSessionDeps(stub, tools.MakeToolDeps(stub.GetToolCaller()), MakeLoopDeps(4), MakeSteeringDeps(thunk.Of(A.From("steer"))))
+	deps := MakeSessionDeps(stub, tools.MakeStateToolDeps(stub.GetToolCaller()), MakeLoopDeps(4), MakeSteeringDeps(thunk.Of(A.From("steer"))))
 
 	assert.Equal(t, 4, deps.GetMaxIterations())
 	assert.Equal(t, result.Of(A.From("steer")), deps.GetPoll()(t.Context())())

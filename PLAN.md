@@ -194,7 +194,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `prompt.ProjectRules()` now takes the mode's ID and adds the rules in `.bob/rules-<id>/` after those in
   `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt
   reads the workspace the tools work in. The CLI (`--mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
-  The `available_modes` section waits for H5.
+  The `available_modes` section came with H5.
 - [x] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.
   `prompt.EnvironmentDetails()` is an `effect.Kleisli[EnvDetailsDeps, string, Endomorphism[string]]` over the mode's
@@ -212,8 +212,9 @@ and a text result. Validation errors (such as "path must be absolute") come back
   by line breaks) and `replay.SystemPrompts` yields one per request of a log. The recording is synthetic
   (`mode/testdata/recorded-system-prompt.log`, the tags of §0 in their order), since the real ones are not available (B5).
   The test fixes the gap: the Agent prompt lacks investigate_before_answering, engineering_discipline,
-  auto_appended_context, available_skills (H1), user_custom_instructions and available_modes (H5), adds nothing,
-  and keeps the recorded order.
+  auto_appended_context and user_custom_instructions, adds nothing,
+  and keeps the recorded order. available_skills came with H1 (the test lives in `skill/replay_test.go` since then),
+  available_modes with H5.
 - [x] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
   `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in
   ones: the workspace wins over the home directory, both over the built-ins, by `id` (precedence is a monoid, as in G1).
@@ -298,11 +299,23 @@ and a text result. Validation errors (such as "path must be absolute") come back
     released after the run, and a cancelled REPL context still ends the REPL.
   - [ ] **E5c `--task <id>`.** Load a saved task and continue it, save after every turn; without `--task` create an
     id and print it on stderr.
-- [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
+- [x] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
   with no access to the `Session`. Add a second kind of tool whose result is the text *and* an
   `Endomorphism[Session]`, which `Next` applies after the tool messages are appended; the plain tools lift into it
   with the identity. H3 (`update_todo_list`) and H5 (`switch_mode`) are built on it. *Test:* a fake tool that sets a
   field through a lens changes the session the next request is built from.
+  *Done:* `tools` can't import `session`, so the kind is generic over the state
+  ([tools/statetool.go](tools/statetool.go)): `ToolResult[T] = Pair[Endomorphism[T], string]`,
+  `StateCall[T] = thunk.Kleisli[string, ToolResult[T]]`, and the one tool type is `ToolOf[C]`
+  ([tools/registry.go](tools/registry.go)), with `Tool = ToolOf[ToolCall]` and `StateTool[T] = ToolOf[StateCall[T]]`;
+  the registry functions have generic `...Of` forms. `LiftCall`, `LiftTool`, `LiftRegistry`, `LiftToolCaller` and
+  `LiftToolDeps` lift plain tools with the identity; `TruncateCall` and `TruncateStateTools` truncate the text and keep
+  the change. `HandleStateToolCalls` composes the changes in call order (the reversed endomorphism monoid) and the
+  plain `MakeToolCall`/`HandleToolCalls` are it at the unit state. The session aliases `SessionCall`, `SessionTool`,
+  `SessionRegistry`; `SessionDeps` holds `tools.StateToolDeps[Session]`, and `Next` appends the messages, then
+  applies the changes. The CLI lifts its registry. *Test:* [session/statetool_test.go](session/statetool_test.go) (the
+  next request has the model a tool set, call order against finish order, a failed and an unknown tool change
+  nothing) and [tools/statetool_test.go](tools/statetool_test.go); every existing tool test passes unchanged.
 
 ### Phase F: Streaming and observability
 
@@ -350,15 +363,47 @@ and a text result. Validation errors (such as "path must be absolute") come back
 
 ### Phase H: Skills, todos, subtasks
 
-- [ ] **H1 Skill discovery.** Scan the skill directories (`~/.bob/skills`, `~/.claude/skills`, `<ws>/.bob/skills`, …)
+- [x] **H1 Skill discovery.** Scan the skill directories (`~/.bob/skills`, `~/.claude/skills`, `<ws>/.bob/skills`, …)
   for `SKILL.md` front matter and render them into the `<available_skills>` section.
-- [ ] **H2 `use_skill`.** Implement it as a tool that returns the body of the skill file (recorded result: the `SKILL.md` text).
-- [ ] **H3 `update_todo_list`.** Keep the todo list in `Session` (lens) and render it into the next `environment_details`.
+  `skill.ReadSkillDirs` reads every `<dir>/*/SKILL.md` over an `fs.FS` per directory (`SkillDirsDeps`), splits it with
+  `mode.SplitFrontMatter` and decodes `name` and `description` with `go.yaml.in/yaml/v3`; other keys are allowed, a
+  file without front matter, with invalid YAML or without a name is left out and reported on stderr
+  (`skill left out: …`). The directories merge by name through `record.UnionLastMonoid`, lowest precedence first:
+  home before workspace, and in each root `.claude/skills` before `.bob/skills`. `skill.AvailableSkills` renders the
+  section (no skills, no section). `mode` can't import `skill` (it imports `mode`), so `mode.SharedDeps` carries the
+  sections and tools every mode gets, placed after the static sections and before `project_rules`. The D7 test moved
+  to `skill/replay_test.go` and no longer lists available_skills as missing.
+- [x] **H2 `use_skill`.** Implement it as a tool that returns the body of the skill file (recorded result: the `SKILL.md` text).
+  `skill.Tools` registers `use_skill` (`{"skill_name": string}`, required). It returns the whole `SKILL.md` text; an
+  unknown name is a tool error that names the available skills. It only reads, so `mode.Tools` merges it into the tools
+  of every mode, ask and plan included, through `mode.SharedDeps`.
+- [x] **H3 `update_todo_list`.** Keep the todo list in `Session` (lens) and render it into the next `environment_details`.
   A session-changing tool (E6).
+  *Done:* the `todo` package parses the `todos` checklist (`[ ]`, `[x]`/`[X]`, `[-]`, optional `-`/`*`/`+` marker,
+  one level) into `[]todo.Todo{Text, Status}` with the ACP statuses `pending`, `in_progress`, `completed` (for J12);
+  an invalid line is a tool error, so the list stays as it was. `todo.Tools[T]` is generic over a lens to the list;
+  `session.TodoTools` binds it to the new `todos` field of `Session`. The CLI merges the session tools
+  (`cli.sessionTools`, where H5 adds `switch_mode`) into the lifted mode registry in `sessionRegistry`, and
+  `modeRequest` offers their definitions in every mode. `prompt.EnvironmentDetailsWith` takes extra sections after
+  `git_status_snapshot`; the REPL reads `session.Todos` of the session it continues and renders a `<todo_list>`
+  section (no recording has one, so the format is ours). `SessionDTO.Todos` is `omitempty`, so older task files load.
 - [ ] **H4 `ask_followup_question`.** Implement it through the event sink (F2) and an `InputDeps`: it waits for user
   input inside the thunk. Needs a front end that can answer: the REPL (E5), ACP (J2) or A2A's `input-required` (K8).
-- [ ] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
+- [x] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
   A session-changing tool (E6); the endomorphism is shared with ACP's `session/set_mode` (J6).
+  *Done:* `session.SwitchMode()` is the one change of mode, `func(ModeRequest) Endomorphism[Session]` over the ID and
+  the request of a mode (`mode.Request`): it replaces the system messages and the tool definitions of `current`,
+  keeps every other message, the model and the history, and records the ID in the new `mode` field (`session.ModeID`,
+  `SessionDTO.Mode`, `omitempty`). J6 applies it too. `mode.SwitchMode[T]` is the tool (`{"mode_id": string,
+  "reason"?: string}`), generic over the state like `todo.Tools`: an unknown ID is a tool error naming the modes
+  (`mode.Lookup`), a mode whose tools are not all in `SwitchModeDeps.GetAllowedTools` is refused (approval can come
+  with I1), and a success answers `Switched to mode "<id>"` (no recording of the text). The CLI allows the tools of the
+  mode the run started in, whose registry the tool caller is built from: ask and plan may switch to each other, not to
+  agent; agent may switch anywhere and back. `Next` only calls the tools the request offered
+  (`tools.OfferedToolDeps`), so after a switch the caller follows the mode, and an unoffered call is
+  "Unable to find tool". The `<available_modes>` section (`mode.AvailableModes`: a short "# Mode Switching" intro,
+  then `<mode>` with `name`, `id`, `when_to_use` and `available_tools`) is the last section of every mode's prompt;
+  the D7 comparison no longer misses it. The REPL renders `current_mode` from the mode the session is in.
 - [ ] **H6 `spawn_subagent` / `start_subtask`.** Run a nested `session.Run` with a fresh `Session` and narrower deps
   (`effect.Local`). Return its final text as the tool result. The nested run reports through the same event sink (F2).
 

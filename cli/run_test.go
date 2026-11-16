@@ -11,6 +11,7 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
+	"github.com/Carsten-Leue/fp-go-harness/skill"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/ioref"
@@ -164,8 +165,18 @@ func TestMakeRegistry_ToolsOfTheMode(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t,
-		[]string{tools.ReadFileName, tools.ListFilesName, tools.GlobName, tools.GrepName},
-		R.Keys(makeRegistry()(newModeEnv(defaultConfig(t), mode.MakeDefaultModeDeps(makeTestToolsDeps(t), mode.Modes()), m))))
+		[]string{tools.ReadFileName, tools.ListFilesName, tools.GlobName, tools.GrepName, skill.UseSkillName},
+		R.Keys(makeRegistry()(newModeEnv(defaultConfig(t),
+			mode.MakeDefaultModeDeps(makeTestToolsDeps(t), mode.Modes(), skill.MakeSharedDeps()(nil)), m))))
+}
+
+func TestSkillDirs(t *testing.T) {
+	assert.Equal(t, []string{
+		filepath.Join("home", ".claude", "skills"),
+		filepath.Join("home", ".bob", "skills"),
+		filepath.Join("ws", ".claude", "skills"),
+		filepath.Join("ws", ".bob", "skills"),
+	}, skillDirs()("ws")("home"), "the workspace comes last, so it wins")
 }
 
 func TestWithPrompt(t *testing.T) {

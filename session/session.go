@@ -4,6 +4,7 @@ import (
 	"context"
 
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	"github.com/IBM/fp-go/v2/effect"
@@ -28,31 +29,43 @@ type HistoryEntry = pair.Pair[openai.ChatCompletionNewParams, *openai.ChatComple
 
 type History = []HistoryEntry
 
+// Session is the state of a conversation: the history of requests and
+// completions, the request of the next step, the accumulated usage, the
+// number of requests of the current turn, the todo list the model keeps
+// with update_todo_list (H3), see [TodoTools], and the ID of the mode the
+// session switched to with switch_mode (H5), empty while it is in the mode
+// it started in, see [SwitchMode].
+//
 // fp-go:Lens
 type Session struct {
 	history    History
 	current    openai.ChatCompletionNewParams
 	usage      openai.CompletionUsage
 	iterations int
+	todos      []todo.Todo
+	mode       string
 }
 
+// SessionDeps are the dependencies of [Next]. Its tools are session-changing
+// tools, see [ToolDeps]; plain tools lift into them with
+// [tools.LiftToolDeps] or [tools.LiftRegistry].
 type SessionDeps interface {
 	oai.ChatCompletionDeps
-	tools.ToolDeps
+	ToolDeps
 	LoopDeps
 	SteeringDeps
 }
 
 type sessionDeps struct {
 	oai.ChatCompletionDeps
-	tools.ToolDeps
+	ToolDeps
 	LoopDeps
 	SteeringDeps
 }
 
 // MakeSessionDeps is wiring: it combines the chat completions, the tools, the
 // loop limit and the steering messages into [SessionDeps].
-func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps, s SteeringDeps) SessionDeps {
+func MakeSessionDeps(c oai.ChatCompletionDeps, t ToolDeps, l LoopDeps, s SteeringDeps) SessionDeps {
 	return &sessionDeps{c, t, l, s}
 }
 
@@ -86,6 +99,19 @@ func appendAnswer() func(*openai.ChatCompletion) Endomorphism[openai.ChatComplet
 	)
 }
 
+// toolChange is the change of the session the tool calls of a completion
+// make: the messages are appended to the request first, then the changes of
+// the tools are applied in the order of the calls. The endomorphism monoid
+// applies its right operand first.
+func toolChange() func(tools.ToolUpdate[Session]) Endomorphism[Session] {
+	currentLens := MakeSessioncurrentLens()
+
+	return F.Flow2(
+		pair.MapTail[Endomorphism[Session]](currentLens.Modify),
+		pair.Paired(endomorphism.Monoid[Session]().Concat),
+	)
+}
+
 func isToolCallFinishReason() Predicate[string] {
 	return S.Equals(finishReasonToolCalls)
 }
@@ -98,11 +124,14 @@ func isToolCallFinishReason() Predicate[string] {
 // inspects the finish reason of the response's first choice:
 //
 //   - If the model asked to call tools (finish_reason == "tool_calls"),
-//     Next resolves and executes them through [SessionDeps.GetToolCaller],
-//     appends the resulting assistant/tool messages to session.current,
-//     records the (request, response) pair in session.history, and
-//     returns a Bounce carrying the updated [Session] so the loop can
-//     continue.
+//     Next resolves and executes them concurrently through
+//     [SessionDeps.GetToolCaller], records the (request, response) pair in
+//     session.history, appends the resulting assistant/tool messages to
+//     session.current, then applies the changes of the session the tools
+//     returned, in the order of the tool calls, whatever order the calls
+//     finish in (a plain or a failed tool changes nothing), and returns a
+//     Bounce carrying the updated [Session] so the loop can continue: the
+//     next request is built from the changed session.
 //   - Otherwise, Next records the (request, response) pair in
 //     session.history, appends the message of the response's first choice
 //     to session.current and returns a Land carrying the answered
@@ -129,9 +158,26 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 		ComposePrism(P.Head[openai.ChatCompletionChoice]()).
 		ComposeLens(finishReasonLens)
 
-	handleToolCalls := F.Flow2(
-		tools.HandleToolCalls(),
-		effect.Local[Endomorphism[openai.ChatCompletionNewParams]](tools.AsToolDeps[SessionDeps]),
+	// the tool calls of the completion, with the caller restricted to the
+	// tools the request offered (see [tools.OfferedToolDeps]), so a mode's
+	// tools are those of its request, also after a switch_mode; request and
+	// completion are independent reads of the pair
+	restrictTo := F.Flow4(
+		pair.Head[Session, *openai.ChatCompletion],
+		currentLens.Get,
+		tools.OfferedToolDeps[Session](),
+		F.Flow2(
+			reader.Compose[ToolDeps](tools.AsStateToolDeps[Session, SessionDeps]),
+			effect.Local[tools.ToolUpdate[Session], SessionDeps, ToolDeps],
+		),
+	)
+	handleToolCalls := F.Pipe2(
+		restrictTo,
+		reader.Ap[Effect[SessionDeps, tools.ToolUpdate[Session]]](F.Flow2(
+			pair.Tail[Session, *openai.ChatCompletion],
+			tools.HandleStateToolCalls[Session](),
+		)),
+		reader.Map[FinalResult](effect.Map[SessionDeps](toolChange())),
 	)
 	chatCompletion := F.Flow2(
 		oai.ChatCompletion(),
@@ -175,15 +221,16 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 		updateSession,
 	)
 
-	// the session with the messages of the tool calls appended to its request;
-	// session and tool calls are two independent reads of the same pair
+	// the session with the messages of the tool calls appended to its request
+	// and the changes of the tools applied; session and tool calls are two
+	// independent reads of the same pair
 	applyToolCalls := F.Pipe1(
 		F.Flow3(
 			pair.Head[Session, *openai.ChatCompletion],
-			F.Flip(currentLens.Modify),
-			effect.Map[SessionDeps, Endomorphism[openai.ChatCompletionNewParams], Session],
+			endomorphism.Read[Session],
+			effect.Map[SessionDeps, Endomorphism[Session], Session],
 		),
-		reader.Ap[Effect[SessionDeps, Session]](F.Flow2(pair.Tail[Session, *openai.ChatCompletion], handleToolCalls)),
+		reader.Ap[Effect[SessionDeps, Session]](handleToolCalls),
 	)
 
 	bounceToolCall := F.Flow3(

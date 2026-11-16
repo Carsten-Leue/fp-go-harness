@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -11,7 +12,9 @@ import (
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
+	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
 	"github.com/IBM/fp-go/v2/effect"
+	F "github.com/IBM/fp-go/v2/function"
 	"github.com/IBM/fp-go/v2/io"
 	"github.com/IBM/fp-go/v2/pair"
 	R "github.com/IBM/fp-go/v2/record"
@@ -38,8 +41,15 @@ var writeToolNames = []string{
 }
 
 // makeTestDeps builds [ModeDeps] over a temporary workspace with the files,
-// relative path to content, on a fixed machine and date.
+// relative path to content, on a fixed machine and date, sharing nothing.
 func makeTestDeps(t *testing.T, files Record[string, string]) (string, ModeDeps) {
+	t.Helper()
+
+	return makeSharingTestDeps(t, files, MakeSharedDeps(nil, nil))
+}
+
+// makeSharingTestDeps is [makeTestDeps] with what the modes share.
+func makeSharingTestDeps(t *testing.T, files Record[string, string], shared SharedDeps) (string, ModeDeps) {
 	t.Helper()
 
 	root := t.TempDir()
@@ -53,7 +63,7 @@ func makeTestDeps(t *testing.T, files Record[string, string]) (string, ModeDeps)
 	now := time.Date(2026, 10, 19, 12, 0, 0, 0, time.UTC)
 	env := prompt.MakeEnvInfoDeps(toolsDeps, "linux", "amd64", "sh", io.Of(now))
 
-	return root, MakeModeDeps(toolsDeps, env, Modes())
+	return root, MakeModeDeps(toolsDeps, env, Modes(), shared)
 }
 
 func lookup(t *testing.T, id string) Mode {
@@ -123,17 +133,19 @@ func TestRequestPlan(t *testing.T) {
 	system := request.Messages[0].OfSystem.Content.OfString.Value
 
 	assert.Equal(t,
-		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "project_rules", "agents_md", "rule", "rule", "environment_info"},
+		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "project_rules", "agents_md", "rule", "rule", "environment_info", "available_modes"},
 		tagsOf(system))
 	assert.Regexp(t, `^<role_definition>\nYou are a software architect running in Plan mode\.`, system)
 	assert.Contains(t, system, "<rule>\nUse fp-go.\n</rule>")
 	assert.Contains(t, system, "<rule>\nPlans list their tests.\n</rule>")
 	assert.NotContains(t, system, "Agents run the tests.")
 	assert.Contains(t, system, "The currently active workspace folder is "+root+"\n")
-	assert.Regexp(t, `Current date: 2026-10-19\n</environment_info>$`, system)
+	assert.Regexp(t, `Current date: 2026-10-19\n</environment_info>\n\n<available_modes>\n`, system)
 	assert.NotContains(t, system, "\r")
+	// the available_modes section lists the tools of every mode
+	beforeModes, _, _ := strings.Cut(system, "<available_modes>")
 	for _, name := range writeToolNames {
-		assert.NotContains(t, system, name)
+		assert.NotContains(t, beforeModes, name)
 	}
 
 	assert.ElementsMatch(t, readOnlyToolNames, toolNames(request))
@@ -146,13 +158,31 @@ func TestRequestAgentWithoutRules(t *testing.T) {
 
 	system := request.Messages[0].OfSystem.Content.OfString.Value
 	assert.Equal(t,
-		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "environment_info"},
+		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "environment_info", "available_modes"},
 		tagsOf(system))
 	assert.Regexp(t, `^<role_definition>\nYou are a coding agent running in Agent mode\.`, system)
 	assert.Contains(t, system, "over write_file for existing files.\n")
 	assert.Contains(t, system, "run the validation that applies to your changes with execute_command")
 
 	assert.ElementsMatch(t, allToolNames, toolNames(request))
+}
+
+func TestRequestShared(t *testing.T) {
+	shared := tools.MakeTool(openai.FunctionDefinitionParam{Name: "use_skill"}, F.Constant1[string](thunk.Of("skill")))
+	_, deps := makeSharingTestDeps(t, Record[string, string]{"AGENTS.md": "Use fp-go."}, MakeSharedDeps(
+		A.Of(prompt.MakeSection("available_skills", "<skill>\nfp-go\n</skill>")),
+		tools.MakeToolRegistry(shared),
+	))
+
+	for _, m := range Modes() {
+		request := runRequest(t, deps, m)
+
+		assert.Equal(t,
+			[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "available_skills", "skill", "project_rules", "agents_md", "rule", "environment_info", "available_modes"},
+			tagsOf(request.Messages[0].OfSystem.Content.OfString.Value), m.ID)
+		assert.Contains(t, toolNames(request), "use_skill", m.ID)
+		assert.Contains(t, R.Keys(Tools()(m)(deps)), "use_skill", m.ID)
+	}
 }
 
 func TestRequestAsk(t *testing.T) {

@@ -14,6 +14,8 @@ import (
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
 	"github.com/Carsten-Leue/fp-go-harness/session"
+	"github.com/Carsten-Leue/fp-go-harness/skill"
+	"github.com/Carsten-Leue/fp-go-harness/todo"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -31,6 +33,7 @@ import (
 	"github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	RRIOE "github.com/IBM/fp-go/v2/readerreaderioeither"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/IBM/fp-go/v2/result"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/openai/openai-go/v3"
@@ -79,7 +82,7 @@ func makeRegistry() Reader[modeEnv, tools.ToolRegistry] {
 
 	registry := F.Pipe1(
 		F.Flow2(modeLens.Get, mode.Tools()),
-		reader.Ap[tools.ToolRegistry](F.Flow2(depsLens.Get, tools.AsToolsDeps[mode.ModeDeps])),
+		reader.Ap[tools.ToolRegistry](depsLens.Get),
 	)
 
 	return F.Pipe1(
@@ -112,18 +115,89 @@ func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNe
 // [session.SessionDeps] of a turn.
 type toSessionDeps = Reader[oai.ChatCompletionDeps, session.SessionDeps]
 
+// modeRequestOf is a leaf that defers [modeRequest]: the request the mode of
+// an environment starts with, built when switch_mode calls it. The request
+// lists the tools of [sessionRegistry], switch_mode among them, whose deps
+// hold this builder (see [switchModeDeps]), so building it eagerly there
+// would not terminate.
+func modeRequestOf(env modeEnv) session.Thunk[openai.ChatCompletionNewParams] {
+	return modeRequest[F.Void]()(env)(F.VOID)
+}
+
+// switchModeDeps is wiring: the [mode.SwitchModeDeps] of the session of the
+// mode of an environment: the table of the modes of its deps, the tools of
+// its mode as the allowed ones, the request of a target mode in the same
+// environment (see [modeRequestOf]) and [session.SwitchMode] as the change.
+//
+// The allowed tools are those of the mode the run started in, because the
+// tool caller of the session is built from its registry, see [sessionDeps]:
+// a one-shot ask, whose registry has the read-only tools only, may switch to
+// plan but not to agent. In the REPL the start mode stays the environment, so
+// a session that switched from agent to plan may switch back.
+func switchModeDeps() Reader[modeEnv, mode.SwitchModeDeps[session.Session]] {
+	modeLens := MakemodeEnvModeLens()
+	depsLens := MakemodeEnvDepsLens()
+	allowedToolsLens := mode.MakeModeAllowedToolsLens()
+
+	type (
+		requestK   = thunk.Kleisli[mode.Mode, openai.ChatCompletionNewParams]
+		switchTo   = func(session.ModeRequest) endomorphism.Endomorphism[session.Session]
+		switchDeps = mode.SwitchModeDeps[session.Session]
+	)
+
+	// the request of a mode in the environment
+	requestIn := F.Flip(F.Flow2(
+		modeLens.Set,
+		reader.Map[modeEnv](modeRequestOf),
+	))
+
+	return F.Pipe3(
+		F.Flow3(depsLens.Get, mode.AsModeTableDeps[mode.ModeDeps], F.Curry4(mode.MakeSwitchModeDeps[session.Session])),
+		reader.Ap[func(requestK) func(switchTo) switchDeps](F.Flow2(modeLens.Get, allowedToolsLens.Get)),
+		reader.Ap[func(switchTo) switchDeps](requestIn),
+		reader.Map[modeEnv](reader.Read[switchDeps](session.SwitchMode())),
+	)
+}
+
+// sessionTools is wiring: the session tools every mode of an environment
+// has, whatever tools it allows: update_todo_list (H3) and switch_mode (H5,
+// see [switchModeDeps]).
+func sessionTools() Reader[modeEnv, session.SessionRegistry] {
+	registries := R.UnionLastMonoid[string, session.SessionTool]()
+
+	return F.Flow3(
+		switchModeDeps(),
+		mode.SwitchModeTools[session.Session](),
+		F.Bind1st(registries.Concat, session.TodoTools()),
+	)
+}
+
+// sessionRegistry is wiring: the registry of the session tools of the mode of
+// an environment: the plain tools of [makeRegistry], lifted into session
+// tools that change nothing, and the [sessionTools]. A session tool wins over
+// a plain one of the same name; both are independent reads of the
+// environment.
+func sessionRegistry() Reader[modeEnv, session.SessionRegistry] {
+	registries := reader.ApplicativeMonoid[modeEnv](R.UnionLastMonoid[string, session.SessionTool]())
+
+	return registries.Concat(
+		F.Flow2(makeRegistry(), tools.LiftRegistry[session.Session]()),
+		sessionTools(),
+	)
+}
+
 // sessionDeps is wiring: the [session.SessionDeps] of a turn of the mode of an
-// environment over any provider's ChatCompletionDeps: the registry of
-// [makeRegistry], at most MaxIterations requests and the user messages of a
-// poll steering the turn.
+// environment over any provider's ChatCompletionDeps: the tools of
+// [sessionRegistry], at most MaxIterations requests and the user messages of
+// a poll steering the turn.
 func sessionDeps() Reader[modeEnv, Reader[session.Thunk[[]string], toSessionDeps]] {
 	configLens := MakemodeEnvConfigLens()
 	maxIterationsLens := MakeConfigMaxIterationsLens()
 
 	return F.Pipe2(
 		F.Flow3(
-			makeRegistry(),
-			tools.MakeRegistryToolDeps(),
+			sessionRegistry(),
+			tools.MakeStateRegistryToolDeps[session.Session](),
 			F.Curry3(F.Bind234of4(session.MakeSessionDeps)),
 		),
 		reader.Ap[func(session.SteeringDeps) toSessionDeps](F.Flow3(configLens.Get, maxIterationsLens.Get, session.MakeLoopDeps)),
@@ -205,12 +279,15 @@ type withDetails = func(endomorphism.Endomorphism[string]) endomorphism.Endomorp
 
 // modeRequest is wiring: the request the mode of an environment starts with,
 // its system prompt read from the workspace of the deps, under any
-// environment T, which it ignores.
+// environment T, which it ignores. Its tool definitions are those of
+// [sessionRegistry], the tools the session can call: the mode's own and the
+// [sessionTools]. The request and the registry are independent reads of the
+// environment.
 func modeRequest[T any]() Reader[modeEnv, Effect[T, openai.ChatCompletionNewParams]] {
 	modeLens := MakemodeEnvModeLens()
 	depsLens := MakemodeEnvDepsLens()
 
-	return F.Pipe1(
+	request := F.Pipe1(
 		F.Flow3(
 			depsLens.Get,
 			F.Constant1[T, mode.ModeDeps],
@@ -218,24 +295,43 @@ func modeRequest[T any]() Reader[modeEnv, Effect[T, openai.ChatCompletionNewPara
 		),
 		reader.Ap[Effect[T, openai.ChatCompletionNewParams]](F.Flow2(modeLens.Get, mode.Request())),
 	)
+
+	return F.Pipe2(
+		F.Flow2(sessionRegistry(), tools.WithToolsOf[session.SessionCall]()),
+		reader.Map[modeEnv](effect.Map[T, openai.ChatCompletionNewParams, openai.ChatCompletionNewParams]),
+		reader.Ap[Effect[T, openai.ChatCompletionNewParams]](request),
+	)
+}
+
+// detailsWith are the environment_details of the mode of an environment with
+// the todo_list section of a todo list, see [todo.Section].
+func detailsWith() Reader[modeEnv, Reader[[]todo.Todo, Effect[prompt.EnvDetailsDeps, endomorphism.Endomorphism[string]]]] {
+	modeLens := MakemodeEnvModeLens()
+	nameLens := mode.MakeModeNameLens()
+
+	return F.Flow3(
+		modeLens.Get,
+		nameLens.Get,
+		F.Flip(F.Flow2(todo.Section(), prompt.EnvironmentDetailsWith())),
+	)
 }
 
 // modeDetails is wiring: the environment_details of the mode and the
-// workspace of an environment, which wrap the prompt of a turn, under any
-// environment T, which it ignores.
-func modeDetails[T any]() Reader[modeEnv, Effect[T, endomorphism.Endomorphism[string]]] {
-	modeLens := MakemodeEnvModeLens()
+// workspace of an environment for the todo list of the session, which wrap
+// the prompt of a turn, under any environment T, which it ignores. An empty
+// todo list shows no todo_list section.
+func modeDetails[T any]() Reader[modeEnv, Reader[[]todo.Todo, Effect[T, endomorphism.Endomorphism[string]]]] {
 	depsLens := MakemodeEnvDepsLens()
-	nameLens := mode.MakeModeNameLens()
 
-	return F.Pipe1(
+	return F.Pipe2(
 		F.Flow4(
 			depsLens.Get,
 			prompt.AsEnvDetailsDeps[mode.ModeDeps],
 			F.Constant1[T, prompt.EnvDetailsDeps],
 			effect.Local[endomorphism.Endomorphism[string], T, prompt.EnvDetailsDeps],
 		),
-		reader.Ap[Effect[T, endomorphism.Endomorphism[string]]](F.Flow3(modeLens.Get, nameLens.Get, prompt.EnvironmentDetails())),
+		reader.Map[modeEnv](reader.Map[[]todo.Todo, Effect[prompt.EnvDetailsDeps, endomorphism.Endomorphism[string]], Effect[T, endomorphism.Endomorphism[string]]]),
+		reader.Ap[Reader[[]todo.Todo, Effect[T, endomorphism.Endomorphism[string]]]](detailsWith()),
 	)
 }
 
@@ -251,9 +347,9 @@ type (
 // workspace of its tools. The request of the mode reads its system prompt
 // from that workspace, and the prompt is sent with the environment_details of
 // the mode and workspace: the prompt's change to the request is applied to
-// the details, then to the request, both read concurrently. After a cancelled
-// turn the background processes of the tools are stopped, see
-// [stopProcesses].
+// the details, then to the request, both read concurrently. The one prompt
+// starts a new session, which has no todo list yet. After a cancelled turn
+// the background processes of the tools are stopped, see [stopProcesses].
 //
 // Each stage reads the environment; they are composed in data-flow order:
 // the change of the prompt, the details, the request, the turn and the tap.
@@ -267,8 +363,9 @@ func ask() Reader[modeEnv, effect.Kleisli[oai.DeepSeekDeps, string, session.Turn
 	return F.Pipe8(
 		start,
 		reader.Map[modeEnv](reader.Compose[askEffect[askChange], string, askEffect[withDetails]]),
-		reader.Ap[func(string) askEffect[askChange]](F.Flow2(
+		reader.Ap[func(string) askEffect[askChange]](F.Flow3(
 			modeDetails[oai.DeepSeekDeps](),
+			reader.Read[askEffect[endomorphism.Endomorphism[string]]](A.Empty[todo.Todo]()),
 			effect.Ap[askChange, oai.DeepSeekDeps, endomorphism.Endomorphism[string]],
 		)),
 		reader.Map[modeEnv](reader.Compose[askEffect[askParams], string, askEffect[askChange]]),
@@ -315,19 +412,50 @@ func readModes() ioresult.Kleisli[string, []mode.Mode] {
 	)
 }
 
+// skillDirs is wiring: the skill directories of a workspace root and a home
+// directory, lowest precedence first: the home directory's, then the
+// workspace's, see [skill.DirsIn].
+func skillDirs() Reader[string, A.Kleisli[string, string]] {
+	return F.Flow3(
+		skill.DirsIn(),
+		A.Concat[string],
+		reader.Local[[]string](skill.DirsIn()),
+	)
+}
+
+// readSkills is wiring: it reads the skills for a workspace root, those of
+// the workspace overriding those of the home directory, into what they give
+// every mode: the available_skills section and the use_skill tool. Broken
+// skill files are left out and reported on stderr.
+func readSkills() ioresult.Kleisli[string, mode.SharedDeps] {
+	return F.Flow5(
+		skillDirs(),
+		ioresult.Map[string, []string],
+		reader.Read[IOResult[[]string]](ioresult.Eitherize0(os.UserHomeDir)()),
+		ioresult.ChainIOK(skill.ReadSkillDirs()(skill.MakeDefaultSkillDirsDeps())),
+		ioresult.Map(skill.MakeSharedDeps()),
+	)
+}
+
 // makeModeDeps is wiring: it builds the deps of the modes of a configuration
-// from the deps of the tools and the table of the modes of the workspace,
-// read concurrently.
+// from the deps of the tools, the table of the modes of the workspace and
+// the skills of the workspace, read concurrently. The workspace is read for
+// each of them.
 func makeModeDeps() ioresult.Kleisli[Config, mode.ModeDeps] {
 	workspaceLens := MakeConfigWorkspaceLens()
 
-	return F.Pipe1(
-		F.Flow3(workspaceLens.Get, readModes(), ioresult.Ap[mode.ModeDeps, []mode.Mode]),
-		reader.Ap[IOResult[mode.ModeDeps]](F.Flow3(
+	withModes := F.Pipe1(
+		F.Flow3(workspaceLens.Get, readModes(), ioresult.Ap[func(mode.SharedDeps) mode.ModeDeps, []mode.Mode]),
+		reader.Ap[IOResult[func(mode.SharedDeps) mode.ModeDeps]](F.Flow3(
 			makeToolsDeps(),
 			ioresult.FromIO[tools.ToolsDeps],
-			ioresult.Map(F.Curry2(mode.MakeDefaultModeDeps)),
+			ioresult.Map(F.Curry3(mode.MakeDefaultModeDeps)),
 		)),
+	)
+
+	return F.Pipe1(
+		F.Flow3(workspaceLens.Get, readSkills(), ioresult.Ap[mode.ModeDeps, mode.SharedDeps]),
+		reader.Ap[IOResult[mode.ModeDeps]](withModes),
 	)
 }
 
