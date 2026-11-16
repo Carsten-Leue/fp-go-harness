@@ -37,14 +37,44 @@ func AsModeTableDeps[R ModeTableDeps](r R) ModeTableDeps {
 	return r
 }
 
+// SharedDeps hold what every mode offers besides its own role and tools: the
+// sections that follow the static ones in the system prompt, and tools that
+// every mode has, whatever tools it allows. The skills of package skill are
+// such: the available_skills section and the use_skill tool. They are built
+// by the wiring and passed in, because package skill depends on this one
+// (for [SplitFrontMatter]) and so can't be imported here.
+type SharedDeps interface {
+	// GetSharedSections returns the sections that come after the static
+	// sections and before project_rules, in order.
+	GetSharedSections() []Section
+	// GetSharedTools returns the tools of every mode. A shared tool replaces
+	// a tool of the mode with the same name.
+	GetSharedTools() tools.ToolRegistry
+}
+
+type sharedDeps struct {
+	sections []Section
+	tools    tools.ToolRegistry
+}
+
+func (d *sharedDeps) GetSharedSections() []Section       { return d.sections }
+func (d *sharedDeps) GetSharedTools() tools.ToolRegistry { return d.tools }
+
+// MakeSharedDeps is wiring: it builds [SharedDeps] over sections and tools.
+// MakeSharedDeps(nil, nil) shares nothing.
+func MakeSharedDeps(sections []Section, registry tools.ToolRegistry) SharedDeps {
+	return &sharedDeps{sections, registry}
+}
+
 // ModeDeps are the dependencies of the request of a mode: the tools, whose
 // definitions it lists, the facts and files the system prompt is read from,
-// and the table of the modes.
+// the table of the modes, and what every mode shares.
 type ModeDeps interface {
 	tools.ToolsDeps
 	prompt.EnvInfoDeps
 	prompt.ProjectRulesDeps
 	ModeTableDeps
+	SharedDeps
 }
 
 // modeDeps takes the workspace, the files and the directory listings from
@@ -54,6 +84,7 @@ type ModeDeps interface {
 type modeDeps struct {
 	tools.ToolsDeps
 	ModeTableDeps
+	SharedDeps
 	env prompt.EnvInfoDeps
 }
 
@@ -63,22 +94,23 @@ func (d *modeDeps) GetShell() string         { return d.env.GetShell() }
 func (d *modeDeps) GetNow() io.IO[time.Time] { return d.env.GetNow() }
 
 // MakeModeDeps is wiring: it builds [ModeDeps] from the tools, the facts
-// about the machine and the table of the modes.
-func MakeModeDeps(t tools.ToolsDeps, env prompt.EnvInfoDeps, modes []Mode) ModeDeps {
-	return &modeDeps{t, MakeModeTableDeps(modes), env}
+// about the machine, the table of the modes and what the modes share.
+func MakeModeDeps(t tools.ToolsDeps, env prompt.EnvInfoDeps, modes []Mode, shared SharedDeps) ModeDeps {
+	return &modeDeps{t, MakeModeTableDeps(modes), shared, env}
 }
 
 // MakeDefaultModeDeps is wiring: it builds [ModeDeps] for the running
-// process over the dependencies of the tools and the table of the modes.
-// The shell is the program of [tools.DefaultShell], which runs the commands.
-func MakeDefaultModeDeps(t tools.ToolsDeps, modes []Mode) ModeDeps {
+// process over the dependencies of the tools, the table of the modes and
+// what the modes share. The shell is the program of [tools.DefaultShell],
+// which runs the commands.
+func MakeDefaultModeDeps(t tools.ToolsDeps, modes []Mode, shared SharedDeps) ModeDeps {
 	shell := F.Pipe2(
 		tools.DefaultShell(),
 		A.Head[string],
 		option.GetOrElse(F.Constant("")),
 	)
 
-	return MakeModeDeps(t, prompt.MakeDefaultEnvInfoDeps(t, shell), modes)
+	return MakeModeDeps(t, prompt.MakeDefaultEnvInfoDeps(t, shell), modes, shared)
 }
 
 // AsModeDeps is wiring: it narrows any wider dependencies to [ModeDeps], for

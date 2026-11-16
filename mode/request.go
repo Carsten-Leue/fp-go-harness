@@ -9,6 +9,7 @@ import (
 	F "github.com/IBM/fp-go/v2/function"
 	M "github.com/IBM/fp-go/v2/monoid"
 	"github.com/IBM/fp-go/v2/reader"
+	R "github.com/IBM/fp-go/v2/record"
 	"github.com/openai/openai-go/v3"
 )
 
@@ -49,6 +50,11 @@ func projectRules() effect.Kleisli[ModeDeps, Mode, []Section] {
 	)
 }
 
+// sharedSections are the sections every mode shares, see [SharedDeps].
+func sharedSections() effect.Kleisli[ModeDeps, Mode, []Section] {
+	return F.Constant1[Mode](effect.Asks(ModeDeps.GetSharedSections))
+}
+
 // environmentInfo is the environment_info section, the same in every mode.
 func environmentInfo() effect.Kleisli[ModeDeps, Mode, []Section] {
 	return F.Constant1[Mode](F.Pipe2(
@@ -59,15 +65,16 @@ func environmentInfo() effect.Kleisli[ModeDeps, Mode, []Section] {
 }
 
 // Sections are the sections of the system prompt of a mode, in the order of
-// the recorded system prompts: role_definition, the static sections,
-// project_rules and environment_info. The sections are read concurrently;
-// the monoid keeps their order.
+// the recorded system prompts: role_definition, the static sections, the
+// shared sections (available_skills), project_rules and environment_info.
+// The sections are read concurrently; the monoid keeps their order.
 func Sections() effect.Kleisli[ModeDeps, Mode, []Section] {
 	sections := reader.ApplicativeMonoid[Mode](effect.ApplicativeMonoid[ModeDeps](A.Monoid[Section]()))
 
 	return M.ConcatAll(sections)(A.From(
 		roleDefinition(),
 		staticSections(),
+		sharedSections(),
 		projectRules(),
 		environmentInfo(),
 	))
@@ -81,9 +88,9 @@ func SystemPrompt() effect.Kleisli[ModeDeps, Mode, string] {
 	)
 }
 
-// Tools builds the registry of the tools a mode allows, see
+// allowedTools builds the registry of the tools a mode allows, see
 // [tools.SelectTools].
-func Tools() reader.Kleisli[tools.ToolsDeps, Mode, tools.ToolRegistry] {
+func allowedTools() reader.Kleisli[tools.ToolsDeps, Mode, tools.ToolRegistry] {
 	allowedToolsLens := MakeModeAllowedToolsLens()
 
 	return F.Flow4(
@@ -91,6 +98,20 @@ func Tools() reader.Kleisli[tools.ToolsDeps, Mode, tools.ToolRegistry] {
 		tools.SelectTools(),
 		reader.Map[tools.ToolsDeps, tools.ToolRegistry, tools.ToolRegistry],
 		reader.Read[Reader[tools.ToolsDeps, tools.ToolRegistry]](tools.MakeTools()),
+	)
+}
+
+// Tools builds the registry of the tools of a mode: those it allows, see
+// [tools.SelectTools], and the shared ones of [SharedDeps], such as
+// use_skill, which every mode has. A shared tool wins over an allowed one of
+// the same name.
+func Tools() reader.Kleisli[ModeDeps, Mode, tools.ToolRegistry] {
+	registries := reader.ApplicativeMonoid[ModeDeps](R.UnionLastMonoid[string, tools.Tool]())
+
+	return F.Flow3(
+		allowedTools(),
+		reader.Local[tools.ToolRegistry](tools.AsToolsDeps[ModeDeps]),
+		F.Bind2nd(registries.Concat, ModeDeps.GetSharedTools),
 	)
 }
 
@@ -108,9 +129,8 @@ func systemRequest() func(string) Params {
 
 // withTools sets the definitions of the tools of a mode in a request.
 func withTools() effect.Kleisli[ModeDeps, Mode, Endomorphism[Params]] {
-	return F.Flow4(
+	return F.Flow3(
 		Tools(),
-		reader.Local[tools.ToolRegistry](tools.AsToolsDeps[ModeDeps]),
 		reader.Map[ModeDeps](tools.WithTools()),
 		effect.Asks[ModeDeps, Endomorphism[Params]],
 	)

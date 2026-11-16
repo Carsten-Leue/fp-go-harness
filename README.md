@@ -81,10 +81,16 @@ recorded agent sessions.
   custom modes of the home directory and the workspace over the built-in ones by id (two files
   with the same id in one directory are an error), and `mode.Lookup` finds a mode in that
   merged table. `mode.Request` assembles the first request of a mode: the system
-  prompt with the mode's `role_definition`, the static sections, `project_rules` and
-  `environment_info`, and the definitions of the mode's tools.
+  prompt with the mode's `role_definition`, the static sections, `available_skills`,
+  `project_rules` and `environment_info`, and the definitions of the mode's tools.
+- **Skills**: `skill.ReadSkillDirs` reads every `<dir>/<skill>/SKILL.md` of `~/.claude/skills`,
+  `~/.bob/skills`, `<workspace>/.claude/skills` and `<workspace>/.bob/skills` (name and
+  description from the YAML front matter, other keys allowed). A skill with the name of an
+  earlier one replaces it, so the workspace wins over the home directory. A broken file is left
+  out and reported on stderr. The skills become the `available_skills` section of every mode
+  and the `use_skill` tool, which returns the whole `SKILL.md` of a skill.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
-  `apply_diff`, `insert_content` and `execute_command`, each with its definition for the model, confined to the workspace
+  `apply_diff`, `insert_content`, `execute_command` and `use_skill` (in every mode), each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
   content that is shorter than its announced `line_count`. `search_and_replace` replaces
   literal text or a regular expression, optionally within a line range, and fails when
@@ -145,6 +151,7 @@ replay tests.
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`) and its `TurnResult`, the next turn (`Continue`, `RunPrompt`), steering (`Steer`), usage monoid, iteration limit, the task store (`Save`, `Load`) |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
+| [`skill`](skill/) | Skill discovery from the skill directories of the home directory and the workspace, the `available_skills` section and the `use_skill` tool |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details`, and the section comparison with a recorded prompt |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests, and extracts their system prompts |
@@ -164,7 +171,7 @@ replay tests.
 | E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL) | ⏳ E1–E4 done, E5 in progress (E5a REPL done) |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
-| H | Skills, todos, subtasks | ⏳ open |
+| H | Skills, todos, subtasks | ⏳ H1–H2 done |
 | I | Safety and approval | ⏳ open |
 | J | Agent Client Protocol (run as an ACP agent in editors) | ⏳ open |
 | K | Agent2Agent protocol (serve tasks to other agents, call remote agents) | ⏳ open |

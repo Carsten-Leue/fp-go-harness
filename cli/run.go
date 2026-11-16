@@ -14,6 +14,7 @@ import (
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
 	"github.com/Carsten-Leue/fp-go-harness/session"
+	"github.com/Carsten-Leue/fp-go-harness/skill"
 	"github.com/Carsten-Leue/fp-go-harness/tools"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -79,7 +80,7 @@ func makeRegistry() Reader[modeEnv, tools.ToolRegistry] {
 
 	registry := F.Pipe1(
 		F.Flow2(modeLens.Get, mode.Tools()),
-		reader.Ap[tools.ToolRegistry](F.Flow2(depsLens.Get, tools.AsToolsDeps[mode.ModeDeps])),
+		reader.Ap[tools.ToolRegistry](depsLens.Get),
 	)
 
 	return F.Pipe1(
@@ -315,19 +316,50 @@ func readModes() ioresult.Kleisli[string, []mode.Mode] {
 	)
 }
 
+// skillDirs is wiring: the skill directories of a workspace root and a home
+// directory, lowest precedence first: the home directory's, then the
+// workspace's, see [skill.DirsIn].
+func skillDirs() Reader[string, A.Kleisli[string, string]] {
+	return F.Flow3(
+		skill.DirsIn(),
+		A.Concat[string],
+		reader.Local[[]string](skill.DirsIn()),
+	)
+}
+
+// readSkills is wiring: it reads the skills for a workspace root, those of
+// the workspace overriding those of the home directory, into what they give
+// every mode: the available_skills section and the use_skill tool. Broken
+// skill files are left out and reported on stderr.
+func readSkills() ioresult.Kleisli[string, mode.SharedDeps] {
+	return F.Flow5(
+		skillDirs(),
+		ioresult.Map[string, []string],
+		reader.Read[IOResult[[]string]](ioresult.Eitherize0(os.UserHomeDir)()),
+		ioresult.ChainIOK(skill.ReadSkillDirs()(skill.MakeDefaultSkillDirsDeps())),
+		ioresult.Map(skill.MakeSharedDeps()),
+	)
+}
+
 // makeModeDeps is wiring: it builds the deps of the modes of a configuration
-// from the deps of the tools and the table of the modes of the workspace,
-// read concurrently.
+// from the deps of the tools, the table of the modes of the workspace and
+// the skills of the workspace, read concurrently. The workspace is read for
+// each of them.
 func makeModeDeps() ioresult.Kleisli[Config, mode.ModeDeps] {
 	workspaceLens := MakeConfigWorkspaceLens()
 
-	return F.Pipe1(
-		F.Flow3(workspaceLens.Get, readModes(), ioresult.Ap[mode.ModeDeps, []mode.Mode]),
-		reader.Ap[IOResult[mode.ModeDeps]](F.Flow3(
+	withModes := F.Pipe1(
+		F.Flow3(workspaceLens.Get, readModes(), ioresult.Ap[func(mode.SharedDeps) mode.ModeDeps, []mode.Mode]),
+		reader.Ap[IOResult[func(mode.SharedDeps) mode.ModeDeps]](F.Flow3(
 			makeToolsDeps(),
 			ioresult.FromIO[tools.ToolsDeps],
-			ioresult.Map(F.Curry2(mode.MakeDefaultModeDeps)),
+			ioresult.Map(F.Curry3(mode.MakeDefaultModeDeps)),
 		)),
+	)
+
+	return F.Pipe1(
+		F.Flow3(workspaceLens.Get, readSkills(), ioresult.Ap[mode.ModeDeps, mode.SharedDeps]),
+		reader.Ap[IOResult[mode.ModeDeps]](withModes),
 	)
 }
 
