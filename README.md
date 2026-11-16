@@ -82,7 +82,8 @@ recorded agent sessions.
   with the same id in one directory are an error), and `mode.Lookup` finds a mode in that
   merged table. `mode.Request` assembles the first request of a mode: the system
   prompt with the mode's `role_definition`, the static sections, `available_skills`,
-  `project_rules` and `environment_info`, and the definitions of the mode's tools.
+  `project_rules`, `environment_info` and `available_modes` (every mode of the table with its
+  name, id, description and tools), and the definitions of the mode's tools.
 - **Skills**: `skill.ReadSkillDirs` reads every `<dir>/<skill>/SKILL.md` of `~/.claude/skills`,
   `~/.bob/skills`, `<workspace>/.claude/skills` and `<workspace>/.bob/skills` (name and
   description from the YAML front matter, other keys allowed). A skill with the name of an
@@ -90,7 +91,7 @@ recorded agent sessions.
   out and reported on stderr. The skills become the `available_skills` section of every mode
   and the `use_skill` tool, which returns the whole `SKILL.md` of a skill.
 - **Tools**: `read_file`, `list_files`, `glob`, `grep`, `write_file`, `search_and_replace`,
-  `apply_diff`, `insert_content`, `execute_command`, `use_skill` and `update_todo_list` (both in every mode), each with its definition for the model, confined to the workspace
+  `apply_diff`, `insert_content`, `execute_command`, `use_skill`, `update_todo_list` and `switch_mode` (the last three in every mode), each with its definition for the model, confined to the workspace
   root. `write_file` replaces a whole file, creates missing parent directories and rejects
   content that is shorter than its announced `line_count`. `search_and_replace` replaces
   literal text or a regular expression, optionally within a line range, and fails when
@@ -113,6 +114,12 @@ recorded agent sessions.
   (`todo.Todo` with text and status) through a lens; an invalid list is a tool message and
   changes nothing. In the REPL the next user message shows the list as a `<todo_list>` section
   in its `environment_details` (an empty list shows nothing), and a saved task keeps it.
+- **Mode switching**: `switch_mode` (`mode_id`, optional `reason`) changes the session to
+  another mode with `session.SwitchMode`, the one change of mode that ACP's `session/set_mode`
+  is to reuse: the system prompt and the tool definitions become the target mode's, the
+  conversation stays. An unknown id names the modes; a mode with tools the run didn't start
+  with is refused, so `--mode ask` can't switch to agent. `Next` only calls the tools the
+  request offered, and in the REPL the later turns stay in the new mode.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -163,7 +170,7 @@ replay tests.
 | [`cli`](cli/) | The urfave/cli command: decodes the `Config` with a codec from `.env`, the environment and the flags, builds the mode's request and tools, wires the DeepSeek dependencies, runs the loop |
 | [`session`](session/) | `Session` state, one loop step (`Next`), the driver (`Run`) and its `TurnResult`, the next turn (`Continue`, `RunPrompt`), steering (`Steer`), usage monoid, iteration limit, the task store (`Save`, `Load`) |
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
-| [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
+| [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, the request each one starts with (system prompt and tool definitions), the `available_modes` section and the `switch_mode` tool |
 | [`skill`](skill/) | Skill discovery from the skill directories of the home directory and the workspace, the `available_skills` section and the `use_skill` tool |
 | [`todo`](todo/) | The todo list: `Todo` items parsed from and rendered to a Markdown checklist, the `todo_list` section of `environment_details` and the session-changing `update_todo_list` tool |
 | [`tools`](tools/) | Tool registry, tool-call dispatch, plain and state-changing tools (`ToolOf`, `StateCall`, the lifts), workspace path resolution and the tools themselves |
@@ -185,7 +192,7 @@ replay tests.
 | E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL, session-changing tools) | ⏳ E1–E4 and E6 done, E5 in progress (E5a–E5b done) |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
-| H | Skills, todos, subtasks | ⏳ H1–H3 done |
+| H | Skills, todos, subtasks | ⏳ H1–H3 and H5 done |
 | I | Safety and approval | ⏳ open |
 | J | Agent Client Protocol (run as an ACP agent in editors) | ⏳ open |
 | K | Agent2Agent protocol (serve tasks to other agents, call remote agents) | ⏳ open |

@@ -13,8 +13,9 @@ import (
 // SessionDTO is the exported form of a [Session], with one field per field of
 // the session, for encoding it as JSON. [SessionIso] converts between both.
 //
-// The todo list (H3) is left out of the JSON when it is empty, so a task file
-// written before H3, which has no todos, loads with an empty list.
+// The todo list (H3) and the mode the session switched to (H5) are left out
+// of the JSON when they are empty, so a task file written before them loads
+// with an empty list and in the mode it started in.
 //
 // fp-go:Lens
 type SessionDTO struct {
@@ -23,6 +24,7 @@ type SessionDTO struct {
 	Usage      openai.CompletionUsage         `json:"usage"`
 	Iterations int                            `json:"iterations"`
 	Todos      []todo.Todo                    `json:"todos,omitempty"`
+	Mode       string                         `json:"mode,omitempty"`
 }
 
 // HistoryEntryDTO is the exported form of a [HistoryEntry]: a request and the
@@ -38,21 +40,22 @@ type HistoryEntryDTO struct {
 // [SessionDTO] after the history, in order of application. They are named
 // because [reader.Ap] cannot infer them.
 type (
-	fromTodos[T any]      = func([]todo.Todo) T
+	fromMode[T any]       = func(string) T
+	fromTodos[T any]      = func([]todo.Todo) fromMode[T]
 	fromIterations[T any] = func(int) fromTodos[T]
 	fromUsage[T any]      = func(openai.CompletionUsage) fromIterations[T]
 	fromCurrent[T any]    = func(openai.ChatCompletionNewParams) fromUsage[T]
 )
 
 // makeSessionDTO is a leaf: the constructor of a [SessionDTO].
-func makeSessionDTO(history []HistoryEntryDTO, current openai.ChatCompletionNewParams, usage openai.CompletionUsage, iterations int, todos []todo.Todo) SessionDTO {
-	return SessionDTO{history, current, usage, iterations, todos}
+func makeSessionDTO(history []HistoryEntryDTO, current openai.ChatCompletionNewParams, usage openai.CompletionUsage, iterations int, todos []todo.Todo, mode string) SessionDTO {
+	return SessionDTO{history, current, usage, iterations, todos, mode}
 }
 
 // makeSessionOf is a leaf: the constructor of a [Session] over all of its
 // fields.
-func makeSessionOf(history History, current openai.ChatCompletionNewParams, usage openai.CompletionUsage, iterations int, todos []todo.Todo) Session {
-	return Session{history, current, usage, iterations, todos}
+func makeSessionOf(history History, current openai.ChatCompletionNewParams, usage openai.CompletionUsage, iterations int, todos []todo.Todo, mode string) Session {
+	return Session{history, current, usage, iterations, todos, mode}
 }
 
 // makeHistoryEntryDTO is a leaf: the constructor of a [HistoryEntryDTO].
@@ -86,13 +89,15 @@ func sessionDTOOf() Reader[Session, SessionDTO] {
 	usageLens := MakeSessionusageLens()
 	iterLens := MakeSessioniterationsLens()
 	todosLens := MakeSessiontodosLens()
+	modeLens := MakeSessionmodeLens()
 
-	return F.Pipe4(
-		F.Flow3(historyLens.Get, A.Map(HistoryEntryIso().Get), F.Curry5(makeSessionDTO)),
+	return F.Pipe5(
+		F.Flow3(historyLens.Get, A.Map(HistoryEntryIso().Get), F.Curry6(makeSessionDTO)),
 		reader.Ap[fromUsage[SessionDTO]](currentLens.Get),
 		reader.Ap[fromIterations[SessionDTO]](usageLens.Get),
 		reader.Ap[fromTodos[SessionDTO]](iterLens.Get),
-		reader.Ap[SessionDTO](todosLens.Get),
+		reader.Ap[fromMode[SessionDTO]](todosLens.Get),
+		reader.Ap[SessionDTO](modeLens.Get),
 	)
 }
 
@@ -104,13 +109,15 @@ func sessionOf() Reader[SessionDTO, Session] {
 	usageLens := MakeSessionDTOUsageLens()
 	iterLens := MakeSessionDTOIterationsLens()
 	todosLens := MakeSessionDTOTodosLens()
+	modeLens := MakeSessionDTOModeLens()
 
-	return F.Pipe4(
-		F.Flow3(historyLens.Get, A.Map(HistoryEntryIso().ReverseGet), F.Curry5(makeSessionOf)),
+	return F.Pipe5(
+		F.Flow3(historyLens.Get, A.Map(HistoryEntryIso().ReverseGet), F.Curry6(makeSessionOf)),
 		reader.Ap[fromUsage[Session]](currentLens.Get),
 		reader.Ap[fromIterations[Session]](usageLens.Get),
 		reader.Ap[fromTodos[Session]](iterLens.Get),
-		reader.Ap[Session](todosLens.Get),
+		reader.Ap[fromMode[Session]](todosLens.Get),
+		reader.Ap[Session](modeLens.Get),
 	)
 }
 

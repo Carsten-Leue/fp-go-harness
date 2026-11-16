@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"slices"
+
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	A "github.com/IBM/fp-go/v2/array"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -10,6 +12,7 @@ import (
 	M "github.com/IBM/fp-go/v2/monoid"
 	L "github.com/IBM/fp-go/v2/optics/lens"
 	P "github.com/IBM/fp-go/v2/optics/prism"
+	"github.com/IBM/fp-go/v2/option"
 	"github.com/IBM/fp-go/v2/pair"
 	"github.com/IBM/fp-go/v2/reader"
 	"github.com/IBM/fp-go/v2/readeroption"
@@ -17,6 +20,7 @@ import (
 	R "github.com/IBM/fp-go/v2/record"
 	S "github.com/IBM/fp-go/v2/string"
 	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 // ToolResult is the result of a tool that may change a state of type T: the
@@ -123,6 +127,48 @@ func LiftToolDeps[T any]() func(ToolDeps) StateToolDeps[T] {
 		ToolDeps.GetToolCaller,
 		LiftToolCaller[T](),
 		MakeStateToolDeps[T],
+	)
+}
+
+// OfferedToolNames are the names of the function tools a request offers the
+// model, in order.
+func OfferedToolNames() A.Kleisli[openai.ChatCompletionNewParams, string] {
+	toolsLens := oai.MakeChatCompletionNewParamsToolsLens()
+	nameLens := MakeFunctionDefinitionParamNameLens()
+
+	return F.Flow2(
+		toolsLens.Get,
+		A.FilterMap(F.Flow3(
+			openai.ChatCompletionToolUnionParam.GetFunction,
+			option.FromNillable2[shared.FunctionDefinitionParam],
+			option.Map(nameLens.Get),
+		)),
+	)
+}
+
+// OfferedCaller restricts a caller to the tools of names: any other name is
+// not found, so its call is the tool message "Unable to find tool", see
+// [MakeStateToolCall].
+func OfferedCaller[T any]() func([]string) Endomorphism[StateToolCaller[T]] {
+	return F.Flow4(
+		F.Curry2(slices.Contains[[]string]),
+		option.FromPredicate[string],
+		reader.Compose[Option[StateCall[T]], string, Option[string]],
+		reader.Compose[StateToolCaller[T]](option.Chain[string, StateCall[T]]),
+	)
+}
+
+// OfferedToolDeps restricts the caller of [StateToolDeps] to the tools a
+// request offers the model, see [OfferedToolNames] and [OfferedCaller]: the
+// model can only call what it was offered, also when the registry of the
+// caller has more tools, as after a switch_mode (H5) to a mode with fewer
+// tools.
+func OfferedToolDeps[T any]() func(openai.ChatCompletionNewParams) Endomorphism[StateToolDeps[T]] {
+	return F.Flow4(
+		OfferedToolNames(),
+		OfferedCaller[T](),
+		reader.Map[StateToolCaller[T]](MakeStateToolDeps[T]),
+		reader.Compose[StateToolDeps[T]](StateToolDeps[T].GetToolCaller),
 	)
 }
 

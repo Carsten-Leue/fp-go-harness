@@ -115,23 +115,74 @@ func withPrompt() func(string) endomorphism.Endomorphism[openai.ChatCompletionNe
 // [session.SessionDeps] of a turn.
 type toSessionDeps = Reader[oai.ChatCompletionDeps, session.SessionDeps]
 
-// sessionTools are the session tools every mode has, whatever tools it
-// allows: update_todo_list (H3). H5's switch_mode joins them here.
-func sessionTools() session.SessionRegistry {
-	return session.TodoTools()
+// modeRequestOf is a leaf that defers [modeRequest]: the request the mode of
+// an environment starts with, built when switch_mode calls it. The request
+// lists the tools of [sessionRegistry], switch_mode among them, whose deps
+// hold this builder (see [switchModeDeps]), so building it eagerly there
+// would not terminate.
+func modeRequestOf(env modeEnv) session.Thunk[openai.ChatCompletionNewParams] {
+	return modeRequest[F.Void]()(env)(F.VOID)
+}
+
+// switchModeDeps is wiring: the [mode.SwitchModeDeps] of the session of the
+// mode of an environment: the table of the modes of its deps, the tools of
+// its mode as the allowed ones, the request of a target mode in the same
+// environment (see [modeRequestOf]) and [session.SwitchMode] as the change.
+//
+// The allowed tools are those of the mode the run started in, because the
+// tool caller of the session is built from its registry, see [sessionDeps]:
+// a one-shot ask, whose registry has the read-only tools only, may switch to
+// plan but not to agent. In the REPL the start mode stays the environment, so
+// a session that switched from agent to plan may switch back.
+func switchModeDeps() Reader[modeEnv, mode.SwitchModeDeps[session.Session]] {
+	modeLens := MakemodeEnvModeLens()
+	depsLens := MakemodeEnvDepsLens()
+	allowedToolsLens := mode.MakeModeAllowedToolsLens()
+
+	type (
+		requestK   = thunk.Kleisli[mode.Mode, openai.ChatCompletionNewParams]
+		switchTo   = func(session.ModeRequest) endomorphism.Endomorphism[session.Session]
+		switchDeps = mode.SwitchModeDeps[session.Session]
+	)
+
+	// the request of a mode in the environment
+	requestIn := F.Flip(F.Flow2(
+		modeLens.Set,
+		reader.Map[modeEnv](modeRequestOf),
+	))
+
+	return F.Pipe3(
+		F.Flow3(depsLens.Get, mode.AsModeTableDeps[mode.ModeDeps], F.Curry4(mode.MakeSwitchModeDeps[session.Session])),
+		reader.Ap[func(requestK) func(switchTo) switchDeps](F.Flow2(modeLens.Get, allowedToolsLens.Get)),
+		reader.Ap[func(switchTo) switchDeps](requestIn),
+		reader.Map[modeEnv](reader.Read[switchDeps](session.SwitchMode())),
+	)
+}
+
+// sessionTools is wiring: the session tools every mode of an environment
+// has, whatever tools it allows: update_todo_list (H3) and switch_mode (H5,
+// see [switchModeDeps]).
+func sessionTools() Reader[modeEnv, session.SessionRegistry] {
+	registries := R.UnionLastMonoid[string, session.SessionTool]()
+
+	return F.Flow3(
+		switchModeDeps(),
+		mode.SwitchModeTools[session.Session](),
+		F.Bind1st(registries.Concat, session.TodoTools()),
+	)
 }
 
 // sessionRegistry is wiring: the registry of the session tools of the mode of
 // an environment: the plain tools of [makeRegistry], lifted into session
 // tools that change nothing, and the [sessionTools]. A session tool wins over
-// a plain one of the same name.
+// a plain one of the same name; both are independent reads of the
+// environment.
 func sessionRegistry() Reader[modeEnv, session.SessionRegistry] {
-	registries := R.UnionLastMonoid[string, session.SessionTool]()
+	registries := reader.ApplicativeMonoid[modeEnv](R.UnionLastMonoid[string, session.SessionTool]())
 
-	return F.Flow3(
-		makeRegistry(),
-		tools.LiftRegistry[session.Session](),
-		F.Bind2nd(registries.Concat, sessionTools()),
+	return registries.Concat(
+		F.Flow2(makeRegistry(), tools.LiftRegistry[session.Session]()),
+		sessionTools(),
 	)
 }
 

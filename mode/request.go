@@ -66,8 +66,9 @@ func environmentInfo() effect.Kleisli[ModeDeps, Mode, []Section] {
 
 // Sections are the sections of the system prompt of a mode, in the order of
 // the recorded system prompts: role_definition, the static sections, the
-// shared sections (available_skills), project_rules and environment_info.
-// The sections are read concurrently; the monoid keeps their order.
+// shared sections (available_skills), project_rules, environment_info and
+// available_modes (H5), the last one. The sections are read concurrently;
+// the monoid keeps their order.
 func Sections() effect.Kleisli[ModeDeps, Mode, []Section] {
 	sections := reader.ApplicativeMonoid[Mode](effect.ApplicativeMonoid[ModeDeps](A.Monoid[Section]()))
 
@@ -77,6 +78,7 @@ func Sections() effect.Kleisli[ModeDeps, Mode, []Section] {
 		sharedSections(),
 		projectRules(),
 		environmentInfo(),
+		availableModes(),
 	))
 }
 

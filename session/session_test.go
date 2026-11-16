@@ -178,6 +178,7 @@ func TestNext_BouncesOnToolCalls(t *testing.T) {
 			openai.SystemMessage("you are a helpful assistant"),
 			openai.UserMessage("what's the weather in Berlin?"),
 		},
+		Tools: offering("get_weather"),
 	}
 
 	toolCall := openai.ChatCompletionMessageToolCallUnion{

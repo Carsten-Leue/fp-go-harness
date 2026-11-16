@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -132,17 +133,19 @@ func TestRequestPlan(t *testing.T) {
 	system := request.Messages[0].OfSystem.Content.OfString.Value
 
 	assert.Equal(t,
-		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "project_rules", "agents_md", "rule", "rule", "environment_info"},
+		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "project_rules", "agents_md", "rule", "rule", "environment_info", "available_modes"},
 		tagsOf(system))
 	assert.Regexp(t, `^<role_definition>\nYou are a software architect running in Plan mode\.`, system)
 	assert.Contains(t, system, "<rule>\nUse fp-go.\n</rule>")
 	assert.Contains(t, system, "<rule>\nPlans list their tests.\n</rule>")
 	assert.NotContains(t, system, "Agents run the tests.")
 	assert.Contains(t, system, "The currently active workspace folder is "+root+"\n")
-	assert.Regexp(t, `Current date: 2026-10-19\n</environment_info>$`, system)
+	assert.Regexp(t, `Current date: 2026-10-19\n</environment_info>\n\n<available_modes>\n`, system)
 	assert.NotContains(t, system, "\r")
+	// the available_modes section lists the tools of every mode
+	beforeModes, _, _ := strings.Cut(system, "<available_modes>")
 	for _, name := range writeToolNames {
-		assert.NotContains(t, system, name)
+		assert.NotContains(t, beforeModes, name)
 	}
 
 	assert.ElementsMatch(t, readOnlyToolNames, toolNames(request))
@@ -155,7 +158,7 @@ func TestRequestAgentWithoutRules(t *testing.T) {
 
 	system := request.Messages[0].OfSystem.Content.OfString.Value
 	assert.Equal(t,
-		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "environment_info"},
+		[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "environment_info", "available_modes"},
 		tagsOf(system))
 	assert.Regexp(t, `^<role_definition>\nYou are a coding agent running in Agent mode\.`, system)
 	assert.Contains(t, system, "over write_file for existing files.\n")
@@ -175,7 +178,7 @@ func TestRequestShared(t *testing.T) {
 		request := runRequest(t, deps, m)
 
 		assert.Equal(t,
-			[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "available_skills", "skill", "project_rules", "agents_md", "rule", "environment_info"},
+			[]string{"role_definition", "tool_use", "markdown_rules", "base_rules", "available_skills", "skill", "project_rules", "agents_md", "rule", "environment_info", "available_modes"},
 			tagsOf(request.Messages[0].OfSystem.Content.OfString.Value), m.ID)
 		assert.Contains(t, toolNames(request), "use_skill", m.ID)
 		assert.Contains(t, R.Keys(Tools()(m)(deps)), "use_skill", m.ID)

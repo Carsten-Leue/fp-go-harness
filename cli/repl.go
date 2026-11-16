@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/Carsten-Leue/fp-go-harness/mode"
 	oai "github.com/Carsten-Leue/fp-go-harness/openai"
 	"github.com/Carsten-Leue/fp-go-harness/session"
 	thunk "github.com/IBM/fp-go/v2/context/readerioresult"
@@ -186,10 +187,51 @@ func sessionLine() Reader[session.Session, func(string) wrappedLine] {
 	return F.Flip(F.Flow2(lineChange(), F.Flip[endomorphism.Endomorphism[string], session.Session, session.Session]))
 }
 
+// switchedEnv is the environment with the mode of an ID, looked up in the
+// table of its deps; an ID that is not in the table keeps the environment.
+// The lookup and the change both read the environment.
+func switchedEnv() func(string) endomorphism.Endomorphism[modeEnv] {
+	modeLens := MakemodeEnvModeLens()
+	depsLens := MakemodeEnvDepsLens()
+
+	return F.Flow3(
+		F.Flip(F.Flow4(
+			depsLens.Get,
+			mode.AsModeTableDeps[mode.ModeDeps],
+			mode.Lookup(),
+			reader.Map[string](result.ToOption[mode.Mode]),
+		)),
+		reader.Map[modeEnv](option.Fold(endomorphism.Identity[modeEnv], modeLens.Set)),
+		reader.Flatten[modeEnv, modeEnv],
+	)
+}
+
+// sessionEnv is the environment of the mode a session is in: the mode it
+// switched to with switch_mode (H5), see [session.ModeID], or the start mode
+// of the environment.
+func sessionEnv() Reader[session.Session, endomorphism.Endomorphism[modeEnv]] {
+	return F.Flow2(
+		session.ModeID(),
+		option.Fold(endomorphism.Identity[modeEnv], switchedEnv()),
+	)
+}
+
+// sessionDetails are the environment_details of a turn of a session: those
+// of the mode the session is in (see [sessionEnv]), so current_mode shows a
+// switch, with the todo list of the session (H3). The mode and the todo list
+// are independent reads of the session.
+func sessionDetails() Reader[modeEnv, Reader[session.Session, lineDetails]] {
+	return F.Flow3(
+		F.Flip(sessionEnv()),
+		reader.Map[session.Session](modeDetails[oai.ChatCompletionDeps]()),
+		reader.Ap[lineDetails](session.Todos()),
+	)
+}
+
 // withLine continues a session with a line: the line wrapped by the
-// environment_details of the turn, which show the todo list of the session
-// (H3), and added with [session.Continue], see [sessionLine]. The details
-// and the continuation are independent reads of the session.
+// environment_details of the turn, see [sessionDetails], and added with
+// [session.Continue], see [sessionLine]. The details and the continuation
+// are independent reads of the session.
 func withLine() Reader[replEnv, Reader[session.Session, continuedLine]] {
 	envLens := MakereplEnvEnvLens()
 
@@ -201,10 +243,9 @@ func withLine() Reader[replEnv, Reader[session.Session, continuedLine]] {
 		)),
 	)
 
-	return F.Flow4(
+	return F.Flow3(
 		envLens.Get,
-		modeDetails[oai.ChatCompletionDeps](),
-		reader.Local[lineDetails](session.Todos()),
+		sessionDetails(),
 		F.Flow2(
 			reader.Ap[continuedLine, session.Session, lineDetails],
 			reader.Read[Reader[session.Session, continuedLine]](continuation),

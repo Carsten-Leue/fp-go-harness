@@ -194,7 +194,7 @@ and a text result. Validation errors (such as "path must be absolute") come back
   `prompt.ProjectRules()` now takes the mode's ID and adds the rules in `.bob/rules-<id>/` after those in
   `.bob/rules/`. `ModeDeps` takes the workspace, files and listings from `tools.ToolsDeps`, so the prompt
   reads the workspace the tools work in. The CLI (`--mode agent|plan|ask`) uses it, so D1–D4 are now wired in.
-  The `available_modes` section waits for H5.
+  The `available_modes` section came with H5.
 - [x] **D6 `<environment_details>` per turn.** Add an endomorphism that wraps each user message with datetime, mode
   and git status (`git status --porcelain` through `ProcessDeps`). *Test:* golden file against a recorded user message.
   `prompt.EnvironmentDetails()` is an `effect.Kleisli[EnvDetailsDeps, string, Endomorphism[string]]` over the mode's
@@ -212,8 +212,9 @@ and a text result. Validation errors (such as "path must be absolute") come back
   by line breaks) and `replay.SystemPrompts` yields one per request of a log. The recording is synthetic
   (`mode/testdata/recorded-system-prompt.log`, the tags of §0 in their order), since the real ones are not available (B5).
   The test fixes the gap: the Agent prompt lacks investigate_before_answering, engineering_discipline,
-  auto_appended_context, user_custom_instructions and available_modes (H5), adds nothing,
-  and keeps the recorded order. available_skills came with H1; the test lives in `skill/replay_test.go` since then.
+  auto_appended_context and user_custom_instructions, adds nothing,
+  and keeps the recorded order. available_skills came with H1 (the test lives in `skill/replay_test.go` since then),
+  available_modes with H5.
 - [x] **D8 Custom modes.** Read the mode files of `~/.bob/modes/` and `<ws>/.bob/modes/` with `mode.ReadModes` over
   `os.DirFS` (a missing directory is no modes, `ioresult.CatchIs(fs.ErrNotExist, …)`), and merge them with the built-in
   ones: the workspace wins over the home directory, both over the built-ins, by `id` (precedence is a monoid, as in G1).
@@ -388,8 +389,21 @@ and a text result. Validation errors (such as "path must be absolute") come back
   section (no recording has one, so the format is ours). `SessionDTO.Todos` is `omitempty`, so older task files load.
 - [ ] **H4 `ask_followup_question`.** Implement it through the event sink (F2) and an `InputDeps`: it waits for user
   input inside the thunk. Needs a front end that can answer: the REPL (E5), ACP (J2) or A2A's `input-required` (K8).
-- [ ] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
+- [x] **H5 `switch_mode`.** Implement it as an endomorphism on `Session` that swaps the system prompt and tool set (Phase D5).
   A session-changing tool (E6); the endomorphism is shared with ACP's `session/set_mode` (J6).
+  *Done:* `session.SwitchMode()` is the one change of mode, `func(ModeRequest) Endomorphism[Session]` over the ID and
+  the request of a mode (`mode.Request`): it replaces the system messages and the tool definitions of `current`,
+  keeps every other message, the model and the history, and records the ID in the new `mode` field (`session.ModeID`,
+  `SessionDTO.Mode`, `omitempty`). J6 applies it too. `mode.SwitchMode[T]` is the tool (`{"mode_id": string,
+  "reason"?: string}`), generic over the state like `todo.Tools`: an unknown ID is a tool error naming the modes
+  (`mode.Lookup`), a mode whose tools are not all in `SwitchModeDeps.GetAllowedTools` is refused (approval can come
+  with I1), and a success answers `Switched to mode "<id>"` (no recording of the text). The CLI allows the tools of the
+  mode the run started in, whose registry the tool caller is built from: ask and plan may switch to each other, not to
+  agent; agent may switch anywhere and back. `Next` only calls the tools the request offered
+  (`tools.OfferedToolDeps`), so after a switch the caller follows the mode, and an unoffered call is
+  "Unable to find tool". The `<available_modes>` section (`mode.AvailableModes`: a short "# Mode Switching" intro,
+  then `<mode>` with `name`, `id`, `when_to_use` and `available_tools`) is the last section of every mode's prompt;
+  the D7 comparison no longer misses it. The REPL renders `current_mode` from the mode the session is in.
 - [ ] **H6 `spawn_subagent` / `start_subtask`.** Run a nested `session.Run` with a fresh `Session` and narrower deps
   (`effect.Local`). Return its final text as the tool result. The nested run reports through the same event sink (F2).
 

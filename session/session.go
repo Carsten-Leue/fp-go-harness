@@ -31,8 +31,10 @@ type History = []HistoryEntry
 
 // Session is the state of a conversation: the history of requests and
 // completions, the request of the next step, the accumulated usage, the
-// number of requests of the current turn and the todo list the model keeps
-// with update_todo_list (H3), see [TodoTools].
+// number of requests of the current turn, the todo list the model keeps
+// with update_todo_list (H3), see [TodoTools], and the ID of the mode the
+// session switched to with switch_mode (H5), empty while it is in the mode
+// it started in, see [SwitchMode].
 //
 // fp-go:Lens
 type Session struct {
@@ -41,6 +43,7 @@ type Session struct {
 	usage      openai.CompletionUsage
 	iterations int
 	todos      []todo.Todo
+	mode       string
 }
 
 // SessionDeps are the dependencies of [Next]. Its tools are session-changing
@@ -155,10 +158,26 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 		ComposePrism(P.Head[openai.ChatCompletionChoice]()).
 		ComposeLens(finishReasonLens)
 
-	handleToolCalls := F.Flow3(
-		tools.HandleStateToolCalls[Session](),
-		effect.Local[tools.ToolUpdate[Session]](tools.AsStateToolDeps[Session, SessionDeps]),
-		effect.Map[SessionDeps](toolChange()),
+	// the tool calls of the completion, with the caller restricted to the
+	// tools the request offered (see [tools.OfferedToolDeps]), so a mode's
+	// tools are those of its request, also after a switch_mode; request and
+	// completion are independent reads of the pair
+	restrictTo := F.Flow4(
+		pair.Head[Session, *openai.ChatCompletion],
+		currentLens.Get,
+		tools.OfferedToolDeps[Session](),
+		F.Flow2(
+			reader.Compose[ToolDeps](tools.AsStateToolDeps[Session, SessionDeps]),
+			effect.Local[tools.ToolUpdate[Session], SessionDeps, ToolDeps],
+		),
+	)
+	handleToolCalls := F.Pipe2(
+		restrictTo,
+		reader.Ap[Effect[SessionDeps, tools.ToolUpdate[Session]]](F.Flow2(
+			pair.Tail[Session, *openai.ChatCompletion],
+			tools.HandleStateToolCalls[Session](),
+		)),
+		reader.Map[FinalResult](effect.Map[SessionDeps](toolChange())),
 	)
 	chatCompletion := F.Flow2(
 		oai.ChatCompletion(),
@@ -211,7 +230,7 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 			endomorphism.Read[Session],
 			effect.Map[SessionDeps, Endomorphism[Session], Session],
 		),
-		reader.Ap[Effect[SessionDeps, Session]](F.Flow2(pair.Tail[Session, *openai.ChatCompletion], handleToolCalls)),
+		reader.Ap[Effect[SessionDeps, Session]](handleToolCalls),
 	)
 
 	bounceToolCall := F.Flow3(

@@ -27,8 +27,12 @@ type SessionDTOLenses struct {
 	Iterations __lens.Lens[SessionDTO, int]
 	// Todos is a [__lens.Lens] for the Todos field of [SessionDTO]
 	Todos __lens.Lens[SessionDTO, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// Mode is a [__lens.Lens] for the Mode field of [SessionDTO]
+	Mode __lens.Lens[SessionDTO, string]
 	// IterationsO is a [__lens_option.LensO] for the Iterations field of [SessionDTO], treating the zero value as absent
 	IterationsO __lens_option.LensO[SessionDTO, int]
+	// ModeO is a [__lens_option.LensO] for the Mode field of [SessionDTO], treating the zero value as absent
+	ModeO __lens_option.LensO[SessionDTO, string]
 }
 
 // SessionDTORefLenses provides [lenses] for accessing fields of [SessionDTO] via a pointer to [SessionDTO]
@@ -45,8 +49,12 @@ type SessionDTORefLenses struct {
 	Iterations __lens.Lens[*SessionDTO, int]
 	// Todos is a [__lens.Lens] for the Todos field of [SessionDTO] via a pointer receiver
 	Todos __lens.Lens[*SessionDTO, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// Mode is a [__lens.Lens] for the Mode field of [SessionDTO] via a pointer receiver
+	Mode __lens.Lens[*SessionDTO, string]
 	// IterationsO is a [__lens_option.LensO] for the Iterations field of [SessionDTO] via a pointer receiver, treating the zero value as absent
 	IterationsO __lens_option.LensO[*SessionDTO, int]
+	// ModeO is a [__lens_option.LensO] for the Mode field of [SessionDTO] via a pointer receiver, treating the zero value as absent
+	ModeO __lens_option.LensO[*SessionDTO, string]
 }
 
 // SessionDTOPrisms provides [prisms] for accessing fields of [SessionDTO]
@@ -63,6 +71,8 @@ type SessionDTOPrisms struct {
 	Iterations __prism.Prism[SessionDTO, int]
 	// Todos is a [__prism.Prism] for the Todos field of [SessionDTO]
 	Todos __prism.Prism[SessionDTO, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// Mode is a [__prism.Prism] for the Mode field of [SessionDTO]
+	Mode __prism.Prism[SessionDTO, string]
 }
 
 // SessionDTORefPrisms provides [prisms] for accessing fields of [SessionDTO] via a pointer to [SessionDTO]
@@ -79,6 +89,8 @@ type SessionDTORefPrisms struct {
 	Iterations __prism.Prism[*SessionDTO, int]
 	// Todos is a [__prism.Prism] for the Todos field of [SessionDTO] via a pointer receiver
 	Todos __prism.Prism[*SessionDTO, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// Mode is a [__prism.Prism] for the Mode field of [SessionDTO] via a pointer receiver
+	Mode __prism.Prism[*SessionDTO, string]
 }
 
 // MakeSessionDTOHistoryLens returns a [__lens.Lens] for the History field of [SessionDTO]
@@ -320,6 +332,58 @@ func MakeSessionDTOTodosRefPrism() __prism.Prism[*SessionDTO, []github_com_Carst
 	)
 }
 
+// MakeSessionDTOModeLens returns a [__lens.Lens] for the Mode field of [SessionDTO]
+func MakeSessionDTOModeLens() __lens.Lens[SessionDTO, string] {
+	return __lens.MakeLensWithName(
+		func(s SessionDTO) string { return s.Mode },
+		func(s SessionDTO, v string) SessionDTO { s.Mode = v; return s },
+		"SessionDTO.Mode",
+	)
+}
+
+// MakeSessionDTOModeLensO returns a [__lens_option.LensO] for the Mode field of [SessionDTO]
+func MakeSessionDTOModeLensO() __lens_option.LensO[SessionDTO, string] {
+	return __lens_option.FromIso[SessionDTO](__iso_option.FromZero[string]())(MakeSessionDTOModeLens())
+}
+
+// MakeSessionDTOModeRefLens returns a [__lens.Lens] for the Mode field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOModeRefLens() __lens.Lens[*SessionDTO, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *SessionDTO) string { return s.Mode },
+		func(s *SessionDTO, v string) *SessionDTO { s.Mode = v; return s },
+		"(*SessionDTO).Mode",
+	)
+}
+
+// MakeSessionDTOModeRefLensO returns a [__lens_option.LensO] for the Mode field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOModeRefLensO() __lens_option.LensO[*SessionDTO, string] {
+	return __lens_option.FromIso[*SessionDTO](__iso_option.FromZero[string]())(MakeSessionDTOModeRefLens())
+}
+
+// MakeSessionDTOModePrism returns a [__prism.Prism] for the Mode field of [SessionDTO]
+func MakeSessionDTOModePrism() __prism.Prism[SessionDTO, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s SessionDTO) __option.Option[string] { return _fromNonZero(s.Mode) },
+		func(v string) SessionDTO {
+			return SessionDTO{Mode: v}
+		},
+		"SessionDTO.Mode",
+	)
+}
+
+// MakeSessionDTOModeRefPrism returns a [__prism.Prism] for the Mode field of [SessionDTO] via a pointer receiver
+func MakeSessionDTOModeRefPrism() __prism.Prism[*SessionDTO, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *SessionDTO) __option.Option[string] { return _fromNonZero(s.Mode) },
+		func(v string) *SessionDTO {
+			return &SessionDTO{Mode: v}
+		},
+		"SessionDTO.Mode",
+	)
+}
+
 // MakeSessionDTOLenses creates a new [SessionDTOLenses] with [lenses] for all fields
 //
 // [lenses]: __lens.Lens
@@ -331,8 +395,10 @@ func MakeSessionDTOLenses() SessionDTOLenses {
 		Usage:      MakeSessionDTOUsageLens(),
 		Iterations: MakeSessionDTOIterationsLens(),
 		Todos:      MakeSessionDTOTodosLens(),
+		Mode:       MakeSessionDTOModeLens(),
 		// optional lenses
 		IterationsO: MakeSessionDTOIterationsLensO(),
+		ModeO:       MakeSessionDTOModeLensO(),
 	}
 }
 
@@ -347,8 +413,10 @@ func MakeSessionDTORefLenses() SessionDTORefLenses {
 		Usage:      MakeSessionDTOUsageRefLens(),
 		Iterations: MakeSessionDTOIterationsRefLens(),
 		Todos:      MakeSessionDTOTodosRefLens(),
+		Mode:       MakeSessionDTOModeRefLens(),
 		// optional lenses
 		IterationsO: MakeSessionDTOIterationsRefLensO(),
+		ModeO:       MakeSessionDTOModeRefLensO(),
 	}
 }
 
@@ -362,6 +430,7 @@ func MakeSessionDTOPrisms() SessionDTOPrisms {
 		Usage:      MakeSessionDTOUsagePrism(),
 		Iterations: MakeSessionDTOIterationsPrism(),
 		Todos:      MakeSessionDTOTodosPrism(),
+		Mode:       MakeSessionDTOModePrism(),
 	}
 }
 
@@ -375,6 +444,7 @@ func MakeSessionDTORefPrisms() SessionDTORefPrisms {
 		Usage:      MakeSessionDTOUsageRefPrism(),
 		Iterations: MakeSessionDTOIterationsRefPrism(),
 		Todos:      MakeSessionDTOTodosRefPrism(),
+		Mode:       MakeSessionDTOModeRefPrism(),
 	}
 }
 
@@ -594,8 +664,12 @@ type SessionLenses struct {
 	iterations __lens.Lens[Session, int]
 	// todos is a [__lens.Lens] for the todos field of [Session]
 	todos __lens.Lens[Session, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// mode is a [__lens.Lens] for the mode field of [Session]
+	mode __lens.Lens[Session, string]
 	// iterationsO is a [__lens_option.LensO] for the iterations field of [Session], treating the zero value as absent
 	iterationsO __lens_option.LensO[Session, int]
+	// modeO is a [__lens_option.LensO] for the mode field of [Session], treating the zero value as absent
+	modeO __lens_option.LensO[Session, string]
 }
 
 // SessionRefLenses provides [lenses] for accessing fields of [Session] via a pointer to [Session]
@@ -612,8 +686,12 @@ type SessionRefLenses struct {
 	iterations __lens.Lens[*Session, int]
 	// todos is a [__lens.Lens] for the todos field of [Session] via a pointer receiver
 	todos __lens.Lens[*Session, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// mode is a [__lens.Lens] for the mode field of [Session] via a pointer receiver
+	mode __lens.Lens[*Session, string]
 	// iterationsO is a [__lens_option.LensO] for the iterations field of [Session] via a pointer receiver, treating the zero value as absent
 	iterationsO __lens_option.LensO[*Session, int]
+	// modeO is a [__lens_option.LensO] for the mode field of [Session] via a pointer receiver, treating the zero value as absent
+	modeO __lens_option.LensO[*Session, string]
 }
 
 // SessionPrisms provides [prisms] for accessing fields of [Session]
@@ -630,6 +708,8 @@ type SessionPrisms struct {
 	iterations __prism.Prism[Session, int]
 	// todos is a [__prism.Prism] for the todos field of [Session]
 	todos __prism.Prism[Session, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// mode is a [__prism.Prism] for the mode field of [Session]
+	mode __prism.Prism[Session, string]
 }
 
 // SessionRefPrisms provides [prisms] for accessing fields of [Session] via a pointer to [Session]
@@ -646,6 +726,8 @@ type SessionRefPrisms struct {
 	iterations __prism.Prism[*Session, int]
 	// todos is a [__prism.Prism] for the todos field of [Session] via a pointer receiver
 	todos __prism.Prism[*Session, []github_com_Carsten_Leue_fp_go_harness_todo.Todo]
+	// mode is a [__prism.Prism] for the mode field of [Session] via a pointer receiver
+	mode __prism.Prism[*Session, string]
 }
 
 // MakeSessionhistoryLens returns a [__lens.Lens] for the history field of [Session]
@@ -878,6 +960,58 @@ func MakeSessiontodosRefPrism() __prism.Prism[*Session, []github_com_Carsten_Leu
 	)
 }
 
+// MakeSessionmodeLens returns a [__lens.Lens] for the mode field of [Session]
+func MakeSessionmodeLens() __lens.Lens[Session, string] {
+	return __lens.MakeLensWithName(
+		func(s Session) string { return s.mode },
+		func(s Session, v string) Session { s.mode = v; return s },
+		"Session.mode",
+	)
+}
+
+// MakeSessionmodeLensO returns a [__lens_option.LensO] for the mode field of [Session]
+func MakeSessionmodeLensO() __lens_option.LensO[Session, string] {
+	return __lens_option.FromIso[Session](__iso_option.FromZero[string]())(MakeSessionmodeLens())
+}
+
+// MakeSessionmodeRefLens returns a [__lens.Lens] for the mode field of [Session] via a pointer receiver
+func MakeSessionmodeRefLens() __lens.Lens[*Session, string] {
+	return __lens.MakeLensStrictWithName(
+		func(s *Session) string { return s.mode },
+		func(s *Session, v string) *Session { s.mode = v; return s },
+		"(*Session).mode",
+	)
+}
+
+// MakeSessionmodeRefLensO returns a [__lens_option.LensO] for the mode field of [Session] via a pointer receiver
+func MakeSessionmodeRefLensO() __lens_option.LensO[*Session, string] {
+	return __lens_option.FromIso[*Session](__iso_option.FromZero[string]())(MakeSessionmodeRefLens())
+}
+
+// MakeSessionmodePrism returns a [__prism.Prism] for the mode field of [Session]
+func MakeSessionmodePrism() __prism.Prism[Session, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s Session) __option.Option[string] { return _fromNonZero(s.mode) },
+		func(v string) Session {
+			return Session{mode: v}
+		},
+		"Session.mode",
+	)
+}
+
+// MakeSessionmodeRefPrism returns a [__prism.Prism] for the mode field of [Session] via a pointer receiver
+func MakeSessionmodeRefPrism() __prism.Prism[*Session, string] {
+	_fromNonZero := __option.FromNonZero[string]()
+	return __prism.MakePrismWithName(
+		func(s *Session) __option.Option[string] { return _fromNonZero(s.mode) },
+		func(v string) *Session {
+			return &Session{mode: v}
+		},
+		"Session.mode",
+	)
+}
+
 // MakeSessionLenses creates a new [SessionLenses] with [lenses] for all fields
 //
 // [lenses]: __lens.Lens
@@ -889,8 +1023,10 @@ func MakeSessionLenses() SessionLenses {
 		usage:      MakeSessionusageLens(),
 		iterations: MakeSessioniterationsLens(),
 		todos:      MakeSessiontodosLens(),
+		mode:       MakeSessionmodeLens(),
 		// optional lenses
 		iterationsO: MakeSessioniterationsLensO(),
+		modeO:       MakeSessionmodeLensO(),
 	}
 }
 
@@ -905,8 +1041,10 @@ func MakeSessionRefLenses() SessionRefLenses {
 		usage:      MakeSessionusageRefLens(),
 		iterations: MakeSessioniterationsRefLens(),
 		todos:      MakeSessiontodosRefLens(),
+		mode:       MakeSessionmodeRefLens(),
 		// optional lenses
 		iterationsO: MakeSessioniterationsRefLensO(),
+		modeO:       MakeSessionmodeRefLensO(),
 	}
 }
 
@@ -920,6 +1058,7 @@ func MakeSessionPrisms() SessionPrisms {
 		usage:      MakeSessionusagePrism(),
 		iterations: MakeSessioniterationsPrism(),
 		todos:      MakeSessiontodosPrism(),
+		mode:       MakeSessionmodePrism(),
 	}
 }
 
@@ -933,5 +1072,6 @@ func MakeSessionRefPrisms() SessionRefPrisms {
 		usage:      MakeSessionusageRefPrism(),
 		iterations: MakeSessioniterationsRefPrism(),
 		todos:      MakeSessiontodosRefPrism(),
+		mode:       MakeSessionmodeRefPrism(),
 	}
 }

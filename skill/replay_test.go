@@ -56,8 +56,8 @@ func recordedSystemPrompt(t *testing.T, name string) string {
 // skills, with a recorded one, section by section (D7). The recording is
 // synthetic (the real ones are not in the repository, see B5) and has the
 // tags of the recorded system prompts in their order. Missing lists the
-// sections that later steps add, available_modes (H5) among them; the
-// available_skills section (H1) is there.
+// sections that later steps add; the available_skills section (H1) and the
+// available_modes section (H5), the last one, are there.
 func TestSystemPromptAgainstRecording(t *testing.T) {
 	_, deps := makeModeDeps(t, testSkills())
 
@@ -70,11 +70,11 @@ func TestSystemPromptAgainstRecording(t *testing.T) {
 
 	assert.Equal(t, []string{
 		"investigate_before_answering", "engineering_discipline", "auto_appended_context",
-		"user_custom_instructions", "available_modes",
+		"user_custom_instructions",
 	}, diff.Missing)
 	assert.Empty(t, diff.Extra)
 	assert.Equal(t,
-		A.From("role_definition", "tool_use", "markdown_rules", "base_rules", AvailableSkillsTag, "project_rules", "environment_info"),
+		A.From("role_definition", "tool_use", "markdown_rules", "base_rules", AvailableSkillsTag, "project_rules", "environment_info", mode.AvailableModesTag),
 		diff.Assembled)
 	assert.Equal(t, diff.Recorded, diff.Assembled, "the sections both prompts have are in the recorded order")
 }

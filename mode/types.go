@@ -2,6 +2,7 @@ package mode
 
 import (
 	"github.com/Carsten-Leue/fp-go-harness/prompt"
+	"github.com/Carsten-Leue/fp-go-harness/tools"
 	"github.com/IBM/fp-go/v2/effect"
 	"github.com/IBM/fp-go/v2/endomorphism"
 	"github.com/IBM/fp-go/v2/ioresult"
@@ -22,6 +23,10 @@ type (
 	Record[K comparable, V any] = record.Record[K, V]
 	IOResult[A any]             = ioresult.IOResult[A]
 	Result[A any]               = result.Result[A]
+
+	// ToolResult is the result of a tool that changes a state T, see
+	// [tools.ToolResult].
+	ToolResult[T any] = tools.ToolResult[T]
 
 	Section = prompt.Section
 	// Params is the chat completion request a mode starts with.
