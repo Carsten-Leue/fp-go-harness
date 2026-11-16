@@ -101,6 +101,13 @@ recorded agent sessions.
   for a command, or starts it in the background and returns its process id and log file
   under `.fp-go-harness/logs` in the workspace. The CLI cuts every tool result, including
   error text, to 50,000 bytes (`MAX_TOOL_OUTPUT`) and adds a note that the output was truncated.
+- **Session-changing tools**: a tool's call can return, next to its text, an
+  `Endomorphism` of the session (`tools.StateCall[T]`, at the session `session.SessionCall`).
+  `Next` appends the tool messages and then applies the changes in the order of the tool
+  calls, whatever order the concurrent calls finish in; a failed or unknown tool changes
+  nothing. There is one tool type, `tools.ToolOf[C]`: plain tools are `ToolOf[ToolCall]` and
+  lift into session tools with the identity (`tools.LiftTool`, `tools.LiftRegistry`), so the
+  registry functions, truncation (`tools.TruncateStateTools`) and mode selection work on both.
 - **Replay**: reads recorded session logs (JSON lines), redacts sensitive values, extracts
   the chat request and response payloads, and groups the records into tasks and turns.
   A grouped task replays through `session.Run` without a network: replay
@@ -152,7 +159,7 @@ replay tests.
 | [`openai`](openai/) | `ChatCompletion` as a Kleisli over the OpenAI-compatible API, DeepSeek provider wiring |
 | [`mode`](mode/) | The modes (Agent, Plan, Ask and the custom modes of `~/.bob/modes/` and `<workspace>/.bob/modes/`), read from Markdown files with YAML front matter, with their roles and allowed tools, and the request each one starts with: system prompt and tool definitions |
 | [`skill`](skill/) | Skill discovery from the skill directories of the home directory and the workspace, the `available_skills` section and the `use_skill` tool |
-| [`tools`](tools/) | Tool registry, tool-call dispatch, workspace path resolution and the tools themselves |
+| [`tools`](tools/) | Tool registry, tool-call dispatch, plain and state-changing tools (`ToolOf`, `StateCall`, the lifts), workspace path resolution and the tools themselves |
 | [`prompt`](prompt/) | Tagged system prompt sections, their monoid, the embedded static sections, `environment_info`, `project_rules` and the per-turn `environment_details`, and the section comparison with a recorded prompt |
 | [`replay`](replay/) | Reads, redacts, groups and replays recorded session logs for tests, and extracts their system prompts |
 | [`env`](env/) | Environment variables from the process and `.env` |
@@ -168,7 +175,7 @@ replay tests.
 | B | Replay fixtures from the recordings | ✅ B1–B4 done, B5 skipped |
 | C | Core tools | ✅ done |
 | D | Prompt assembly | ✅ done |
-| E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL) | ⏳ E1–E4 done, E5 in progress (E5a REPL done) |
+| E | Session lifecycle (multi-turn, persistence, steering, cancellation, REPL, session-changing tools) | ⏳ E1–E4 and E6 done, E5 in progress (E5a–E5b done) |
 | F | Streaming and observability | ⏳ open |
 | G | MCP client | ⏳ open |
 | H | Skills, todos, subtasks | ⏳ H1–H2 done |

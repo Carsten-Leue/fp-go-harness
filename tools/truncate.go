@@ -10,6 +10,7 @@ import (
 	ER "github.com/IBM/fp-go/v2/errors"
 	F "github.com/IBM/fp-go/v2/function"
 	N "github.com/IBM/fp-go/v2/number"
+	"github.com/IBM/fp-go/v2/pair"
 	P "github.com/IBM/fp-go/v2/predicate"
 	"github.com/IBM/fp-go/v2/reader"
 	R "github.com/IBM/fp-go/v2/record"
@@ -104,9 +105,34 @@ func truncateThunk() Reader[int, Endomorphism[Thunk[string]]] {
 
 // Truncate shortens the output of a tool call to at most n bytes, plus a note
 // that the output was truncated. It applies to the text of a failed call too,
-// because that text goes back to the model as the tool message.
+// because that text goes back to the model as the tool message. It is the
+// form for a plain call; [TruncateCall] is the one for a [StateCall].
 func Truncate() Reader[int, Endomorphism[ToolCall]] {
 	return F.Flow2(truncateThunk(), reader.Map[string, Thunk[string], Thunk[string]])
+}
+
+// truncateResult is [truncateThunk] of a [ToolResult]: it shortens the text
+// and keeps the change.
+func truncateResult[T any]() Reader[int, Endomorphism[Thunk[ToolResult[T]]]] {
+	return reader.ApplicativeMonoid[int](endomorphism.Monoid[Thunk[ToolResult[T]]]()).Concat(
+		F.Flow3(truncateText(), pair.MapTail[Endomorphism[T], string, string], thunk.Map[ToolResult[T], ToolResult[T]]),
+		F.Flow2(truncateError(), thunk.MapLeft[ToolResult[T]]),
+	)
+}
+
+// TruncateCall is [Truncate] of a [StateCall]: it shortens the text of the
+// call, also of a failed one, to at most n bytes and keeps the change of the
+// state.
+func TruncateCall[T any]() Reader[int, Endomorphism[StateCall[T]]] {
+	return F.Flow2(truncateResult[T](), reader.Map[string, Thunk[ToolResult[T]], Thunk[ToolResult[T]]])
+}
+
+// TruncateStateTools applies [TruncateCall] to the call of every tool of a
+// registry.
+func TruncateStateTools[T any]() Reader[int, Endomorphism[StateRegistry[T]]] {
+	callLens := MakeToolOfCallLens[StateCall[T]]()
+
+	return F.Flow3(TruncateCall[T](), callLens.Modify, R.Map[string, StateTool[T], StateTool[T]])
 }
 
 // TruncateTools applies [Truncate] to the call of every tool of a registry.

@@ -63,8 +63,16 @@ func makeStubSessionDeps(t *testing.T, response openai.ChatCompletion, registry 
 
 // makeSequencedSessionDeps starts a test server that answers the n-th chat
 // completion request with responses[n], repeating the last response once the
-// sequence is exhausted.
+// sequence is exhausted. The plain tools of the registry change nothing.
 func makeSequencedSessionDeps(t *testing.T, responses []openai.ChatCompletion, registry map[string]tools.ToolCall, maxIterations int) SessionDeps {
+	t.Helper()
+
+	return makeSequencedSessionToolDeps(t, responses, tools.LiftToolCaller[Session]()(F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry)), maxIterations)
+}
+
+// makeSequencedSessionToolDeps is [makeSequencedSessionDeps] with a caller of
+// session-changing tools.
+func makeSequencedSessionToolDeps(t *testing.T, responses []openai.ChatCompletion, caller ToolCaller, maxIterations int) SessionDeps {
 	t.Helper()
 
 	var calls atomic.Int64
@@ -80,8 +88,6 @@ func makeSequencedSessionDeps(t *testing.T, responses []openai.ChatCompletion, r
 		opt.WithBaseURL(server.URL+"/"),
 		opt.WithAPIKey("test-key"),
 	)
-
-	caller := F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry)
 
 	return &stubSessionDeps{
 		svc:           &client.Chat.Completions,

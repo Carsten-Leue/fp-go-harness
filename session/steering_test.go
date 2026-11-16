@@ -160,13 +160,13 @@ func makeSteeredSessionDeps(t *testing.T, queue chan string, maxIterations int, 
 	client := openai.NewClient(opt.WithBaseURL(server.URL+"/"), opt.WithAPIKey("test-key"), opt.WithMaxRetries(0))
 	stub := &stubSessionDeps{
 		svc:           &client.Chat.Completions,
-		toolCall:      F.Bind1st(record.MonadLookup[tools.ToolCall, string], makeWeatherRegistry()),
+		toolCall:      tools.LiftToolCaller[Session]()(F.Bind1st(record.MonadLookup[tools.ToolCall, string], makeWeatherRegistry())),
 		maxIterations: maxIterations,
 	}
 
 	return MakeSessionDeps(
 		stub,
-		tools.MakeToolDeps(stub.GetToolCaller()),
+		tools.MakeStateToolDeps(stub.GetToolCaller()),
 		MakeLoopDeps(maxIterations),
 		MakeSteeringDeps(ChannelSteering(queue)),
 	)

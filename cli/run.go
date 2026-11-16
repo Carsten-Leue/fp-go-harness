@@ -115,16 +115,18 @@ type toSessionDeps = Reader[oai.ChatCompletionDeps, session.SessionDeps]
 
 // sessionDeps is wiring: the [session.SessionDeps] of a turn of the mode of an
 // environment over any provider's ChatCompletionDeps: the registry of
-// [makeRegistry], at most MaxIterations requests and the user messages of a
-// poll steering the turn.
+// [makeRegistry], its plain tools lifted into session tools that change
+// nothing, at most MaxIterations requests and the user messages of a poll
+// steering the turn.
 func sessionDeps() Reader[modeEnv, Reader[session.Thunk[[]string], toSessionDeps]] {
 	configLens := MakemodeEnvConfigLens()
 	maxIterationsLens := MakeConfigMaxIterationsLens()
 
 	return F.Pipe2(
-		F.Flow3(
+		F.Flow4(
 			makeRegistry(),
-			tools.MakeRegistryToolDeps(),
+			tools.LiftRegistry[session.Session](),
+			tools.MakeStateRegistryToolDeps[session.Session](),
 			F.Curry3(F.Bind234of4(session.MakeSessionDeps)),
 		),
 		reader.Ap[func(session.SteeringDeps) toSessionDeps](F.Flow3(configLens.Get, maxIterationsLens.Get, session.MakeLoopDeps)),

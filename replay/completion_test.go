@@ -131,7 +131,7 @@ func TestReplaySyntheticTask(t *testing.T) {
 
 	deps := session.MakeSessionDeps(
 		MakeTaskChatCompletionDeps()(task)(),
-		tools.MakeToolDeps(F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry)),
+		tools.LiftToolDeps[session.Session]()(tools.MakeToolDeps(F.Bind1st(record.MonadLookup[tools.ToolCall, string], registry))),
 		session.MakeLoopDeps(10),
 		session.MakeSteeringDeps(session.NoSteering()),
 	)

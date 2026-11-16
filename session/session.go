@@ -36,23 +36,26 @@ type Session struct {
 	iterations int
 }
 
+// SessionDeps are the dependencies of [Next]. Its tools are session-changing
+// tools, see [ToolDeps]; plain tools lift into them with
+// [tools.LiftToolDeps] or [tools.LiftRegistry].
 type SessionDeps interface {
 	oai.ChatCompletionDeps
-	tools.ToolDeps
+	ToolDeps
 	LoopDeps
 	SteeringDeps
 }
 
 type sessionDeps struct {
 	oai.ChatCompletionDeps
-	tools.ToolDeps
+	ToolDeps
 	LoopDeps
 	SteeringDeps
 }
 
 // MakeSessionDeps is wiring: it combines the chat completions, the tools, the
 // loop limit and the steering messages into [SessionDeps].
-func MakeSessionDeps(c oai.ChatCompletionDeps, t tools.ToolDeps, l LoopDeps, s SteeringDeps) SessionDeps {
+func MakeSessionDeps(c oai.ChatCompletionDeps, t ToolDeps, l LoopDeps, s SteeringDeps) SessionDeps {
 	return &sessionDeps{c, t, l, s}
 }
 
@@ -86,6 +89,19 @@ func appendAnswer() func(*openai.ChatCompletion) Endomorphism[openai.ChatComplet
 	)
 }
 
+// toolChange is the change of the session the tool calls of a completion
+// make: the messages are appended to the request first, then the changes of
+// the tools are applied in the order of the calls. The endomorphism monoid
+// applies its right operand first.
+func toolChange() func(tools.ToolUpdate[Session]) Endomorphism[Session] {
+	currentLens := MakeSessioncurrentLens()
+
+	return F.Flow2(
+		pair.MapTail[Endomorphism[Session]](currentLens.Modify),
+		pair.Paired(endomorphism.Monoid[Session]().Concat),
+	)
+}
+
 func isToolCallFinishReason() Predicate[string] {
 	return S.Equals(finishReasonToolCalls)
 }
@@ -98,11 +114,14 @@ func isToolCallFinishReason() Predicate[string] {
 // inspects the finish reason of the response's first choice:
 //
 //   - If the model asked to call tools (finish_reason == "tool_calls"),
-//     Next resolves and executes them through [SessionDeps.GetToolCaller],
-//     appends the resulting assistant/tool messages to session.current,
-//     records the (request, response) pair in session.history, and
-//     returns a Bounce carrying the updated [Session] so the loop can
-//     continue.
+//     Next resolves and executes them concurrently through
+//     [SessionDeps.GetToolCaller], records the (request, response) pair in
+//     session.history, appends the resulting assistant/tool messages to
+//     session.current, then applies the changes of the session the tools
+//     returned, in the order of the tool calls, whatever order the calls
+//     finish in (a plain or a failed tool changes nothing), and returns a
+//     Bounce carrying the updated [Session] so the loop can continue: the
+//     next request is built from the changed session.
 //   - Otherwise, Next records the (request, response) pair in
 //     session.history, appends the message of the response's first choice
 //     to session.current and returns a Land carrying the answered
@@ -129,9 +148,10 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 		ComposePrism(P.Head[openai.ChatCompletionChoice]()).
 		ComposeLens(finishReasonLens)
 
-	handleToolCalls := F.Flow2(
-		tools.HandleToolCalls(),
-		effect.Local[Endomorphism[openai.ChatCompletionNewParams]](tools.AsToolDeps[SessionDeps]),
+	handleToolCalls := F.Flow3(
+		tools.HandleStateToolCalls[Session](),
+		effect.Local[tools.ToolUpdate[Session]](tools.AsStateToolDeps[Session, SessionDeps]),
+		effect.Map[SessionDeps](toolChange()),
 	)
 	chatCompletion := F.Flow2(
 		oai.ChatCompletion(),
@@ -175,13 +195,14 @@ func Next() effect.Kleisli[SessionDeps, Session, TurnStep] {
 		updateSession,
 	)
 
-	// the session with the messages of the tool calls appended to its request;
-	// session and tool calls are two independent reads of the same pair
+	// the session with the messages of the tool calls appended to its request
+	// and the changes of the tools applied; session and tool calls are two
+	// independent reads of the same pair
 	applyToolCalls := F.Pipe1(
 		F.Flow3(
 			pair.Head[Session, *openai.ChatCompletion],
-			F.Flip(currentLens.Modify),
-			effect.Map[SessionDeps, Endomorphism[openai.ChatCompletionNewParams], Session],
+			endomorphism.Read[Session],
+			effect.Map[SessionDeps, Endomorphism[Session], Session],
 		),
 		reader.Ap[Effect[SessionDeps, Session]](F.Flow2(pair.Tail[Session, *openai.ChatCompletion], handleToolCalls)),
 	)

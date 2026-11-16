@@ -210,7 +210,7 @@ func makeCancellingSessionDeps(t *testing.T, started chan<- struct{}, onDone fun
 
 	return &stubSessionDeps{
 		svc:           &client.Chat.Completions,
-		toolCall:      F.Bind1st(record.MonadLookup[tools.ToolCall, string], map[string]tools.ToolCall{waitToolName: wait}),
+		toolCall:      tools.LiftToolCaller[Session]()(F.Bind1st(record.MonadLookup[tools.ToolCall, string], map[string]tools.ToolCall{waitToolName: wait})),
 		maxIterations: 10,
 	}
 }
@@ -301,7 +301,7 @@ func TestMaxIterationsError_Error(t *testing.T) {
 func TestMakeSessionDeps(t *testing.T) {
 	stub := makeSequencedSessionDeps(t, []openai.ChatCompletion{makeStopCompletion("chatcmpl-1", "done")}, makeWeatherRegistry(), 10)
 
-	deps := MakeSessionDeps(stub, tools.MakeToolDeps(stub.GetToolCaller()), MakeLoopDeps(4), MakeSteeringDeps(thunk.Of(A.From("steer"))))
+	deps := MakeSessionDeps(stub, tools.MakeStateToolDeps(stub.GetToolCaller()), MakeLoopDeps(4), MakeSteeringDeps(thunk.Of(A.From("steer"))))
 
 	assert.Equal(t, 4, deps.GetMaxIterations())
 	assert.Equal(t, result.Of(A.From("steer")), deps.GetPoll()(t.Context())())

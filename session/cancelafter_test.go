@@ -71,7 +71,7 @@ func makeCancelAfterAnswerDeps(t *testing.T, cancel context.CancelFunc, response
 
 	return &stubSessionDeps{
 		svc:           &client.Chat.Completions,
-		toolCall:      F.Bind1st(record.MonadLookup[tools.ToolCall, string], makeWeatherRegistry()),
+		toolCall:      tools.LiftToolCaller[Session]()(F.Bind1st(record.MonadLookup[tools.ToolCall, string], makeWeatherRegistry())),
 		maxIterations: 10,
 	}
 }

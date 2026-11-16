@@ -298,11 +298,23 @@ and a text result. Validation errors (such as "path must be absolute") come back
     released after the run, and a cancelled REPL context still ends the REPL.
   - [ ] **E5c `--task <id>`.** Load a saved task and continue it, save after every turn; without `--task` create an
     id and print it on stderr.
-- [ ] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
+- [x] **E6 Session-changing tools.** A `ToolCall` today is `thunk.Kleisli[string, string]`: arguments in, text out,
   with no access to the `Session`. Add a second kind of tool whose result is the text *and* an
   `Endomorphism[Session]`, which `Next` applies after the tool messages are appended; the plain tools lift into it
   with the identity. H3 (`update_todo_list`) and H5 (`switch_mode`) are built on it. *Test:* a fake tool that sets a
   field through a lens changes the session the next request is built from.
+  *Done:* `tools` can't import `session`, so the kind is generic over the state
+  ([tools/statetool.go](tools/statetool.go)): `ToolResult[T] = Pair[Endomorphism[T], string]`,
+  `StateCall[T] = thunk.Kleisli[string, ToolResult[T]]`, and the one tool type is `ToolOf[C]`
+  ([tools/registry.go](tools/registry.go)), with `Tool = ToolOf[ToolCall]` and `StateTool[T] = ToolOf[StateCall[T]]`;
+  the registry functions have generic `...Of` forms. `LiftCall`, `LiftTool`, `LiftRegistry`, `LiftToolCaller` and
+  `LiftToolDeps` lift plain tools with the identity; `TruncateCall` and `TruncateStateTools` truncate the text and keep
+  the change. `HandleStateToolCalls` composes the changes in call order (the reversed endomorphism monoid) and the
+  plain `MakeToolCall`/`HandleToolCalls` are it at the unit state. The session aliases `SessionCall`, `SessionTool`,
+  `SessionRegistry`; `SessionDeps` holds `tools.StateToolDeps[Session]`, and `Next` appends the messages, then
+  applies the changes. The CLI lifts its registry. *Test:* [session/statetool_test.go](session/statetool_test.go) (the
+  next request has the model a tool set, call order against finish order, a failed and an unknown tool change
+  nothing) and [tools/statetool_test.go](tools/statetool_test.go); every existing tool test passes unchanged.
 
 ### Phase F: Streaming and observability
 
